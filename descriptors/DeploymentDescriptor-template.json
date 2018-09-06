@@ -1,0 +1,8 @@
+{
+	"srvcId": "${artifactId}-${version}",
+	"nodeId": "localhost",
+	"descriptor": {
+		"exec": "java -Dport=%p -jar ../mod-audit-storage/target/mod-audit-storage-fat.jar -Dhttp.port=%p embed_postgres=true"
+	}
+}
+
