@@ -3,7 +3,7 @@
 buildMvn {
   publishModDescriptor = 'yes'
   mvnDeploy = 'yes'
-  publishAPI = 'yes'
+  publishAPI = 'no'
   runLintRamlCop = 'yes'
 
   doDocker = {
