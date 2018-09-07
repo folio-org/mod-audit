@@ -31,7 +31,7 @@ import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.After;
 
 /**
- * Interface test for mod-audit-storage.
+ * Interface test for mod-audit.
  */
 @RunWith(VertxUnitRunner.class)
 public class AuditDataResourceImplTest {
