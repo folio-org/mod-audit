@@ -1,4 +1,4 @@
-# mod-audit-storage
+# mod-audit
 
 Copyright (C) 2017-2018 The Open Library Foundation
 
@@ -7,7 +7,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Introduction
 
-The audit-storage module provides CRUD for audit data.
+The mod-audit module provides API to access and modify audit data.
 
 ## Permissions
 
@@ -30,13 +30,13 @@ Compile with `mvn clean install`
 Run the local stand-alone instance:
 
 ```
-java -jar target/mod-audit-storage-fat.jar \
+java -jar target/mod-audit-fat.jar \
   -Dhttp.port=8085 embed_postgres=true
 ```
 
 ### API documentation
 
-This module's [API documentation](https://dev.folio.org/reference/api/#mod-audit-storage).
+This module's [API documentation](https://dev.folio.org/reference/api/#mod-audit).
 
 The local API docs are available, for example:
 ```
@@ -46,11 +46,11 @@ etc.
 
 ### Code analysis
 
-[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio.rest%3Amod-audit-storage).
+[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio.rest%3Amod-audit).
 
 ### Download and configuration
 
 The built artifacts for this module are available.
 See [configuration](https://dev.folio.org/download/artifacts) for repository access,
-and the [Docker image](https://hub.docker.com/r/folioorg/mod-audit-storage/).
+and the [Docker image](https://hub.docker.com/r/folioorg/mod-audit/).
 

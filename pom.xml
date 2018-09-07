@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
-  <artifactId>mod-audit-storage</artifactId>
+  <artifactId>mod-audit</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -53,9 +53,9 @@
   </distributionManagement>
 
   <scm>
-    <url>https://github.com/folio-org/mod-audit-storage</url>
-    <connection>scm:git:git://github.com/folio-org/mod-audit-storage</connection>
-    <developerConnection>scm:git:git@github.com:folio-org/mod-audit-storage.git</developerConnection>
+    <url>https://github.com/folio-org/mod-audit</url>
+    <connection>scm:git:git://github.com/folio-org/mod-audit</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/mod-audit.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -306,8 +306,8 @@
         </executions>
       </plugin>
 
-      <!-- Replace the baseUri and the protocols in the RAMLs that have been 
-        copied to apidocs directory so that they can be used via the local html api 
+      <!-- Replace the baseUri and the protocols in the RAMLs that have been
+        copied to apidocs directory so that they can be used via the local html api
         console. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
