@@ -1,6 +1,6 @@
 {
 	"id": "${artifactId}-${version}",
-	"name": "Audit Storage Module",
+	"name": "Audit Module",
 	"requires": [],
 	"provides": [
 		{
