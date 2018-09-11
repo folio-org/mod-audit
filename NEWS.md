@@ -1,3 +1,2 @@
 ## 0.0.1
-* Initial checkin (pre-release placeholder)
-
+* provide basic CRUD for audit data
