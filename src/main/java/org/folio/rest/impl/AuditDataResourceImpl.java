@@ -120,7 +120,6 @@ public class AuditDataResourceImpl implements AuditDataResource {
     String id = audit.getId();
     if (id == null || id.isEmpty()) {
       audit.setId(UUID.randomUUID().toString());
-      logger.info("Added id to Audit record " + audit);
     }
     getClient(okapiHeaders, vertxContext).save(DB_TAB_AUDIT, id, audit, reply -> {
       if (reply.succeeded()) {
