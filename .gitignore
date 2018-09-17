@@ -1,6 +1,10 @@
 
 # Based on by https://www.gitignore.io/api/macos,maven,gradle,eclipse,netbeans,intellij+iml,visualstudiocode
 
+### Folio release artifacts ###
+pom.xml.relesaeBackup
+release.properties
+
 ### Vert.x ###
 .vertx/
 pg.json
