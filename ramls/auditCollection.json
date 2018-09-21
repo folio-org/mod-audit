@@ -1,21 +1,21 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "object",
-	"description": "Collection of audit records",
-	"properties": {
-		"audit": {
-			"type": "array",
-			"items": {
-				"type": "object",
-				"$ref": "audit.json"
-			}
-		},
-		"totalRecords": {
-			"type": "integer"
-		}
-	},
-	"required": [
-		"audit",
-		"totalRecords"
-	]
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of audit records",
+  "properties": {
+    "audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "audit.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "audit",
+    "totalRecords"
+  ]
 }
