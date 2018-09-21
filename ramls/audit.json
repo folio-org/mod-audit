@@ -1,73 +1,73 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "object",
-	"description": "Info that an audit record contains",
-	"additionalProperties": true,
-	"properties": {
-		"id": {
-			"type": "string"
-		},
-		"timestamp": {
-			"type": "string"
-		},
-		"tenant": {
-			"type": "string"
-		},
-		"user": {
-			"type": "string"
-		},
-		"login": {
-			"type": "string"
-		},
-		"uri": {
-			"type": "string"
-		},
-		"path": {
-			"type": "string"
-		},
-		"params": {
-			"type": "object"
-		},
-		"path_params": {
-			"type": "object"
-		},
-		"request_id": {
-			"type": "string"
-		},
-		"auth_result": {
-			"type": "string"
-		},
-		"auth_error": {
-			"type": "object"
-		},
-		"module_result": {
-			"type": "string"
-		},
-		"module_error": {
-			"type": "object"
-		},
-		"target_type": {
-			"type": "string"
-		},
-		"target_id": {
-			"type": "string"
-		},
-		"extra_targets": {
-			"type": "object"
-		},
-		"ip": {
-			"type": "string"
-		},
-		"extra_headers": {
-			"type": "object"
-		},
-		"metadata": {
-			"type": "object",
-			"$ref": "raml-util/schemas/metadata.schema",
-			"readonly": true
-		}
-	},
-	"required": [
-		"tenant"
-	]
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Info that an audit record contains",
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "tenant": {
+      "type": "string"
+    },
+    "user": {
+      "type": "string"
+    },
+    "login": {
+      "type": "string"
+    },
+    "uri": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "params": {
+      "type": "object"
+    },
+    "path_params": {
+      "type": "object"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "auth_result": {
+      "type": "string"
+    },
+    "auth_error": {
+      "type": "object"
+    },
+    "module_result": {
+      "type": "string"
+    },
+    "module_error": {
+      "type": "object"
+    },
+    "target_type": {
+      "type": "string"
+    },
+    "target_id": {
+      "type": "string"
+    },
+    "extra_targets": {
+      "type": "object"
+    },
+    "ip": {
+      "type": "string"
+    },
+    "extra_headers": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object",
+      "$ref": "raml-util/schemas/metadata.schema",
+      "readonly": true
+    }
+  },
+  "required": [
+    "tenant"
+  ]
 }
