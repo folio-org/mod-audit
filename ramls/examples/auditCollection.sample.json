@@ -2,13 +2,13 @@
   "audit": [
     {
       "id": "1",
-      "timestamp": "1531567028746",
+      "timestamp": "2018-09-27T01:50:59.466+0000",
       "tenant": "diku",
       "login": "diku_admin"
     },
     {
       "id": "2",
-      "timestamp": "153156705876",
+      "timestamp": "2018-09-27T01:50:59.467+0000",
       "tenant": "diku",
       "login": "diku_admin"
     }

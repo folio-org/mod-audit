@@ -5,6 +5,7 @@
   "properties": {
     "audit": {
       "type": "array",
+      "description": "",
       "items": {
         "type": "object",
         "$ref": "audit.json"

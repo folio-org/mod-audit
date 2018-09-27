@@ -5,68 +5,89 @@
   "additionalProperties": true,
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "timestamp": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": ""
     },
     "tenant": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "user": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "login": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "uri": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "path": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "params": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "path_params": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "request_id": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "auth_result": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "auth_error": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "module_result": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "module_error": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "target_type": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "target_id": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "method": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "extra_targets": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "ip": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "extra_headers": {
-      "type": "object"
+      "type": "object",
+      "description": ""
     },
     "metadata": {
       "type": "object",
+      "description": "",
       "$ref": "raml-util/schemas/metadata.schema",
       "readonly": true
     }
