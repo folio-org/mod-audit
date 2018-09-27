@@ -5,67 +5,89 @@
   "additionalProperties": true,
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "description": "id"
     },
     "timestamp": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time",
+      "description": "timestamp"
     },
     "tenant": {
-      "type": "string"
+      "type": "string",
+      "description": "tenant"
     },
     "user": {
-      "type": "string"
+      "type": "string",
+      "description": "user"
     },
     "login": {
-      "type": "string"
+      "type": "string",
+      "description": "login"
     },
     "uri": {
-      "type": "string"
+      "type": "string",
+      "description": "uri"
     },
     "path": {
-      "type": "string"
+      "type": "string",
+      "description": "path"
     },
     "params": {
-      "type": "object"
+      "type": "object",
+      "description": "params"
     },
     "path_params": {
-      "type": "object"
+      "type": "object",
+      "description": "path_params"
     },
     "request_id": {
-      "type": "string"
+      "type": "string",
+      "description": "request_id"
     },
     "auth_result": {
-      "type": "string"
+      "type": "string",
+      "description": "auth_result"
     },
     "auth_error": {
-      "type": "object"
+      "type": "object",
+      "description": "auth_error"
     },
     "module_result": {
-      "type": "string"
+      "type": "string",
+      "description": "module_result"
     },
     "module_error": {
-      "type": "object"
+      "type": "object",
+      "description": "module_error"
     },
     "target_type": {
-      "type": "string"
+      "type": "string",
+      "description": "target_type"
     },
     "target_id": {
-      "type": "string"
+      "type": "string",
+      "description": "target_id"
     },
     "method": {
-      "type": "string"
+      "type": "string",
+      "description": "method"
     },
     "extra_targets": {
-      "type": "object"
+      "type": "object",
+      "description": "extra_targets"
     },
     "ip": {
-      "type": "string"
+      "type": "string",
+      "description": "ip"
     },
     "extra_headers": {
-      "type": "object"
+      "type": "object",
+      "description": "extra_headers"
     },
     "metadata": {
       "type": "object",
+      "description": "metadata",
       "$ref": "raml-util/schemas/metadata.schema",
       "readonly": true
     }
