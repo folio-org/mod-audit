@@ -6,88 +6,88 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": ""
+      "description": "id"
     },
     "timestamp": {
       "type": "string",
       "format": "date-time",
-      "description": ""
+      "description": "timestamp"
     },
     "tenant": {
       "type": "string",
-      "description": ""
+      "description": "tenant"
     },
     "user": {
       "type": "string",
-      "description": ""
+      "description": "user"
     },
     "login": {
       "type": "string",
-      "description": ""
+      "description": "login"
     },
     "uri": {
       "type": "string",
-      "description": ""
+      "description": "uri"
     },
     "path": {
       "type": "string",
-      "description": ""
+      "description": "path"
     },
     "params": {
       "type": "object",
-      "description": ""
+      "description": "params"
     },
     "path_params": {
       "type": "object",
-      "description": ""
+      "description": "path_params"
     },
     "request_id": {
       "type": "string",
-      "description": ""
+      "description": "request_id"
     },
     "auth_result": {
       "type": "string",
-      "description": ""
+      "description": "auth_result"
     },
     "auth_error": {
       "type": "object",
-      "description": ""
+      "description": "auth_error"
     },
     "module_result": {
       "type": "string",
-      "description": ""
+      "description": "module_result"
     },
     "module_error": {
       "type": "object",
-      "description": ""
+      "description": "module_error"
     },
     "target_type": {
       "type": "string",
-      "description": ""
+      "description": "target_type"
     },
     "target_id": {
       "type": "string",
-      "description": ""
+      "description": "target_id"
     },
     "method": {
       "type": "string",
-      "description": ""
+      "description": "method"
     },
     "extra_targets": {
       "type": "object",
-      "description": ""
+      "description": "extra_targets"
     },
     "ip": {
       "type": "string",
-      "description": ""
+      "description": "ip"
     },
     "extra_headers": {
       "type": "object",
-      "description": ""
+      "description": "extra_headers"
     },
     "metadata": {
       "type": "object",
-      "description": "",
+      "description": "metadata",
       "$ref": "raml-util/schemas/metadata.schema",
       "readonly": true
     }
