@@ -139,7 +139,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
   public void getAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
-    logger.debug("Get Audit record by " + id);
+    logger.debug("Get Audit record by id" + id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {
