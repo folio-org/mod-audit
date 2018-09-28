@@ -51,11 +51,11 @@ public class AuditDataImpl implements AuditData {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
-  private String SCHEMA_AUDIT = null;
+  private String auditSchema = null;
 
   private void initCQLValidation() {
     try {
-      SCHEMA_AUDIT = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT), "UTF-8");
+      auditSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT), "UTF-8");
     } catch (Exception e) {
       logger.error("unable to load schema - " + JSON_SCHEMA_AUDIT + ", validation of query fields will not be active",
         e);
@@ -63,7 +63,7 @@ public class AuditDataImpl implements AuditData {
   }
 
   public AuditDataImpl() {
-    if (SCHEMA_AUDIT == null) {
+    if (auditSchema == null) {
       initCQLValidation();
     }
   }
@@ -88,7 +88,7 @@ public class AuditDataImpl implements AuditData {
 
     CQLWrapper cql = null;
     try {
-      cql = getCQL(query, limit, offset, SCHEMA_AUDIT);
+      cql = getCQL(query, limit, offset, auditSchema);
     } catch (Exception e) {
       ValidationHelper.handleError(e, asyncResultHandler);
       return;
