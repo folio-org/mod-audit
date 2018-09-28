@@ -45,13 +45,12 @@ import io.vertx.core.logging.LoggerFactory;
 public class AuditDataImpl implements AuditData {
 
   public static final String API_CXT = "/audit-data";
+  public static final String DB_TAB_AUDIT = "audit_data";
+  public static final String DB_TAB_AUDIT_ID = "_id";
+  public static final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
-
-  private final String DB_TAB_AUDIT = "audit_data";
-  private final String DB_TAB_AUDIT_ID = "_id";
-  private final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
   private String SCHEMA_AUDIT = null;
 
   private void initCQLValidation() {
@@ -275,7 +274,7 @@ public class AuditDataImpl implements AuditData {
 
     getClient(okapiHeaders, vertxContext).get(DB_TAB_AUDIT, Audit.class, c, true, reply -> {
       if (reply.succeeded()) {
-        List<Audit> audits = (List<Audit>) reply.result().getResults();
+        List<Audit> audits = reply.result().getResults();
         if (audits.isEmpty()) {
           resp.handle(new Failure<>(NOT_FOUND, "Audit " + id + " not found"));
         } else {
