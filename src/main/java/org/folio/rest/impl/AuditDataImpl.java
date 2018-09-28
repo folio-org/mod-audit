@@ -19,7 +19,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Audit;
 import org.folio.rest.jaxrs.model.AuditCollection;
 import org.folio.rest.jaxrs.model.Errors;
-import org.folio.rest.jaxrs.resource.AuditDataResource;
+import org.folio.rest.jaxrs.resource.AuditData;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
@@ -42,29 +42,28 @@ import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class AuditDataResourceImpl implements AuditDataResource {
+public class AuditDataImpl implements AuditData {
 
   public static final String API_CXT = "/audit-data";
+  public static final String DB_TAB_AUDIT = "audit_data";
+  public static final String DB_TAB_AUDIT_ID = "_id";
+  public static final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
-
-  private final String DB_TAB_AUDIT = "audit_data";
-  private final String DB_TAB_AUDIT_ID = "_id";
-  private final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
-  private String SCHEMA_AUDIT = null;
+  private String auditSchema = null;
 
   private void initCQLValidation() {
     try {
-      SCHEMA_AUDIT = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT), "UTF-8");
+      auditSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT), "UTF-8");
     } catch (Exception e) {
       logger.error("unable to load schema - " + JSON_SCHEMA_AUDIT + ", validation of query fields will not be active",
         e);
     }
   }
 
-  public AuditDataResourceImpl() {
-    if (SCHEMA_AUDIT == null) {
+  public AuditDataImpl() {
+    if (auditSchema == null) {
       initCQLValidation();
     }
   }
@@ -80,17 +79,16 @@ public class AuditDataResourceImpl implements AuditDataResource {
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   @Validate
   public void getAuditData(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     logger.debug("Getting Audit data " + offset + "+" + limit + " q=" + query);
 
     CQLWrapper cql = null;
     try {
-      cql = getCQL(query, limit, offset, SCHEMA_AUDIT);
+      cql = getCQL(query, limit, offset, auditSchema);
     } catch (Exception e) {
       ValidationHelper.handleError(e, asyncResultHandler);
       return;
@@ -103,7 +101,8 @@ public class AuditDataResourceImpl implements AuditDataResource {
           auditCollection.setAudit((List<Audit>) reply.result().getResults());
           Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
           auditCollection.setTotalRecords(totalRecords);
-          asyncResultHandler.handle(succeededFuture(GetAuditDataResponse.withJsonOK(auditCollection)));
+          asyncResultHandler
+            .handle(succeededFuture(GetAuditDataResponse.respond200WithApplicationJson(auditCollection)));
         } else {
           ValidationHelper.handleError(reply.cause(), asyncResultHandler);
         }
@@ -113,7 +112,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
   @Override
   @Validate
   public void postAuditData(String lang, Audit audit, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     logger.debug("Save Audit record " + audit);
 
@@ -127,7 +126,8 @@ public class AuditDataResourceImpl implements AuditDataResource {
         audit.setId((String) ret);
         OutStream stream = new OutStream();
         stream.setData(audit);
-        asyncResultHandler.handle(succeededFuture(PostAuditDataResponse.withJsonCreated(API_CXT + "/" + ret, stream)));
+        asyncResultHandler.handle(succeededFuture(PostAuditDataResponse.respond201WithApplicationJson(stream,
+          PostAuditDataResponse.headersFor201().withLocation(API_CXT + "/" + ret))));
       } else {
         ValidationHelper.handleError(reply.cause(), asyncResultHandler);
       }
@@ -137,29 +137,30 @@ public class AuditDataResourceImpl implements AuditDataResource {
   @Override
   @Validate
   public void getAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     logger.debug("Get Audit record by " + id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {
-        asyncResultHandler.handle(succeededFuture(GetAuditDataByIdResponse.withJsonOK(res.result())));
+        asyncResultHandler
+          .handle(succeededFuture(GetAuditDataByIdResponse.respond200WithApplicationJson(res.result())));
       } else {
         switch (res.getType()) {
         case NOT_FOUND:
           asyncResultHandler
-            .handle(succeededFuture(GetAuditDataByIdResponse.withPlainNotFound(res.cause().getMessage())));
+            .handle(succeededFuture(GetAuditDataByIdResponse.respond404WithTextPlain(res.cause().getMessage())));
           break;
         case USER:
           asyncResultHandler
-            .handle(succeededFuture(GetAuditDataByIdResponse.withPlainBadRequest(res.cause().getMessage())));
+            .handle(succeededFuture(GetAuditDataByIdResponse.respond400WithTextPlain(res.cause().getMessage())));
           break;
         default:
           String msg = res.cause().getMessage();
           if (msg.isEmpty()) {
             msg = messages.getMessage(lang, MessageConsts.InternalServerError);
           }
-          asyncResultHandler.handle(succeededFuture(GetAuditDataByIdResponse.withPlainInternalServerError(msg)));
+          asyncResultHandler.handle(succeededFuture(GetAuditDataByIdResponse.respond500WithTextPlain(msg)));
         }
       }
     });
@@ -168,7 +169,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
   @Override
   @Validate
   public void putAuditDataById(String id, String lang, Audit audit, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     logger.warn("Update Audit record by " + id);
 
@@ -177,7 +178,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
     }
     if (!id.equals(audit.getId())) {
       Errors err = ValidationHelper.createValidationErrorMessage("id", audit.getId(), "Can not change Id");
-      asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.withJsonUnprocessableEntity(err)));
+      asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.respond422WithApplicationJson(err)));
     }
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
@@ -186,9 +187,9 @@ public class AuditDataResourceImpl implements AuditDataResource {
           if (reply.succeeded()) {
             if (reply.result().getUpdated() == 0) {
               asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse
-                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
             } else {
-              asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.withNoContent()));
+              asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.respond204()));
             }
           } else {
             ValidationHelper.handleError(reply.cause(), asyncResultHandler);
@@ -198,18 +199,18 @@ public class AuditDataResourceImpl implements AuditDataResource {
         switch (res.getType()) {
         case NOT_FOUND:
           asyncResultHandler
-            .handle(succeededFuture(PutAuditDataByIdResponse.withPlainNotFound(res.cause().getMessage())));
+            .handle(succeededFuture(PutAuditDataByIdResponse.respond404WithTextPlain(res.cause().getMessage())));
           break;
         case USER:
           asyncResultHandler
-            .handle(succeededFuture(PutAuditDataByIdResponse.withPlainBadRequest(res.cause().getMessage())));
+            .handle(succeededFuture(PutAuditDataByIdResponse.respond400WithTextPlain(res.cause().getMessage())));
           break;
         default:
           String msg = res.cause().getMessage();
           if (msg.isEmpty()) {
             msg = messages.getMessage(lang, MessageConsts.InternalServerError);
           }
-          asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.withPlainInternalServerError(msg)));
+          asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse.respond500WithTextPlain(msg)));
         }
       }
     });
@@ -219,7 +220,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
   @Override
   @Validate
   public void deleteAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     logger.warn("Delte Audit record " + id);
 
@@ -228,10 +229,10 @@ public class AuditDataResourceImpl implements AuditDataResource {
         getClient(okapiHeaders, vertxContext).delete(DB_TAB_AUDIT, id, reply -> {
           if (reply.succeeded()) {
             if (reply.result().getUpdated() == 1) {
-              asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.withNoContent()));
+              asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.respond204()));
             } else {
               logger.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
-              asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.withPlainNotFound(
+              asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.respond404WithTextPlain(
                 messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()))));
             }
           } else {
@@ -242,18 +243,18 @@ public class AuditDataResourceImpl implements AuditDataResource {
         switch (res.getType()) {
         case NOT_FOUND:
           asyncResultHandler
-            .handle(succeededFuture(DeleteAuditDataByIdResponse.withPlainNotFound(res.cause().getMessage())));
+            .handle(succeededFuture(DeleteAuditDataByIdResponse.respond404WithTextPlain(res.cause().getMessage())));
           break;
         case USER:
           asyncResultHandler
-            .handle(succeededFuture(DeleteAuditDataByIdResponse.withPlainBadRequest(res.cause().getMessage())));
+            .handle(succeededFuture(DeleteAuditDataByIdResponse.respond400WithTextPlain(res.cause().getMessage())));
           break;
         default:
           String msg = res.cause().getMessage();
           if (msg.isEmpty()) {
             msg = messages.getMessage(lang, MessageConsts.InternalServerError);
           }
-          asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.withPlainInternalServerError(msg)));
+          asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.respond500WithTextPlain(msg)));
         }
       }
     });
@@ -273,8 +274,7 @@ public class AuditDataResourceImpl implements AuditDataResource {
 
     getClient(okapiHeaders, vertxContext).get(DB_TAB_AUDIT, Audit.class, c, true, reply -> {
       if (reply.succeeded()) {
-        @SuppressWarnings("unchecked")
-        List<Audit> audits = (List<Audit>) reply.result().getResults();
+        List<Audit> audits = reply.result().getResults();
         if (audits.isEmpty()) {
           resp.handle(new Failure<>(NOT_FOUND, "Audit " + id + " not found"));
         } else {

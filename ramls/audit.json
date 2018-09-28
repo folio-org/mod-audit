@@ -79,7 +79,7 @@
     },
     "ip": {
       "type": "string",
-      "description": "ip"
+      "description": "client IP"
     },
     "extra_headers": {
       "type": "object",

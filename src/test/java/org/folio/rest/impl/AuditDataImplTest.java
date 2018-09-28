@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.*;
-import static org.folio.rest.impl.AuditDataResourceImpl.API_CXT;
+import static org.folio.rest.impl.AuditDataImpl.API_CXT;
 import static org.hamcrest.Matchers.containsString;
 
 import io.restassured.RestAssured;
@@ -34,7 +34,7 @@ import org.junit.After;
  * Interface test for mod-audit.
  */
 @RunWith(VertxUnitRunner.class)
-public class AuditDataResourceImplTest {
+public class AuditDataImplTest {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
