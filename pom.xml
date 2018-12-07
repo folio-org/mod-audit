@@ -19,10 +19,10 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
-    <okapi.version>2.17.5</okapi.version>
-    <rmb.version>21.0.3</rmb.version>
+    <okapi.version>2.22.0</okapi.version>
+    <rmb.version>23.2.1</rmb.version>
     <vertx.version>3.5.4</vertx.version>
-    <rest-assured.version>3.1.0</rest-assured.version>
+    <rest-assured.version>3.2.0</rest-assured.version>
     <junit.version>4.12</junit.version>
   </properties>
 
