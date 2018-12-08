@@ -45,7 +45,7 @@ etc.
 
 ### Code analysis
 
-[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio.rest%3Amod-audit).
+[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio%3Amod-audit).
 
 ### Download and configuration
 
