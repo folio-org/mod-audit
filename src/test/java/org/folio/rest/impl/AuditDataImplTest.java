@@ -124,6 +124,7 @@ public class AuditDataImplTest {
     // get by id
     given().header(ctype).header(tenant).header(perms).get(API_CXT + "/" + id).then().log().all().statusCode(200)
       .body(containsString("diku")).body(containsString(id));
+
     // get by non-existing id
     given().header(ctype).header(tenant).header(perms).get(API_CXT + "/" + nonExistingId).then().log().all()
       .statusCode(404);

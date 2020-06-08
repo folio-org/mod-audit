@@ -45,7 +45,7 @@ public class AuditDataImpl implements AuditData {
 
   protected static final String API_CXT = "/audit-data";
   protected static final String DB_TAB_AUDIT = "audit_data";
-  protected static final String DB_TAB_AUDIT_ID = "_id";
+  protected static final String DB_TAB_AUDIT_ID = "id";
   protected static final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
