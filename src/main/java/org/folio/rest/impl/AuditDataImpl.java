@@ -262,7 +262,7 @@ public class AuditDataImpl implements AuditData {
     Handler<ExtendedAsyncResult<Audit>> resp) {
 
     Criterion c = new Criterion(
-      new Criteria().addField(DB_TAB_AUDIT_ID).setJSONB(false).setOperation("=").setVal("'" + id + "'"));
+      new Criteria().addField(DB_TAB_AUDIT_ID).setJSONB(false).setOperation("=").setVal(id));
 
     getClient(okapiHeaders, vertxContext).get(DB_TAB_AUDIT, Audit.class, c, true, reply -> {
       if (reply.succeeded()) {
