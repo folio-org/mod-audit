@@ -5,12 +5,10 @@ import static org.folio.okapi.common.ErrorType.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.okapi.common.ExtendedAsyncResult;
 import org.folio.okapi.common.Failure;
@@ -46,24 +44,11 @@ public class AuditDataImpl implements AuditData {
   protected static final String API_CXT = "/audit-data";
   protected static final String DB_TAB_AUDIT = "audit_data";
   protected static final String DB_TAB_AUDIT_ID = "id";
-  protected static final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
-  private String auditSchema = null;
 
-  private void initCQLValidation() {
-    try {
-      auditSchema = IOUtils.toString(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT)), "UTF-8");
-    } catch (Exception e) {
-      logger.error("unable to load schema - " + JSON_SCHEMA_AUDIT + ", validation of query fields will not be active",
-        e);
-    }
-  }
-
-  public AuditDataImpl() {
-      initCQLValidation();
-  }
+  public AuditDataImpl() { }
 
   private CQLWrapper getCQL(String query, int limit, int offset)
     throws FieldException {
@@ -214,7 +199,7 @@ public class AuditDataImpl implements AuditData {
   public void deleteAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.warn("Delte Audit record " + id);
+    logger.warn("Delete Audit record " + id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {
