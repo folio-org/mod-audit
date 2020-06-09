@@ -48,8 +48,6 @@ public class AuditDataImpl implements AuditData {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
 
-  public AuditDataImpl() { }
-
   private CQLWrapper getCQL(String query, int limit, int offset)
     throws FieldException {
     CQL2PgJSON cql2pgJson = new CQL2PgJSON(DB_TAB_AUDIT + ".jsonb");
