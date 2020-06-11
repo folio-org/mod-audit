@@ -3,10 +3,7 @@
     {
       "tableName": "audit_data",
       "fromModuleVersion": "0.0.1",
-      "pkColumnName": "_id",
       "withMetadata": true,
-      "generateId": true,
-      "populateJsonWithId": true,
       "ginIndex": [
         {
           "fieldName": "target_id",

@@ -3,14 +3,13 @@ package org.folio.rest.impl;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.okapi.common.ErrorType.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
+import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.okapi.common.ExtendedAsyncResult;
 import org.folio.okapi.common.Failure;
 import org.folio.okapi.common.Success;
@@ -32,9 +31,7 @@ import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
-import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
-import org.z3950.zing.cql.cql2pgjson.FieldException;
-import org.z3950.zing.cql.cql2pgjson.SchemaException;
+import org.folio.cql2pgjson.CQL2PgJSON;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -44,38 +41,16 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class AuditDataImpl implements AuditData {
 
-  public static final String API_CXT = "/audit-data";
-  public static final String DB_TAB_AUDIT = "audit_data";
-  public static final String DB_TAB_AUDIT_ID = "_id";
-  public static final String JSON_SCHEMA_AUDIT = "ramls/audit.json";
+  protected static final String API_CXT = "/audit-data";
+  protected static final String DB_TAB_AUDIT = "audit_data";
+  protected static final String DB_TAB_AUDIT_ID = "id";
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
-  private String auditSchema = null;
 
-  private void initCQLValidation() {
-    try {
-      auditSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(JSON_SCHEMA_AUDIT), "UTF-8");
-    } catch (Exception e) {
-      logger.error("unable to load schema - " + JSON_SCHEMA_AUDIT + ", validation of query fields will not be active",
-        e);
-    }
-  }
-
-  public AuditDataImpl() {
-    if (auditSchema == null) {
-      initCQLValidation();
-    }
-  }
-
-  private CQLWrapper getCQL(String query, int limit, int offset, String schema)
-    throws IOException, FieldException, SchemaException {
-    CQL2PgJSON cql2pgJson = null;
-    if (schema != null) {
-      cql2pgJson = new CQL2PgJSON(DB_TAB_AUDIT + ".jsonb", schema);
-    } else {
-      cql2pgJson = new CQL2PgJSON(DB_TAB_AUDIT + ".jsonb");
-    }
+  private CQLWrapper getCQL(String query, int limit, int offset)
+    throws FieldException {
+    CQL2PgJSON cql2pgJson = new CQL2PgJSON(DB_TAB_AUDIT + ".jsonb");
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
 
@@ -86,9 +61,9 @@ public class AuditDataImpl implements AuditData {
 
     logger.debug("Getting Audit data " + offset + "+" + limit + " q=" + query);
 
-    CQLWrapper cql = null;
+    CQLWrapper cql;
     try {
-      cql = getCQL(query, limit, offset, auditSchema);
+      cql = getCQL(query, limit, offset);
     } catch (Exception e) {
       ValidationHelper.handleError(e, asyncResultHandler);
       return;
@@ -98,7 +73,7 @@ public class AuditDataImpl implements AuditData {
       reply -> {
         if (reply.succeeded()) {
           AuditCollection auditCollection = new AuditCollection();
-          auditCollection.setAudit((List<Audit>) reply.result().getResults());
+          auditCollection.setAudit(reply.result().getResults());
           Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
           auditCollection.setTotalRecords(totalRecords);
           asyncResultHandler
@@ -122,8 +97,8 @@ public class AuditDataImpl implements AuditData {
     }
     getClient(okapiHeaders, vertxContext).save(DB_TAB_AUDIT, id, audit, reply -> {
       if (reply.succeeded()) {
-        Object ret = reply.result();
-        audit.setId((String) ret);
+        String ret = reply.result();
+        audit.setId(ret);
         OutStream stream = new OutStream();
         stream.setData(audit);
         asyncResultHandler.handle(succeededFuture(PostAuditDataResponse.respond201WithApplicationJson(stream,
@@ -185,7 +160,7 @@ public class AuditDataImpl implements AuditData {
       if (res.succeeded()) {
         getClient(okapiHeaders, vertxContext).update(DB_TAB_AUDIT, audit, id, reply -> {
           if (reply.succeeded()) {
-            if (reply.result().getUpdated() == 0) {
+            if (reply.result().rowCount() == 0) {
               asyncResultHandler.handle(succeededFuture(PutAuditDataByIdResponse
                 .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
             } else {
@@ -222,18 +197,18 @@ public class AuditDataImpl implements AuditData {
   public void deleteAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.warn("Delte Audit record " + id);
+    logger.warn("Delete Audit record " + id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {
         getClient(okapiHeaders, vertxContext).delete(DB_TAB_AUDIT, id, reply -> {
           if (reply.succeeded()) {
-            if (reply.result().getUpdated() == 1) {
+            if (reply.result().rowCount() == 1) {
               asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.respond204()));
             } else {
-              logger.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
+              logger.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().rowCount()));
               asyncResultHandler.handle(succeededFuture(DeleteAuditDataByIdResponse.respond404WithTextPlain(
-                messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()))));
+                messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().rowCount()))));
             }
           } else {
             ValidationHelper.handleError(reply.cause(), asyncResultHandler);
@@ -270,7 +245,7 @@ public class AuditDataImpl implements AuditData {
     Handler<ExtendedAsyncResult<Audit>> resp) {
 
     Criterion c = new Criterion(
-      new Criteria().addField(DB_TAB_AUDIT_ID).setJSONB(false).setOperation("=").setValue("'" + id + "'"));
+      new Criteria().addField(DB_TAB_AUDIT_ID).setJSONB(false).setOperation("=").setVal(id));
 
     getClient(okapiHeaders, vertxContext).get(DB_TAB_AUDIT, Audit.class, c, true, reply -> {
       if (reply.succeeded()) {

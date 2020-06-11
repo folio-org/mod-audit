@@ -19,9 +19,8 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
-    <okapi.version>2.22.0</okapi.version>
-    <rmb.version>23.2.1</rmb.version>
-    <vertx.version>3.5.4</vertx.version>
+    <rmb.version>30.0.2</rmb.version>
+    <vertx.version>3.9.0</vertx.version>
     <rest-assured.version>3.2.0</rest-assured.version>
     <junit.version>4.12</junit.version>
   </properties>
@@ -59,12 +58,6 @@
   </scm>
 
   <dependencies>
-
-    <dependency>
-      <groupId>org.folio.okapi</groupId>
-      <artifactId>okapi-common</artifactId>
-      <version>${okapi.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
