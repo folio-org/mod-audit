@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-audit</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.4</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -54,7 +54,7 @@
     <url>https://github.com/folio-org/mod-audit</url>
     <connection>scm:git:git://github.com/folio-org/mod-audit</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-audit.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.0.4</tag>
   </scm>
 
   <dependencies>
