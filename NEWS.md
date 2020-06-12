@@ -1,3 +1,6 @@
+## 0.0.4
+* https://issues.folio.org/browse/MODAUD-7: Update RMB to v30.0.2
+
 ## 0.0.3
 * update some dependencies
 
