@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Main entity for saving/retrieving log info",
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "description": "Event id",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "user": {
+      "description": "User id",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "item": {
+      "description": "Item id",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "object": {
+      "description": "Logged object",
+      "type": "string",
+      "enum": [
+        "Fee/Fine",
+        "Item Block",
+        "Loan",
+        "Manual Block",
+        "Notice",
+        "Patron Block",
+        "Request"
+      ]
+    },
+    "action": {
+      "description": "Action",
+      "type": "string",
+      "enum": [
+        "Anonymize",
+        "Billed",
+        "Cancelled",
+        "Cancelled as error",
+        "Changed due date",
+        "Check in",
+        "Check out",
+        "Checked in",
+        "Checked out",
+        "Checked out through override",
+        "Claimed returned",
+        "Closed loan",
+        "Created",
+        "Credited fully",
+        "Declared lost",
+        "Deleted",
+        "Edited",
+        "Expired",
+        "Marked as missing",
+        "Modified",
+        "Moved",
+        "Paid fully",
+        "Paid partially",
+        "Patron blocked from requesting",
+        "Pickup expired",
+        "Queue position reordered",
+        "Recall requested",
+        "Refunded fully",
+        "Refunded partially",
+        "Renewed",
+        "Renewed through override",
+        "Request status changed",
+        "Send",
+        "Staff information only added",
+        "Transferred fully",
+        "Transferred partially",
+        "Waived fully",
+        "Waived partially"
+      ]
+    },
+    "date": {
+      "description": "Event date",
+      "type": "string",
+      "format": "date-time"
+    },
+    "servicePoint": {
+      "description": "Service point",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "source": {
+      "description": "Source",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description",
+      "type": "string"
+    }
+  },
+  "required": [
+    "eventId"
+  ]
+}
