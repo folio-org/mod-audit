@@ -12,6 +12,34 @@
           "removeAccents": true
         }
       ]
+    },
+    {
+      "tableName": "loans",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "fees_fines",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "item_blocks",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "patron_blocks",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "manual_blocks",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "requests",
+      "fromModuleVersion": "0.0.4"
+    },
+    {
+      "tableName": "notices",
+      "fromModuleVersion": "0.0.4"
     }
   ]
 }
