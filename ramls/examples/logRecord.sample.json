@@ -1,0 +1,10 @@
+{
+  "eventId":"d294da0d-e946-440f-bba4-894a631ecfe9",
+  "userId": "255b4f80-2959-45ff-9647-661103a25e1d",
+  "itemId": "796dba43-b80e-40e6-9fa9-47c7add86cb7",
+  "object": "Loan",
+  "action": "Check out",
+  "date": "2020-08-12T12:21:21.123",
+  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "description": "Checked out to proxy"
+}
