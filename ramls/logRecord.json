@@ -2,22 +2,18 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "description": "Main entity for saving/retrieving log info",
-  "additionalProperties": true,
   "properties": {
     "eventId": {
       "description": "Event id",
-      "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      "$ref": "common/uuid.json"
     },
-    "userId": {
-      "description": "User id",
-      "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    "userBarcode": {
+      "description": "User barcode",
+      "type": "string"
     },
-    "itemId": {
-      "description": "Item id",
-      "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    "itemBarcode": {
+      "description": "Item barcode",
+      "type": "string"
     },
     "object": {
       "description": "Logged object",
@@ -82,9 +78,8 @@
       "format": "date-time"
     },
     "servicePointId": {
-      "description": "Service point",
-      "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      "description": "Service point id",
+      "$ref": "common/uuid.json"
     },
     "source": {
       "description": "Source",
@@ -95,6 +90,7 @@
       "type": "string"
     }
   },
+  "additionalProperties": true,
   "required": [
     "eventId"
   ]
