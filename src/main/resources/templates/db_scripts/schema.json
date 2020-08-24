@@ -15,31 +15,269 @@
     },
     {
       "tableName": "loans",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "fees_fines",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "item_blocks",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "patron_blocks",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "manual_blocks",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "requests",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     },
     {
       "tableName": "notices",
-      "fromModuleVersion": "0.0.4"
+      "fromModuleVersion": "0.0.4",
+      "index": [
+        {
+          "fieldName": "eventId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "userBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemBarcode",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "servicePointId",
+          "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "action",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ]
     }
   ]
 }
