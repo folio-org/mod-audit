@@ -30,16 +30,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -68,16 +64,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -106,16 +98,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -144,16 +132,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -182,16 +166,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -220,16 +200,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
@@ -258,16 +234,12 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "action",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "servicePointId",
           "caseSensitive": false
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "action",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": true
         }
       ],
       "fullTextIndex": [
