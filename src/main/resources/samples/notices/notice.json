@@ -1,0 +1,10 @@
+{
+  "eventId":"aa332dbe-7d1c-4d9c-8169-8f94c38c1e78",
+  "userBarcode": "1000024158",
+  "itemBarcode": "12983766",
+  "object": "Notice",
+  "action": "Send",
+  "date": "2020-08-12T12:21:21.123",
+  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "description": "Template: Test template. Triggering event: Test triggering event."
+}

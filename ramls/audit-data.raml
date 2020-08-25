@@ -11,6 +11,7 @@ documentation:
 types:
   audit: !include audit.json
   auditCollection: !include auditCollection.json
+  logRecordCollection: !include logRecordCollection.json
   errors: !include raml-util/schemas/errors.schema
   error: !include raml-util/schemas/error.schema
   parameters: !include raml-util/schemas/parameters.schema
@@ -24,6 +25,7 @@ traits:
 resourceTypes:
   collection: !include raml-util/rtypes/collection.raml
   collection-item: !include raml-util/rtypes/item-collection.raml
+  collection-get: !include raml-util/rtypes/collection-get.raml
 
 /audit-data:
   displayName: Audit data
@@ -32,10 +34,10 @@ resourceTypes:
     collection:
       schemaCollection: auditCollection
       schemaItem: audit
-      exampleCollection: 
+      exampleCollection:
         strict: false
         value: !include examples/auditCollection.sample.json
-      exampleItem: 
+      exampleItem:
         strict: false
         value: !include examples/audit.sample.json
 
@@ -56,7 +58,7 @@ resourceTypes:
     type:
       collection-item:
         schema: audit
-        exampleItem: 
+        exampleItem:
           strict: false
           value: !include examples/audit.sample.json
     get:
@@ -90,3 +92,17 @@ resourceTypes:
           description: "Not authorized to perform requested action"
           body:
             text/plain:
+  /circulation/logs:
+    displayName: Circulation audit logs
+    description: Get circulation audit logs
+    type:
+      collection-get:
+        schemaCollection: logRecordCollection
+        exampleCollection:
+          strict: false
+          value: !include examples/logRecordCollection.sample.json
+    get:
+      is: [
+        searchable: {description: "with valid searchable fields, for example userBarcode", example: "userBarcode=1000024158"},
+        validate
+      ]

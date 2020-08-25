@@ -8,6 +8,7 @@ import org.junit.Test;
 import static io.restassured.RestAssured.*;
 import static org.folio.rest.impl.AuditDataImpl.API_CXT;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
@@ -21,6 +22,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
@@ -42,6 +44,8 @@ public class AuditDataImplTest {
   private final Header tenant = new Header("X-Okapi-Tenant", "modaudittest");
   private final Header perms = new Header("X-Okapi-Permissions", "audit.all");
   private final Header ctype = new Header("Content-Type", "application/json");
+
+  private final String CIRC_LOGS_ENDPOINT = "/audit-data/circulation/logs";
 
   private String moduleName;
   private String moduleVersion;
@@ -91,9 +95,9 @@ public class AuditDataImplTest {
   }
 
   @Test
-  public void tests(TestContext context) {
+  public void auditDataTests(TestContext context) {
     async = context.async();
-    logger.info("Test starting");
+    logger.info("Audit data test starting");
 
     // health check
     given().header(ctype).get("/admin/health").then().log().all().statusCode(200);
@@ -166,4 +170,46 @@ public class AuditDataImplTest {
     async.complete();
   }
 
+  @Test
+  public void circulationLogsTests(TestContext context) {
+    async = context.async();
+    logger.info("Circulation audit logs test starting");
+
+    // initialize database and load sample data
+    String tenants = "{\"module_to\":\"" + moduleId + "\"," +
+      "\"parameters\": [ { \"key\":\"loadSample\", \"value\": true } ] }";
+    given().header(ctype).header(tenant).header(ctype).body(tenants).post("/_/tenant").then().log().all()
+      .statusCode(201);
+
+    // get circulation audit log records: no filter
+    given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT)
+      .then().log().all().statusCode(200)
+      .assertThat().body("totalRecords", equalTo(7));
+
+    // get circulation audit log records: filter by action
+    given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT + "?query=action=Created")
+      .then().log().all().statusCode(200)
+      .assertThat().body("logRecords[0].object", equalTo("Item Block"))
+      .and().body("logRecords[1].object", equalTo("Request"))
+      .and().body("totalRecords", equalTo(2));
+
+    // get circulation audit log records: filter by userBarcode and itemBarcode
+    given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND itemBarcode=12983765)")
+      .then().log().all().statusCode(200)
+      .assertThat().body("logRecords[0].object", equalTo("Fee/Fine"))
+      .and().body("logRecords[1].object", equalTo("Item Block"))
+      .and().body("totalRecords", equalTo(2));
+
+    // get circulation audit log records: malformed query
+    given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT + "?query=userbarcod=1000024158")
+      .then().log().all().statusCode(200)
+      .and().body("totalRecords", equalTo(0));
+
+    // get circulation audit log records: invalid query
+    given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT + "?query=abcd")
+      .then().log().all().statusCode(422);
+
+    // All done
+    async.complete();
+  }
 }
