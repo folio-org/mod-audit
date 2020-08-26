@@ -19,17 +19,13 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
 
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TenantSampleApi extends TenantAPI {
   private static final Logger log = LoggerFactory.getLogger(TenantSampleApi.class);
@@ -39,6 +35,15 @@ public class TenantSampleApi extends TenantAPI {
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
     Handler<AsyncResult<Response>> handlers, Context context) {
+    Map<String, String> sampleDataMap = new HashMap<>();
+    sampleDataMap.put("fees_fines", "fee_fine.json");
+    sampleDataMap.put("item_blocks", "item_block.json");
+    sampleDataMap.put("loans", "loan.json");
+    sampleDataMap.put("manual_blocks", "manual_block.json");
+    sampleDataMap.put("notices", "notice.json");
+    sampleDataMap.put("patron_blocks", "patron_block.json");
+    sampleDataMap.put("requests", "request.json");
+
     super.postTenant(tenantAttributes, headers, res -> {
       if (res.failed() || (res.succeeded() && (res.result().getStatus() < 200 || res.result().getStatus() > 299))) {
         handlers.handle(res);
@@ -49,14 +54,9 @@ public class TenantSampleApi extends TenantAPI {
         log.info("Loading sample data...");
         String tenantId = TenantTool.calculateTenantId(headers.get(RestVerticle.OKAPI_HEADER_TENANT));
 
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-        listDirContent(SAMPLES_PATH, true).forEach(directory ->
-          listDirContent(buildPath(SAMPLES_PATH, directory), false).forEach(fileName -> {
-              LogRecord record = getMockAsJson(buildPath(SAMPLES_PATH, directory, fileName)).mapTo(LogRecord.class);
-              futures.add(loadSample(directory, record, context, tenantId));
-            }));
-
-        allOf(futures.toArray(new CompletableFuture[0]))
+        allOf(sampleDataMap.entrySet().stream()
+          .map(e -> loadSample(e.getKey(), getMockAsJson(SAMPLES_PATH + "/" + e.getValue()).mapTo(LogRecord.class), context, tenantId))
+          .toArray(CompletableFuture[]::new))
           .thenAccept(vVoid -> handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
                     .respond201WithApplicationJson(""))))
           .exceptionally(throwable -> {
@@ -105,17 +105,6 @@ public class TenantSampleApi extends TenantAPI {
       }
     }
     return loadSample;
-  }
-
-  private Set<String> listDirContent(String path, boolean isDirectory) {
-    return Stream.of(new File(TenantSampleApi.class.getClassLoader().getResource(path).getPath()).listFiles())
-      .filter(file -> isDirectory == file.isDirectory())
-      .map(File::getName)
-      .collect(Collectors.toSet());
-  }
-
-  private String buildPath(String... tokens) {
-    return String.join("/", tokens);
   }
 
   private JsonObject getMockAsJson(String fullPath) {
