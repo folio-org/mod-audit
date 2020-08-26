@@ -23,8 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +50,9 @@ public class TenantSampleApi extends TenantAPI {
         String tenantId = TenantTool.calculateTenantId(headers.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        listDirContent(SAMPLES_PATH, true)
-          .forEach(directory -> listDirContent(SAMPLES_PATH + "/" + directory, false)
-            .forEach(fileName -> {
-              LogRecord record = getMockAsJson(SAMPLES_PATH + "/" + directory + "/" + fileName).mapTo(LogRecord.class);
+        listDirContent(SAMPLES_PATH, true).forEach(directory ->
+          listDirContent(buildPath(SAMPLES_PATH, directory), false).forEach(fileName -> {
+              LogRecord record = getMockAsJson(buildPath(SAMPLES_PATH, directory, fileName)).mapTo(LogRecord.class);
               futures.add(loadSample(directory, record, context, tenantId));
             }));
 
@@ -83,11 +80,6 @@ public class TenantSampleApi extends TenantAPI {
       }
     });
     return future;
-  }
-
-  @Override
-  public void getTenant(Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
-    super.getTenant(headers, handlers, context);
   }
 
   @Override
@@ -122,27 +114,19 @@ public class TenantSampleApi extends TenantAPI {
       .collect(Collectors.toSet());
   }
 
+  private String buildPath(String... tokens) {
+    return String.join("/", tokens);
+  }
+
   private JsonObject getMockAsJson(String fullPath) {
-    try {
-      return new JsonObject(getMockData(fullPath));
+    log.info("Using mock datafile: " + fullPath);
+    try (InputStream resourceAsStream = TenantSampleApi.class.getClassLoader().getResourceAsStream(fullPath)) {
+      if (resourceAsStream != null) {
+        return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
+      }
     } catch (IOException e) {
       log.error("Failed to load mock data: " + fullPath, e);
     }
     return new JsonObject();
-  }
-
-  private static String getMockData(String path) throws IOException {
-    log.info("Using mock datafile: " + path);
-    try (InputStream resourceAsStream = TenantSampleApi.class.getClassLoader().getResourceAsStream(path)) {
-      if (resourceAsStream != null) {
-        return IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
-      } else {
-        StringBuilder sb = new StringBuilder();
-        try (Stream<String> lines = Files.lines(Paths.get(path))) {
-          lines.forEach(sb::append);
-        }
-        return sb.toString();
-      }
-    }
   }
 }

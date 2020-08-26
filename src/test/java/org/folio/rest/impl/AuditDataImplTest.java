@@ -209,6 +209,9 @@ public class AuditDataImplTest {
     given().header(ctype).header(tenant).header(perms).get(CIRC_LOGS_ENDPOINT + "?query=abcd")
       .then().log().all().statusCode(422);
 
+    // delete tenant
+    given().header(ctype).header(tenant).header(ctype).delete("/_/tenant").then().log().all().statusCode(204);
+
     // All done
     async.complete();
   }
