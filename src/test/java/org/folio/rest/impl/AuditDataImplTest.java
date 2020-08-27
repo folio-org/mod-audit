@@ -25,7 +25,7 @@ public class AuditDataImplTest extends TestBase {
   String badId = nonExistingId + "1";
 
   @Test
-  public void auditDataTests() {
+  void auditDataTests() {
     logger.info("Audit data test starting");
 
     // health check

@@ -19,7 +19,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(1)
-  public void initializeDatabaseAndLoadSampleData() {
+  void initializeDatabaseAndLoadSampleData() {
     logger.info("Initialize database and load sample data");
     String tenants = "{\"module_to\":\"" + moduleId + "\"," +
       "\"parameters\": [ { \"key\":\"loadSample\", \"value\": true } ] }";
@@ -29,7 +29,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(2)
-  public void getCirculationAuditLogRecordsNoFilter() {
+  void getCirculationAuditLogRecordsNoFilter() {
     logger.info("Get circulation audit log records: no filter");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
@@ -38,7 +38,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(3)
-  public void getCirculationAuditLogRecordsFilterByAction() {
+  void getCirculationAuditLogRecordsFilterByAction() {
     logger.info("Get circulation audit log records: filter by action");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=action=Created")
       .then().log().all().statusCode(200)
@@ -49,7 +49,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(4)
-  public void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
+  void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND itemBarcode=12983765)")
       .then().log().all().statusCode(200)
@@ -60,7 +60,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(5)
-  public void getCirculationAuditLogRecordsMalformedQuery() {
+  void getCirculationAuditLogRecordsMalformedQuery() {
     logger.info("get circulation audit log records: malformed query");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=userbarcod=1000024158")
       .then().log().all().statusCode(200)
@@ -69,7 +69,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(6)
-  public void getCirculationAuditLogRecordsInvalidQuery() {
+  void getCirculationAuditLogRecordsInvalidQuery() {
     logger.info("get circulation audit log records: invalid query");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=abcd")
       .then().log().all().statusCode(422);
@@ -77,7 +77,7 @@ public class CirculationLogsImplTest extends TestBase {
 
   @Test
   @Order(7)
-  public void deleteTenant() {
+  void deleteTenant() {
     logger.info("Delete tenant");
     given().headers(headers).delete("/_/tenant").then().log().all().statusCode(204);
   }
