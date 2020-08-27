@@ -32,10 +32,9 @@ public class TenantSampleApi extends TenantAPI {
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
-  @Override
-  public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
-    Handler<AsyncResult<Response>> handlers, Context context) {
-    Map<String, String> sampleDataMap = new HashMap<>();
+  private static final Map<String, String> sampleDataMap = new HashMap<>();
+
+  static {
     sampleDataMap.put("fees_fines", "fee_fine.json");
     sampleDataMap.put("item_blocks", "item_block.json");
     sampleDataMap.put("loans", "loan.json");
@@ -43,7 +42,11 @@ public class TenantSampleApi extends TenantAPI {
     sampleDataMap.put("notices", "notice.json");
     sampleDataMap.put("patron_blocks", "patron_block.json");
     sampleDataMap.put("requests", "request.json");
+  }
 
+  @Override
+  public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
+    Handler<AsyncResult<Response>> handlers, Context context) {
     super.postTenant(tenantAttributes, headers, res -> {
       if (res.failed() || (res.succeeded() && (res.result().getStatus() < 200 || res.result().getStatus() > 299))) {
         handlers.handle(res);

@@ -92,17 +92,3 @@ resourceTypes:
           description: "Not authorized to perform requested action"
           body:
             text/plain:
-  /circulation/logs:
-    displayName: Circulation audit logs
-    description: Get circulation audit logs
-    type:
-      collection-get:
-        schemaCollection: logRecordCollection
-        exampleCollection:
-          strict: false
-          value: !include examples/logRecordCollection.sample.json
-    get:
-      is: [
-        searchable: {description: "with valid searchable fields, for example userBarcode", example: "userBarcode=1000024158"},
-        validate
-      ]
