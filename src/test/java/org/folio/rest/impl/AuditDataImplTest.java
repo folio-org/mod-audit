@@ -16,7 +16,7 @@ import java.util.UUID;
  * Interface test for mod-audit.
  */
 
-public class AuditDataImplTest extends TestBase {
+class AuditDataImplTest extends TestBase {
   private final Logger logger = LoggerFactory.getLogger(TestBase.class);
   // test data
   JsonObject audit = new JsonObject().put("tenant", "diku");
@@ -30,14 +30,6 @@ public class AuditDataImplTest extends TestBase {
 
     // health check
     given().header(ctype).get("/admin/health").then().log().all().statusCode(200);
-
-    // without tenant
-    given().header(ctype).get(API_CXT).then().log().all().statusCode(400).body(containsString("Tenant"));
-
-    // initialize database
-    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
-    given().header(ctype).header(tenant).header(ctype).body(tenants).post("/_/tenant").then().log().all()
-      .statusCode(201);
 
     // get collection
     given().header(ctype).header(tenant).header(perms).get(API_CXT).then().log().all().statusCode(200)

@@ -2,6 +2,13 @@ package org.folio.rest.impl;
 
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_FEES_FINES;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_ITEM_BLOCKS;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_LOANS;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_MANUAL_BLOCKS;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_NOTICES;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_PATRON_BLOCKS;
+import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_REQUESTS;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -35,13 +42,13 @@ public class TenantSampleApi extends TenantAPI {
   private static final Map<String, String> sampleDataMap = new HashMap<>();
 
   static {
-    sampleDataMap.put("fees_fines", "fee_fine.json");
-    sampleDataMap.put("item_blocks", "item_block.json");
-    sampleDataMap.put("loans", "loan.json");
-    sampleDataMap.put("manual_blocks", "manual_block.json");
-    sampleDataMap.put("notices", "notice.json");
-    sampleDataMap.put("patron_blocks", "patron_block.json");
-    sampleDataMap.put("requests", "request.json");
+    sampleDataMap.put(DB_TAB_FEES_FINES, "fee_fine.json");
+    sampleDataMap.put(DB_TAB_ITEM_BLOCKS, "item_block.json");
+    sampleDataMap.put(DB_TAB_LOANS, "loan.json");
+    sampleDataMap.put(DB_TAB_MANUAL_BLOCKS, "manual_block.json");
+    sampleDataMap.put(DB_TAB_NOTICES, "notice.json");
+    sampleDataMap.put(DB_TAB_PATRON_BLOCKS, "patron_block.json");
+    sampleDataMap.put(DB_TAB_REQUESTS, "request.json");
   }
 
   @Override
@@ -58,7 +65,7 @@ public class TenantSampleApi extends TenantAPI {
         String tenantId = TenantTool.calculateTenantId(headers.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         allOf(sampleDataMap.entrySet().stream()
-          .map(e -> loadSample(e.getKey(), getMockAsJson(SAMPLES_PATH + "/" + e.getValue()).mapTo(LogRecord.class), context, tenantId))
+          .map(e -> loadSample(e.getKey(), e.getValue(), context, tenantId))
           .toArray(CompletableFuture[]::new))
           .thenAccept(vVoid -> handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
                     .respond201WithApplicationJson(""))))
@@ -73,15 +80,20 @@ public class TenantSampleApi extends TenantAPI {
     }, context);
   }
 
-  private CompletableFuture<Void> loadSample(String tableName, LogRecord logRecord, Context context, String tenantId) {
+  private CompletableFuture<Void> loadSample(String tableName, String sampleFileName, Context context, String tenantId) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    PostgresClient.getInstance(context.owner(), tenantId).save(tableName, logRecord, reply -> {
-      if (reply.succeeded()) {
-        future.complete(null);
-      } else {
-        future.completeExceptionally(reply.cause());
-      }
-    });
+    try {
+      PostgresClient.getInstance(context.owner(), tenantId)
+        .save(tableName, getSampleAsJson(SAMPLES_PATH + "/" + sampleFileName).mapTo(LogRecord.class), reply -> {
+          if (reply.succeeded()) {
+            future.complete(null);
+          } else {
+            future.completeExceptionally(reply.cause());
+          }
+        });
+    } catch (IOException e) {
+      future.completeExceptionally(e);
+    }
     return future;
   }
 
@@ -110,15 +122,13 @@ public class TenantSampleApi extends TenantAPI {
     return loadSample;
   }
 
-  private JsonObject getMockAsJson(String fullPath) {
+  private JsonObject getSampleAsJson(String fullPath) throws IOException {
     log.info("Using mock datafile: " + fullPath);
     try (InputStream resourceAsStream = TenantSampleApi.class.getClassLoader().getResourceAsStream(fullPath)) {
       if (resourceAsStream != null) {
         return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
       }
-    } catch (IOException e) {
-      log.error("Failed to load mock data: " + fullPath, e);
     }
-    return new JsonObject();
+    throw new IOException("Error loading sample file");
   }
 }

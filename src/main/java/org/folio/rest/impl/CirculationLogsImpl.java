@@ -1,5 +1,7 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -13,33 +15,32 @@ import org.folio.rest.jaxrs.resource.AuditDataCirculation;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.rest.tools.utils.ValidationHelper;
 
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.vertx.core.Future.succeededFuture;
 
 public class CirculationLogsImpl implements AuditDataCirculation {
-  protected static final String DB_TAB_FEES_FINES = "fees_fines";
-  protected static final String DB_TAB_ITEM_BLOCKS = "item_blocks";
-  protected static final String DB_TAB_LOANS = "loans";
-  protected static final String DB_TAB_MANUAL_BLOCKS = "manual_blocks";
-  protected static final String DB_TAB_NOTICES = "notices";
-  protected static final String DB_TAB_PATRON_BLOCKS = "patron_blocks";
-  protected static final String DB_TAB_REQUESTS = "requests";
+  public static final String DB_TAB_FEES_FINES = "fees_fines";
+  public static final String DB_TAB_ITEM_BLOCKS = "item_blocks";
+  public static final String DB_TAB_LOANS = "loans";
+  public static final String DB_TAB_MANUAL_BLOCKS = "manual_blocks";
+  public static final String DB_TAB_NOTICES = "notices";
+  public static final String DB_TAB_PATRON_BLOCKS = "patron_blocks";
+  public static final String DB_TAB_REQUESTS = "requests";
+
+  private final List<String> tableNames = Arrays.asList(DB_TAB_FEES_FINES, DB_TAB_ITEM_BLOCKS, DB_TAB_LOANS,
+    DB_TAB_MANUAL_BLOCKS, DB_TAB_NOTICES, DB_TAB_PATRON_BLOCKS, DB_TAB_REQUESTS);
 
   @Override
   @Validate
   public void getAuditDataCirculationLogs(String query, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    List<CompletableFuture<List<LogRecord>>> futures = Stream.of(DB_TAB_FEES_FINES, DB_TAB_ITEM_BLOCKS,
-      DB_TAB_LOANS, DB_TAB_MANUAL_BLOCKS, DB_TAB_NOTICES, DB_TAB_PATRON_BLOCKS, DB_TAB_REQUESTS)
+    List<CompletableFuture<List<LogRecord>>> futures = tableNames.stream()
       .map(tableName -> getLogsFromTable(tableName, query, okapiHeaders, vertxContext))
       .collect(Collectors.toList());
 
@@ -53,13 +54,14 @@ public class CirculationLogsImpl implements AuditDataCirculation {
         .handle(succeededFuture(AuditDataCirculation.GetAuditDataCirculationLogsResponse
           .respond200WithApplicationJson(logRecordCollection))))
       .exceptionally(throwable -> {
-        ValidationHelper.handleError(throwable, asyncResultHandler);
+        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.GetAuditDataCirculationLogsResponse.
+          respond400WithTextPlain(throwable.getLocalizedMessage())));
         return null;
       });
   }
 
   private CompletableFuture<List<LogRecord>> getLogsFromTable(String tableName, String query,
-                                                              Map<String, String> okapiHeaders, Context vertxContext) {
+    Map<String, String> okapiHeaders, Context vertxContext) {
     CompletableFuture<List<LogRecord>> future = new CompletableFuture<>();
     String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
     createCqlWrapper(tableName, query)

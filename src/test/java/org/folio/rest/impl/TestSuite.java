@@ -1,12 +1,10 @@
-package org.folio;
+package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.RestVerticle;
-import org.folio.rest.impl.AuditDataImplTest;
-import org.folio.rest.impl.CirculationLogsImplTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.jupiter.api.AfterAll;
