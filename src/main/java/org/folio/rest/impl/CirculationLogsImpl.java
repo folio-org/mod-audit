@@ -1,6 +1,15 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
+import static org.folio.util.Constants.DB_TAB_FEES_FINES;
+import static org.folio.util.Constants.DB_TAB_ITEM_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_LOANS;
+import static org.folio.util.Constants.DB_TAB_MANUAL_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_NOTICES;
+import static org.folio.util.Constants.DB_TAB_PATRON_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_REQUESTS;
+import static org.folio.util.ErrorUtils.buildError;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -25,14 +34,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CirculationLogsImpl implements AuditDataCirculation {
-  public static final String DB_TAB_FEES_FINES = "fees_fines";
-  public static final String DB_TAB_ITEM_BLOCKS = "item_blocks";
-  public static final String DB_TAB_LOANS = "loans";
-  public static final String DB_TAB_MANUAL_BLOCKS = "manual_blocks";
-  public static final String DB_TAB_NOTICES = "notices";
-  public static final String DB_TAB_PATRON_BLOCKS = "patron_blocks";
-  public static final String DB_TAB_REQUESTS = "requests";
-
   private final List<String> tableNames = Arrays.asList(DB_TAB_FEES_FINES, DB_TAB_ITEM_BLOCKS, DB_TAB_LOANS,
     DB_TAB_MANUAL_BLOCKS, DB_TAB_NOTICES, DB_TAB_PATRON_BLOCKS, DB_TAB_REQUESTS);
 
@@ -55,7 +56,7 @@ public class CirculationLogsImpl implements AuditDataCirculation {
           .respond200WithApplicationJson(logRecordCollection))))
       .exceptionally(throwable -> {
         asyncResultHandler.handle(succeededFuture(AuditDataCirculation.GetAuditDataCirculationLogsResponse.
-          respond400WithTextPlain(throwable.getLocalizedMessage())));
+          respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
         return null;
       });
   }

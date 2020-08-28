@@ -1,14 +1,17 @@
 package org.folio.rest.impl;
 
 import static java.util.concurrent.CompletableFuture.allOf;
+import static org.folio.HttpStatus.HTTP_INTERNAL_SERVER_ERROR;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_FEES_FINES;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_ITEM_BLOCKS;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_LOANS;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_MANUAL_BLOCKS;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_NOTICES;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_PATRON_BLOCKS;
-import static org.folio.rest.impl.CirculationLogsImpl.DB_TAB_REQUESTS;
+import static org.folio.util.Constants.DB_TAB_FEES_FINES;
+import static org.folio.util.Constants.DB_TAB_ITEM_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_LOANS;
+import static org.folio.util.Constants.DB_TAB_MANUAL_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_NOTICES;
+import static org.folio.util.Constants.DB_TAB_PATRON_BLOCKS;
+import static org.folio.util.Constants.DB_TAB_REQUESTS;
+import static org.folio.util.ErrorUtils.buildError;
+
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -34,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class TenantSampleApi extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(TenantSampleApi.class);
+public class TenantSampleImpl extends TenantAPI {
+  private static final Logger log = LoggerFactory.getLogger(TenantSampleImpl.class);
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
@@ -71,7 +74,7 @@ public class TenantSampleApi extends TenantAPI {
                     .respond201WithApplicationJson(""))))
           .exceptionally(throwable -> {
             handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-              .respond500WithTextPlain(throwable.getLocalizedMessage())));
+              .respond500WithTextPlain(buildError(HTTP_INTERNAL_SERVER_ERROR.toInt(), throwable.getLocalizedMessage()))));
             return null;
           });
       } else {
@@ -91,7 +94,7 @@ public class TenantSampleApi extends TenantAPI {
             future.completeExceptionally(reply.cause());
           }
         });
-    } catch (IOException e) {
+    } catch (Exception e) {
       future.completeExceptionally(e);
     }
     return future;
@@ -124,7 +127,7 @@ public class TenantSampleApi extends TenantAPI {
 
   private JsonObject getSampleAsJson(String fullPath) throws IOException {
     log.info("Using mock datafile: " + fullPath);
-    try (InputStream resourceAsStream = TenantSampleApi.class.getClassLoader().getResourceAsStream(fullPath)) {
+    try (InputStream resourceAsStream = TenantSampleImpl.class.getClassLoader().getResourceAsStream(fullPath)) {
       if (resourceAsStream != null) {
         return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
       }
