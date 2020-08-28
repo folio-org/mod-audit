@@ -116,6 +116,11 @@
       "description": "Delete specific audit record"
     },
     {
+      "permissionName": "circulation-logs.collection.get",
+      "displayName": "Circulation audit logs - get circulation log records",
+      "description": "Get circulation audit logs records"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -124,19 +129,7 @@
         "audit.item.get",
         "audit.item.post",
         "audit.item.put",
-        "audit.item.delete"
-      ]
-    },
-    {
-      "permissionName": "circulation-logs.collection.get",
-      "displayName": "Circulation audit logs - get circulation log records",
-      "description": "Get circulation audit logs records"
-    },
-    {
-      "permissionName": "circulation-logs.all",
-      "displayName": "Circulation audit logs - all permissions",
-      "description": "Circulation audit logs - all permissions",
-      "subPermissions": [
+        "audit.item.delete",
         "circulation-logs.collection.get"
       ]
     }
