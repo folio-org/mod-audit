@@ -22,7 +22,7 @@
     <rmb.version>30.0.2</rmb.version>
     <vertx.version>3.9.0</vertx.version>
     <rest-assured.version>3.2.0</rest-assured.version>
-    <junit.version>4.12</junit.version>
+    <junit.jupiter.version>5.6.0</junit.jupiter.version>
   </properties>
 
   <repositories>
@@ -77,9 +77,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -373,6 +379,12 @@
                https://issues.folio.org/browse/FOLIO-1609
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
+          <excludes>
+            <exclude>org/folio/rest/impl/**Test.class</exclude>
+          </excludes>
+          <includes>
+            <include>org/folio/rest/impl/TestSuite.class</include>
+          </includes>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>

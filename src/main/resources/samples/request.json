@@ -1,0 +1,10 @@
+{
+  "eventId":"3fc0567f-129d-49f8-871c-7a3eedd62f34",
+  "userBarcode": "1000024158",
+  "itemBarcode": "12983766",
+  "object": "Request",
+  "action": "Created",
+  "date": "2020-08-12T12:21:21.123",
+  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "description": "Type: Recall. Pickup service point: Circ 1."
+}

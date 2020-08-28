@@ -1,0 +1,10 @@
+{
+  "eventId":"0c733b7d-22e4-46a6-8851-bf85c8c8eb5b",
+  "userBarcode": "1000024158",
+  "itemBarcode": "12983765",
+  "object": "Item Block",
+  "action": "Created",
+  "date": "2020-08-12T12:21:21.123",
+  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "description": "Item Block test description"
+}

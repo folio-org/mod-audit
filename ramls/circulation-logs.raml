@@ -1,0 +1,35 @@
+#%RAML 1.0
+
+title: Circulation Audit Logs API
+baseUri: https://github.com/folio-org/mod-audit
+version: v1
+
+documentation:
+  - title: mod-audit API
+    content: This documents the API calls that can be made to query circulation audit logs records
+
+types:
+  logRecordCollection: !include logRecordCollection.json
+  errors: !include raml-util/schemas/errors.schema
+  error: !include raml-util/schemas/error.schema
+traits:
+  searchable: !include raml-util/traits/searchable.raml
+  language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  get-only-with-json-response: !include raml-util/rtypes/get-only-with-json-response.raml
+
+/audit-data/circulation:
+  /logs:
+    displayName: Circulation audit logs
+    description: Get circulation audit logs
+    type:
+      get-only-with-json-response:
+        schema: logRecordCollection
+        exampleCollection:
+          strict: false
+          value: !include examples/logRecordCollection.sample.json
+    get:
+      is: [
+        searchable: {description: "with valid searchable fields, for example userBarcode", example: "userBarcode=1000024158"},
+      ]

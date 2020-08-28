@@ -55,6 +55,21 @@
       ]
     },
     {
+      "id": "circulation-logs",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/circulation/logs",
+          "permissionsRequired": [
+            "circulation-logs.collection.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.0",
       "interfaceType": "system",
@@ -101,6 +116,11 @@
       "description": "Delete specific audit record"
     },
     {
+      "permissionName": "circulation-logs.collection.get",
+      "displayName": "Circulation audit logs - get circulation log records",
+      "description": "Get circulation audit logs records"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -109,7 +129,8 @@
         "audit.item.get",
         "audit.item.post",
         "audit.item.put",
-        "audit.item.delete"
+        "audit.item.delete",
+        "circulation-logs.collection.get"
       ]
     }
   ],

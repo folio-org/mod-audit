@@ -1,110 +1,35 @@
 package org.folio.rest.impl;
 
-import java.util.Locale;
-import java.util.UUID;
-
-import org.junit.Test;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import static io.restassured.RestAssured.*;
 import static org.folio.rest.impl.AuditDataImpl.API_CXT;
 import static org.hamcrest.Matchers.containsString;
-
-import io.restassured.RestAssured;
-import io.restassured.http.Header;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import java.io.IOException;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
-import org.folio.rest.RestVerticle;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.junit.After;
+import java.util.UUID;
 
 /**
  * Interface test for mod-audit.
  */
-@RunWith(VertxUnitRunner.class)
-public class AuditDataImplTest {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private final int port = Integer.parseInt(System.getProperty("port", "8081"));
-
-  private final Header tenant = new Header("X-Okapi-Tenant", "modaudittest");
-  private final Header perms = new Header("X-Okapi-Permissions", "audit.all");
-  private final Header ctype = new Header("Content-Type", "application/json");
-
-  private String moduleName;
-  private String moduleVersion;
-  private String moduleId;
-
-  private Vertx vertx;
-  private Async async;
-
+class AuditDataImplTest extends TestBase {
+  private final Logger logger = LoggerFactory.getLogger(TestBase.class);
   // test data
   JsonObject audit = new JsonObject().put("tenant", "diku");
   JsonObject badAudit = new JsonObject().put("x", "y");
   String nonExistingId = UUID.randomUUID().toString();
   String badId = nonExistingId + "1";
 
-  @Before
-  public void setUp(TestContext context) {
-    Locale.setDefault(Locale.US);
-    vertx = Vertx.vertx();
-    moduleName = PomReader.INSTANCE.getModuleName().replaceAll("_", "-");
-    moduleVersion = PomReader.INSTANCE.getVersion();
-    moduleId = moduleName + "-" + moduleVersion;
-    logger.info("Test setup starting for " + moduleId);
-    try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-    } catch (IOException e) {
-      e.printStackTrace();
-      context.fail(e);
-      return;
-    }
-
-    JsonObject conf = new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true");
-    DeploymentOptions opt = new DeploymentOptions().setConfig(conf);
-    vertx.deployVerticle(RestVerticle.class.getName(), opt, context.asyncAssertSuccess());
-    RestAssured.port = port;
-    logger.info("Setup done. Using port " + port);
-  }
-
-  @After
-  public void tearDown(TestContext context) {
-    logger.info("Cleaning up after ModuleTest");
-    async = context.async();
-    vertx.close(context.asyncAssertSuccess(res -> {
-      PostgresClient.stopEmbeddedPostgres();
-      async.complete();
-    }));
-  }
-
   @Test
-  public void tests(TestContext context) {
-    async = context.async();
-    logger.info("Test starting");
+  void auditDataTests() {
+    logger.info("Audit data test starting");
 
     // health check
     given().header(ctype).get("/admin/health").then().log().all().statusCode(200);
-
-    // without tenant
-    given().header(ctype).get(API_CXT).then().log().all().statusCode(400).body(containsString("Tenant"));
-
-    // initialize database
-    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
-    given().header(ctype).header(tenant).header(ctype).body(tenants).post("/_/tenant").then().log().all()
-      .statusCode(201);
 
     // get collection
     given().header(ctype).header(tenant).header(perms).get(API_CXT).then().log().all().statusCode(200)
@@ -161,9 +86,5 @@ public class AuditDataImplTest {
       .statusCode(404);
     // delete by bad id
     given().header(ctype).header(tenant).header(perms).delete(API_CXT + "/" + badId).then().log().all().statusCode(400);
-
-    // All done
-    async.complete();
   }
-
 }
