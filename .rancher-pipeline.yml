@@ -15,7 +15,7 @@ stages:
 - name: Deploy
   steps:
   - applyAppConfig:
-      catalogTemplate: p-ngvqv:firebird-helmcharts-mod-quick-marc
+      catalogTemplate: p-ngvqv:firebird-helmcharts-mod-audit
       version: 0.1.22
       answers:
         image.repository: docker.dev.folio.org/mod-audit
