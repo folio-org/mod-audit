@@ -16,7 +16,7 @@ stages:
   steps:
   - applyAppConfig:
       catalogTemplate: p-ngvqv:firebird-helmcharts-mod-audit
-      version: 0.1.22
+      version: 0.1.24
       answers:
         image.repository: docker.dev.folio.org/mod-audit
         image.tag: firebird-latest
