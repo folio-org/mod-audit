@@ -36,7 +36,7 @@ class CirculationLogsImplTest extends TestBase {
       .then().log().all().statusCode(200)
       .assertThat().body("logRecords[0].object", equalTo("Fee/Fine"))
       .and().body("logRecords[1].object", equalTo("Item Block"))
-      .and().body("totalRecords", equalTo(3));
+      .and().body("totalRecords", equalTo(2));
   }
 
   @Test
