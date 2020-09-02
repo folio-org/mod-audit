@@ -88,6 +88,40 @@
     "description": {
       "description": "Description",
       "type": "string"
+    },
+    "linkToIds": {
+      "description": "Additional data for details",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "description": "User id",
+          "$ref": "common/uuid.json"
+        },
+        "itemId": {
+          "description": "Item id",
+          "$ref": "common/uuid.json"
+        },
+        "loanId": {
+          "description": "Loan id",
+          "$ref": "common/uuid.json"
+        },
+        "feeFineId": {
+          "description": "Fee/Fine id",
+          "$ref": "common/uuid.json"
+        },
+        "templateId": {
+          "description": "Template id",
+          "$ref": "common/uuid.json"
+        },
+        "requestId": {
+          "description": "Request id",
+          "$ref": "common/uuid.json"
+        },
+        "noticePolicyId": {
+          "description": "Notice Policy id",
+          "$ref": "common/uuid.json"
+        }
+      }
     }
   },
   "additionalProperties": true,

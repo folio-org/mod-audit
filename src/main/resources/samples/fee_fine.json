@@ -6,5 +6,10 @@
   "action": "Billed",
   "date": "2020-08-12T12:21:21.123",
   "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
-  "description": "Fee/Fine test description"
+  "description": "Fee/Fine test description",
+  "linkToIds": {
+    "feeFineId": "39a14e03-c372-4659-860b-5423c970633e",
+    "userId": "df7f4993-8c14-4a0f-ab63-93975ab01c76",
+    "loanId": "57ea9fc0-ac54-4d91-b5e0-dbe9d1f78def"
+  }
 }
