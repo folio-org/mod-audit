@@ -90,6 +90,7 @@
       "type": "string"
     },
     "linkToIds": {
+      "description": "Additional data for details",
       "type": "object",
       "properties": {
         "userId": {
