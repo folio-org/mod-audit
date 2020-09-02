@@ -7,7 +7,9 @@
   "date": "2020-08-12T12:21:21.123",
   "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
   "description": "Type: Recall. Pickup service point: Circ 1.",
-  "requestId": "d63d2b1d-c08d-488d-af33-eb62078117c5",
-  "userId": "50413b63-4a23-4341-bdda-b7ab36c85db1",
-  "itemId": "39827d30-7c16-459f-bddb-7aa149822f7d"
+  "linkToIds": {
+    "requestId": "89105c06-dbdb-4aa0-9695-d4d19c733270",
+    "userId": "df7f4993-8c14-4a0f-ab63-93975ab01c76",
+    "itemId": "cb20f34f-b773-462f-a091-b233cc96b9e6"
+  }
 }
