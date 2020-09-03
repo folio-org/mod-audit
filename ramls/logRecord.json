@@ -121,6 +121,14 @@
         "noticePolicyId": {
           "description": "Notice Policy id",
           "$ref": "common/uuid.json"
+        },
+        "instanceId": {
+          "description": "Instance id",
+          "$ref": "common/uuid.json"
+        },
+        "holdingId": {
+          "description": "Holding id",
+          "$ref": "common/uuid.json"
         }
       }
     }

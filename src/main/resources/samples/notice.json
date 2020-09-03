@@ -15,6 +15,8 @@
     "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260",
     "requestId": "89105c06-dbdb-4aa0-9695-d4d19c733270",
     "feeFineId": "39a14e03-c372-4659-860b-5423c970633e",
-    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c"
+    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c",
+    "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
+    "holdingId": "133a7916-f05e-4df4-8f7f-09eb2a7076d1"
   }
 }
