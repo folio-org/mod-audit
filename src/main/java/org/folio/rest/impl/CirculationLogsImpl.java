@@ -2,22 +2,20 @@ package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
-import static org.folio.util.Constants.DB_TAB_FEES_FINES;
-import static org.folio.util.Constants.DB_TAB_ITEM_BLOCKS;
-import static org.folio.util.Constants.DB_TAB_LOANS;
-import static org.folio.util.Constants.DB_TAB_MANUAL_BLOCKS;
-import static org.folio.util.Constants.DB_TAB_NOTICES;
-import static org.folio.util.Constants.DB_TAB_PATRON_BLOCKS;
-import static org.folio.util.Constants.DB_TAB_REQUESTS;
+import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
 import static org.folio.util.ErrorUtils.buildError;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.handler.LogEventProcessor;
+import org.folio.rest.handler.LogObject;
+import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
 import org.folio.rest.jaxrs.resource.AuditDataCirculation;
@@ -34,14 +32,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CirculationLogsImpl implements AuditDataCirculation {
-  private final List<String> tableNames = Arrays.asList(DB_TAB_FEES_FINES, DB_TAB_ITEM_BLOCKS, DB_TAB_LOANS,
-    DB_TAB_MANUAL_BLOCKS, DB_TAB_NOTICES, DB_TAB_PATRON_BLOCKS, DB_TAB_REQUESTS);
-
   @Override
   @Validate
   public void getAuditDataCirculationLogs(String query, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    List<CompletableFuture<List<LogRecord>>> futures = tableNames.stream()
+    List<CompletableFuture<List<LogRecord>>> futures = Arrays.stream(LogObject.values())
+      .map(LogObject::tableName)
       .map(tableName -> getLogsFromTable(tableName, query, okapiHeaders, vertxContext))
       .collect(Collectors.toList());
 
@@ -61,12 +57,26 @@ public class CirculationLogsImpl implements AuditDataCirculation {
       });
   }
 
+  @Override
+  public void postAuditDataCirculationEventHandler(String entity, Map<String, String> okapiHeaders,
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LogRecord logRecord = LogEventProcessor.processPayload(new JsonObject(entity).mapTo(LogEventPayload.class));
+    getClient(okapiHeaders, vertxContext).save(LogObject.fromName(logRecord.getObject().value()).tableName(), logRecord, reply -> {
+      if (reply.succeeded()) {
+        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.PostAuditDataCirculationEventHandlerResponse
+          .respond201()));
+      } else {
+        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.PostAuditDataCirculationEventHandlerResponse
+          .respond422WithApplicationJson(buildError(HTTP_UNPROCESSABLE_ENTITY.toInt(), reply.cause().getLocalizedMessage()))));
+      }
+    });
+  }
+
   private CompletableFuture<List<LogRecord>> getLogsFromTable(String tableName, String query,
     Map<String, String> okapiHeaders, Context vertxContext) {
     CompletableFuture<List<LogRecord>> future = new CompletableFuture<>();
-    String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
     createCqlWrapper(tableName, query)
-      .thenAccept(cqlWrapper -> PostgresClient.getInstance(vertxContext.owner(), tenantId)
+      .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
         .get(tableName, LogRecord.class, new String[] { "*" }, cqlWrapper, false, false, reply -> {
           if (reply.succeeded()) {
             future.complete(reply.result().getResults());
@@ -90,5 +100,10 @@ public class CirculationLogsImpl implements AuditDataCirculation {
       future.completeExceptionally(e);
     }
     return future;
+  }
+
+  private PostgresClient getClient(Map<String, String> okapiHeaders, Context vertxContext) {
+    String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    return PostgresClient.getInstance(vertxContext.owner(), tenantId);
   }
 }

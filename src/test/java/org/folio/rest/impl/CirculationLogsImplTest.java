@@ -5,18 +5,20 @@ import static org.hamcrest.Matchers.equalTo;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.junit.jupiter.api.Test;
 
 class CirculationLogsImplTest extends TestBase {
   private final Logger logger = LoggerFactory.getLogger(CirculationLogsImplTest.class);
   private final String CIRC_LOGS_ENDPOINT = "/audit-data/circulation/logs";
+  private final String EVENT_HANDLER_ENDPOINT = "/audit-data/circulation/event/handler";
 
   @Test
   void getCirculationAuditLogRecordsNoFilter() {
     logger.info("Get circulation audit log records: no filter");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(7));
+      .assertThat().body("totalRecords", equalTo(8));
   }
 
   @Test
@@ -52,5 +54,23 @@ class CirculationLogsImplTest extends TestBase {
     logger.info("get circulation audit log records: invalid query");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=abcd")
       .then().log().all().statusCode(400);
+  }
+
+  @Test
+  void postLogRecordEvent() {
+    logger.info("post valid log event: success");
+    // check initial number of Loans
+    given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=object=Loan")
+      .then().log().all().statusCode(200)
+      .and().body("totalRecords", equalTo(1));
+
+    LogEventPayload payload = new LogEventPayload().withLoggedObjectType(LogEventPayload.LoggedObjectType.LOAN)
+      .withRequest("{\"request\"}").withResponse("{\"response\"}");
+
+    given().headers(headers).body(payload).post(EVENT_HANDLER_ENDPOINT)
+      .then().log().all().statusCode(201);
+    given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=object=Loan")
+      .then().log().all().statusCode(200)
+      .and().body("totalRecords", equalTo(2));
   }
 }
