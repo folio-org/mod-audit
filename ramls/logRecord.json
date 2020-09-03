@@ -32,6 +32,7 @@
       "description": "Action",
       "type": "string",
       "enum": [
+        "Age to lost",
         "Anonymize",
         "Billed",
         "Cancelled",
