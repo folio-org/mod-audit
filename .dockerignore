@@ -2,3 +2,4 @@
 !Dockerfile
 !docker
 !target/*.jar
+!mod-audit-server/target/*.jar
