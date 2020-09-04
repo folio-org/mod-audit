@@ -45,16 +45,13 @@ public class LogEventPublisherServiceTest extends AbstractRestTest {
 
     LogEventPayload expected = new LogEventPayload().withLoggedObjectType(LogEventPayload.LoggedObjectType.LOAN)
       .withRequest("{request: body}")
-      .withResponse("{id:" + UUID.randomUUID()
-        .toString() + "}");
+      .withResponse("{id:" + UUID.randomUUID().toString() + "}");
 
     PubSubLogPublisherUtil.sendEventWithPayload(expected, new OkapiConnectionParams(okapiHeaders, Vertx.vertx().getOrCreateContext().owner())).get(TIMEOUT, TimeUnit.SECONDS);
 
     verify(1, postRequestedFor(urlEqualTo(PUBSUB_PUBLISH_URL)));
-    LoggedRequest event = WireMock.findAll(postRequestedFor(urlEqualTo(PUBSUB_PUBLISH_URL)))
-      .get(0);
-    LogEventPayload actual = new JsonObject(new JsonObject(event.getBodyAsString()).mapTo(Event.class)
-      .getEventPayload()).mapTo(LogEventPayload.class);
+    LoggedRequest event = WireMock.findAll(postRequestedFor(urlEqualTo(PUBSUB_PUBLISH_URL))).get(0);
+    LogEventPayload actual = new JsonObject(new JsonObject(event.getBodyAsString()).mapTo(Event.class).getEventPayload()).mapTo(LogEventPayload.class);
     assertThat(expected, is(actual));
 
   }
@@ -62,23 +59,18 @@ public class LogEventPublisherServiceTest extends AbstractRestTest {
   @Test
   public void testModuleRegistration() throws Exception {
 
-    LOGGER.info("=== Test: publishing log record event ===");
+    LOGGER.info("=== Test: module registration ===");
 
-    PubSubLogPublisherUtil.registerLogEventPublisher(okapiHeaders, Vertx.vertx()
-      .getOrCreateContext()
-      .owner())
-      .get(TIMEOUT, TimeUnit.SECONDS);
-    LoggedRequest loggedRequest1 = WireMock.findAll(postRequestedFor(urlPathEqualTo(PUBSUB_EVENT_TYPES)))
-      .get(0);
+    PubSubLogPublisherUtil.registerLogEventPublisher(okapiHeaders, Vertx.vertx().getOrCreateContext().owner()).get(TIMEOUT, TimeUnit.SECONDS);
+
+    LoggedRequest loggedRequest1 = WireMock.findAll(postRequestedFor(urlPathEqualTo(PUBSUB_EVENT_TYPES))).get(0);
     EventDescriptor eventDescriptor = new JsonObject(loggedRequest1.getBodyAsString()).mapTo(EventDescriptor.class);
     assertThat(eventDescriptor.getEventType(), is(EVENT_TYPE));
-    LoggedRequest loggedRequest2 = WireMock.findAll(postRequestedFor(urlPathEqualTo(PUBSUB_EVENT_TYPES_DECLARE_PUBLISHER_URL)))
-      .get(0);
+
+    LoggedRequest loggedRequest2 = WireMock.findAll(postRequestedFor(urlPathEqualTo(PUBSUB_EVENT_TYPES_DECLARE_PUBLISHER_URL))).get(0);
     PublisherDescriptor publisherDescriptor = new JsonObject(loggedRequest2.getBodyAsString()).mapTo(PublisherDescriptor.class);
     assertThat(publisherDescriptor.getModuleId(), is(PubSubClientUtils.constructModuleName()));
     assertThat(publisherDescriptor.getEventDescriptors(), hasSize(1));
-    assertThat(publisherDescriptor.getEventDescriptors()
-      .get(0)
-      .getEventType(), is(EVENT_TYPE));
+    assertThat(publisherDescriptor.getEventDescriptors().get(0).getEventType(), is(EVENT_TYPE));
   }
 }

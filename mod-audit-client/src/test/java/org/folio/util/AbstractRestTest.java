@@ -46,11 +46,7 @@ public abstract class AbstractRestTest {
   private static Vertx vertx;
   public static Map<String, String> okapiHeaders = new HashMap<>();
 
-
-  protected static final String okapiUserIdHeader = UUID.randomUUID()
-    .toString();
-
-  protected static RequestSpecification spec;
+  protected static final String okapiUserIdHeader = UUID.randomUUID().toString();
 
   public static WireMockRule snapshotMockServer = new WireMockRule();
 
