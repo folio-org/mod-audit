@@ -5,7 +5,8 @@
   "object": "Fee/Fine",
   "action": "Billed",
   "date": "2020-08-12T12:21:21.123",
-  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "servicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+  "source": "Truesdale, Yanic",
   "description": "Fee/Fine test description",
   "linkToIds": {
     "feeFineId": "39a14e03-c372-4659-860b-5423c970633e",

@@ -5,7 +5,8 @@
   "object": "Notice",
   "action": "Send",
   "date": "2020-08-12T12:21:21.123",
-  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "servicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+  "source": "Truesdale, Yanic",
   "description": "Template: Test template. Triggering event: Test triggering event.",
   "linkToIds": {
     "templateId": "b68cdf51-ae7c-43cf-bfd5-b79174810593",
@@ -14,6 +15,8 @@
     "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260",
     "requestId": "89105c06-dbdb-4aa0-9695-d4d19c733270",
     "feeFineId": "39a14e03-c372-4659-860b-5423c970633e",
-    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c"
+    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c",
+    "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
+    "holdingId": "133a7916-f05e-4df4-8f7f-09eb2a7076d1"
   }
 }
