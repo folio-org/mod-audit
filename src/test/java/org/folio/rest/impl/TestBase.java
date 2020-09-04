@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 @ExtendWith(VertxExtension.class)
-public class TestBase {
+class TestBase {
   protected static final Header tenant = new Header("X-Okapi-Tenant", "modaudittest");
   protected static final Header perms = new Header("X-Okapi-Permissions", "audit.all");
   protected static final Header ctype = new Header("Content-Type", "application/json");

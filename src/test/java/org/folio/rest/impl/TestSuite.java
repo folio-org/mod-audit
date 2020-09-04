@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class TestSuite {
+class TestSuite {
   public static boolean isInitialized = false;
   private static final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
