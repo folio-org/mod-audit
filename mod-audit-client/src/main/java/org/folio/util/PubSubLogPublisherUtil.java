@@ -32,14 +32,21 @@ public final class PubSubLogPublisherUtil {
    * @return true if LogEventPublisher registered successfully, otherwise - false
    */
   public static CompletableFuture<Boolean> registerLogEventPublisher(Map<String, String> headers, Vertx vertx) {
-    return PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx))
+
+    final CompletableFuture<Boolean> registrationResult = new CompletableFuture<>();
+
+    PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx))
       .whenComplete((result, throwable) -> {
         if (throwable == null) {
           LOGGER.info("Module was successfully registered as publisher/subscriber in mod-pubsub");
+          registrationResult.complete(true);
         } else {
           LOGGER.error("Error during module registration in mod-pubsub", throwable);
+          registrationResult.completeExceptionally(throwable);
         }
       });
+
+    return registrationResult;
   }
 
   /**
@@ -61,24 +68,28 @@ public final class PubSubLogPublisherUtil {
           publishResult.complete(true);
         } else {
           LOGGER.error("Failed to publish LogEvent. ID: {}, payload: {}", throwable, event.getId(), event.getEventPayload());
-          if (throwable != null && throwable.getMessage() != null && throwable.getMessage()
-            .toLowerCase()
-            .contains("there is no subscribers registered for event type")) {
+          if (throwable != null && throwable.getMessage() != null && throwable.getMessage().toLowerCase().contains("there is no subscribers registered for event type")) {
             publishResult.complete(true);
           } else {
             publishResult.completeExceptionally(throwable);
           }
         }
       });
+
     return publishResult;
   }
 
+  /**
+   * This method builds {@link Event} with {@link LogEventPayload}
+   * @param payload payload with needed data
+   * @param params OKAPI connection parameters
+   * @return event with LogEventPayload
+   */
   private static Event buildLogRecordEvent(LogEventPayload payload, OkapiConnectionParams params) {
     return new Event().withId(UUID.randomUUID()
       .toString())
       .withEventType(EVENT_TYPE)
-      .withEventPayload(JsonObject.mapFrom(payload)
-        .encode())
+      .withEventPayload(JsonObject.mapFrom(payload).encode())
       .withEventMetadata(new EventMetadata().withTenantId(params.getTenantId())
         .withEventTTL(1)
         .withPublishedBy(PubSubClientUtils.constructModuleName()));
