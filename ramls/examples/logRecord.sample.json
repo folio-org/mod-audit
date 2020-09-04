@@ -1,15 +1,18 @@
 {
-  "eventId":"d294da0d-e946-440f-bba4-894a631ecfe9",
+  "eventId":"d194da0d-e946-440f-bba4-894a631ecfe9",
   "userBarcode": "1000024158",
   "itemBarcode": "12983765",
   "object": "Loan",
-  "action": "Check out",
+  "action": "Checked out",
   "date": "2020-08-12T12:21:21.123",
-  "servicePointId": "e7f1db20-3e78-4d74-abcb-cdff7d9e91ea",
+  "servicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+  "source": "Truesdale, Yanic",
   "description": "Checked out to proxy",
   "linkToIds": {
     "userId": "df7f4993-8c14-4a0f-ab63-93975ab01c76",
     "itemId": "cb20f34f-b773-462f-a091-b233cc96b9e6",
-    "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260"
+    "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260",
+    "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
+    "holdingId": "133a7916-f05e-4df4-8f7f-09eb2a7076d1"
   }
 }
