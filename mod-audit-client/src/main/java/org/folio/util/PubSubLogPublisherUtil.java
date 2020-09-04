@@ -38,11 +38,11 @@ public final class PubSubLogPublisherUtil {
     PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx))
       .whenComplete((result, throwable) -> {
         if (throwable == null) {
-          LOGGER.info("Module was successfully registered as publisher/subscriber in mod-pubsub");
+          LOGGER.info("Module: {} was successfully registered as log event publisher in mod-pubsub", PubSubClientUtils.constructModuleName());
           registrationResult.complete(true);
         } else {
-          LOGGER.error("Error during module registration in mod-pubsub", throwable);
-          registrationResult.completeExceptionally(throwable);
+          LOGGER.error("Error during module registration in mod-pubsub for publishing log events", throwable);
+          registrationResult.complete(false);
         }
       });
 
@@ -67,11 +67,11 @@ public final class PubSubLogPublisherUtil {
           LOGGER.debug("LogEvent published successfully. ID: {}, payload: {}", event.getId(), event.getEventPayload());
           publishResult.complete(true);
         } else {
-          LOGGER.error("Failed to publish LogEvent. ID: {}, payload: {}", throwable, event.getId(), event.getEventPayload());
           if (throwable != null && throwable.getMessage() != null && throwable.getMessage().toLowerCase().contains("there is no subscribers registered for event type")) {
             publishResult.complete(true);
           } else {
-            publishResult.completeExceptionally(throwable);
+            LOGGER.error("Failed to publish Log Event. ID: {}, payload: {}", throwable, event.getId(), event.getEventPayload());
+            publishResult.complete(false);
           }
         }
       });
