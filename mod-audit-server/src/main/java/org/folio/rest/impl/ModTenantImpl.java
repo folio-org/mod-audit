@@ -28,8 +28,7 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.rest.util.OkapiConnectionParams;
-import org.folio.util.pubsub.PubSubClientUtils;
+import org.folio.util.PubSubLogPublisherUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -154,7 +153,7 @@ public class ModTenantImpl extends TenantAPI {
 
   private CompletableFuture<Void> registerModuleToPubsub(Map<String, String> headers, Vertx vertx) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
+    CompletableFuture.supplyAsync(() -> PubSubLogPublisherUtil.registerLogEventPublisher(headers, vertx))
       .thenAccept(registered -> future.complete(null))
       .exceptionally(throwable -> {
         future.completeExceptionally(throwable);

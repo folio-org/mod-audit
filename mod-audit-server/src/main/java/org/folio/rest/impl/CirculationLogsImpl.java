@@ -48,10 +48,10 @@ public class CirculationLogsImpl implements AuditDataCirculation {
         .collect(Collectors.toList()))
       .thenApply(list -> new LogRecordCollection().withLogRecords(list).withTotalRecords(list.size()))
       .thenAccept(logRecordCollection -> asyncResultHandler
-        .handle(succeededFuture(AuditDataCirculation.GetAuditDataCirculationLogsResponse
+        .handle(succeededFuture(GetAuditDataCirculationLogsResponse
           .respond200WithApplicationJson(logRecordCollection))))
       .exceptionally(throwable -> {
-        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.GetAuditDataCirculationLogsResponse.
+        asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse.
           respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
         return null;
       });
@@ -63,10 +63,10 @@ public class CirculationLogsImpl implements AuditDataCirculation {
     LogRecord logRecord = LogEventProcessor.processPayload(new JsonObject(entity).mapTo(LogEventPayload.class));
     getClient(okapiHeaders, vertxContext).save(LogObject.fromName(logRecord.getObject().value()).tableName(), logRecord, reply -> {
       if (reply.succeeded()) {
-        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.PostAuditDataCirculationEventHandlerResponse
+        asyncResultHandler.handle(succeededFuture(PostAuditDataCirculationEventHandlerResponse
           .respond201()));
       } else {
-        asyncResultHandler.handle(succeededFuture(AuditDataCirculation.PostAuditDataCirculationEventHandlerResponse
+        asyncResultHandler.handle(succeededFuture(PostAuditDataCirculationEventHandlerResponse
           .respond422WithApplicationJson(buildError(HTTP_UNPROCESSABLE_ENTITY.toInt(), reply.cause().getLocalizedMessage()))));
       }
     });

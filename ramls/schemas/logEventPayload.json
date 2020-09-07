@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Main entity for saving/retrieving log info",
+  "properties": {
+    "loggedObjectType": {
+      "description": "Logged object",
+      "type": "string",
+      "enum": [
+        "Fee/Fine",
+        "Item Block",
+        "Loan",
+        "Manual Block",
+        "Notice",
+        "Patron Block",
+        "Request"
+      ]
+    },
+    "request": {
+      "description": "Request entity",
+      "type": "string"
+    },
+    "response": {
+      "description": "Response entity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
