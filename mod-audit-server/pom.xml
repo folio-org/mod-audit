@@ -28,47 +28,20 @@
     <vertx.version>3.9.0</vertx.version>
     <rest-assured.version>3.2.0</rest-assured.version>
     <junit.jupiter.version>5.6.0</junit.jupiter.version>
+    <mod-audit-client.version>0.0.5-SNAPSHOT</mod-audit-client.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>folio-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://repository.folio.org/repository/maven-folio</url>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>folio-nexus</id>
-      <name>FOLIO Release Repository</name>
-      <url>https://repository.folio.org/repository/maven-releases/</url>
-      <uniqueVersion>false</uniqueVersion>
-      <layout>default</layout>
-    </repository>
-    <snapshotRepository>
-      <id>folio-nexus</id>
-      <name>FOLIO Snapshot Repository</name>
-      <uniqueVersion>true</uniqueVersion>
-      <url>https://repository.folio.org/repository/maven-snapshots/</url>
-      <layout>default</layout>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <scm>
-    <url>https://github.com/folio-org/mod-audit</url>
-    <connection>scm:git:git://github.com/folio-org/mod-audit</connection>
-    <developerConnection>scm:git:git@github.com:folio-org/mod-audit.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
   <dependencies>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>mod-audit-client</artifactId>
+      <version>${mod-audit-client.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
       <version>${rmb.version}</version>
     </dependency>
-
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>

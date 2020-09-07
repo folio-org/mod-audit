@@ -1,0 +1,10 @@
+{
+  "publications": [
+  ],
+  "subscriptions": [
+    {
+      "eventType": "LOG_RECORD_EVENT",
+      "callbackAddress": "/audit-data/circulation/event/handler"
+    }
+  ]
+}
