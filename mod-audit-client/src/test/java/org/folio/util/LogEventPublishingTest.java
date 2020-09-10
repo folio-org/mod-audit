@@ -11,6 +11,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.folio.util.PubSubLogPublisherUtil.sendLogRecordEvent;
 import static org.folio.util.PubSubModuleRegistrationUtil.registerLogEventPublisher;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -19,9 +20,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.folio.rest.acq.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.Event;
 import org.folio.rest.jaxrs.model.EventDescriptor;
+import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.PublisherDescriptor;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
@@ -58,7 +59,7 @@ public class LogEventPublishingTest extends AbstractRestTest {
     verify(1, postRequestedFor(urlEqualTo(PUBSUB_PUBLISH_URL)));
     LoggedRequest event = WireMock.findAll(postRequestedFor(urlEqualTo(PUBSUB_PUBLISH_URL))).get(0);
     LogEventPayload actual = new JsonObject(new JsonObject(event.getBodyAsString()).mapTo(Event.class).getEventPayload()).mapTo(LogEventPayload.class);
-    assertThat(expected, is(actual));
+    assertThat(expected, equalTo(actual));
 
   }
 

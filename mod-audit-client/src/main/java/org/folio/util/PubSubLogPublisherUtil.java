@@ -5,9 +5,9 @@ import static org.folio.util.PubSubModuleRegistrationUtil.EVENT_TTL;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import org.folio.rest.acq.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.Event;
 import org.folio.rest.jaxrs.model.EventMetadata;
+import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
 
@@ -63,12 +63,13 @@ public final class PubSubLogPublisherUtil {
     return sendLogRecordEvent(JsonObject.mapFrom(payload).encode(), params);
   }
 
-  private static Event buildLogRecordEvent(String payload, OkapiConnectionParams params) {
+  public static Event buildLogRecordEvent(String payload, OkapiConnectionParams params) {
     return new Event().withId(UUID.randomUUID()
       .toString())
       .withEventType(EventType.LOG_RECORD_EVENT.name())
       .withEventPayload(payload)
-      .withEventMetadata(new EventMetadata().withTenantId(params.getTenantId())
+      .withEventMetadata(new EventMetadata()
+        .withTenantId(params.getTenantId())
         .withEventTTL(EVENT_TTL)
         .withPublishedBy(PubSubClientUtils.constructModuleName()));
   }

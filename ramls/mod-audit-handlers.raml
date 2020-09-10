@@ -1,0 +1,28 @@
+#%RAML 1.0
+
+title: Audit event handlers API
+version: v0.1
+protocols: [ HTTP, HTTPS ]
+baseUri: http://localhost
+
+documentation:
+  - title: Audit event handlers API
+    content: API for event handling
+
+types:
+  errors: !include raml-util/schemas/errors.schema
+  logEventPayload: !include schemas/logEventPayload.json
+
+
+traits:
+  validate: !include raml-util/traits/validation.raml
+
+/audit/handlers:
+  /log-record:
+    description: "Handler for LOG_RECORD event"
+    post:
+      body:
+        application/json:
+          type: string
+      responses:
+        204:

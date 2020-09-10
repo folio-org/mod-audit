@@ -34,21 +34,12 @@ resourceTypes:
       is: [
         searchable: {description: "with valid searchable fields, for example userBarcode", example: "userBarcode=1000024158"},
       ]
-  /event/handler:
-    displayName: Publish event
-    description: API used by subscriber to catch events
-    post:
-      body:
-        application/json:
+      queryParameters:
+        object:
+          description:
+            A object expressed as a string with object names to be searched.
+            If it is not specified all the available object names to be searched.
+          example:
+            object==(loan and notice)
+          required: false
           type: string
-      responses:
-        201:
-        422:
-          body:
-            application/json:
-              schema: error
-        500:
-          description: "Internal server error"
-          body:
-            application/json:
-              schema: error

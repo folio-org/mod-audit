@@ -1,4 +1,4 @@
-package org.folio.rest.handler;
+package org.folio.handler;
 
 import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.LogRecord;

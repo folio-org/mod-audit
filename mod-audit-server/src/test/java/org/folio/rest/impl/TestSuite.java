@@ -59,10 +59,14 @@ class TestSuite {
   }
 
   @Nested
-  class AuditDataImplTestNested extends AuditDataImplTest{
+  class AuditDataImplTestNested extends AuditDataImplTest {
   }
 
   @Nested
-  class CirculationLogsImplTestNested extends CirculationLogsImplTest{
+  class CirculationLogsImplTestNested extends CirculationLogsImplTest {
+  }
+
+  @Nested
+  class AuditHandlersImplTestNested extends AuditHandlersImplTest {
   }
 }

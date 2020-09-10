@@ -53,7 +53,7 @@ public class PubSubModuleRegistrationUtil {
       EventDescriptor evenDescriptor = buildLogRecordEventDescriptor();
       LOGGER.info("Registering {} for publishing", evenDescriptor.getEventType());
       return registerLogRecordEventType(client, evenDescriptor)
-        .thenCompose((ar) -> registerLogEventPublisher(client, buildLogEventPublisherDescriptor(evenDescriptor)));
+        .thenCompose(ar -> registerLogEventPublisher(client, buildLogEventPublisherDescriptor(evenDescriptor)));
     } catch (Exception e) {
       return logAndCompleteExceptionally(result, e, "Error during registration module in PubSub");
     }
@@ -63,7 +63,7 @@ public class PubSubModuleRegistrationUtil {
     LOGGER.info("Registering module's publishers");
     CompletableFuture<Boolean> publisherRegistrationResult = new CompletableFuture<>();
     try {
-      client.postPubsubEventTypesDeclarePublisher(descriptor, (ar) -> {
+      client.postPubsubEventTypesDeclarePublisher(descriptor, ar -> {
         if (ar.statusCode() == HttpStatus.HTTP_CREATED.toInt()) {
           LOGGER.info("LogEventPublisher was successfully registered");
           publisherRegistrationResult.complete(true);
@@ -82,7 +82,7 @@ public class PubSubModuleRegistrationUtil {
   private static CompletableFuture<Boolean> registerLogRecordEventType(PubsubClient client, EventDescriptor eventDescriptor) {
     CompletableFuture<Boolean> future = new CompletableFuture<>();
     try {
-      client.postPubsubEventTypes(null, eventDescriptor, (ar) -> {
+      client.postPubsubEventTypes(null, eventDescriptor, ar -> {
         if (ar.statusCode() == HttpStatus.HTTP_CREATED.toInt()) {
           future.complete(true);
         } else {
@@ -98,12 +98,6 @@ public class PubSubModuleRegistrationUtil {
     return future;
   }
 
-  private static CompletableFuture<Boolean> logAndCompleteExceptionally(CompletableFuture<Boolean> result, Exception e, String message) {
-    LOGGER.error(message, e);
-    result.completeExceptionally(e);
-    return result;
-  }
-
   private static PublisherDescriptor buildLogEventPublisherDescriptor(EventDescriptor evenDescriptor) {
     return new PublisherDescriptor().withEventDescriptors(Collections.singletonList(evenDescriptor))
       .withModuleId(PubSubClientUtils.constructModuleName());
@@ -114,5 +108,11 @@ public class PubSubModuleRegistrationUtil {
       .withDescription(EventType.LOG_RECORD_EVENT.description())
       .withEventTTL(EVENT_TTL)
       .withSigned(false);
+  }
+
+  private static CompletableFuture<Boolean> logAndCompleteExceptionally(CompletableFuture<Boolean> result, Exception e, String message) {
+    LOGGER.error(message, e);
+    result.completeExceptionally(e);
+    return result;
   }
 }

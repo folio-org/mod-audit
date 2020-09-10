@@ -4,14 +4,9 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.folio.HttpStatus.HTTP_INTERNAL_SERVER_ERROR;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-import static org.folio.rest.handler.LogObject.FEE_FINE;
-import static org.folio.rest.handler.LogObject.ITEM_BLOCK;
-import static org.folio.rest.handler.LogObject.LOAN;
-import static org.folio.rest.handler.LogObject.MANUAL_BLOCK;
-import static org.folio.rest.handler.LogObject.NOTICE;
-import static org.folio.rest.handler.LogObject.PATRON_BLOCK;
-import static org.folio.rest.handler.LogObject.REQUEST;
+import static org.folio.rest.jaxrs.model.LogEventPayload.LoggedObjectType.*;
 import static org.folio.util.ErrorUtils.buildError;
+import static org.folio.util.ObjectTypeResolver.getTableNameByObjectType;
 
 
 import io.vertx.core.AsyncResult;
@@ -40,21 +35,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class ModTenantImpl extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(ModTenantImpl.class);
+public class ModTenantService extends TenantAPI {
+  private static final Logger log = LoggerFactory.getLogger(ModTenantService.class);
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
   private static final Map<String, String> sampleDataMap = new HashMap<>();
 
   static {
-    sampleDataMap.put(FEE_FINE.tableName(), "fee_fine.json");
-    sampleDataMap.put(ITEM_BLOCK.tableName(), "item_block.json");
-    sampleDataMap.put(LOAN.tableName(), "loan.json");
-    sampleDataMap.put(MANUAL_BLOCK.tableName(), "manual_block.json");
-    sampleDataMap.put(NOTICE.tableName(), "notice.json");
-    sampleDataMap.put(PATRON_BLOCK.tableName(), "patron_block.json");
-    sampleDataMap.put(REQUEST.tableName(), "request.json");
+    sampleDataMap.put(getTableNameByObjectType(FEE_FINE), "fee_fine.json");
+    sampleDataMap.put(getTableNameByObjectType(ITEM_BLOCK), "item_block.json");
+    sampleDataMap.put(getTableNameByObjectType(LOAN), "loan.json");
+    sampleDataMap.put(getTableNameByObjectType(MANUAL_BLOCK), "manual_block.json");
+    sampleDataMap.put(getTableNameByObjectType(NOTICE), "notice.json");
+    sampleDataMap.put(getTableNameByObjectType(PATRON_BLOCK), "patron_block.json");
+    sampleDataMap.put(getTableNameByObjectType(REQUEST), "request.json");
   }
 
   @Override
@@ -144,7 +139,7 @@ public class ModTenantImpl extends TenantAPI {
 
   private JsonObject getSampleAsJson(String fullPath) throws IOException {
     log.info("Using mock datafile: " + fullPath);
-    try (InputStream resourceAsStream = ModTenantImpl.class.getClassLoader().getResourceAsStream(fullPath)) {
+    try (InputStream resourceAsStream = ModTenantService.class.getClassLoader().getResourceAsStream(fullPath)) {
       if (resourceAsStream != null) {
         return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
       }

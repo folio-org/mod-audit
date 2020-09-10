@@ -22,6 +22,8 @@ class TestBase {
   protected static final Header ctype = new Header("Content-Type", "application/json");
   protected static final Headers headers = new Headers(tenant, perms, ctype);
 
+  public final String CIRC_LOGS_ENDPOINT = "/audit-data/circulation/logs";
+
   protected static String moduleId;
 
   @BeforeAll
