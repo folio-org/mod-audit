@@ -70,6 +70,19 @@
       ]
     },
     {
+      "id": "audit-data-event-handlers",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/audit-data/circulation/event/handler",
+          "permissionsRequired": [
+            "audit-data.events.post"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",

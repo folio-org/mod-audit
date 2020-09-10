@@ -28,7 +28,8 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.util.PubSubLogPublisherUtil;
+import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.util.pubsub.PubSubClientUtils;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class ModTenantImpl extends TenantAPI {
         handlers.handle(res);
         return;
       }
-      registerModuleToPubsub(headers, context.owner())
+      registerModuleToPubSub(headers, context.owner())
         .thenCompose(vVoid -> loadSampleData(tenantAttributes, headers, context))
         .thenAccept(vVoid -> handlers.handle(res))
         .exceptionally(throwable -> {
@@ -151,9 +152,9 @@ public class ModTenantImpl extends TenantAPI {
     throw new IOException("Error loading sample file");
   }
 
-  private CompletableFuture<Void> registerModuleToPubsub(Map<String, String> headers, Vertx vertx) {
+  private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> PubSubLogPublisherUtil.registerLogEventPublisher(headers, vertx))
+    CompletableFuture.supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
       .thenAccept(registered -> future.complete(null))
       .exceptionally(throwable -> {
         future.completeExceptionally(throwable);
