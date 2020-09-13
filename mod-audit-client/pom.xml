@@ -70,8 +70,56 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
-
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>process-sources</phase>
+          </execution>
+          <execution>
+            <id>build-generated-code</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <id>set-system-properties</id>
+            <goals>
+              <goal>set-system-properties</goal>
+            </goals>
+            <configuration>
+              <properties>
+                <property>
+                  <name>log4j.configurationFile</name>
+                  <value>${project.baseUri}src/main/resources/log4j2.properties</value>
+                </property>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -91,7 +139,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -115,16 +162,11 @@
                   <key>raml_files</key>
                   <value>${ramlfiles_path}</value>
                 </systemProperty>
-                <systemProperty>
-                  <key>jsonschema2pojo.config.includeHashcodeAndEquals</key>
-                  <value>true</value>
-                </systemProperty>
               </systemProperties>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
