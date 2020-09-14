@@ -26,7 +26,7 @@ import io.vertx.core.logging.LoggerFactory;
 public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private static final ObjectMapper MAPPER = ObjectMapperTool.getMapper();
-  private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuditHandlersService.class);
 
   @Override
   @Validate
