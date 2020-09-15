@@ -31,13 +31,6 @@
   </properties>
 
   <build>
-    <resources>
-      <resource>
-        <directory>mod-pubsub-server/src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-
     <plugins>
       <plugin>
         <groupId>org.jsonschema2pojo</groupId>

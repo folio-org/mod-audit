@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.folio.rest.RestVerticle;
-import org.folio.rest.acq.model.LogEventPayload;
 import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.LogEventPayload;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;

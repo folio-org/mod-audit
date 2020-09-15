@@ -4,14 +4,9 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.folio.HttpStatus.HTTP_INTERNAL_SERVER_ERROR;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-import static org.folio.rest.handler.LogObject.FEE_FINE;
-import static org.folio.rest.handler.LogObject.ITEM_BLOCK;
-import static org.folio.rest.handler.LogObject.LOAN;
-import static org.folio.rest.handler.LogObject.MANUAL_BLOCK;
-import static org.folio.rest.handler.LogObject.NOTICE;
-import static org.folio.rest.handler.LogObject.PATRON_BLOCK;
-import static org.folio.rest.handler.LogObject.REQUEST;
+import static org.folio.rest.jaxrs.model.LogEventPayload.LoggedObjectType.*;
 import static org.folio.util.ErrorUtils.buildError;
+import static org.folio.util.ObjectTypeResolver.getTableNameByObjectType;
 
 
 import io.vertx.core.AsyncResult;
@@ -28,7 +23,8 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.util.PubSubLogPublisherUtil;
+import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.util.pubsub.PubSubClientUtils;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -39,21 +35,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class ModTenantImpl extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(ModTenantImpl.class);
+public class ModTenantService extends TenantAPI {
+  private static final Logger log = LoggerFactory.getLogger(ModTenantService.class);
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
   private static final Map<String, String> sampleDataMap = new HashMap<>();
 
   static {
-    sampleDataMap.put(FEE_FINE.tableName(), "fee_fine.json");
-    sampleDataMap.put(ITEM_BLOCK.tableName(), "item_block.json");
-    sampleDataMap.put(LOAN.tableName(), "loan.json");
-    sampleDataMap.put(MANUAL_BLOCK.tableName(), "manual_block.json");
-    sampleDataMap.put(NOTICE.tableName(), "notice.json");
-    sampleDataMap.put(PATRON_BLOCK.tableName(), "patron_block.json");
-    sampleDataMap.put(REQUEST.tableName(), "request.json");
+    sampleDataMap.put(getTableNameByObjectType(FEE_FINE), "fee_fine.json");
+    sampleDataMap.put(getTableNameByObjectType(ITEM_BLOCK), "item_block.json");
+    sampleDataMap.put(getTableNameByObjectType(LOAN), "loan.json");
+    sampleDataMap.put(getTableNameByObjectType(MANUAL_BLOCK), "manual_block.json");
+    sampleDataMap.put(getTableNameByObjectType(NOTICE), "notice.json");
+    sampleDataMap.put(getTableNameByObjectType(PATRON_BLOCK), "patron_block.json");
+    sampleDataMap.put(getTableNameByObjectType(REQUEST), "request.json");
   }
 
   @Override
@@ -64,7 +60,7 @@ public class ModTenantImpl extends TenantAPI {
         handlers.handle(res);
         return;
       }
-      registerModuleToPubsub(headers, context.owner())
+      registerModuleToPubSub(headers, context.owner())
         .thenCompose(vVoid -> loadSampleData(tenantAttributes, headers, context))
         .thenAccept(vVoid -> handlers.handle(res))
         .exceptionally(throwable -> {
@@ -143,7 +139,7 @@ public class ModTenantImpl extends TenantAPI {
 
   private JsonObject getSampleAsJson(String fullPath) throws IOException {
     log.info("Using mock datafile: " + fullPath);
-    try (InputStream resourceAsStream = ModTenantImpl.class.getClassLoader().getResourceAsStream(fullPath)) {
+    try (InputStream resourceAsStream = ModTenantService.class.getClassLoader().getResourceAsStream(fullPath)) {
       if (resourceAsStream != null) {
         return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
       }
@@ -151,9 +147,9 @@ public class ModTenantImpl extends TenantAPI {
     throw new IOException("Error loading sample file");
   }
 
-  private CompletableFuture<Void> registerModuleToPubsub(Map<String, String> headers, Vertx vertx) {
+  private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> PubSubLogPublisherUtil.registerLogEventPublisher(headers, vertx))
+    CompletableFuture.supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
       .thenAccept(registered -> future.complete(null))
       .exceptionally(throwable -> {
         future.completeExceptionally(throwable);
