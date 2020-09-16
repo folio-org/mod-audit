@@ -34,8 +34,8 @@ class CirculationLogsImplTest extends TestBase {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND itemBarcode=12983765)&object=(Fee/Fine OR Item Block)")
       .then().log().all().statusCode(200)
-      .assertThat().body("logRecords[0].object", equalTo("Fee/Fine"))
-      .and().body("logRecords[1].object", equalTo("Item Block"))
+      .assertThat().body("logRecords[0].object", equalTo("Item Block"))
+      .and().body("logRecords[1].object", equalTo("Fee/Fine"))
       .and().body("totalRecords", equalTo(2));
   }
 
@@ -51,13 +51,6 @@ class CirculationLogsImplTest extends TestBase {
   void getCirculationAuditLogRecordsInvalidQuery() {
     logger.info("get circulation audit log records: invalid query");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=abcd")
-      .then().log().all().statusCode(400);
-  }
-
-  @Test
-  void getCirculationAuditLogRecordsInvalidObject() {
-    logger.info("Get circulation audit log records: filter by action");
-    given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=action=Created&object=Item Bloc")
       .then().log().all().statusCode(400);
   }
 }

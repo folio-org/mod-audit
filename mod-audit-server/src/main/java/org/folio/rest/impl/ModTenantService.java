@@ -4,10 +4,8 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.folio.HttpStatus.HTTP_INTERNAL_SERVER_ERROR;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-import static org.folio.rest.jaxrs.model.LogEventPayload.LoggedObjectType.*;
+import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
 import static org.folio.util.ErrorUtils.buildError;
-import static org.folio.util.ObjectTypeResolver.getTableNameByObjectType;
-
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -30,7 +28,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -40,17 +38,8 @@ public class ModTenantService extends TenantAPI {
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
-  private static final Map<String, String> sampleDataMap = new HashMap<>();
-
-  static {
-    sampleDataMap.put(getTableNameByObjectType(FEE_FINE), "fee_fine.json");
-    sampleDataMap.put(getTableNameByObjectType(ITEM_BLOCK), "item_block.json");
-    sampleDataMap.put(getTableNameByObjectType(LOAN), "loan.json");
-    sampleDataMap.put(getTableNameByObjectType(MANUAL_BLOCK), "manual_block.json");
-    sampleDataMap.put(getTableNameByObjectType(NOTICE), "notice.json");
-    sampleDataMap.put(getTableNameByObjectType(PATRON_BLOCK), "patron_block.json");
-    sampleDataMap.put(getTableNameByObjectType(REQUEST), "request.json");
-  }
+  private List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
+    "notice.json", "patron_block.json", "request.json");
 
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
@@ -76,10 +65,11 @@ public class ModTenantService extends TenantAPI {
     CompletableFuture<Void> future = new CompletableFuture<>();
     if (isLoadSample(tenantAttributes)) {
       log.info("Loading sample data...");
+
       String tenantId = TenantTool.calculateTenantId(headers.get(RestVerticle.OKAPI_HEADER_TENANT));
 
-      allOf(sampleDataMap.entrySet().stream()
-        .map(e -> loadSample(e.getKey(), e.getValue(), context, tenantId))
+      allOf(samples.stream()
+        .map(fileName -> loadSample(LOGS_TABLE_NAME, fileName, context, tenantId))
         .toArray(CompletableFuture[]::new))
         .thenAccept(vVoid -> {
           log.info("Sample data loaded successfully");
