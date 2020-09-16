@@ -16,6 +16,7 @@ types:
 traits:
   searchable: !include raml-util/traits/searchable.raml
   language: !include raml-util/traits/language.raml
+  pageable: !include raml-util/traits/pageable.raml
 
 resourceTypes:
   get-only-with-json-response: !include raml-util/rtypes/get-only-with-json-response.raml
@@ -33,13 +34,5 @@ resourceTypes:
     get:
       is: [
         searchable: {description: "with valid searchable fields, for example userBarcode", example: "userBarcode=1000024158"},
+        pageable
       ]
-      queryParameters:
-        object:
-          description:
-            A object expressed as a string with object names to be searched.
-            If it is not specified all the available object names to be searched.
-          example:
-            object==(loan and notice)
-          required: false
-          type: string

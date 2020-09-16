@@ -1,7 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.util.ObjectTypeResolver.getTableNameByObjectType;
+import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
 
 import java.io.IOException;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
     try {
       LogEventPayload logEventPayload = MAPPER.readValue(entity, LogEventPayload.class);
       LogRecord logRecord = LogEventProcessor.processPayload(logEventPayload);
-      getClient(okapiHeaders, vertxContext).save(getTableNameByObjectType(logEventPayload.getLoggedObjectType()), logRecord,
+      getClient(okapiHeaders, vertxContext).save(LOGS_TABLE_NAME, logRecord,
           reply -> {
             if (reply.failed()) {
               LOGGER.error("Error saving log record", reply.cause());
