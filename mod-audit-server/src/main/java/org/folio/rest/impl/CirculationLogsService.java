@@ -26,8 +26,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
 
   @Override
   @Validate
-  public void getAuditDataCirculationLogs(String query, int offset, int limit, String lang, Map<String,
-    String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataCirculationLogs(String query, int offset, int limit, String lang,
+    Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
