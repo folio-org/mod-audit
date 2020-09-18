@@ -25,8 +25,7 @@ public class AuditHandlersImplTest extends TestBase {
 
     LogEventPayload payload = new LogEventPayload()
       .withLoggedObjectType(LogEventPayload.LoggedObjectType.LOAN)
-      .withRequest("{\"request: a\"}")
-      .withResponse("{\"response: b\"}");
+      .withBody("{\"request: a\"}");
 
     given().headers(headers).body(payload).post(EVENT_HANDLER_ENDPOINT)
       .then().log().all().statusCode(204);

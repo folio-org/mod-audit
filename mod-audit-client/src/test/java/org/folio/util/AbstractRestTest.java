@@ -96,8 +96,6 @@ public abstract class AbstractRestTest {
 
   public static LogEventPayload buildEventSample() {
     return new LogEventPayload().withLoggedObjectType(LogEventPayload.LoggedObjectType.LOAN)
-      .withRequest("{request: body}")
-      .withResponse("{id:" + UUID.randomUUID()
-        .toString() + "}");
+      .withBody("{request: body}");
   }
 }

@@ -7,21 +7,64 @@
       "description": "Logged object",
       "type": "string",
       "enum": [
+        "Item",
         "Fee/Fine",
         "Item Block",
         "Loan",
         "Manual Block",
         "Notice",
         "Patron Block",
-        "Request"
+        "Request",
+        "CheckIn/CheckOut"
       ]
     },
-    "request": {
-      "description": "Request entity",
-      "type": "string"
+    "action": {
+      "description": "Action",
+      "type": "string",
+      "enum": [
+        "Age to lost",
+        "Anonymize",
+        "Billed",
+        "Cancelled",
+        "Cancelled as error",
+        "Changed due date",
+        "Check in",
+        "Check out",
+        "Checked in",
+        "Checked out",
+        "Checked out through override",
+        "Claimed returned",
+        "Closed loan",
+        "Created",
+        "Credited fully",
+        "Declared lost",
+        "Deleted",
+        "Edited",
+        "Expired",
+        "Marked as missing",
+        "Modified",
+        "Moved",
+        "Paid fully",
+        "Paid partially",
+        "Patron blocked from requesting",
+        "Pickup expired",
+        "Queue position reordered",
+        "Recall requested",
+        "Refunded fully",
+        "Refunded partially",
+        "Renewed",
+        "Renewed through override",
+        "Request status changed",
+        "Send",
+        "Staff information only added",
+        "Transferred fully",
+        "Transferred partially",
+        "Waived fully",
+        "Waived partially"
+      ]
     },
-    "response": {
-      "description": "Response entity",
+    "body": {
+      "description": "Request entity",
       "type": "string"
     }
   },
