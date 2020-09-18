@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.vertx.core.logging.Logger;
@@ -34,8 +35,8 @@ class CirculationLogsImplTest extends TestBase {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
     given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND itemBarcode=12983765)")
       .then().log().all().statusCode(200)
-      .assertThat().body("logRecords[0].object", equalTo("Fee/Fine"))
-      .and().body("logRecords[1].object", equalTo("Item Block"))
+      .assertThat().body("logRecords[0].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
+      .and().body("logRecords[1].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
       .and().body("totalRecords", equalTo(2));
   }
 
