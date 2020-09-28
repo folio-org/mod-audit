@@ -11,9 +11,45 @@
       "description": "User barcode",
       "type": "string"
     },
-    "itemBarcode": {
-      "description": "Item barcode",
-      "type": "string"
+    "items": {
+      "description": "Items",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "barcode": {
+            "description": "Item barcode",
+            "type": "string"
+          },
+          "id": {
+            "description": "Item id",
+            "$ref": "common/uuid.json"
+          },
+          "instanceId": {
+            "description": "Instance id",
+            "$ref": "common/uuid.json"
+          },
+          "holdingId": {
+            "description": "Holding id",
+            "$ref": "common/uuid.json"
+          },
+          "loanId": {
+            "description": "Loan id",
+            "$ref": "common/uuid.json"
+          },
+          "requestId": {
+            "description": "Request id",
+            "$ref": "common/uuid.json"
+          },
+          "feeFineId": {
+            "description": "Fee/Fine id",
+            "$ref": "common/uuid.json"
+          }
+        },
+        "required": [
+          "barcode"
+        ]
+      }
     },
     "object": {
       "description": "Logged object",
@@ -98,36 +134,12 @@
           "description": "User id",
           "$ref": "common/uuid.json"
         },
-        "itemId": {
-          "description": "Item id",
-          "$ref": "common/uuid.json"
-        },
-        "loanId": {
-          "description": "Loan id",
-          "$ref": "common/uuid.json"
-        },
-        "feeFineId": {
-          "description": "Fee/Fine id",
-          "$ref": "common/uuid.json"
-        },
         "templateId": {
           "description": "Template id",
           "$ref": "common/uuid.json"
         },
-        "requestId": {
-          "description": "Request id",
-          "$ref": "common/uuid.json"
-        },
         "noticePolicyId": {
           "description": "Notice Policy id",
-          "$ref": "common/uuid.json"
-        },
-        "instanceId": {
-          "description": "Instance id",
-          "$ref": "common/uuid.json"
-        },
-        "holdingId": {
-          "description": "Holding id",
           "$ref": "common/uuid.json"
         }
       }
