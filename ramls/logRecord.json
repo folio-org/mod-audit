@@ -12,16 +12,17 @@
       "type": "string"
     },
     "items": {
-      "description": "Items",
+      "description": "Notice items",
       "type": "array",
       "items": {
         "type": "object",
+        "description": "Item related data",
         "properties": {
-          "barcode": {
+          "itemBarcode": {
             "description": "Item barcode",
             "type": "string"
           },
-          "id": {
+          "itemId": {
             "description": "Item id",
             "$ref": "common/uuid.json"
           },
@@ -36,18 +37,10 @@
           "loanId": {
             "description": "Loan id",
             "$ref": "common/uuid.json"
-          },
-          "requestId": {
-            "description": "Request id",
-            "$ref": "common/uuid.json"
-          },
-          "feeFineId": {
-            "description": "Fee/Fine id",
-            "$ref": "common/uuid.json"
           }
         },
         "required": [
-          "barcode"
+          "itemBarcode"
         ]
       }
     },
@@ -132,6 +125,14 @@
       "properties": {
         "userId": {
           "description": "User id",
+          "$ref": "common/uuid.json"
+        },
+        "requestId": {
+          "description": "Request id",
+          "$ref": "common/uuid.json"
+        },
+        "feeFineId": {
+          "description": "Fee/Fine id",
           "$ref": "common/uuid.json"
         },
         "templateId": {

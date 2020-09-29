@@ -1,7 +1,15 @@
 {
   "eventId":"aa332dbe-7d1c-4d9c-8169-8f94c38c1e78",
   "userBarcode": "1000024158",
-  "itemBarcode": "12983766",
+  "items": [
+    {
+      "itemBarcode": "12983766",
+      "itemId": "cb20f34f-b773-462f-a091-b233cc96b9e6",
+      "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
+      "holdingId": "133a7916-f05e-4df4-8f7f-09eb2a7076d1",
+      "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260"
+    }
+  ],
   "object": "Notice",
   "action": "Send",
   "date": "2020-08-12T12:21:21.123",
@@ -9,14 +17,8 @@
   "source": "Truesdale, Yanic",
   "description": "Template: Test template. Triggering event: Test triggering event.",
   "linkToIds": {
-    "templateId": "b68cdf51-ae7c-43cf-bfd5-b79174810593",
     "userId": "df7f4993-8c14-4a0f-ab63-93975ab01c76",
-    "itemId": "cb20f34f-b773-462f-a091-b233cc96b9e6",
-    "loanId": "cf23adf0-61ba-4887-bf82-956c4aae2260",
-    "requestId": "89105c06-dbdb-4aa0-9695-d4d19c733270",
-    "feeFineId": "39a14e03-c372-4659-860b-5423c970633e",
-    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c",
-    "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
-    "holdingId": "133a7916-f05e-4df4-8f7f-09eb2a7076d1"
+    "templateId": "b68cdf51-ae7c-43cf-bfd5-b79174810593",
+    "noticePolicyId": "122b3d2b-4788-4f1e-9117-56daa91cb75c"
   }
 }
