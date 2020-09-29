@@ -16,6 +16,14 @@
     {
       "tableName": "circulation_logs",
       "fromModuleVersion": "0.0.4",
+      "ginIndex": [
+        {
+          "fieldName": "items",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "arraySubfield": "itemBarcode"
+        }
+      ],
       "index": [
         {
           "fieldName": "eventId",
@@ -23,10 +31,6 @@
         },
         {
           "fieldName": "userBarcode",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "itemBarcode",
           "caseSensitive": false
         },
         {
