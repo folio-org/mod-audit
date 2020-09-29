@@ -1,7 +1,11 @@
 {
   "eventId":"0c733b7d-22e4-46a6-8851-bf85c8c8eb5b",
   "userBarcode": "1000024158",
-  "itemBarcode": "12983765",
+  "items": [
+    {
+      "itemBarcode": "12983765"
+    }
+  ],
   "object": "Item Block",
   "action": "Created",
   "date": "2020-08-12T12:21:21.123",

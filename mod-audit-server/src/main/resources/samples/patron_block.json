@@ -1,7 +1,11 @@
 {
   "eventId":"a6231da4-f6fd-4845-8c5d-9c45a4fd4ae2",
   "userBarcode": "1000024158",
-  "itemBarcode": "12983766",
+  "items": [
+    {
+      "itemBarcode": "12983766"
+    }
+  ],
   "object": "Patron Block",
   "action": "Edited",
   "date": "2020-08-12T12:21:21.123",

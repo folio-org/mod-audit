@@ -33,7 +33,7 @@ class CirculationLogsImplTest extends TestBase {
   @Test
   void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
-    given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND itemBarcode=12983765)")
+    given().headers(headers).get(CIRC_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND items=12983765)")
       .then().log().all().statusCode(200)
       .assertThat().body("logRecords[0].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
       .and().body("logRecords[1].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
