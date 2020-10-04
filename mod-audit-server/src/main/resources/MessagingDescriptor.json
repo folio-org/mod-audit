@@ -3,7 +3,7 @@
   ],
   "subscriptions": [
     {
-      "eventType": "LOG_RECORD_EVENT",
+      "eventType": "LOG_RECORD",
       "callbackAddress": "/audit/handlers/log-record"
     }
   ]
