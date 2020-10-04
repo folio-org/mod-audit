@@ -8,6 +8,8 @@ public class LogRecordBuilderResolver {
   public static final String CHECK_IN_EVENT = "CHECK_IN_EVENT";
   public static final String CHECK_OUT_EVENT = "CHECK_OUT_EVENT";
 
+  private LogRecordBuilderResolver() { }
+
   public static LogRecordBuilder getBuilder(String logEventType) {
     if (logEventType.equals(CHECK_IN_EVENT)) {
       return new CheckInRecordBuilder();

@@ -12,13 +12,10 @@ import org.folio.TestSuite;
 import org.folio.rest.tools.PomReader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
-import io.vertx.junit5.VertxExtension;
 
-@ExtendWith(VertxExtension.class)
 public class ApiTestBase extends TestBase {
   protected static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
   protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");

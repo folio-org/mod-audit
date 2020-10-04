@@ -3,8 +3,11 @@ package org.folio;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import io.vertx.junit5.VertxExtension;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(VertxExtension.class)
 public class TestBase {
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
