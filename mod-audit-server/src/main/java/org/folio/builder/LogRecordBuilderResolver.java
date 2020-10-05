@@ -1,6 +1,7 @@
 package org.folio.builder;
 
 import org.folio.builder.record.CheckInRecordBuilder;
+import org.folio.builder.record.CheckOutRecordBuilder;
 import org.folio.builder.record.LogRecordBuilder;
 
 public class LogRecordBuilderResolver {
@@ -14,7 +15,7 @@ public class LogRecordBuilderResolver {
     if (logEventType.equals(CHECK_IN_EVENT)) {
       return new CheckInRecordBuilder();
     } else if (logEventType.equals(CHECK_OUT_EVENT)) {
-      return new CheckInRecordBuilder();
+      return new CheckOutRecordBuilder();
     } else {
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);
     }
