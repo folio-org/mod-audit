@@ -22,19 +22,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.folio.dbschema.ObjectMapperTool;
-import org.folio.handler.LogEventProcessor;
-import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.LogEventPayload;
-import org.folio.rest.jaxrs.model.LogRecord;
-import org.folio.rest.jaxrs.resource.AuditHandlers;
-
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.Map;
-
-import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
 
 public class AuditHandlersService extends BaseService implements AuditHandlers {
 
