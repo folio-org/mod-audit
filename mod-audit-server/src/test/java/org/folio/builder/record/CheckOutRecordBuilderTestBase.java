@@ -40,17 +40,17 @@ public class CheckOutRecordBuilderTestBase extends BuilderTestBase {
       .collect(groupingBy(LogRecord::getObject, groupingBy(LogRecord::getAction)));
 
     assertThat(records.entrySet(), hasSize(2));
-    assertThat(records.get(LogRecord.Object.ITEM)
+    assertThat(records.get(LogRecord.Object.LOAN)
       .get(LogRecord.Action.CHECKED_OUT), hasSize(1));
     assertThat(records.get(LogRecord.Object.REQUEST)
       .get(LogRecord.Action.REQUEST_STATUS_CHANGED), hasSize(1));
 
-    LogRecord itemCheckedOutRecord = records.get(LogRecord.Object.ITEM)
+    LogRecord loanCheckedOutRecord = records.get(LogRecord.Object.LOAN)
       .get(LogRecord.Action.CHECKED_OUT).get(0);
 
-    validateBaseContent(payload, itemCheckedOutRecord);
-    validateAdditionalContent(payload, itemCheckedOutRecord);
-    assertThat(itemCheckedOutRecord.getDescription(), equalTo("Checked out to proxy: "
+    validateBaseContent(payload, loanCheckedOutRecord);
+    validateAdditionalContent(payload, loanCheckedOutRecord);
+    assertThat(loanCheckedOutRecord.getDescription(), equalTo("Checked out to proxy: "
         + (Objects.nonNull(getProperty(payload, PROXY_BARCODE)) ? getProperty(payload, PROXY_BARCODE) : "no") + DOT_MSG));
 
     LogRecord requestStatusChangedRecord = records.get(LogRecord.Object.REQUEST)

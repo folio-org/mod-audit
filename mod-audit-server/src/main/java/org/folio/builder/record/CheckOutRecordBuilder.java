@@ -55,7 +55,7 @@ public class CheckOutRecordBuilder implements LogRecordBuilder {
   }
 
   private LogRecord buildLoanCheckOutRecord(JsonObject payload) {
-    return new LogRecord().withObject(LogRecord.Object.ITEM)
+    return new LogRecord().withObject(LogRecord.Object.LOAN)
       .withAction(LogRecord.Action.CHECKED_OUT)
       .withUserBarcode(JsonPropertyFetcher.getProperty(payload, USER_BARCODE))
       .withSource(JsonPropertyFetcher.getProperty(payload, SOURCE))
