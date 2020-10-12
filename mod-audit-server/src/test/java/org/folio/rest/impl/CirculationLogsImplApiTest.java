@@ -8,7 +8,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.junit.jupiter.api.Test;
 
-public class CirculationLogsImplApiTest extends ApiTestBase {
+public class CirculationLogsImplApiTest extends ApiBaseTest {
 
   private final Logger logger = LoggerFactory.getLogger(CirculationLogsImplApiTest.class);
 

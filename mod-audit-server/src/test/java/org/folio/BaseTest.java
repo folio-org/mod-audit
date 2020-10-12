@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
-public class TestBase {
+public class BaseTest {
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";

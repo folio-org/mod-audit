@@ -13,7 +13,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class AuditHandlersImplApiTest extends ApiTestBase {
+public class AuditHandlersImplApiTest extends ApiBaseTest {
 
   private final Logger logger = LoggerFactory.getLogger(AuditHandlersImplApiTest.class);
 

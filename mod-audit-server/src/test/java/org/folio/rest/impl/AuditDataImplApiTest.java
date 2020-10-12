@@ -16,8 +16,8 @@ import java.util.UUID;
  * Interface test for mod-audit.
  */
 
-public class AuditDataImplApiTest extends ApiTestBase {
-  private final Logger logger = LoggerFactory.getLogger(ApiTestBase.class);
+public class AuditDataImplApiTest extends ApiBaseTest {
+  private final Logger logger = LoggerFactory.getLogger(ApiBaseTest.class);
   // test data
   JsonObject audit = new JsonObject().put("tenant", "diku");
   JsonObject badAudit = new JsonObject().put("x", "y");

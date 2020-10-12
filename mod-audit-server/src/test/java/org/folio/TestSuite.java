@@ -67,22 +67,22 @@ public class TestSuite {
   }
 
   @Nested
-  class AuditDataImplApiTestNested extends AuditDataImplApiTest {
+  class AuditDataImplApiNestedTest extends AuditDataImplApiTest {
   }
 
   @Nested
-  class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
+  class CirculationLogsImplApiNestedTest extends CirculationLogsImplApiTest {
   }
 
   @Nested
-  class AuditHandlersImplApiTestNested extends AuditHandlersImplApiTest {
+  class AuditHandlersImplApiNestedTest extends AuditHandlersImplApiTest {
   }
 
   @Nested
-  class CheckInRecordBuilderTestNested extends CheckInRecordBuilderTest {
+  class CheckInRecordBuilderNestedTest extends CheckInRecordBuilderTest {
   }
 
   @Nested
-  class CheckOutRecordBuilderTestNested extends CheckOutRecordBuilderTest {
+  class CheckOutRecordBuilderNestedTest extends CheckOutRecordBuilderTest {
   }
 }

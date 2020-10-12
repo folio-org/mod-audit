@@ -14,14 +14,14 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import org.folio.TestBase;
+import org.folio.BaseTest;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.BeforeAll;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class BuilderBaseTest extends TestBase {
+public class BuilderBaseTest extends BaseTest {
 
   static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder;
 
