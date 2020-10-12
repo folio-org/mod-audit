@@ -29,9 +29,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class CheckInRecordBuilderBaseTest extends BuilderBaseTest {
+public class CheckInRecordBuilderTest extends BuilderBaseTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderBaseTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderTest.class);
 
   @Test
   public void checkInTest() {

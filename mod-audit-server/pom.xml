@@ -332,6 +332,7 @@
           -->
           <excludes>
             <exclude>org/folio/rest/impl/**Test.class</exclude>
+            <exclude>org/folio/builder/record/**Test.class</exclude>
           </excludes>
           <includes>
             <include>org/folio/TestSuite.class</include>
