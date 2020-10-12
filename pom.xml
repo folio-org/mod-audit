@@ -169,8 +169,7 @@
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
           <excludes>
-            <exclude>org/folio/rest/impl/**Test.class</exclude>
-            <exclude>org/folio/builder/record/**Test.class</exclude>
+            <exclude>**/**Test.class</exclude>
           </excludes>
           <includes>
             <include>org/folio/TestSuite.class</include>
