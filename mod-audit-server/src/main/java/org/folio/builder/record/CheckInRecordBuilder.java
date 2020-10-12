@@ -64,7 +64,7 @@ public class CheckInRecordBuilder implements LogRecordBuilder {
   }
 
   private LogRecord buildItemCheckInRecord(JsonObject payload) {
-    return new LogRecord().withObject(LogRecord.Object.ITEM)
+    return new LogRecord().withObject(LogRecord.Object.N_A)
       .withAction(LogRecord.Action.CHECKED_IN)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withSource(getProperty(payload, SOURCE))

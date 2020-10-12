@@ -44,11 +44,11 @@ public class CheckInRecordBuilderTestBase extends BuilderTestBase {
       .collect(groupingBy(LogRecord::getObject, groupingBy(LogRecord::getAction)));
 
     assertThat(records.entrySet(), hasSize(3));
-    assertThat(records.get(LogRecord.Object.ITEM).get(LogRecord.Action.CHECKED_IN), hasSize(1));
+    assertThat(records.get(LogRecord.Object.N_A).get(LogRecord.Action.CHECKED_IN), hasSize(1));
     assertThat(records.get(LogRecord.Object.LOAN).get(LogRecord.Action.CLOSED_LOAN), hasSize(1));
     assertThat(records.get(LogRecord.Object.REQUEST).get(LogRecord.Action.REQUEST_STATUS_CHANGED), hasSize(1));
 
-    LogRecord itemCheckedInRecord = records.get(LogRecord.Object.ITEM).get(LogRecord.Action.CHECKED_IN).get(0);
+    LogRecord itemCheckedInRecord = records.get(LogRecord.Object.N_A).get(LogRecord.Action.CHECKED_IN).get(0);
     validateBaseContent(payload, itemCheckedInRecord);
     validateAdditionalContent(payload, itemCheckedInRecord);
     assertThat(itemCheckedInRecord.getDescription(), equalTo(format("Item status: %s to %s.",

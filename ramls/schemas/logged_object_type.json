@@ -3,7 +3,7 @@
   "description": "The purchase order line format",
   "type": "string",
   "enum": [
-    "Item",
+    "N/A",
     "Fee/Fine",
     "Item Block",
     "Loan",
