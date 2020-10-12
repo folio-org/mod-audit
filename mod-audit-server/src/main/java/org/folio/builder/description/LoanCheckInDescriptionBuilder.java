@@ -1,6 +1,7 @@
 package org.folio.builder.description;
 
 import static java.lang.String.format;
+import static org.folio.builder.description.DescriptionHelper.getFormattedDateTime;
 import static org.folio.builder.description.Descriptions.BACKDATED_TO_MSG;
 import static org.folio.builder.description.Descriptions.CLAIMED_RETURNED_ITEM_MSG;
 import static org.folio.builder.description.Descriptions.DOT_MSG;
@@ -39,13 +40,11 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     DateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
     if (!returnDate.isEqual(systemReturnDate)) {
-      description.append(BACKDATED_TO_MSG)
-        .append(returnDate);
+      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate));
     }
 
     if (dueDate.isAfter(returnDate)) {
-      description.append(OVERDUE_DUE_DATE_MSG)
-        .append(dueDate);
+      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate));
     }
 
     description.append(DOT_MSG);

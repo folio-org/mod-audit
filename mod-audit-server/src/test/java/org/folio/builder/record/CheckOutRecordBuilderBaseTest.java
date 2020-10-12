@@ -2,15 +2,12 @@ package org.folio.builder.record;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.builder.description.Descriptions.DOT_MSG;
-import static org.folio.builder.description.Descriptions.REQUEST_STATUS_CHANGED_MSG;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.NEW_REQUEST_STATUS;
 import static org.folio.util.LogEventPayloadField.OLD_REQUEST_STATUS;
-import static org.folio.util.LogEventPayloadField.PICK_UP_SERVICE_POINT;
 import static org.folio.util.LogEventPayloadField.PROXY_BARCODE;
 import static org.folio.util.LogEventPayloadField.REQUESTS;
-import static org.folio.util.LogEventPayloadField.REQUEST_ADDRESS_TYPE;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,7 +31,7 @@ public class CheckOutRecordBuilderBaseTest extends BuilderBaseTest {
 
   @Test
   public void checkOutTest() {
-    logger.info("Test check-out log records builder");
+    logger.info("===== Test check-out log records builder =====");
 
     JsonObject payload = new JsonObject(getFile(CHECK_OUT_PAYLOAD_JSON));
 
@@ -68,10 +65,8 @@ public class CheckOutRecordBuilderBaseTest extends BuilderBaseTest {
     String requestType = getProperty(request, REQUEST_TYPE);
     String oldRequestStatus = getProperty(request, OLD_REQUEST_STATUS);
     String newRequestStatus = getProperty(request, NEW_REQUEST_STATUS);
-    String pickupServicePoint = getProperty(request, PICK_UP_SERVICE_POINT);
-    String addressType = getProperty(request, REQUEST_ADDRESS_TYPE);
 
     assertThat(requestStatusChangedRecord.getDescription(),
-        equalTo(String.format(REQUEST_STATUS_CHANGED_MSG, requestType, pickupServicePoint, addressType, newRequestStatus, oldRequestStatus)));
+        equalTo(String.format("Type: %s. New request status: %s (from: %s).", requestType, newRequestStatus, oldRequestStatus)));
   }
 }
