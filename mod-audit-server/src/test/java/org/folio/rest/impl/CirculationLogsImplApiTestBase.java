@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-public class CirculationLogsImplApiTest extends ApiBaseTest {
+public class CirculationLogsImplApiTestBase extends ApiTestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(CirculationLogsImplApiTest.class);
+  private final Logger logger = LoggerFactory.getLogger(CirculationLogsImplApiTestBase.class);
 
   @Test
   void getCirculationAuditLogRecordsNoFilter() {

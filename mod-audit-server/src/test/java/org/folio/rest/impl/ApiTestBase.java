@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.folio.BaseTest;
+import org.folio.TestBase;
 import org.folio.TestSuite;
 import org.folio.rest.tools.PomReader;
 import org.junit.jupiter.api.AfterAll;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 
-public class ApiBaseTest extends BaseTest {
+public class ApiTestBase extends TestBase {
   protected static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
   protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
   protected static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");

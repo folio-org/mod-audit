@@ -7,12 +7,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.folio.builder.record.CheckInRecordBuilderTest;
-import org.folio.builder.record.CheckOutRecordBuilderTest;
+import org.folio.builder.record.CheckInRecordBuilderTestBase;
+import org.folio.builder.record.CheckOutRecordBuilderTestBase;
 import org.folio.rest.RestVerticle;
-import org.folio.rest.impl.AuditDataImplApiTest;
-import org.folio.rest.impl.AuditHandlersImplApiTest;
-import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.AuditDataImplApiTestBase;
+import org.folio.rest.impl.AuditHandlersImplApiTestBase;
+import org.folio.rest.impl.CirculationLogsImplApiTestBase;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.jupiter.api.AfterAll;
@@ -67,22 +67,22 @@ public class TestSuite {
   }
 
   @Nested
-  class AuditDataImplApiNestedTest extends AuditDataImplApiTest {
+  class AuditDataImplApiTestBaseNested extends AuditDataImplApiTestBase {
   }
 
   @Nested
-  class CirculationLogsImplApiNestedTest extends CirculationLogsImplApiTest {
+  class CirculationLogsImplApiTestBaseNested extends CirculationLogsImplApiTestBase {
   }
 
   @Nested
-  class AuditHandlersImplApiNestedTest extends AuditHandlersImplApiTest {
+  class AuditHandlersImplApiTestBaseNested extends AuditHandlersImplApiTestBase {
   }
 
   @Nested
-  class CheckInRecordBuilderNestedTest extends CheckInRecordBuilderTest {
+  class CheckInRecordBuilderNestedTestBase extends CheckInRecordBuilderTestBase {
   }
 
   @Nested
-  class CheckOutRecordBuilderNestedTest extends CheckOutRecordBuilderTest {
+  class CheckOutRecordBuilderNestedTestBase extends CheckOutRecordBuilderTestBase {
   }
 }

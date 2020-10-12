@@ -13,9 +13,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class AuditHandlersImplApiTest extends ApiBaseTest {
+public class AuditHandlersImplApiTestBase extends ApiTestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(AuditHandlersImplApiTest.class);
+  private final Logger logger = LoggerFactory.getLogger(AuditHandlersImplApiTestBase.class);
 
   String EVENT_HANDLER_ENDPOINT = "/audit/handlers/log-record";
 

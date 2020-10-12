@@ -168,9 +168,6 @@
                https://issues.folio.org/browse/FOLIO-1609
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
-          <excludes>
-            <exclude>**/**Test.class</exclude>
-          </excludes>
           <includes>
             <include>org/folio/TestSuite.class</include>
           </includes>
