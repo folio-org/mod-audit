@@ -28,9 +28,16 @@ public enum LogEventPayloadField {
   PICK_UP_SERVICE_POINT("pickUpServicePoint"),
   REQUEST_TYPE("requestType"),
   REQUEST_ADDRESS_TYPE("addressType"),
-  CREATED("created"),
   REQUESTER("requester"),
-  BARCODE("barcode");
+  BARCODE("barcode"),
+  MANUAL_BLOCK_BORROWING("borrowing"),
+  MANUAL_BLOCK_RENEWALS("renewals"),
+  MANUAL_BLOCK_REQUESTS("requests"),
+  MANUAL_BLOCK_DESCRIPTION("desc"),
+  MANUAL_BLOCK_STAFF_INFORMATION("staffInformation"),
+  MANUAL_BLOCK_MESSAGE_TO_PATRON("patronMessage"),
+  MANUAL_BLOCK_EXPIRATION_DATE("expirationDate");
+
 
   private final String value;
 

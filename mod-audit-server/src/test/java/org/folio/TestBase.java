@@ -12,7 +12,9 @@ public class TestBase {
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";
-  public static final String REQUEST_CREATED_PAYLOAD_JSON = "payloads/request_created.json";
+  public static final String MANUAL_BLOCK_CREATED_PAYLOAD_JSON = "payloads/manual_block_created.json";
+  public static final String MANUAL_BLOCK_UPDATED_PAYLOAD_JSON = "payloads/manual_block_updated.json";
+  public static final String MANUAL_BLOCK_DELETED_PAYLOAD_JSON = "payloads/manual_block_deleted.json";
 
   public String getFile(String filename) {
     String value = "";

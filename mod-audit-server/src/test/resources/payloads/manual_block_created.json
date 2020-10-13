@@ -2,9 +2,10 @@
   "logEventType":"MANUAL_BLOCK_CREATED_EVENT",
   "payload":{
     "type":"Manual",
-    "desc":"zzz",
-    "staffInformation":"yyy",
-    "patronMessage":"xxx",
+    "desc":"Manual Block Description",
+    "staffInformation":"Staff information",
+    "patronMessage":"Message To Patron",
+    "expirationDate": "2018-10-23T00:00:00Z",
     "borrowing":true,
     "renewals":true,
     "requests":true,

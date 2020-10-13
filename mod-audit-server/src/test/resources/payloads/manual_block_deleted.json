@@ -2,11 +2,12 @@
   "logEventType":"MANUAL_BLOCK_DELETED_EVENT",
   "payload":{
     "type":"Manual",
-    "desc":"xxx",
-    "staffInformation":"yyy",
-    "patronMessage":"zzz",
+    "desc":"Manual Block Description",
+    "staffInformation":"Staff information",
+    "patronMessage":"Message To Patron",
+    "expirationDate": "2018-10-23T00:00:00Z",
     "borrowing":true,
-    "renewals":true,
+    "renewals":false,
     "requests":true,
     "userId":"48a3115d-d476-4582-b6a8-55c09eed7ec7",
     "metadata":{
