@@ -2,11 +2,15 @@ package org.folio.util;
 
 public enum LogEventPayloadField {
   LOG_EVENT_TYPE("logEventType"),
+  PAYLOAD("payload"),
   CLAIMED_RETURNED_RESOLUTION("claimedReturnedResolution"),
   SERVICE_POINT_ID("servicePointId"),
   REQUESTS("requests"),
+  ITEM("item"),
   ITEM_ID("itemId"),
   ITEM_BARCODE("itemBarcode"),
+  HOLDINGS_RECORD_ID("holdingsRecordId"),
+  INSTANCE_ID("instanceId"),
   ITEM_STATUS_NAME("itemStatusName"),
   DESTINATION_SERVICE_POINT("destinationServicePoint"),
   SOURCE("source"),
@@ -23,7 +27,10 @@ public enum LogEventPayloadField {
   NEW_REQUEST_STATUS("newRequestStatus"),
   PICK_UP_SERVICE_POINT("pickUpServicePoint"),
   REQUEST_TYPE("requestType"),
-  REQUEST_ADDRESS_TYPE("addressType");
+  REQUEST_ADDRESS_TYPE("addressType"),
+  CREATED("created"),
+  REQUESTER("requester"),
+  BARCODE("barcode");
 
   private final String value;
 

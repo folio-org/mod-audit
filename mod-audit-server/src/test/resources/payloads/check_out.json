@@ -4,6 +4,8 @@
   "loanId":"4f3b6988-bb85-4df5-8dfd-190dde0c7bbf",
   "isLoanClosed":false,
   "dueDate":"2020-09-25T09:48:48.000Z",
+  "holdingsRecordId": "2e96afd4-7027-4cb8-bc40-efc5d1bf155b",
+  "instanceId":"c361cda5-ee48-43b4-88eb-1d5c32c165cf",
   "userId":"e546d50a-926a-421f-8400-a041a2e9db79",
   "userBarcode":"40187925817754",
   "itemId":"bb5a6689-c008-4c96-8f8f-b666850ee12d",

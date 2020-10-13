@@ -2,6 +2,8 @@ package org.folio.builder.record;
 
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
+import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
+import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
@@ -23,12 +25,13 @@ import io.vertx.core.json.JsonObject;
 
 public class BuilderTestBase extends TestBase {
 
-  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder;
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, requestRecordBuilder;
 
   @BeforeAll
   public static void setUp() {
     checkInRecordBuilder = new CheckInRecordBuilder();
     checkOutRecordBuilder = new CheckOutRecordBuilder();
+    requestRecordBuilder = new RequestRecordBuilder();
   }
 
   public void validateRequestStatusChangedContent(JsonObject payload, LogRecord requestStatusChanged) {
@@ -46,6 +49,8 @@ public class BuilderTestBase extends TestBase {
   public void validateBaseContent(JsonObject payload, LogRecord itemCheckedOutRecord) {
     assertThat(itemCheckedOutRecord.getUserBarcode(), equalTo(getProperty(payload, USER_BARCODE)));
     assertThat(itemCheckedOutRecord.getItems().get(0).getItemBarcode(), equalTo(getProperty(payload, ITEM_BARCODE)));
+    assertThat(itemCheckedOutRecord.getItems().get(0).getHoldingId(), equalTo(getProperty(payload, HOLDINGS_RECORD_ID)));
+    assertThat(itemCheckedOutRecord.getItems().get(0).getInstanceId(), equalTo(getProperty(payload, INSTANCE_ID)));
     assertThat(itemCheckedOutRecord.getSource(), equalTo(getProperty(payload, SOURCE)));
     assertThat(itemCheckedOutRecord.getServicePointId(), equalTo(getProperty(payload, SERVICE_POINT_ID)));
   }

@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.folio.builder.record.CheckInRecordBuilderTestBase;
-import org.folio.builder.record.CheckOutRecordBuilderTestBase;
+import org.folio.builder.record.CheckInRecordBuilderTest;
+import org.folio.builder.record.CheckOutRecordBuilderTest;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
@@ -79,10 +79,10 @@ public class TestSuite {
   }
 
   @Nested
-  class CheckInRecordBuilderNestedTestBase extends CheckInRecordBuilderTestBase {
+  class CheckInRecordBuilderNestedTest extends CheckInRecordBuilderTest {
   }
 
   @Nested
-  class CheckOutRecordBuilderNestedTestBase extends CheckOutRecordBuilderTestBase {
+  class CheckOutRecordBuilderNestedTest extends CheckOutRecordBuilderTest {
   }
 }
