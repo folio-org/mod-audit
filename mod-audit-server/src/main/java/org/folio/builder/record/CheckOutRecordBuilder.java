@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.folio.builder.description.LoanCheckOutDescriptionBuilder;
-import org.folio.builder.description.request.RequestStatusChangedDescriptionBuilder;
+import org.folio.builder.description.RequestStatusChangedDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
