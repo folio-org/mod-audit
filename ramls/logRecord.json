@@ -7,6 +7,10 @@
       "description": "Log record id",
       "$ref": "common/uuid.json"
     },
+    "eventId": {
+      "description": "Event id",
+      "$ref": "common/uuid.json"
+    },
     "userBarcode": {
       "description": "User barcode",
       "type": "string"
@@ -99,5 +103,8 @@
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "eventId"
+  ]
 }
