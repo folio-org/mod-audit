@@ -1,6 +1,9 @@
 package org.folio.builder.record;
 
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
+import static org.folio.util.JsonPropertyFetcher.getProperty;
+import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
+import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
@@ -67,9 +70,11 @@ public class CheckOutRecordBuilder implements LogRecordBuilder {
   }
 
   private List<Item> buildItems(JsonObject payload) {
-    return Collections.singletonList(new Item().withItemId(JsonPropertyFetcher.getProperty(payload, ITEM_ID))
-      .withItemBarcode(JsonPropertyFetcher.getProperty(payload, ITEM_BARCODE))
-      .withLoanId(JsonPropertyFetcher.getProperty(payload, LOAN_ID)));
+    return Collections.singletonList(new Item().withItemId(getProperty(payload, ITEM_ID))
+      .withItemBarcode(getProperty(payload, ITEM_BARCODE))
+      .withHoldingId(getProperty(payload, HOLDINGS_RECORD_ID))
+      .withInstanceId(getProperty(payload, INSTANCE_ID))
+      .withLoanId(getProperty(payload, LOAN_ID)));
   }
 
 }

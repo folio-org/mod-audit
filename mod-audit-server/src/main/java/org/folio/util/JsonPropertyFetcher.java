@@ -13,6 +13,30 @@ public class JsonPropertyFetcher {
   private JsonPropertyFetcher() {
   }
 
+  public static JsonObject getObjectProperty(JsonObject representation, LogEventPayloadField field) {
+    if (representation != null) {
+      return representation.getJsonObject(field.value());
+    } else {
+      return null;
+    }
+  }
+
+  public static JsonObject getNestedObjectProperty(JsonObject representation, LogEventPayloadField object,
+                                                   LogEventPayloadField property) {
+
+    if (representation == null) {
+      return null;
+    }
+
+    if (representation.containsKey(object.value())) {
+      final JsonObject obj = representation.getJsonObject(object.value());
+
+      return getObjectProperty(obj, property);
+    } else {
+      return null;
+    }
+  }
+
   public static DateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field) {
     return getDateTimeProperty(representation, field, null);
   }
@@ -47,5 +71,17 @@ public class JsonPropertyFetcher {
     } else {
       return false;
     }
+  }
+
+  public static String getNestedStringProperty(JsonObject representation,
+                                               LogEventPayloadField object, LogEventPayloadField field) {
+
+    if (representation == null) {
+      return null;
+    }
+
+    return representation.containsKey(object.value())
+      ? representation.getJsonObject(object.value()).getString(field.value())
+      : null;
   }
 }
