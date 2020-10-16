@@ -14,13 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(VertxExtension.class)
 public class TestBase {
-  public static final Map<String, String> headersMap = new HashMap<>();
-  static {
-    headersMap.put("X-Okapi-Tenant", "modaudittest");
-    headersMap.put("X-Okapi-Permissions", "audit.all");
-    headersMap.put("Content-Type", "application/json");
-  }
-
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";
 

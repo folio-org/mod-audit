@@ -103,10 +103,6 @@
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
             "audit-data.events.post"
-          ],
-          "modulePermissions": [
-            "users.item.get",
-            "templates.item.get"
           ]
         }
       ]

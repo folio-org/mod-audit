@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import io.vertx.core.Context;
 import org.folio.builder.description.DescriptionBuilder;
 import org.folio.builder.description.ItemCheckInDescriptionBuilder;
 import org.folio.builder.description.LoanCheckInDescriptionBuilder;
@@ -37,10 +35,6 @@ import io.vertx.core.json.JsonObject;
 public class CheckInRecordBuilderService extends LogRecordBuilderService {
 
   private final DescriptionBuilder itemCheckInDescriptionBuilder = new ItemCheckInDescriptionBuilder();
-
-  public CheckInRecordBuilderService(Context context, Map<String, String> headers) {
-    super(context, headers);
-  }
 
   @Override
   public List<LogRecord> buildLogRecord(JsonObject payload) {

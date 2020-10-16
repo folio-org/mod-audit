@@ -12,9 +12,7 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import io.vertx.core.Context;
 import org.folio.builder.description.ManualBlockDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -23,10 +21,6 @@ import org.folio.util.JsonPropertyFetcher;
 import io.vertx.core.json.JsonObject;
 
 public class ManualBlockRecordBuilderService extends LogRecordBuilderService {
-  public ManualBlockRecordBuilderService(Context context, Map<String, String> headers) {
-    super(context, headers);
-  }
-
   @Override
   public List<LogRecord> buildLogRecord(JsonObject event) {
     List<LogRecord> logRecords = new ArrayList<>();

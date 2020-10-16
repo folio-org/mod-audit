@@ -1,6 +1,5 @@
 package org.folio.builder.service;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.NOTICE_MSG;
@@ -17,7 +16,6 @@ import static org.folio.util.LogEventPayloadField.ITEMS;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
-import static org.folio.util.LogEventPayloadField.NAME;
 import static org.folio.util.LogEventPayloadField.NOTICE_POLICY_ID;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.REQUEST_ID;
@@ -27,30 +25,18 @@ import static org.folio.util.LogEventPayloadField.TRIGGERING_EVENT;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
-import io.vertx.core.Context;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NoticeRecordBuilderService extends LogRecordBuilderService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(NoticeRecordBuilderService.class);
-
   private static final String SYSTEM = "System";
-  private static final String TEMPLATES_ENDPOINT_WITH_ID = "/templates/%s";
-
-  public NoticeRecordBuilderService(Context context, Map<String, String> headers) {
-    super(context, headers);
-  }
 
   @Override
   public List<LogRecord> buildLogRecord(JsonObject fullPayload) {
@@ -73,7 +59,7 @@ public class NoticeRecordBuilderService extends LogRecordBuilderService {
         .withNoticePolicyId(getProperty(itemJson, NOTICE_POLICY_ID)));
 
     logRecord.setDescription(String.format(NOTICE_MSG,
-      getTemplateName(getProperty(itemJson, TEMPLATE_ID)),
+      EMPTY,
       ofNullable(getProperty(itemJson, TRIGGERING_EVENT)).orElse(EMPTY)));
 
     return Collections.singletonList(logRecord);
@@ -107,18 +93,5 @@ public class NoticeRecordBuilderService extends LogRecordBuilderService {
     });
 
     return item;
-  }
-
-  private String getTemplateName(String templateId) {
-    try {
-      JsonObject templateJson = handleGetRequest(String.format(TEMPLATES_ENDPOINT_WITH_ID, templateId))
-        .get(5, TimeUnit.SECONDS);
-      if (nonNull(templateJson)) {
-        return ofNullable(getProperty(templateJson, NAME)).orElse(EMPTY);
-      }
-    } catch (Exception e) {
-      LOGGER.error(e);
-    }
-    return EMPTY;
   }
 }

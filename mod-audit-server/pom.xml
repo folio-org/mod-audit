@@ -23,8 +23,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <pubsub.client.version>1.3.0</pubsub.client.version>
-    <vertx-completable-future.version>0.1.2</vertx-completable-future.version>
-    <wiremock.version>2.26.3</wiremock.version>
     <argLine/>
   </properties>
 
@@ -76,17 +74,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-junit5</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>me.escoffier.vertx</groupId>
-      <artifactId>vertx-completable-future</artifactId>
-      <version>${vertx-completable-future.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8-standalone</artifactId>
-      <version>${wiremock.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
