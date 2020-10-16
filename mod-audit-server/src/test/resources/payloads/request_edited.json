@@ -1,7 +1,7 @@
 {
   "logEventType":"REQUEST_UPDATED_EVENT",
   "payload":{
-    "servicePointId":"c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+    "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
     "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
     "itemBarcode":"765475420716",
     "itemStatusName":"Awaiting pickup",
