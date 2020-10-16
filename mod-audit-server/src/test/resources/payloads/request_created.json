@@ -1,0 +1,45 @@
+{
+  "logEventType":"REQUEST_CREATED_EVENT",
+  "payload":{
+    "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+    "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+    "itemBarcode":"765475420716",
+    "itemStatusName":"Awaiting pickup",
+    "requests":{
+      "created":{
+        "id":"f232d715-7bfa-42e4-978c-8e8943560b04",
+        "requestType":"Recall",
+        "requestDate":"2020-10-11T18:58:13.000+0000",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
+        "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+        "status":"Open - Not yet filled",
+        "position":3,
+        "item":{
+          "title":"The Girl on the Train",
+          "barcode":"765475420716",
+          "identifiers":[
+            {
+              "value":"B01LO7PJOE",
+              "identifierTypeId":"7f907515-a1bf-4513-8a38-92e1a07c539d"
+            }
+          ]
+        },
+        "requester":{
+          "firstName":"Doug",
+          "lastName":"Denesik",
+          "middleName":"Alf",
+          "barcode":"693787594998493"
+        },
+        "fulfilmentPreference":"Hold Shelf",
+        "requestExpirationDate":"2020-10-21T00:00:00.000+0000",
+        "pickupServicePointId":"3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+        "metadata":{
+          "createdDate":"2020-10-11T18:58:14.370+0000",
+          "createdByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc",
+          "updatedDate":"2020-10-11T18:58:14.370+0000",
+          "updatedByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc"
+        }
+      }
+    }
+  }
+}

@@ -15,53 +15,57 @@
 
   <modules>
     <module>mod-audit-server</module>
-    <module>mod-audit-client</module>
   </modules>
 
   <properties>
-    <raml-module-builder.version>30.0.2</raml-module-builder.version>
-    <vertx.version>3.9.1</vertx.version>
-    <wiremock.version>2.19.0</wiremock.version>
-    <junit.version>4.12</junit.version>
-    <rest-assured.version>3.1.1</rest-assured.version>
-    <jackson.version>2.9.10</jackson.version>
+    <aspectj.version>1.9.6</aspectj.version>
+    <raml-module-builder.version>31.1.1</raml-module-builder.version>
+    <vertx.version>3.9.3</vertx.version>
+    <wiremock.version>2.25.1</wiremock.version>
+    <junit.jupiter.version>5.6.2</junit.jupiter.version>
+    <rest-assured.version>4.3.0</rest-assured.version>
+    <jackson.version>2.11.1</jackson.version>
     <main.basedir>${project.basedir}</main.basedir>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <argLine/>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.jsonschema2pojo</groupId>
-        <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-        <version>1.0.2</version>
-        <configuration>
-          <includes><include>*.json</include></includes>
-          <outputDirectory>${jsonschema2pojo_output_dir}</outputDirectory>
-          <generateBuilders>true</generateBuilders>
-        </configuration>
-        <executions>
-          <execution>
-            <id>common</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <sourceDirectory>${ramlfiles_path}/schemas</sourceDirectory>
-              <targetPackage>org.folio.rest.acq.model</targetPackage>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.8.1</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>11</release>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -144,20 +148,6 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
-        <configuration>
-          <useSystemClassLoader>false</useSystemClassLoader>
-          <systemPropertyVariables>
-            <vertx.logger-delegate-factory-class-name>
-              io.vertx.core.logging.Log4j2LogDelegateFactory
-            </vertx.logger-delegate-factory-class-name>
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.3</version>
         <configuration>
@@ -170,42 +160,36 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.2</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>org.folio.rest.RestLauncher</Main-Class>
-                    <Main-Verticle>org.folio.rest.RestVerticle</Main-Verticle>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>org.folio:raml-module-builder</artifact>
-                  <excludes>
-                    <exclude>**/log4j2.properties</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>**/log4j.properties</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <artifactSet />
-              <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+        <configuration>
+          <argLine>@{argLine} -Duser.language=en -Duser.region=US</argLine>
+          <!-- TODO: update to version 3.0.0 and remove useSystemClassLoader
+               https://issues.folio.org/browse/FOLIO-1609
+               https://issues.apache.org/jira/browse/SUREFIRE-1588
+          -->
+          <includes>
+            <include>org/folio/TestSuite.class</include>
+          </includes>
+          <useSystemClassLoader>false</useSystemClassLoader>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-surefire-provider</artifactId>
+            <version>1.2.0</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
     </plugins>
