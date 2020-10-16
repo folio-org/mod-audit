@@ -1,4 +1,4 @@
-package org.folio.builder.record;
+package org.folio.builder.service;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;

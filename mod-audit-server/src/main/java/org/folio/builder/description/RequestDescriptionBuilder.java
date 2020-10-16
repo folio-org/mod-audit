@@ -8,7 +8,6 @@ import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM;
-import static org.folio.util.LogEventPayloadField.NEW_REQUEST_STATUS;
 import static org.folio.util.LogEventPayloadField.REQUEST_ADDRESS_TYPE;
 import static org.folio.util.LogEventPayloadField.REQUEST_EXPIRATION_DATE;
 import static org.folio.util.LogEventPayloadField.REQUEST_FULFILMENT_PREFERENCE;

@@ -1,4 +1,4 @@
-package org.folio.builder.record;
+package org.folio.builder.service;
 
 import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;

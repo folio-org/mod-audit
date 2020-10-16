@@ -1,4 +1,4 @@
-package org.folio.builder.record;
+package org.folio.builder.service;
 
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getBooleanProperty;
@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import io.vertx.core.Context;
 import org.folio.builder.description.DescriptionBuilder;
 import org.folio.builder.description.ItemCheckInDescriptionBuilder;
 import org.folio.builder.description.LoanCheckInDescriptionBuilder;
@@ -32,9 +34,13 @@ import org.folio.rest.jaxrs.model.LogRecord;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class CheckInRecordBuilder implements LogRecordBuilder {
+public class CheckInRecordBuilderService extends LogRecordBuilderService {
 
   private final DescriptionBuilder itemCheckInDescriptionBuilder = new ItemCheckInDescriptionBuilder();
+
+  public CheckInRecordBuilderService(Context context, Map<String, String> headers) {
+    super(context, headers);
+  }
 
   @Override
   public List<LogRecord> buildLogRecord(JsonObject payload) {

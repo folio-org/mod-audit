@@ -1,4 +1,4 @@
-package org.folio.builder.record;
+package org.folio.builder.service;
 
 import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
@@ -67,7 +67,7 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
 
     JsonObject payload = new JsonObject(getFile(value.getPathToPayload()));
 
-    List<LogRecord> records = requestRecordBuilder.buildLogRecord(payload);
+    List<LogRecord> records = requestLogRecordBuilder.buildLogRecord(payload);
     assertThat(records, hasSize(1));
 
     LogRecord requestLogRecord = records.get(0);
