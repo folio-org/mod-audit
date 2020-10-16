@@ -1,6 +1,5 @@
 package org.folio.rest.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
@@ -11,7 +10,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 import org.folio.builder.LogRecordBuilderResolver;
-import org.folio.builder.record.LogRecordBuilder;
+import org.folio.builder.service.LogRecordBuilderService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.resource.AuditHandlers;
@@ -33,7 +32,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       JsonObject payload = new JsonObject(entity);
-      LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()));
+      LogRecordBuilderService builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()), vertxContext, okapiHeaders);
       List<LogRecord> logRecord = builder.buildLogRecord(new JsonObject(entity));
       getClient(okapiHeaders, vertxContext).saveBatch(LOGS_TABLE_NAME, logRecord, reply -> {
         if (reply.failed()) {

@@ -1,4 +1,4 @@
-package org.folio.builder.record;
+package org.folio.builder.service;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.builder.description.Descriptions.DOT_MSG;

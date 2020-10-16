@@ -65,6 +65,14 @@ public class JsonPropertyFetcher {
     }
   }
 
+  public static Double getDoubleProperty(JsonObject representation, LogEventPayloadField field) {
+    if (representation != null) {
+      return representation.getDouble(field.value());
+    } else {
+      return null;
+    }
+  }
+
   public static boolean getBooleanProperty(JsonObject representation, LogEventPayloadField field) {
     if (representation != null) {
       return representation.getBoolean(field.value(), false);
