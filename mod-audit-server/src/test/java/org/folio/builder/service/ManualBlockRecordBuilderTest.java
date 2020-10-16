@@ -57,7 +57,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
   @ParameterizedTest
   @EnumSource(value = TestValue.class)
   public void manualBlockLogRecordTest(TestValue value) {
-    logger.info("===== Test manual block log records builder =====");
+    logger.info("===== Test manual block log records builder: " + value + " =====");
 
     JsonObject payload = new JsonObject(getFile(value.getPathToPayload()));
 

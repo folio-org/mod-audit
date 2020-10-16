@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
 public class BuilderTestBase extends TestBase {
 
   static LogRecordBuilderService checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
-    feeFineRecordBuilder, noticeRecordBuilder, loanRecordBuilder;
+    feeFineRecordBuilder, noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
   public static void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -64,6 +64,7 @@ public class BuilderTestBase extends TestBase {
     feeFineRecordBuilder = new FeeFineRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
     noticeRecordBuilder = new NoticeRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
     loanRecordBuilder = new LoanRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
+    requestLogRecordBuilder = new RequestRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
   }
 
   @AfterAll

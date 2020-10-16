@@ -14,6 +14,7 @@ import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
 import org.folio.builder.service.LoanRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
+import org.folio.builder.service.RequestRecordBuilderTest;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
@@ -125,5 +126,9 @@ public class TestSuite {
 
   @Nested
   class NoticeRecordBuilderNestedTest extends NoticeRecordBuilderTest {
+  }
+
+  @Nested
+  class RequestRecordBuilderNestedTest extends RequestRecordBuilderTest {
   }
 }

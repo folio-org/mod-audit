@@ -3,7 +3,6 @@ package org.folio.builder.description;
 public class Descriptions {
 
   public static final String DOT_MSG = ".";
-  public static final String REQUEST_STATUS_CHANGED_MSG = "Type: %s. Pickup service point: %s. Address type: %s. New request status: %s (from %s).";
   public static final String CHECKED_OUT_TO_PROXY_MSG = "Checked out to proxy: %s.";
   public static final String ITEM_STATUS_MSG = "Item status: %s";
   public static final String TO_MSG = " to %s";
