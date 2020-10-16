@@ -43,6 +43,7 @@
             "$ref": "common/uuid.json"
           }
         },
+        "additionalProperties": false,
         "required": [
           "itemBarcode"
         ]
