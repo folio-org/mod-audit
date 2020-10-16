@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
@@ -21,7 +20,6 @@ import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -32,8 +30,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class TestSuite {
-  public static final int mockPort = NetworkUtils.nextFreePort();
-  public static WireMockServer wireMockServer;
   public static boolean isInitialized = false;
   private static final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
@@ -54,11 +50,6 @@ public class TestSuite {
     } catch (IOException e) {
       e.printStackTrace();
       return;
-    }
-
-    if (Objects.isNull(wireMockServer)) {
-      wireMockServer = new WireMockServer(mockPort);
-      wireMockServer.start();
     }
 
     JsonObject conf = new JsonObject().put("http.port", port)
@@ -83,9 +74,6 @@ public class TestSuite {
 
   @AfterAll
   public static void globalTearDown() {
-    if (Objects.nonNull(wireMockServer)) {
-      wireMockServer.stop();
-    }
     if (Objects.nonNull(vertx)) {
       vertx.close();
     }

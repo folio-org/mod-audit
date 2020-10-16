@@ -1,12 +1,6 @@
 package org.folio.builder.service;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.TestSuite.isInitialized;
-import static org.folio.TestSuite.wireMockServer;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
@@ -45,26 +39,13 @@ public class BuilderTestBase extends TestBase {
     if (!isInitialized) {
       TestSuite.globalInitialize();
     }
-
-    wireMockServer.stubFor(get(urlEqualTo("/users/fa96fec8-786f-505b-b55e-e0bb1150d548"))
-      .willReturn(aResponse().withBody(new JsonObject()
-        .put("personal", new JsonObject().put("firstName", "John").put("lastName", "Johnson")).encode())
-        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-        .withStatus(200)));
-
-    wireMockServer.stubFor(get(urlEqualTo("/templates/fa96fec8-786f-505b-b55e-e0bb1150d548"))
-      .willReturn(aResponse().withBody(new JsonObject()
-        .put("name", "sample template name").encode())
-        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-        .withStatus(200)));
-
-    checkInRecordBuilder = new CheckInRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    checkOutRecordBuilder = new CheckOutRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    manualBlockRecordBuilder = new ManualBlockRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    feeFineRecordBuilder = new FeeFineRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    noticeRecordBuilder = new NoticeRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    loanRecordBuilder = new LoanRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
-    requestLogRecordBuilder = new RequestRecordBuilderService(TestSuite.getVertx().getOrCreateContext(), headersMap);
+    checkInRecordBuilder = new CheckInRecordBuilderService();
+    checkOutRecordBuilder = new CheckOutRecordBuilderService();
+    manualBlockRecordBuilder = new ManualBlockRecordBuilderService();
+    feeFineRecordBuilder = new FeeFineRecordBuilderService();
+    noticeRecordBuilder = new NoticeRecordBuilderService();
+    loanRecordBuilder = new LoanRecordBuilderService();
+    requestLogRecordBuilder = new RequestRecordBuilderService();
   }
 
   @AfterAll

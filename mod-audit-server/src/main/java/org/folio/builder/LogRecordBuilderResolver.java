@@ -1,6 +1,5 @@
 package org.folio.builder;
 
-import io.vertx.core.Context;
 import org.folio.builder.service.CheckInRecordBuilderService;
 import org.folio.builder.service.CheckOutRecordBuilderService;
 import org.folio.builder.service.FeeFineRecordBuilderService;
@@ -9,8 +8,6 @@ import org.folio.builder.service.LogRecordBuilderService;
 import org.folio.builder.service.ManualBlockRecordBuilderService;
 import org.folio.builder.service.NoticeRecordBuilderService;
 import org.folio.builder.service.RequestRecordBuilderService;
-
-import java.util.Map;
 
 public class LogRecordBuilderResolver {
 
@@ -33,27 +30,27 @@ public class LogRecordBuilderResolver {
   private LogRecordBuilderResolver() {
   }
 
-  public static LogRecordBuilderService getBuilder(String logEventType, Context context, Map<String, String> headers) {
+  public static LogRecordBuilderService getBuilder(String logEventType) {
     switch (logEventType) {
     case CHECK_IN_EVENT:
-      return new CheckInRecordBuilderService(context, headers);
+      return new CheckInRecordBuilderService();
     case CHECK_OUT_EVENT:
-      return new CheckOutRecordBuilderService(context, headers);
+      return new CheckOutRecordBuilderService();
     case MANUAL_BLOCK_CREATED:
     case MANUAL_BLOCK_MODIFIED:
     case MANUAL_BLOCK_DELETED:
-      return new ManualBlockRecordBuilderService(context, headers);
+      return new ManualBlockRecordBuilderService();
     case LOAN:
-      return new LoanRecordBuilderService(context, headers);
+      return new LoanRecordBuilderService();
     case NOTICE:
-      return new NoticeRecordBuilderService(context, headers);
+      return new NoticeRecordBuilderService();
     case FEE_FINE:
-      return new FeeFineRecordBuilderService(context, headers);
+      return new FeeFineRecordBuilderService();
     case REQUEST_CREATED:
     case REQUEST_UPDATED:
     case REQUEST_MOVED:
     case REQUEST_REORDERED:
-      return new RequestRecordBuilderService(context, headers);
+      return new RequestRecordBuilderService();
     default:
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);
     }

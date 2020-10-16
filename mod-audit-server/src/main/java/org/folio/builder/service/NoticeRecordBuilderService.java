@@ -25,7 +25,6 @@ import static org.folio.util.LogEventPayloadField.TRIGGERING_EVENT;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
-import io.vertx.core.Context;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.Item;
@@ -34,15 +33,10 @@ import org.folio.rest.jaxrs.model.LogRecord;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NoticeRecordBuilderService extends LogRecordBuilderService {
   private static final String SYSTEM = "System";
-
-  public NoticeRecordBuilderService(Context context, Map<String, String> headers) {
-    super(context, headers);
-  }
 
   @Override
   public List<LogRecord> buildLogRecord(JsonObject fullPayload) {
