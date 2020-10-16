@@ -13,6 +13,9 @@ import io.vertx.core.logging.LoggerFactory;
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -39,5 +42,12 @@ public class FeeFineRecordBuilderTest extends BuilderTestBase {
     assertThat(feeFineLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
     assertThat(feeFineLogRecord.getDescription(),
       equalTo("Fee/Fine type: manual charge. Fee/Fine owner: sample owner. Amount: 10.00. manual"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(FeeFineDescriptions.class)
+  void testDescriptions(FeeFineDescriptions feeFineDescription) {
+    String actual = new FeeFineDescriptionBuilder().buildDescription(new JsonObject(feeFineDescription.getPayload()));
+    assertThat(feeFineDescription.getExpected(), equalTo(actual));
   }
 }

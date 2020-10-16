@@ -14,7 +14,7 @@ import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.AMOUNT;
 import static org.folio.util.LogEventPayloadField.AUTOMATED;
 import static org.folio.util.LogEventPayloadField.BALANCE;
-import static org.folio.util.LogEventPayloadField.COMMENT;
+import static org.folio.util.LogEventPayloadField.COMMENTS;
 import static org.folio.util.LogEventPayloadField.FEE_FINE_OWNER;
 import static org.folio.util.LogEventPayloadField.PAYMENT_METHOD;
 import static org.folio.util.LogEventPayloadField.TYPE;
@@ -62,9 +62,9 @@ public class FeeFineDescriptionBuilder implements DescriptionBuilder {
         return createDescriptionFor(FEE_FINE_TRANSFERRED_MSG, logEventPayload);
       case CANCELLED:
         return String.format(CANCELLED_MSG,
-          getProperty(logEventPayload, AMOUNT),
-          extractInfo(getProperty(logEventPayload, COMMENT), STAFF),
-          extractInfo(getProperty(logEventPayload, COMMENT), PATRON));
+          getDoubleProperty(logEventPayload, AMOUNT),
+          extractInfo(getProperty(logEventPayload, COMMENTS), STAFF),
+          extractInfo(getProperty(logEventPayload, COMMENTS), PATRON));
       default:
         return EMPTY;
     }
@@ -76,8 +76,8 @@ public class FeeFineDescriptionBuilder implements DescriptionBuilder {
       getDoubleProperty(logEventPayload, AMOUNT),
       getDoubleProperty(logEventPayload, BALANCE),
       getProperty(logEventPayload, PAYMENT_METHOD),
-      extractInfo(getProperty(logEventPayload, COMMENT), STAFF),
-      extractInfo(getProperty(logEventPayload, COMMENT), PATRON));
+      extractInfo(getProperty(logEventPayload, COMMENTS), STAFF),
+      extractInfo(getProperty(logEventPayload, COMMENTS), PATRON));
   }
 
   private String extractInfo(String comment, String forWhom) {

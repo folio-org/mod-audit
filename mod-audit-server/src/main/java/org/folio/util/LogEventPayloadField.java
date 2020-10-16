@@ -10,7 +10,7 @@ public enum LogEventPayloadField {
   LAST_NAME("lastName"),
   PERSONAL("personal"),
   UPDATED_BY_USER_ID("updatedByUserId"),
-  COMMENT("comment"),
+  COMMENTS("comments"),
   PAYMENT_METHOD("paymentMethod"),
   BALANCE("balance"),
   AMOUNT("amount"),
