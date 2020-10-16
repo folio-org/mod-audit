@@ -25,13 +25,14 @@ import io.vertx.core.json.JsonObject;
 
 public class BuilderTestBase extends TestBase {
 
-  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder;
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder, requestRecordBuilder;
 
   @BeforeAll
   public static void setUp() {
     checkInRecordBuilder = new CheckInRecordBuilder();
     checkOutRecordBuilder = new CheckOutRecordBuilder();
     manualBlockRecordBuilder = new ManualBlockRecordBuilder();
+    requestRecordBuilder = new RequestRecordBuilder();
   }
 
   public void validateRequestStatusChangedContent(JsonObject payload, LogRecord requestStatusChanged) {

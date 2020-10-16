@@ -84,4 +84,13 @@ public class JsonPropertyFetcher {
       ? representation.getJsonObject(object.value()).getString(field.value())
       : null;
   }
+
+  public static Integer getIntegerProperty(JsonObject representation, LogEventPayloadField field,
+                                           Integer defaultValue) {
+    if (representation != null) {
+      return representation.getInteger(field.value(), defaultValue);
+    } else {
+      return defaultValue;
+    }
+  }
 }

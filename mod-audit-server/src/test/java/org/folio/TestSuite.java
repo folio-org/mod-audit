@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 import org.folio.builder.record.CheckInRecordBuilderTest;
 import org.folio.builder.record.CheckOutRecordBuilderTest;
 import org.folio.builder.record.ManualBlockRecordBuilderTest;
+import org.folio.builder.record.RequestRecordBuilderTest;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
@@ -89,5 +90,9 @@ public class TestSuite {
 
   @Nested
   class ManualBlockRecordBuilderNestedTest extends ManualBlockRecordBuilderTest {
+  }
+
+  @Nested
+  class RequestRecordBuilderNestedTest extends RequestRecordBuilderTest {
   }
 }
