@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-audit</artifactId>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <licenses>
@@ -28,7 +28,7 @@
     <main.basedir>${project.basedir}</main.basedir>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <argLine/>
+    <argLine />
   </properties>
 
   <dependencyManagement>
@@ -199,7 +199,7 @@
     <url>https://github.com/folio-org/mod-pubsub</url>
     <connection>scm:git:git://github.com/folio-org/mod-pubsub</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-pubsub.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v1.0.0</tag>
   </scm>
 
   <repositories>
