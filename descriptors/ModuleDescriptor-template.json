@@ -17,6 +17,14 @@
     {
       "id": "pubsub-publish",
       "version": "0.1"
+    },
+    {
+      "id": "users",
+      "version": "15.2"
+    },
+    {
+      "id": "template-engine",
+      "version": "2.2"
     }
   ],
   "provides": [
