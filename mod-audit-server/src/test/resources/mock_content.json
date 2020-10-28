@@ -17,12 +17,6 @@
       "method": "GET",
       "receivedPath": "mocks/user.json",
       "status": 200
-    },
-    {
-      "url": "/accounts/7ad9dfa0-6ee9-43ba-8db5-7a034ce05838",
-      "method": "GET",
-      "receivedPath": "mocks/account.json",
-      "status": 200
     }
   ]
 }

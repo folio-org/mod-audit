@@ -41,28 +41,4 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
     assertThat(noticeLogRecord.getDescription(),
       equalTo("Template: sample template. Triggering event: manual charge."));
   }
-
-  @Test
-  void testNoticeWithAccountId() throws Exception {
-    logger.info("===== Test notice log records builder =====");
-
-    JsonObject payload = new JsonObject(getFile(NOTICE_WITH_ACCOUNT_PAYLOAD_JSON));
-    List<LogRecord> records = noticeRecordBuilder.buildLogRecord(payload).get();
-
-    assertThat(records.size(), equalTo(1));
-
-    LogRecord noticeLogRecord = records.get(0);
-    assertThat(noticeLogRecord.getUserBarcode(), equalTo("693787594998493"));
-    assertThat(noticeLogRecord.getItems().size(), equalTo(1));
-    assertThat(noticeLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
-    assertThat(noticeLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
-    assertThat(noticeLogRecord.getObject(), equalTo(LogRecord.Object.NOTICE));
-    assertThat(noticeLogRecord.getAction(), equalTo(SEND));
-    assertThat(noticeLogRecord.getDate(), is(not(nullValue())));
-    assertThat(noticeLogRecord.getServicePointId(), equalTo("7c5abc9f-f3d7-4856-b8d7-6712462ca007"));
-    assertThat(noticeLogRecord.getLinkToIds().getFeeFineId(), equalTo("57dbeeba-f26b-4dc0-abc8-21cce7659834"));
-    assertThat(noticeLogRecord.getSource(), equalTo("System"));
-    assertThat(noticeLogRecord.getDescription(),
-      equalTo("Template: sample template. Triggering event: manual charge."));
-  }
 }

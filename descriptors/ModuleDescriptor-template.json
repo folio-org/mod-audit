@@ -25,10 +25,6 @@
     {
       "id": "template-engine",
       "version": "2.2"
-    },
-    {
-      "id":"feesfines",
-      "version":"15.6"
     }
   ],
   "provides": [
@@ -110,8 +106,7 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "templates.item.get",
-            "accounts.item.get"
+            "templates.item.get"
           ]
         }
       ]

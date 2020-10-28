@@ -58,22 +58,7 @@ public class NoticeRecordBuilderService extends LogRecordBuilderService {
     JsonObject payload = new JsonObject(getProperty(fullPayload, PAYLOAD));
 
     return fetchTemplateName(payload)
-      .thenCompose(this::fetchFeeFineIdIfNeeded)
       .thenCompose(this::createResult);
-  }
-
-  private CompletableFuture<JsonObject> fetchFeeFineIdIfNeeded(JsonObject payload) {
-    if (nonNull(getProperty(payload, ACCOUNT_ID))) {
-      return handleGetRequest(String.format(URL_WITH_ID_PATTERN, ACCOUNTS_URL, getProperty(payload, ACCOUNT_ID)))
-        .thenCompose(accountJson -> {
-          if (nonNull(getProperty(accountJson, FEE_FINE_ID))) {
-            return CompletableFuture
-              .completedFuture(payload.put(FEE_FINE_ID.value(), getProperty(accountJson, FEE_FINE_ID)));
-          }
-          return CompletableFuture.completedFuture(payload);
-        });
-    }
-    return CompletableFuture.completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
@@ -128,7 +113,7 @@ public class NoticeRecordBuilderService extends LogRecordBuilderService {
       .withLinkToIds(new LinkToIds()
         .withUserId(getProperty(payload, USER_ID))
         .withRequestId(getProperty(payload, REQUEST_ID))
-        .withFeeFineId(getProperty(payload, FEE_FINE_ID))
+        .withFeeFineId(getProperty(payload, ACCOUNT_ID))
         .withTemplateId(getProperty(itemJson, TEMPLATE_ID))
         .withNoticePolicyId(getProperty(itemJson, NOTICE_POLICY_ID)));
 

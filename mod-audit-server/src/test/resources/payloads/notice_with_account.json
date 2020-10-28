@@ -1,4 +1,0 @@
-{
-  "logEventType":"NOTICE",
-  "payload":"{\"userId\":\"6f36265e-722a-490a-b436-806e63af2ea7\",\"userBarcode\":\"693787594998493\",\"source\":\"ADMINISTRATOR, DIKU\",\"accountId\":\"7ad9dfa0-6ee9-43ba-8db5-7a034ce05838\",\"items\":[{\"servicePointId\":\"7c5abc9f-f3d7-4856-b8d7-6712462ca007\",\"triggeringEvent\":\"manual charge\",\"itemBarcode\":\"90000\",\"loanId\":\"0\",\"itemId\":\"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3\",\"templateId\":\"21f4fd8e-cf19-4870-8288-eb675aec8b3c\"}],\"date\":\"2020-10-15T12:17:39.771Z\"}"
-}

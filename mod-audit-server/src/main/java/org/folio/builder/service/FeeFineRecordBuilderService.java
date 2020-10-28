@@ -8,6 +8,7 @@ import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
+import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
 import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.DATE;
@@ -72,7 +73,7 @@ public class FeeFineRecordBuilderService extends LogRecordBuilderService {
       .withDescription(new FeeFineDescriptionBuilder().buildDescription(payload))
       .withLinkToIds(new LinkToIds()
         .withUserId(getProperty(payload, USER_ID))
-        .withFeeFineId(getProperty(payload, FEE_FINE_ID)))));
+        .withFeeFineId(getProperty(payload, ACCOUNT_ID)))));
   }
 
   private CompletableFuture<JsonObject> fetchUserBarcode(JsonObject payload) {
