@@ -34,13 +34,13 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderTest.class);
 
   @Test
-  public void checkInTest() {
+  public void checkInTest() throws Exception {
     logger.info("Test check-in log records builder");
 
     JsonObject payload = new JsonObject(getFile(CHECK_IN_PAYLOAD_JSON));
 
     Map<LogRecord.Object, Map<LogRecord.Action, List<LogRecord>>> records = checkInRecordBuilder.buildLogRecord(payload)
-      .stream()
+      .get().stream()
       .collect(groupingBy(LogRecord::getObject, groupingBy(LogRecord::getAction)));
 
     assertThat(records.entrySet(), hasSize(3));

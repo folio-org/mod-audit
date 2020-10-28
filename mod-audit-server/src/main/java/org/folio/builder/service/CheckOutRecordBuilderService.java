@@ -18,7 +18,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.Context;
 import org.folio.builder.description.LoanCheckOutDescriptionBuilder;
 import org.folio.builder.description.RequestStatusChangedDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
@@ -30,8 +33,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class CheckOutRecordBuilderService extends LogRecordBuilderService {
+  public CheckOutRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+    super(okapiHeaders, vertxContext);
+  }
+
   @Override
-  public List<LogRecord> buildLogRecord(JsonObject payload) {
+  public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
     List<LogRecord> logRecords = new ArrayList<>();
     logRecords.add(buildLoanCheckOutRecord(payload));
 
@@ -40,7 +47,7 @@ public class CheckOutRecordBuilderService extends LogRecordBuilderService {
       logRecords.add(buildCheckOutRequestStatusChangedRecord(payload, requests.getJsonObject(i)));
     }
 
-    return logRecords;
+    return CompletableFuture.completedFuture(logRecords);
   }
 
   private LogRecord buildCheckOutRequestStatusChangedRecord(JsonObject payload, JsonObject request) {

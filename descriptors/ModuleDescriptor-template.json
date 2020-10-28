@@ -25,6 +25,10 @@
     {
       "id": "template-engine",
       "version": "2.2"
+    },
+    {
+      "id":"feesfines",
+      "version":"15.6"
     }
   ],
   "provides": [
@@ -103,6 +107,11 @@
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
             "audit-data.events.post"
+          ],
+          "modulePermissions": [
+            "users.item.get",
+            "templates.item.get",
+            "accounts.item.get"
           ]
         }
       ]

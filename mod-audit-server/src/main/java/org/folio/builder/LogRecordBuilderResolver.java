@@ -1,5 +1,6 @@
 package org.folio.builder;
 
+import io.vertx.core.Context;
 import org.folio.builder.service.CheckInRecordBuilderService;
 import org.folio.builder.service.CheckOutRecordBuilderService;
 import org.folio.builder.service.FeeFineRecordBuilderService;
@@ -8,6 +9,8 @@ import org.folio.builder.service.LogRecordBuilderService;
 import org.folio.builder.service.ManualBlockRecordBuilderService;
 import org.folio.builder.service.NoticeRecordBuilderService;
 import org.folio.builder.service.RequestRecordBuilderService;
+
+import java.util.Map;
 
 public class LogRecordBuilderResolver {
 
@@ -30,27 +33,27 @@ public class LogRecordBuilderResolver {
   private LogRecordBuilderResolver() {
   }
 
-  public static LogRecordBuilderService getBuilder(String logEventType) {
+  public static LogRecordBuilderService getBuilder(String logEventType, Map<String, String> okapiHeaders, Context vertxContext) {
     switch (logEventType) {
     case CHECK_IN_EVENT:
-      return new CheckInRecordBuilderService();
+      return new CheckInRecordBuilderService(okapiHeaders, vertxContext);
     case CHECK_OUT_EVENT:
-      return new CheckOutRecordBuilderService();
+      return new CheckOutRecordBuilderService(okapiHeaders, vertxContext);
     case MANUAL_BLOCK_CREATED:
     case MANUAL_BLOCK_MODIFIED:
     case MANUAL_BLOCK_DELETED:
-      return new ManualBlockRecordBuilderService();
+      return new ManualBlockRecordBuilderService(okapiHeaders, vertxContext);
     case LOAN:
-      return new LoanRecordBuilderService();
+      return new LoanRecordBuilderService(okapiHeaders, vertxContext);
     case NOTICE:
-      return new NoticeRecordBuilderService();
+      return new NoticeRecordBuilderService(okapiHeaders, vertxContext);
     case FEE_FINE:
-      return new FeeFineRecordBuilderService();
+      return new FeeFineRecordBuilderService(okapiHeaders, vertxContext);
     case REQUEST_CREATED:
     case REQUEST_UPDATED:
     case REQUEST_MOVED:
     case REQUEST_REORDERED:
-      return new RequestRecordBuilderService();
+      return new RequestRecordBuilderService(okapiHeaders, vertxContext);
     default:
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);
     }

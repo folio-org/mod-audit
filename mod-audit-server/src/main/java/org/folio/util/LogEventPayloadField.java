@@ -1,13 +1,16 @@
 package org.folio.util;
 
 public enum LogEventPayloadField {
+  ACCOUNT_ID("accountId"),
   AUTOMATED("automated"),
   NOTICE_POLICY_ID("noticePolicyId"),
   TRIGGERING_EVENT("triggeringEvent"),
   TEMPLATE_ID("templateId"),
+  TEMPLATE_NAME("templateName"),
   NAME("name"),
   FIRST_NAME("firstName"),
   LAST_NAME("lastName"),
+  PERSONAL_NAME("personalName"),
   PERSONAL("personal"),
   UPDATED_BY_USER_ID("updatedByUserId"),
   COMMENTS("comments"),

@@ -37,10 +37,6 @@ public class TestSuite {
 
   @BeforeAll
   public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException {
-    RestAssured.baseURI = "http://localhost:" + port;
-    RestAssured.port = port;
-    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-
     vertx = Vertx.vertx();
 
     try {
