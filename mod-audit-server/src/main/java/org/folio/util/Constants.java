@@ -3,7 +3,6 @@ package org.folio.util;
 public class Constants {
   private Constants(){}
 
-  public static final String ACCOUNTS_URL = "/accounts";
   public static final String TEMPLATES_URL = "/templates";
   public static final String USERS_URL = "/users";
   public static final String URL_WITH_ID_PATTERN = "%s/%s";
