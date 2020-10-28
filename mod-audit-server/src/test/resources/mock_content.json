@@ -1,0 +1,22 @@
+{
+  "mocks": [
+    {
+      "url": "/templates/21f4fd8e-cf19-4870-8288-eb675aec8b3c",
+      "method": "GET",
+      "receivedPath": "mocks/template.json",
+      "status": 200
+    },
+    {
+      "url": "/users/fa96fec8-786f-505b-b55e-e0bb1150d548",
+      "method": "GET",
+      "receivedPath": "mocks/user_diku.json",
+      "status": 200
+    },
+    {
+      "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
+      "method": "GET",
+      "receivedPath": "mocks/user.json",
+      "status": 200
+    }
+  ]
+}

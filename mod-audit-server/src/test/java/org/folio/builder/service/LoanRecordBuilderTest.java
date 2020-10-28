@@ -19,11 +19,11 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LoggerFactory.getLogger(LoanRecordBuilderTest.class);
 
   @Test
-  void testLoan() {
+  void testLoan() throws Exception {
     logger.info("===== Test loan log records builder =====");
 
     JsonObject payload = new JsonObject(getFile(LOAN_PAYLOAD_JSON));
-    List<LogRecord> records = loanRecordBuilder.buildLogRecord(payload);
+    List<LogRecord> records = loanRecordBuilder.buildLogRecord(payload).get();
 
     assertThat(records.size(), equalTo(1));
 
@@ -39,7 +39,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getAction(), equalTo(RENEWED));
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
-    assertThat(loanLogRecord.getSource(), equalTo(""));
+    assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
     assertThat(loanLogRecord.getDescription(),
       equalTo("New due date: 2020-10-14T11:10:41.554Z (from 2020-10-14T11:03:00.751Z)"));
   }

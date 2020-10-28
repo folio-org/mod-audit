@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.Context;
 import org.folio.builder.description.DescriptionBuilder;
 import org.folio.builder.description.ItemCheckInDescriptionBuilder;
 import org.folio.builder.description.LoanCheckInDescriptionBuilder;
@@ -36,8 +39,12 @@ public class CheckInRecordBuilderService extends LogRecordBuilderService {
 
   private final DescriptionBuilder itemCheckInDescriptionBuilder = new ItemCheckInDescriptionBuilder();
 
+  public CheckInRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+    super(okapiHeaders, vertxContext);
+  }
+
   @Override
-  public List<LogRecord> buildLogRecord(JsonObject payload) {
+  public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
     List<LogRecord> logRecords = new ArrayList<>();
     logRecords.add(buildItemCheckInRecord(payload));
 
@@ -50,7 +57,7 @@ public class CheckInRecordBuilderService extends LogRecordBuilderService {
       logRecords.add(buildCheckInRequestStatusChangedRecord(payload, requests.getJsonObject(i)));
     }
 
-    return logRecords;
+    return CompletableFuture.completedFuture(logRecords);
   }
 
   private LogRecord buildLoanCheckInRecord(JsonObject payload) {

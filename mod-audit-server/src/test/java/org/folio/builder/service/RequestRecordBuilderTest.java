@@ -62,12 +62,12 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
 
   @ParameterizedTest
   @EnumSource(value = TestValue.class)
-  void requestLogRecordTest(TestValue value) {
+  void requestLogRecordTest(TestValue value) throws Exception {
     logger.info("===== Test requests log records builder: " + value + " =====");
 
     JsonObject payload = new JsonObject(getFile(value.getPathToPayload()));
 
-    List<LogRecord> records = requestLogRecordBuilder.buildLogRecord(payload);
+    List<LogRecord> records = requestLogRecordBuilder.buildLogRecord(payload).get();
     assertThat(records, hasSize(1));
 
     LogRecord requestLogRecord = records.get(0);

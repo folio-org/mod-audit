@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
+import org.folio.builder.service.LogRecordBuilderResolverTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
 import org.folio.builder.service.LoanRecordBuilderTest;
@@ -37,10 +38,6 @@ public class TestSuite {
 
   @BeforeAll
   public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException {
-    RestAssured.baseURI = "http://localhost:" + port;
-    RestAssured.port = port;
-    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-
     vertx = Vertx.vertx();
 
     try {
@@ -118,5 +115,9 @@ public class TestSuite {
 
   @Nested
   class RequestRecordBuilderNestedTest extends RequestRecordBuilderTest {
+  }
+
+  @Nested
+  class LogRecordBuilderResolverNestedTest extends LogRecordBuilderResolverTest {
   }
 }

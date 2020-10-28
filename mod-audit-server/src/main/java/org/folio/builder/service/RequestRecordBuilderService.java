@@ -33,7 +33,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+import io.vertx.core.Context;
 import org.folio.builder.description.RequestDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
@@ -48,9 +51,13 @@ public class RequestRecordBuilderService extends LogRecordBuilderService {
   public static final String CLOSED_CANCELLED_STATUS = "Closed - Cancelled";
   RequestDescriptionBuilder requestDescriptionBuilder = new RequestDescriptionBuilder();
 
+  public RequestRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+    super(okapiHeaders, vertxContext);
+  }
+
   @Override
-  public List<LogRecord> buildLogRecord(JsonObject event) {
-    return new ArrayList<>(buildRequestLogRecord(event));
+  public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject event) {
+    return CompletableFuture.completedFuture(new ArrayList<>(buildRequestLogRecord(event)));
   }
 
   private List<LogRecord> buildRequestLogRecord(JsonObject event) {
