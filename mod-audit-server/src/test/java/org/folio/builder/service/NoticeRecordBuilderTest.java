@@ -19,11 +19,11 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LoggerFactory.getLogger(NoticeRecordBuilderTest.class);
 
   @Test
-  void testNotice() {
+  void testNotice() throws Exception {
     logger.info("===== Test notice log records builder =====");
 
     JsonObject payload = new JsonObject(getFile(NOTICE_PAYLOAD_JSON));
-    List<LogRecord> records = noticeRecordBuilder.buildLogRecord(payload);
+    List<LogRecord> records = noticeRecordBuilder.buildLogRecord(payload).get();
 
     assertThat(records.size(), equalTo(1));
 
@@ -36,8 +36,9 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
     assertThat(noticeLogRecord.getAction(), equalTo(SEND));
     assertThat(noticeLogRecord.getDate(), is(not(nullValue())));
     assertThat(noticeLogRecord.getServicePointId(), equalTo("7c5abc9f-f3d7-4856-b8d7-6712462ca007"));
+    assertThat(noticeLogRecord.getLinkToIds().getFeeFineId(), equalTo("7ad9dfa0-6ee9-43ba-8db5-7a034ce05838"));
     assertThat(noticeLogRecord.getSource(), equalTo("System"));
     assertThat(noticeLogRecord.getDescription(),
-      equalTo("Template: . Triggering event: manual charge."));
+      equalTo("Template: sample template. Triggering event: manual charge."));
   }
 }

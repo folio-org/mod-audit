@@ -22,11 +22,11 @@ public class FeeFineRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LoggerFactory.getLogger(FeeFineDescriptionBuilder.class);
 
   @Test
-  void testFeeFine() {
+  void testFeeFine() throws Exception {
     logger.info("===== Test fees/fines log records builder =====");
 
     JsonObject payload = new JsonObject(getFile(FEE_FINE_PAYLOAD_JSON));
-    List<LogRecord> records = feeFineRecordBuilder.buildLogRecord(payload);
+    List<LogRecord> records = feeFineRecordBuilder.buildLogRecord(payload).get();
 
     assertThat(records.size(), equalTo(1));
 

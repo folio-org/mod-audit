@@ -30,13 +30,13 @@ public class CheckOutRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderTest.class);
 
   @Test
-  public void checkOutTest() {
+  public void checkOutTest() throws Exception {
     logger.info("===== Test check-out log records builder =====");
 
     JsonObject payload = new JsonObject(getFile(CHECK_OUT_PAYLOAD_JSON));
 
     Map<LogRecord.Object, Map<LogRecord.Action, List<LogRecord>>> records = checkOutRecordBuilder.buildLogRecord(payload)
-      .stream()
+      .get().stream()
       .collect(groupingBy(LogRecord::getObject, groupingBy(LogRecord::getAction)));
 
     assertThat(records.entrySet(), hasSize(2));
