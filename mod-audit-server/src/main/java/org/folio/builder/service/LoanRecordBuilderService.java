@@ -2,12 +2,16 @@ package org.folio.builder.service;
 
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
+import static org.folio.util.Constants.HOLDINGS_URL;
+import static org.folio.util.Constants.ITEMS_URL;
+import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.Constants.URL_WITH_ID_PATTERN;
 import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACTION;
+import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.DATE;
 import static org.folio.util.LogEventPayloadField.DESCRIPTION;
 import static org.folio.util.LogEventPayloadField.FIRST_NAME;
@@ -44,6 +48,10 @@ public class LoanRecordBuilderService extends LogRecordBuilderService {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
+    if (isAnonymize(payload)) {
+      return fetchItemDetails(payload)
+        .thenCompose(this::createResult);
+    }
     return fetchPersonalName(payload)
       .thenCompose(this::createResult);
   }
@@ -61,7 +69,7 @@ public class LoanRecordBuilderService extends LogRecordBuilderService {
       .withAction(LogRecord.Action.fromValue(getProperty(payload, ACTION)))
       .withDate(getDateTimeProperty(payload, DATE).toDate())
       .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
-      .withSource(getProperty(payload, PERSONAL_NAME))
+      .withSource(isAnonymize(payload) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
       .withDescription(getProperty(payload, DESCRIPTION))
       .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)))));
   }
@@ -78,5 +86,33 @@ public class LoanRecordBuilderService extends LogRecordBuilderService {
         }
         return CompletableFuture.completedFuture(payload);
       });
+  }
+
+  private CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, ITEMS_URL, getProperty(payload, ITEM_ID)))
+      .thenCompose(itemJson -> addItemData(payload, itemJson))
+      .thenCompose(json ->
+        handleGetRequest(String.format(URL_WITH_ID_PATTERN, HOLDINGS_URL, getProperty(json, HOLDINGS_RECORD_ID))))
+      .thenCompose(holdingJson -> addHoldingData(payload, holdingJson));
+  }
+
+  private CompletableFuture<JsonObject> addItemData(JsonObject payload, JsonObject itemJson) {
+    if (nonNull(itemJson)) {
+      return CompletableFuture.completedFuture(payload
+        .put(ITEM_BARCODE.value(), getProperty(itemJson, BARCODE))
+        .put(HOLDINGS_RECORD_ID.value(), getProperty(itemJson, HOLDINGS_RECORD_ID)));
+    }
+    return CompletableFuture.completedFuture(payload);
+  }
+
+  private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
+    if (nonNull(holdingJson)) {
+      return CompletableFuture.completedFuture(payload.put(INSTANCE_ID.value(), getProperty(holdingJson, INSTANCE_ID)));
+    }
+    return CompletableFuture.completedFuture(payload);
+  }
+
+  private boolean isAnonymize(JsonObject payload) {
+    return LogRecord.Action.ANONYMIZE.equals(LogRecord.Action.fromValue(getProperty(payload, ACTION)));
   }
 }
