@@ -6,6 +6,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.NOTICE_MSG;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
+import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.Constants.TEMPLATES_URL;
 import static org.folio.util.Constants.URL_WITH_ID_PATTERN;
 import static org.folio.util.Constants.UUID_PATTERN;
@@ -45,8 +46,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class NoticeRecordBuilderService extends LogRecordBuilderService {
-  private static final String SYSTEM = "System";
-
   public NoticeRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
