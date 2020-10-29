@@ -6,10 +6,13 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.folio.rest.jaxrs.model.LogRecord;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -64,7 +67,29 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     List<LogRecord> records = manualBlockRecordBuilder.buildLogRecord(payload).get();
     assertThat(records, hasSize(1));
 
-    LogRecord manualBlockCreatedRecord = records.get(0);
+    LogRecord manualBlockLogRecord = records.get(0);
+    assertManualBlockLogRecord(value, payload, manualBlockLogRecord);
+    assertThat(manualBlockLogRecord.getUserBarcode(), equalTo("693787594998493"));
+  }
+
+  @Test
+  public void manualBlockLogRecordWithoutUserTest() throws Exception {
+    logger.info("===== Test manual block log records builder: user barcode isn't available =====");
+
+    JsonObject payload = new JsonObject(getFile(TestValue.MODIFIED.getPathToPayload()));
+
+    // Set random user ID
+    payload.getJsonObject(PAYLOAD.value()).put(USER_ID.value(), UUID.randomUUID().toString());
+
+    List<LogRecord> records = manualBlockRecordBuilder.buildLogRecord(payload).get();
+    assertThat(records, hasSize(1));
+
+    LogRecord manualBlockLogRecord = records.get(0);
+    assertManualBlockLogRecord(TestValue.MODIFIED, payload, manualBlockLogRecord);
+    assertThat(manualBlockLogRecord.getUserBarcode(), nullValue());
+  }
+
+  private void assertManualBlockLogRecord(TestValue value, JsonObject payload, LogRecord manualBlockCreatedRecord) {
     assertThat(manualBlockCreatedRecord.getObject(), equalTo(LogRecord.Object.MANUAL_BLOCK));
     assertThat(manualBlockCreatedRecord.getAction(), equalTo(value.getAction()));
     assertThat(manualBlockCreatedRecord.getLinkToIds()

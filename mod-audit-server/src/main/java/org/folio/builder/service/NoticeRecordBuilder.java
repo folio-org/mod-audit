@@ -1,14 +1,10 @@
 package org.folio.builder.service;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.NOTICE_MSG;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.util.Constants.SYSTEM;
-import static org.folio.util.Constants.TEMPLATES_URL;
-import static org.folio.util.Constants.URL_WITH_ID_PATTERN;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
@@ -21,7 +17,6 @@ import static org.folio.util.LogEventPayloadField.ITEMS;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
-import static org.folio.util.LogEventPayloadField.NAME;
 import static org.folio.util.LogEventPayloadField.NOTICE_POLICY_ID;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.REQUEST_ID;
@@ -45,8 +40,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class NoticeRecordBuilderService extends LogRecordBuilderService {
-  public NoticeRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+public class NoticeRecordBuilder extends LogRecordBuilder {
+  public NoticeRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
@@ -56,17 +51,6 @@ public class NoticeRecordBuilderService extends LogRecordBuilderService {
 
     return fetchTemplateName(payload)
       .thenCompose(this::createResult);
-  }
-
-  private CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, TEMPLATES_URL, getProperty(extractFirstItem(payload), TEMPLATE_ID)))
-      .thenCompose(templateJson -> {
-        if (nonNull(templateJson)) {
-          return CompletableFuture.completedFuture(payload
-            .put(TEMPLATE_NAME.value(), isNull(getProperty(templateJson, NAME)) ? EMPTY : getProperty(templateJson, NAME)));
-        }
-        return CompletableFuture.completedFuture(payload.put(TEMPLATE_NAME.value(), EMPTY));
-      });
   }
 
   private JsonObject extractFirstItem(JsonObject payload) {

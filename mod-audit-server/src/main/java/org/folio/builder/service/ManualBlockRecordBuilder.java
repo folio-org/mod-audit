@@ -7,6 +7,7 @@ import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
+import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
 import java.util.ArrayList;
@@ -19,27 +20,33 @@ import io.vertx.core.Context;
 import org.folio.builder.description.ManualBlockDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.folio.util.JsonPropertyFetcher;
 
 import io.vertx.core.json.JsonObject;
 
-public class ManualBlockRecordBuilderService extends LogRecordBuilderService {
-  public ManualBlockRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+public class ManualBlockRecordBuilder extends LogRecordBuilder {
+  public ManualBlockRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject event) {
+
+    JsonObject payload = getObjectProperty(event, PAYLOAD);
+    String logEventType = getProperty(event, LOG_EVENT_TYPE);
+
+    return fetchUserBarcode(payload)
+      .thenCompose(p -> createResult(p, logEventType));
+  }
+
+  private CompletableFuture<List<LogRecord>> createResult(JsonObject payload, String logEventType) {
     List<LogRecord> logRecords = new ArrayList<>();
 
-    String logEventType = getProperty(event, LOG_EVENT_TYPE);
-    JsonObject manualBlockJson = getObjectProperty(event, PAYLOAD);
-
     LogRecord manualBlockLogRecord = new LogRecord().withObject(LogRecord.Object.MANUAL_BLOCK)
+      .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withAction(resolveLogRecordAction(logEventType))
       .withDate(new Date())
-      .withDescription(new ManualBlockDescriptionBuilder().buildDescription(manualBlockJson))
-      .withLinkToIds(new LinkToIds().withUserId(JsonPropertyFetcher.getProperty(manualBlockJson, USER_ID)));
+      .withDescription(new ManualBlockDescriptionBuilder().buildDescription(payload))
+      .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)));
 
     logRecords.add(manualBlockLogRecord);
 
