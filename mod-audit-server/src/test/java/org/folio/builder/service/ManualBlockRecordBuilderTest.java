@@ -59,7 +59,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
 
   @ParameterizedTest
   @EnumSource(value = TestValue.class)
-  public void manualBlockLogRecordTest(TestValue value) throws Exception {
+  void manualBlockLogRecordTest(TestValue value) throws Exception {
     logger.info("===== Test manual block log records builder: " + value + " =====");
 
     JsonObject payload = new JsonObject(getFile(value.getPathToPayload()));
@@ -73,7 +73,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
   }
 
   @Test
-  public void manualBlockLogRecordWithoutUserTest() throws Exception {
+  void manualBlockLogRecordWithoutUserTest() throws Exception {
     logger.info("===== Test manual block log records builder: user barcode isn't available =====");
 
     JsonObject payload = new JsonObject(getFile(TestValue.MODIFIED.getPathToPayload()));
