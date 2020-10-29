@@ -25,6 +25,14 @@
     {
       "id": "template-engine",
       "version": "2.2"
+    },
+    {
+      "id": "inventory",
+      "version": "10.7"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "4.4"
     }
   ],
   "provides": [
@@ -106,7 +114,9 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "templates.item.get"
+            "templates.item.get",
+            "inventory.items.item.get",
+            "inventory-storage.holdings.item.get"
           ]
         }
       ]
