@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,9 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
   private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
   private static final String EXPECTED_UPDATE_DESCRIPTION = "Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
   private static final String EXPECTED_DELETE_DESCRIPTION = "Block actions: borrowing, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
+
+  public static final String USER_NOT_FOUND_ID = "4a52f480-8f9a-49c8-9dbb-65f086e577fb";
+  public static final String EXPECTED_SOURCE = "Denesik, Toney";
 
   private enum TestValue {
 
@@ -70,6 +72,8 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     LogRecord manualBlockLogRecord = records.get(0);
     assertManualBlockLogRecord(value, payload, manualBlockLogRecord);
     assertThat(manualBlockLogRecord.getUserBarcode(), equalTo("693787594998493"));
+
+    assertSource(value, manualBlockLogRecord);
   }
 
   @Test
@@ -78,8 +82,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
 
     JsonObject payload = new JsonObject(getFile(TestValue.MODIFIED.getPathToPayload()));
 
-    // Set random user ID
-    payload.getJsonObject(PAYLOAD.value()).put(USER_ID.value(), UUID.randomUUID().toString());
+    payload.getJsonObject(PAYLOAD.value()).put(USER_ID.value(), USER_NOT_FOUND_ID);
 
     List<LogRecord> records = manualBlockRecordBuilder.buildLogRecord(payload).get();
     assertThat(records, hasSize(1));
@@ -87,6 +90,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     LogRecord manualBlockLogRecord = records.get(0);
     assertManualBlockLogRecord(TestValue.MODIFIED, payload, manualBlockLogRecord);
     assertThat(manualBlockLogRecord.getUserBarcode(), nullValue());
+    assertThat(manualBlockLogRecord.getSource(), nullValue());
   }
 
   private void assertManualBlockLogRecord(TestValue value, JsonObject payload, LogRecord manualBlockCreatedRecord) {
@@ -95,5 +99,13 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     assertThat(manualBlockCreatedRecord.getLinkToIds()
       .getUserId(), equalTo(getNestedStringProperty(payload, PAYLOAD, USER_ID)));
     assertThat(manualBlockCreatedRecord.getDescription(), equalTo(value.getDescription()));
+  }
+
+  private void assertSource(TestValue value, LogRecord manualBlockLogRecord) {
+    if (value == TestValue.DELETED) {
+      assertThat(manualBlockLogRecord.getSource(), nullValue());
+    } else {
+      assertThat(manualBlockLogRecord.getSource(), equalTo(EXPECTED_SOURCE));
+    }
   }
 }
