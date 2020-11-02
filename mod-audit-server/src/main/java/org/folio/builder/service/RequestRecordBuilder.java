@@ -41,17 +41,16 @@ import org.folio.builder.description.RequestDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.folio.util.JsonPropertyFetcher;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class RequestRecordBuilderService extends LogRecordBuilderService {
+public class RequestRecordBuilder extends LogRecordBuilder {
 
   public static final String CLOSED_CANCELLED_STATUS = "Closed - Cancelled";
   RequestDescriptionBuilder requestDescriptionBuilder = new RequestDescriptionBuilder();
 
-  public RequestRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+  public RequestRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
@@ -77,8 +76,8 @@ public class RequestRecordBuilderService extends LogRecordBuilderService {
         .withServicePointId(servicePointId)
         .withItems(buildItems(created))
         .withDate(new Date())
-        .withLinkToIds(new LinkToIds().withUserId(JsonPropertyFetcher.getProperty(created, USER_ID))
-          .withRequestId(JsonPropertyFetcher.getProperty(created, REQUEST_ID)))
+        .withLinkToIds(new LinkToIds().withUserId(getProperty(created, USER_ID))
+          .withRequestId(getProperty(created, REQUEST_ID)))
         .withDescription(requestDescriptionBuilder.buildCreateDescription(created)));
 
     } else if (LogRecord.Action.EDITED == action) {
@@ -129,8 +128,8 @@ public class RequestRecordBuilderService extends LogRecordBuilderService {
           .withServicePointId(servicePointId)
           .withItems(buildItems(o))
           .withDate(new Date())
-          .withLinkToIds(new LinkToIds().withUserId(JsonPropertyFetcher.getProperty(o, USER_ID))
-            .withRequestId(JsonPropertyFetcher.getProperty(o, REQUEST_ID)))
+          .withLinkToIds(new LinkToIds().withUserId(getProperty(o, USER_ID))
+            .withRequestId(getProperty(o, REQUEST_ID)))
           .withDescription(requestDescriptionBuilder.buildReorderedDescription(o)));
       });
     } else {

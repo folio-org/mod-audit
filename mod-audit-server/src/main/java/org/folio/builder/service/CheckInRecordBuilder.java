@@ -35,11 +35,11 @@ import org.folio.rest.jaxrs.model.LogRecord;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class CheckInRecordBuilderService extends LogRecordBuilderService {
+public class CheckInRecordBuilder extends LogRecordBuilder {
 
   private final DescriptionBuilder itemCheckInDescriptionBuilder = new ItemCheckInDescriptionBuilder();
 
-  public CheckInRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+  public CheckInRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 

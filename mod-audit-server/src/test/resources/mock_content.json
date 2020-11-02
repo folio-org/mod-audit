@@ -15,7 +15,18 @@
     {
       "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
       "method": "GET",
-      "receivedPath": "mocks/user.json",
+      "status": 404
+    },
+    {
+      "url": "/users?limit=2&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
+      "method": "GET",
+      "receivedPath": "mocks/users.json",
+      "status": 200
+    },
+    {
+      "url": "/users?limit=2&offset=0&query=id%3D%3D%284a52f480-8f9a-49c8-9dbb-65f086e577fb+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
+      "method": "GET",
+      "receivedPath": "mocks/empty_users.json",
       "status": 200
     },
     {

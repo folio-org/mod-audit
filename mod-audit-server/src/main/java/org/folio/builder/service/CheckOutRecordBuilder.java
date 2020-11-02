@@ -27,13 +27,12 @@ import org.folio.builder.description.RequestStatusChangedDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.folio.util.JsonPropertyFetcher;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class CheckOutRecordBuilderService extends LogRecordBuilderService {
-  public CheckOutRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+public class CheckOutRecordBuilder extends LogRecordBuilder {
+  public CheckOutRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
@@ -53,26 +52,26 @@ public class CheckOutRecordBuilderService extends LogRecordBuilderService {
   private LogRecord buildCheckOutRequestStatusChangedRecord(JsonObject payload, JsonObject request) {
     return new LogRecord().withObject(LogRecord.Object.REQUEST)
       .withAction(LogRecord.Action.REQUEST_STATUS_CHANGED)
-      .withUserBarcode(JsonPropertyFetcher.getProperty(payload, USER_BARCODE))
-      .withSource(JsonPropertyFetcher.getProperty(payload, SOURCE))
+      .withUserBarcode(getProperty(payload, USER_BARCODE))
+      .withSource(getProperty(payload, SOURCE))
       .withItems(buildItems(payload))
-      .withServicePointId(JsonPropertyFetcher.getProperty(payload, SERVICE_POINT_ID))
+      .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
       .withDate(new Date())
       .withDescription(new RequestStatusChangedDescriptionBuilder().buildDescription(request))
-      .withLinkToIds(new LinkToIds().withUserId(JsonPropertyFetcher.getProperty(payload, USER_ID))
-        .withRequestId(JsonPropertyFetcher.getProperty(request, REQUEST_ID)));
+      .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID))
+        .withRequestId(getProperty(request, REQUEST_ID)));
   }
 
   private LogRecord buildLoanCheckOutRecord(JsonObject payload) {
     return new LogRecord().withObject(LogRecord.Object.LOAN)
       .withAction(LogRecord.Action.CHECKED_OUT)
-      .withUserBarcode(JsonPropertyFetcher.getProperty(payload, USER_BARCODE))
-      .withSource(JsonPropertyFetcher.getProperty(payload, SOURCE))
+      .withUserBarcode(getProperty(payload, USER_BARCODE))
+      .withSource(getProperty(payload, SOURCE))
       .withItems(buildItems(payload))
-      .withServicePointId(JsonPropertyFetcher.getProperty(payload, SERVICE_POINT_ID))
+      .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
       .withDate(new Date())
       .withDescription(new LoanCheckOutDescriptionBuilder().buildDescription(payload))
-      .withLinkToIds(new LinkToIds().withUserId(JsonPropertyFetcher.getProperty(payload, USER_ID)));
+      .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)));
   }
 
   private List<Item> buildItems(JsonObject payload) {
