@@ -14,8 +14,8 @@ public class LogRecordBuilderResolverTest extends BuilderTestBase {
   @ParameterizedTest
   @EnumSource(LogEventTypes.class)
   void testLogRecordBuilderResolver(LogEventTypes logEventType) {
-    LogRecordBuilderService service = LogRecordBuilderResolver.getBuilder(logEventType.getValue(), new HashMap<>(),
+    LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(logEventType.getValue(), new HashMap<>(),
       TestSuite.getVertx().getOrCreateContext());
-    assertThat(service, instanceOf(logEventType.getClazz()));
+    assertThat(builder, instanceOf(logEventType.getClazz()));
   }
 }

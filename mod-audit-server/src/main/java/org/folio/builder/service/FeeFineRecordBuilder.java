@@ -1,18 +1,13 @@
 package org.folio.builder.service;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.FEE_FINE;
-import static org.folio.util.Constants.URL_WITH_ID_PATTERN;
-import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
 import static org.folio.util.LogEventPayloadField.ACTION;
-import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.DATE;
-import static org.folio.util.LogEventPayloadField.FEE_FINE_ID;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
 import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
@@ -36,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class FeeFineRecordBuilderService extends LogRecordBuilderService {
-  public FeeFineRecordBuilderService(Map<String, String> okapiHeaders, Context vertxContext) {
+public class FeeFineRecordBuilder extends LogRecordBuilder {
+  public FeeFineRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
@@ -76,13 +71,4 @@ public class FeeFineRecordBuilderService extends LogRecordBuilderService {
         .withFeeFineId(getProperty(payload, ACCOUNT_ID)))));
   }
 
-  private CompletableFuture<JsonObject> fetchUserBarcode(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
-      .thenCompose(userJson -> {
-        if (nonNull(userJson)) {
-          return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
-        }
-        return CompletableFuture.completedFuture(payload);
-      });
-  }
 }

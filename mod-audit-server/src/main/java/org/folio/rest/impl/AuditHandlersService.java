@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import org.folio.builder.LogRecordBuilderResolver;
-import org.folio.builder.service.LogRecordBuilderService;
+import org.folio.builder.service.LogRecordBuilder;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.resource.AuditHandlers;
@@ -34,7 +34,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       JsonObject payload = new JsonObject(entity);
-      LogRecordBuilderService builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()),
+      LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()),
         okapiHeaders, vertxContext);
       builder.buildLogRecord(new JsonObject(entity))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))

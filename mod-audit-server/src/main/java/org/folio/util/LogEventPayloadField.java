@@ -1,6 +1,7 @@
 package org.folio.util;
 
 public enum LogEventPayloadField {
+  ID("id"),
   ACCOUNT_ID("accountId"),
   AUTOMATED("automated"),
   NOTICE_POLICY_ID("noticePolicyId"),
@@ -17,6 +18,7 @@ public enum LogEventPayloadField {
   PAYMENT_METHOD("paymentMethod"),
   BALANCE("balance"),
   AMOUNT("amount"),
+  METADATA("metadata"),
   FEE_FINE_OWNER("feeFineOwner"),
   TYPE("type"),
   DESCRIPTION("description"),

@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
 
 public class BuilderTestBase extends TestBase {
 
-  static LogRecordBuilderService checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
     feeFineRecordBuilder, noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
@@ -40,13 +40,13 @@ public class BuilderTestBase extends TestBase {
     if (!isInitialized) {
       TestSuite.globalInitialize();
     }
-    checkInRecordBuilder = new CheckInRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    checkOutRecordBuilder = new CheckOutRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    manualBlockRecordBuilder = new ManualBlockRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    feeFineRecordBuilder = new FeeFineRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    noticeRecordBuilder = new NoticeRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    loanRecordBuilder = new LoanRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    requestLogRecordBuilder = new RequestRecordBuilderService(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    checkInRecordBuilder = new CheckInRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    checkOutRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    manualBlockRecordBuilder = new ManualBlockRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    feeFineRecordBuilder = new FeeFineRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    noticeRecordBuilder = new NoticeRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    loanRecordBuilder = new LoanRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    requestLogRecordBuilder = new RequestRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
   }
 
   @AfterAll
