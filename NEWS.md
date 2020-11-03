@@ -1,5 +1,12 @@
 ## 1.1.0 - Unreleased
 
+## 1.0.1 - Released
+The primary focus of this release was to fix issues with Notices, Loans and Manual Blocks actions logging
+
+### Stories
+* [MODAUD-29](https://issues.folio.org/browse/MODAUD-29) Template name in Notices log description and Source filed in Loan log record are empty
+* [MODAUD-28](https://issues.folio.org/browse/MODAUD-28) User barcode isn't present in log record entry
+
 ## 1.0.0 - Released
 The primary focus of this release was to implement Circulation Audit Logs logic
 
