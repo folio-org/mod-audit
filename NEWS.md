@@ -3,12 +3,16 @@
 ## 1.0.1 - Released
 The primary focus of this release was to fix issues with Notices, Loans and Manual Blocks actions logging
 
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v1.0.0...v1.0.1)
+
 ### Stories
 * [MODAUD-29](https://issues.folio.org/browse/MODAUD-29) Template name in Notices log description and Source filed in Loan log record are empty
 * [MODAUD-28](https://issues.folio.org/browse/MODAUD-28) User barcode isn't present in log record entry
 
 ## 1.0.0 - Released
 The primary focus of this release was to implement Circulation Audit Logs logic
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v0.0.4...v1.0.0)
 
 ### Stories
 * [MODAUD-24](https://issues.folio.org/browse/MODAUD-24) Migrate mod-audit to JDK 11
