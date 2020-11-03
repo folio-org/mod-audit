@@ -27,6 +27,7 @@ import static org.folio.util.LogEventPayloadField.PERSONAL;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_ID;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_NAME;
+import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
@@ -142,7 +143,7 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchPersonalName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, UPDATED_BY_USER_ID)))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
@@ -150,6 +151,16 @@ public abstract class LogRecordBuilder {
             return CompletableFuture.completedFuture(payload.put(PERSONAL_NAME.value(),
               String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME))));
           }
+        }
+        return CompletableFuture.completedFuture(payload);
+      });
+  }
+
+  public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload) {
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
+      .thenCompose(userJson -> {
+        if (nonNull(userJson)) {
+          return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
         }
         return CompletableFuture.completedFuture(payload);
       });

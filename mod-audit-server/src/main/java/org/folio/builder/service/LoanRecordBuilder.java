@@ -1,5 +1,7 @@
 package org.folio.builder.service;
 
+import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
@@ -36,8 +38,11 @@ public class LoanRecordBuilder extends LogRecordBuilder {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
-    if (isAnonymize(payload)) {
+    if (isAction(payload, ANONYMIZE)) {
       return fetchItemDetails(payload)
+        .thenCompose(this::createResult);
+    } else if (isAction(payload, AGE_TO_LOST)) {
+      return fetchUserDetails(payload)
         .thenCompose(this::createResult);
     }
     return fetchPersonalName(payload)
@@ -57,12 +62,12 @@ public class LoanRecordBuilder extends LogRecordBuilder {
       .withAction(LogRecord.Action.fromValue(getProperty(payload, ACTION)))
       .withDate(getDateTimeProperty(payload, DATE).toDate())
       .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
-      .withSource(isAnonymize(payload) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
+      .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
       .withDescription(getProperty(payload, DESCRIPTION))
       .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)))));
   }
 
-  private boolean isAnonymize(JsonObject payload) {
-    return LogRecord.Action.ANONYMIZE.equals(LogRecord.Action.fromValue(getProperty(payload, ACTION)));
+  private boolean isAction(JsonObject payload, LogRecord.Action action) {
+    return action.equals(LogRecord.Action.fromValue(getProperty(payload, ACTION)));
   }
 }
