@@ -1,0 +1,21 @@
+{
+  "username": "diku_admin",
+  "id": "fa96fec8-786f-505b-b55e-e0bb1150d548",
+  "active": true,
+  "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+  "departments": [],
+  "proxyFor": [],
+  "personal": {
+    "lastName": "ADMINISTRATOR",
+    "firstName": "DIKU",
+    "email": "admin@diku.example.org",
+    "addresses": []
+  },
+  "createdDate": "2020-11-01T03:21:31.046+00:00",
+  "updatedDate": "2020-11-01T03:21:31.046+00:00",
+  "metadata": {
+    "createdDate": "2020-11-01T03:19:36.441+00:00",
+    "updatedDate": "2020-11-01T03:21:31.042+00:00",
+    "updatedByUserId": "fa96fec8-786f-505b-b55e-e0bb1150d548"
+  }
+}

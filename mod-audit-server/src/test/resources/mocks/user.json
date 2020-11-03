@@ -1,0 +1,38 @@
+{
+  "username": "carolina",
+  "id": "6f36265e-722a-490a-b436-806e63af2ea7",
+  "barcode": "693787594998493",
+  "active": true,
+  "type": "patron",
+  "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+  "departments": [],
+  "proxyFor": [],
+  "personal": {
+    "lastName": "Mohr",
+    "firstName": "Bridget",
+    "email": "estell@friesen-llc.au",
+    "phone": "350-369-4844 x907",
+    "mobilePhone": "1-791-331-4472",
+    "dateOfBirth": "1976-07-01T00:00:00.000+00:00",
+    "addresses": [
+      {
+        "countryId": "US",
+        "addressLine1": "73436 Phoebe Burgs Suite 980",
+        "city": "Compton",
+        "region": "FL",
+        "postalCode": "95966-2819",
+        "addressTypeId": "1c4b225f-f669-4e9b-afcd-ebc0e273a34e",
+        "primaryAddress": true
+      }
+    ],
+    "preferredContactTypeId": "002"
+  },
+  "enrollmentDate": "2016-09-05T00:00:00.000+00:00",
+  "expirationDate": "2021-01-06T00:00:00.000+00:00",
+  "createdDate": "2020-11-01T03:17:51.757+00:00",
+  "updatedDate": "2020-11-01T03:17:51.757+00:00",
+  "metadata": {
+    "createdDate": "2020-11-01T03:17:51.753+00:00",
+    "updatedDate": "2020-11-01T03:17:51.753+00:00"
+  }
+}

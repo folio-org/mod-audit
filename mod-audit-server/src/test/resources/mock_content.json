@@ -1,0 +1,45 @@
+{
+  "mocks": [
+    {
+      "url": "/templates/21f4fd8e-cf19-4870-8288-eb675aec8b3c",
+      "method": "GET",
+      "receivedPath": "mocks/template.json",
+      "status": 200
+    },
+    {
+      "url": "/users/fa96fec8-786f-505b-b55e-e0bb1150d548",
+      "method": "GET",
+      "receivedPath": "mocks/user_diku.json",
+      "status": 200
+    },
+    {
+      "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
+      "method": "GET",
+      "status": 404
+    },
+    {
+      "url": "/users?limit=2&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
+      "method": "GET",
+      "receivedPath": "mocks/users.json",
+      "status": 200
+    },
+    {
+      "url": "/users?limit=2&offset=0&query=id%3D%3D%284a52f480-8f9a-49c8-9dbb-65f086e577fb+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
+      "method": "GET",
+      "receivedPath": "mocks/empty_users.json",
+      "status": 200
+    },
+    {
+      "url": "/inventory/items/100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+      "method": "GET",
+      "receivedPath": "mocks/item.json",
+      "status": 200
+    },
+    {
+      "url": "/holdings-storage/holdings/e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19",
+      "method": "GET",
+      "receivedPath": "mocks/holdingsRecord.json",
+      "status": 200
+    }
+  ]
+}

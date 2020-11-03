@@ -19,15 +19,18 @@
 
   <properties>
     <aspectj.version>1.9.6</aspectj.version>
-    <raml-module-builder.version>31.1.1</raml-module-builder.version>
+    <raml-module-builder.version>31.1.4</raml-module-builder.version>
     <vertx.version>3.9.3</vertx.version>
     <wiremock.version>2.25.1</wiremock.version>
     <junit.jupiter.version>5.6.2</junit.jupiter.version>
     <rest-assured.version>4.3.0</rest-assured.version>
     <jackson.version>2.11.1</jackson.version>
+    <pubsub.client.version>1.3.1</pubsub.client.version>
+    <vertx-completable-future.version>0.1.2</vertx-completable-future.version>
+    <streamx.version>0.7.3</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
-    <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <argLine />
   </properties>
 

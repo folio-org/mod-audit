@@ -26,12 +26,13 @@ import org.junit.jupiter.api.BeforeAll;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class BuilderTestBase extends TestBase {
 
-  static LogRecordBuilderService checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
     feeFineRecordBuilder, noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
@@ -39,13 +40,13 @@ public class BuilderTestBase extends TestBase {
     if (!isInitialized) {
       TestSuite.globalInitialize();
     }
-    checkInRecordBuilder = new CheckInRecordBuilderService();
-    checkOutRecordBuilder = new CheckOutRecordBuilderService();
-    manualBlockRecordBuilder = new ManualBlockRecordBuilderService();
-    feeFineRecordBuilder = new FeeFineRecordBuilderService();
-    noticeRecordBuilder = new NoticeRecordBuilderService();
-    loanRecordBuilder = new LoanRecordBuilderService();
-    requestLogRecordBuilder = new RequestRecordBuilderService();
+    checkInRecordBuilder = new CheckInRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    checkOutRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    manualBlockRecordBuilder = new ManualBlockRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    feeFineRecordBuilder = new FeeFineRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    noticeRecordBuilder = new NoticeRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    loanRecordBuilder = new LoanRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    requestLogRecordBuilder = new RequestRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
   }
 
   @AfterAll

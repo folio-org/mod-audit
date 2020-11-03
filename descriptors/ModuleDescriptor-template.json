@@ -25,12 +25,20 @@
     {
       "id": "template-engine",
       "version": "2.2"
+    },
+    {
+      "id": "inventory",
+      "version": "10.7"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "4.4"
     }
   ],
   "provides": [
     {
       "id": "audit",
-      "version": "1.0",
+      "version": "1.1",
       "handlers": [
         {
           "methods": [
@@ -81,7 +89,7 @@
     },
     {
       "id": "circulation-logs",
-      "version": "1.0",
+      "version": "1.1",
       "handlers": [
         {
           "methods": [
@@ -96,13 +104,20 @@
     },
     {
       "id": "audit-data-event-handlers",
-      "version": "1.0",
+      "version": "1.1",
       "handlers": [
         {
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
             "audit-data.events.post"
+          ],
+          "modulePermissions": [
+            "users.item.get",
+            "users.collection.get",
+            "templates.item.get",
+            "inventory.items.item.get",
+            "inventory-storage.holdings.item.get"
           ]
         }
       ]
