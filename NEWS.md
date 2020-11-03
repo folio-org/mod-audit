@@ -1,5 +1,14 @@
 ## 1.1.0 - Unreleased
 
+## 1.0.2 - Released
+The primary focus of this release was to update RMB and module logging
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v1.0.1...v1.0.2)
+
+### Stories
+* [MODAUD-37](https://issues.folio.org/browse/MODAUD-37) ERROR StatusLogger Unrecognized format specifier [d]
+* [MODAUD-34](https://issues.folio.org/browse/MODAUD-34) mod-audit: RMB Update
+
 ## 1.0.1 - Released
 The primary focus of this release was to fix issues with Notices, Loans and Manual Blocks actions logging
 
