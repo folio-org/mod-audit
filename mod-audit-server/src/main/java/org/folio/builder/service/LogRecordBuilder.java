@@ -27,7 +27,6 @@ import static org.folio.util.LogEventPayloadField.PERSONAL;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_ID;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_NAME;
-import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
@@ -143,7 +142,7 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchPersonalName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, UPDATED_BY_USER_ID)))
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
