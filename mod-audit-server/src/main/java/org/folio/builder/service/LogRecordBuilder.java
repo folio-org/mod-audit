@@ -2,6 +2,7 @@ package org.folio.builder.service;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -37,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -109,15 +109,6 @@ public abstract class LogRecordBuilder {
     return future;
   }
 
-  public CompletableFuture<JsonObject> fetchUserBarcode(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID))).thenCompose(userJson -> {
-      if (nonNull(userJson)) {
-        return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
-      }
-      return CompletableFuture.completedFuture(payload);
-    });
-  }
-
   /**
    * Returns list of item records for specified id's.
    *
@@ -141,14 +132,17 @@ public abstract class LogRecordBuilder {
       });
   }
 
-  public CompletableFuture<JsonObject> fetchPersonalName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
+  public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, userId))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
+          if (userId.equals(getProperty(payload, USER_ID))) {
+            ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
+          }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
           if (nonNull(personal)) {
-            return CompletableFuture.completedFuture(payload.put(PERSONAL_NAME.value(),
-              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME))));
+            payload.put(PERSONAL_NAME.value(),
+              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME)));
           }
         }
         return CompletableFuture.completedFuture(payload);
@@ -174,7 +168,7 @@ public abstract class LogRecordBuilder {
    * @return list of the entry records as JsonObject elements
    */
   private List<JsonObject> extractEntities(JsonObject entries, String key) {
-    return Optional.ofNullable(entries.getJsonArray(key))
+    return ofNullable(entries.getJsonArray(key))
       .map(objects -> objects.stream()
         .map(entry -> (JsonObject) entry)
         .collect(toList()))
@@ -220,16 +214,18 @@ public abstract class LogRecordBuilder {
 
   private CompletableFuture<JsonObject> addItemData(JsonObject payload, JsonObject itemJson) {
     if (nonNull(itemJson)) {
-      return CompletableFuture.completedFuture(payload
-        .put(ITEM_BARCODE.value(), getProperty(itemJson, BARCODE))
-        .put(HOLDINGS_RECORD_ID.value(), getProperty(itemJson, HOLDINGS_RECORD_ID)));
+      ofNullable(getProperty(itemJson, BARCODE))
+        .ifPresent(barcode -> payload.put(ITEM_BARCODE.value(), barcode));
+      ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
+        .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
     }
     return CompletableFuture.completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
     if (nonNull(holdingJson)) {
-      return CompletableFuture.completedFuture(payload.put(INSTANCE_ID.value(), getProperty(holdingJson, INSTANCE_ID)));
+      ofNullable(getProperty(holdingJson, INSTANCE_ID))
+        .ifPresent(instanceId -> payload.put(INSTANCE_ID.value(), instanceId));
     }
     return CompletableFuture.completedFuture(payload);
   }
@@ -249,4 +245,12 @@ public abstract class LogRecordBuilder {
   }
 
   public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
+
+  protected LogRecord.Action resolveAction(String actionString) {
+    try {
+      return LogRecord.Action.fromValue(actionString);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Builder isn't implemented yet for: " + actionString);
+    }
+  }
 }
