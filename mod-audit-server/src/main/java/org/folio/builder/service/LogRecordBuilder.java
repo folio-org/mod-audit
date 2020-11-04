@@ -27,7 +27,6 @@ import static org.folio.util.LogEventPayloadField.PERSONAL;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_ID;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_NAME;
-import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
