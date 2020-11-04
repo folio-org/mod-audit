@@ -40,7 +40,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
     JsonObject payload = new JsonObject(getProperty(fullPayload, PAYLOAD));
 
-    return fetchUserBarcode(payload)
+    return fetchUserDetails(payload, getProperty(payload, USER_ID))
       .thenCompose(this::createResult);
   }
 

@@ -2,6 +2,7 @@ package org.folio.builder.service;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -37,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -109,15 +109,6 @@ public abstract class LogRecordBuilder {
     return future;
   }
 
-  public CompletableFuture<JsonObject> fetchUserBarcode(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID))).thenCompose(userJson -> {
-      if (nonNull(userJson)) {
-        return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
-      }
-      return CompletableFuture.completedFuture(payload);
-    });
-  }
-
   /**
    * Returns list of item records for specified id's.
    *
@@ -146,7 +137,7 @@ public abstract class LogRecordBuilder {
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
           if (getProperty(payload, USER_ID).equals(userId)) {
-            payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE));
+            ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
           }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
           if (nonNull(personal)) {
@@ -177,7 +168,7 @@ public abstract class LogRecordBuilder {
    * @return list of the entry records as JsonObject elements
    */
   private List<JsonObject> extractEntities(JsonObject entries, String key) {
-    return Optional.ofNullable(entries.getJsonArray(key))
+    return ofNullable(entries.getJsonArray(key))
       .map(objects -> objects.stream()
         .map(entry -> (JsonObject) entry)
         .collect(toList()))
