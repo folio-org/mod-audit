@@ -23,6 +23,7 @@ public class TestBase {
   public static final String FEE_FINE_PAYLOAD_JSON = "payloads/fee_fine_billed.json";
   public static final String LOAN_PAYLOAD_JSON = "payloads/loan.json";
   public static final String LOAN_ANONYMIZE_PAYLOAD_JSON = "payloads/loan_anonymize.json";
+  public static final String LOAN_AGE_TO_LOST_PAYLOAD_JSON = "payloads/loan_age_to_lost.json";
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
 
   public static final String REQUEST_CREATED_PAYLOAD_JSON = "payloads/request_created.json";

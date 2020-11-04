@@ -13,6 +13,12 @@
       "status": 200
     },
     {
+      "url": "/users/2a81b279-d459-4022-82f6-69a569d196b9",
+      "method": "GET",
+      "receivedPath": "mocks/user_sunny.json",
+      "status": 200
+    },
+    {
       "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
       "method": "GET",
       "status": 404
