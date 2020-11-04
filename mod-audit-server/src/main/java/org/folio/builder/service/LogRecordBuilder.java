@@ -136,7 +136,7 @@ public abstract class LogRecordBuilder {
     return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, userId))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
-          if (getProperty(payload, USER_ID).equals(userId)) {
+          if (userId.equals(getProperty(payload, USER_ID))) {
             ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
           }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
@@ -214,16 +214,18 @@ public abstract class LogRecordBuilder {
 
   private CompletableFuture<JsonObject> addItemData(JsonObject payload, JsonObject itemJson) {
     if (nonNull(itemJson)) {
-      return CompletableFuture.completedFuture(payload
-        .put(ITEM_BARCODE.value(), getProperty(itemJson, BARCODE))
-        .put(HOLDINGS_RECORD_ID.value(), getProperty(itemJson, HOLDINGS_RECORD_ID)));
+      ofNullable(getProperty(itemJson, BARCODE))
+        .ifPresent(barcode -> payload.put(ITEM_BARCODE.value(), barcode));
+      ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
+        .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
     }
     return CompletableFuture.completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
     if (nonNull(holdingJson)) {
-      return CompletableFuture.completedFuture(payload.put(INSTANCE_ID.value(), getProperty(holdingJson, INSTANCE_ID)));
+      ofNullable(getProperty(holdingJson, INSTANCE_ID))
+        .ifPresent(instanceId -> payload.put(INSTANCE_ID.value(), instanceId));
     }
     return CompletableFuture.completedFuture(payload);
   }
