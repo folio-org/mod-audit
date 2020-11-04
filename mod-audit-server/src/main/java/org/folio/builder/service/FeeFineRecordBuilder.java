@@ -61,7 +61,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
       .withObject(FEE_FINE)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withItems(Collections.singletonList(item))
-      .withAction(LogRecord.Action.fromValue(getProperty(payload, ACTION)))
+      .withAction(resolveAction(getProperty(payload, ACTION)))
       .withDate(getDateTimeProperty(payload, DATE).toDate())
       .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
       .withSource(getProperty(payload, SOURCE))

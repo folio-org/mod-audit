@@ -142,25 +142,18 @@ public abstract class LogRecordBuilder {
       });
   }
 
-  public CompletableFuture<JsonObject> fetchPersonalName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, UPDATED_BY_USER_ID)))
+  public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, userId))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
+          if (getProperty(payload, USER_ID).equals(userId)) {
+            payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE));
+          }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
           if (nonNull(personal)) {
-            return CompletableFuture.completedFuture(payload.put(PERSONAL_NAME.value(),
-              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME))));
+            payload.put(PERSONAL_NAME.value(),
+              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME)));
           }
-        }
-        return CompletableFuture.completedFuture(payload);
-      });
-  }
-
-  public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
-      .thenCompose(userJson -> {
-        if (nonNull(userJson)) {
-          return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
         }
         return CompletableFuture.completedFuture(payload);
       });
@@ -260,4 +253,12 @@ public abstract class LogRecordBuilder {
   }
 
   public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
+
+  protected LogRecord.Action resolveAction(String actionString) {
+    try {
+      return LogRecord.Action.fromValue(actionString);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Builder isn't implemented yet for: " + actionString);
+    }
+  }
 }

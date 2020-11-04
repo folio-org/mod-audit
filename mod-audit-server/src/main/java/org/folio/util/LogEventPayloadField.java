@@ -22,7 +22,6 @@ public enum LogEventPayloadField {
   FEE_FINE_OWNER("feeFineOwner"),
   TYPE("type"),
   DESCRIPTION("description"),
-  FEE_FINE_ID("feeFineId"),
   ACTION("action"),
   DATE("date"),
   LOG_EVENT_TYPE("logEventType"),

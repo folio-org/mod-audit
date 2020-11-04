@@ -4,11 +4,13 @@ import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.RENEWED;
 import static org.folio.util.Constants.SYSTEM;
+import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -31,7 +33,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(records.size(), equalTo(1));
 
     LogRecord loanLogRecord = records.get(0);
-    assertThat(loanLogRecord.getUserBarcode(), equalTo("412224905087885"));
+    assertThat(loanLogRecord.getUserBarcode(), equalTo("631888472578232"));
     assertThat(loanLogRecord.getItems().size(), equalTo(1));
     assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
     assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
@@ -92,5 +94,16 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
     assertThat(loanLogRecord.getSource(), equalTo(SYSTEM));
+  }
+
+  @Test
+  void testLoanWithWrongAction() {
+    logger.info("===== Test loan log records builder: An IllegalArgumentException will be thrown if action is wrong or null =====");
+
+    JsonObject wrongAction = new JsonObject(getFile(LOAN_AGE_TO_LOST_PAYLOAD_JSON)).put(ACTION.value(), "abc");
+    assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(wrongAction).get());
+
+    JsonObject nullAction = wrongAction.putNull(ACTION.value());
+    assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
   }
 }
