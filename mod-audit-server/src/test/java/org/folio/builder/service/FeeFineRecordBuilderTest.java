@@ -34,6 +34,9 @@ public class FeeFineRecordBuilderTest extends BuilderTestBase {
     assertThat(feeFineLogRecord.getUserBarcode(), equalTo("693787594998493"));
     assertThat(feeFineLogRecord.getItems().size(), equalTo(1));
     assertThat(feeFineLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
+    assertThat(feeFineLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
+    assertThat(feeFineLogRecord.getItems().get(0).getInstanceId(), equalTo("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"));
+    assertThat(feeFineLogRecord.getItems().get(0).getHoldingId(), equalTo("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
     assertThat(feeFineLogRecord.getObject(), equalTo(LogRecord.Object.FEE_FINE));
     assertThat(feeFineLogRecord.getAction(), equalTo(BILLED));
     assertThat(feeFineLogRecord.getDate(), is(not(nullValue())));

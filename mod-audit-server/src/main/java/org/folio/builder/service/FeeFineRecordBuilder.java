@@ -41,6 +41,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
     JsonObject payload = new JsonObject(getProperty(fullPayload, PAYLOAD));
 
     return fetchUserDetails(payload, getProperty(payload, USER_ID))
+      .thenCompose(this::fetchItemDetails)
       .thenCompose(this::createResult);
   }
 
