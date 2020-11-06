@@ -8,6 +8,7 @@ import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
+import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
 import static org.folio.util.LogEventPayloadField.DATE;
@@ -47,7 +48,7 @@ public class NoticeRecordBuilder extends LogRecordBuilder {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
-    JsonObject payload = new JsonObject(getProperty(fullPayload, PAYLOAD));
+    JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
     return fetchTemplateName(payload)
       .thenCompose(this::createResult);
