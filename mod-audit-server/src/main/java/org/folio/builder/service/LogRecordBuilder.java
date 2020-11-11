@@ -143,7 +143,7 @@ public abstract class LogRecordBuilder {
             ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
           }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
-          if (nonNull(personal)) {
+          if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
             payload.put(PERSONAL_NAME.value(),
               buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
           }
