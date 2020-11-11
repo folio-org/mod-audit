@@ -145,7 +145,7 @@ public abstract class LogRecordBuilder {
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
           if (nonNull(personal)) {
             payload.put(PERSONAL_NAME.value(),
-              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME)));
+              buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
           }
         }
         return CompletableFuture.completedFuture(payload);
