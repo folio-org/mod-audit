@@ -48,22 +48,6 @@
         "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
         "status":"Open - Not yet filled",
         "position":3,
-        "item":{
-          "title":"The Girl on the Train",
-          "barcode":"765475420716",
-          "identifiers":[
-            {
-              "value":"B01LO7PJOE",
-              "identifierTypeId":"7f907515-a1bf-4513-8a38-92e1a07c539d"
-            }
-          ]
-        },
-        "requester":{
-          "firstName":"Doug",
-          "lastName":"Denesik",
-          "middleName":"Alf",
-          "barcode":"693787594998493"
-        },
         "fulfilmentPreference":"Hold Shelf",
         "requestExpirationDate":"2020-10-23T00:00:00.000+0000",
         "pickupServicePointId":"c4c90014-c8c9-4ade-8f24-b5e313319f4b",
