@@ -14,7 +14,6 @@ import static org.folio.util.LogEventPayloadField.REQUEST_FULFILMENT_PREFERENCE;
 import static org.folio.util.LogEventPayloadField.REQUEST_PICKUP_SERVICE_POINT;
 import static org.folio.util.LogEventPayloadField.REQUEST_POSITION;
 import static org.folio.util.LogEventPayloadField.REQUEST_PREVIOUS_POSITION;
-import static org.folio.util.LogEventPayloadField.REQUEST_REASON_FOR_CANCELLATION;
 import static org.folio.util.LogEventPayloadField.REQUEST_SERVICE_POINT;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
 
@@ -107,14 +106,13 @@ public class RequestDescriptionBuilder {
       .trim();
   }
 
-  public String buildCancelledDescription(JsonObject original, JsonObject updated) {
+  public String buildCancelledDescription(JsonObject original, String reasonForCancellation) {
 
     StringBuilder description = buildBaseDescription(original);
 
-    Optional.ofNullable(getProperty(updated, REQUEST_REASON_FOR_CANCELLATION))
-      .ifPresent(reason -> description.append("Reason for cancellation: ")
-        .append(reason)
-        .append("."));
+    description.append("Reason for cancellation: ")
+        .append(reasonForCancellation)
+        .append(".");
 
     return description.toString()
       .trim();

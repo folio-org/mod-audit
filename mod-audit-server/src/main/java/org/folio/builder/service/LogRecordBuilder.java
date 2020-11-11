@@ -6,6 +6,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.util.Constants.HOLDINGS_URL;
 import static org.folio.util.Constants.ITEMS_URL;
@@ -15,26 +16,11 @@ import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
-import static org.folio.util.LogEventPayloadField.BARCODE;
-import static org.folio.util.LogEventPayloadField.FIRST_NAME;
-import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
-import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
-import static org.folio.util.LogEventPayloadField.ITEMS;
-import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
-import static org.folio.util.LogEventPayloadField.ITEM_ID;
-import static org.folio.util.LogEventPayloadField.LAST_NAME;
-import static org.folio.util.LogEventPayloadField.NAME;
-import static org.folio.util.LogEventPayloadField.PERSONAL;
-import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
-import static org.folio.util.LogEventPayloadField.TEMPLATE_ID;
-import static org.folio.util.LogEventPayloadField.TEMPLATE_NAME;
-import static org.folio.util.LogEventPayloadField.USER_BARCODE;
-import static org.folio.util.LogEventPayloadField.USER_ID;
+import static org.folio.util.LogEventPayloadField.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -66,9 +52,12 @@ public abstract class LogRecordBuilder {
   public static final String SEARCH_PARAMS = "?limit=%s&offset=%s%s";
   public static final String ID = "id";
   public static final String USERS = "users";
+  public static final String CANCELLATION_REASONS = "cancellationReasons";
 
   protected final Map<String, String> okapiHeaders;
   protected final Context vertxContext;
+
+  public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
 
   public LogRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     this.okapiHeaders = okapiHeaders;
@@ -115,9 +104,9 @@ public abstract class LogRecordBuilder {
    * @param ids List of item id's
    * @return future with list of item records
    */
-  public CompletableFuture<List<JsonObject>> getEntitiesByIds(List<String> ids, String key) {
+  public CompletableFuture<List<JsonObject>> getEntitiesByIds(String url, String key, int limit, int offset, String... ids) {
     String query = convertIdsToCqlQuery(ids);
-    String endpoint = String.format(USERS_URL + SEARCH_PARAMS, 2, 0, buildQuery(query));
+    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
     return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
   }
 
@@ -194,8 +183,8 @@ public abstract class LogRecordBuilder {
    * @param ids list of id's
    * @return String representing CQL query to get records by id's
    */
-  private String convertIdsToCqlQuery(Collection<String> ids) {
-    return convertIdsToCqlQuery(ids, ID, true);
+  private String convertIdsToCqlQuery(String... ids) {
+    return convertIdsToCqlQuery(ID, true, ids);
   }
 
   /**
@@ -206,7 +195,7 @@ public abstract class LogRecordBuilder {
    * @param strictMatch indicates whether strict match mode (i.e. ==) should be used or not (i.e. =)
    * @return String representing CQL query to get records by some property values
    */
-  private String convertIdsToCqlQuery(Collection<String> values, String fieldName, boolean strictMatch) {
+  private String convertIdsToCqlQuery(String fieldName, boolean strictMatch, String... values) {
     String prefix = fieldName + (strictMatch ? "==(" : "=(");
     return StreamEx.of(values)
       .joining(" or ", prefix, ")");
@@ -244,13 +233,23 @@ public abstract class LogRecordBuilder {
     return response.getBody();
   }
 
-  public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
-
   protected LogRecord.Action resolveAction(String actionString) {
     try {
       return LogRecord.Action.fromValue(actionString);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + actionString);
+    }
+  }
+
+  String buildPersonalName(String firstName, String lastName) {
+    if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
+      return lastName + ", " + firstName;
+    } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
+      return lastName;
+    } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
+      return firstName;
+    } else {
+      return null;
     }
   }
 }

@@ -1,13 +1,11 @@
 package org.folio.builder.service;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_CREATED;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_DELETED;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_MODIFIED;
+import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
@@ -27,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import one.util.streamex.StreamEx;
 import org.folio.builder.description.ManualBlockDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -35,6 +32,7 @@ import org.folio.util.LogEventPayloadField;
 
 import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
+import one.util.streamex.StreamEx;
 
 public class ManualBlockRecordBuilder extends LogRecordBuilder {
   public ManualBlockRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
@@ -50,7 +48,7 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
     String userId = getProperty(payload, USER_ID);
     String sourceId = getNestedStringProperty(payload, METADATA, UPDATED_BY_USER_ID);
 
-    return getEntitiesByIds(asList(userId, sourceId), USERS).thenCompose(users -> {
+    return getEntitiesByIds(USERS_URL, USERS, 2, 0, userId, sourceId).thenCompose(users -> {
       Map<String, JsonObject> usersGroupedById = StreamEx.of(users)
         .collect(toMap(u -> getProperty(u, LogEventPayloadField.ID), Function.identity()));
       LogRecord manualBlockLogRecord = buildManualBlockLogRecord(payload, logEventType, userId, sourceId, usersGroupedById);
@@ -59,7 +57,7 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
   }
 
   private LogRecord buildManualBlockLogRecord(JsonObject payload, String logEventType, String userId, String sourceId,
-                                              Map<String, JsonObject> usersGroupedById) {
+      Map<String, JsonObject> usersGroupedById) {
     return new LogRecord().withObject(LogRecord.Object.MANUAL_BLOCK)
       .withUserBarcode(getProperty(usersGroupedById.get(userId), BARCODE))
       .withSource(getSource(logEventType, sourceId, usersGroupedById))
@@ -74,18 +72,6 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
     return MANUAL_BLOCK_DELETED.equals(logEventType) ? null
         : buildPersonalName(getNestedStringProperty(sourceJson, PERSONAL, FIRST_NAME),
             getNestedStringProperty(sourceJson, PERSONAL, LAST_NAME));
-  }
-
-  private String buildPersonalName(String firstName, String lastName) {
-    if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
-      return lastName + ", " + firstName;
-    } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
-      return lastName;
-    } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
-      return firstName;
-    } else {
-      return null;
-    }
   }
 
   private LogRecord.Action resolveLogRecordAction(String logEventType) {

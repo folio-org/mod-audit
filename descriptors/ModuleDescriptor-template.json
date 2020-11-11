@@ -117,7 +117,8 @@
             "users.collection.get",
             "templates.item.get",
             "inventory.items.item.get",
-            "inventory-storage.holdings.item.get"
+            "inventory-storage.holdings.item.get",
+            "circulation-storage.cancellation-reasons.collection.get"
           ]
         }
       ]

@@ -1,9 +1,5 @@
 package org.folio.builder.service;
 
-import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
-import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
-import static org.folio.util.LogEventPayloadField.PAYLOAD;
-import static org.folio.util.LogEventPayloadField.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -26,7 +22,7 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
   private static final String EXPECTED_CREATE_DESCRIPTION = "Type: Recall.";
   private static final String EXPECTED_EDITED_DESCRIPTION = "Type: Recall. New expiration date: 2020-10-23 00:00:00 (from: 2020-10-19 00:00:00). New fulfilment preference: Hold Shelf (from: Hold).";
   private static final String EXPECTED_MOVED_DESCRIPTION = "Type: Hold. New item barcode: 645398607547 (from: 653285216743).";
-  private static final String EXPECTED_CANCELLED_DESCRIPTION = "Type: Hold.";
+  private static final String EXPECTED_CANCELLED_DESCRIPTION = "Type: Hold. Reason for cancellation: Cancelled at patron’s request.";
   private static final String EXPECTED_REORDERED_DESCRIPTION = "Type: Recall. New queue position: 2 (from: 3).";
 
   private enum TestValue {
@@ -77,9 +73,13 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
     assertThat(requestLogRecord.getServicePointId(), notNullValue());
 
     assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
-    assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), equalTo(getNestedStringProperty(payload, PAYLOAD, ITEM_BARCODE)));
+    assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
 
-    assertThat(requestLogRecord.getLinkToIds().getUserId(), equalTo(getNestedStringProperty(payload, PAYLOAD, USER_ID)));
+    assertThat(requestLogRecord.getUserBarcode(), notNullValue());
+    assertThat(requestLogRecord.getLinkToIds().getUserId(), notNullValue());
+    assertThat(requestLogRecord.getLinkToIds().getRequestId(), notNullValue());
+
+    assertThat(requestLogRecord.getSource(), notNullValue());
 
     assertThat(requestLogRecord.getDescription(), equalTo(value.getDescription()));
   }
