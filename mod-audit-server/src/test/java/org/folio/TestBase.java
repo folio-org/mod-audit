@@ -2,8 +2,6 @@ package org.folio;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.vertx.junit5.VertxExtension;
 import org.apache.commons.io.IOUtils;
@@ -24,6 +22,7 @@ public class TestBase {
   public static final String LOAN_PAYLOAD_JSON = "payloads/loan.json";
   public static final String LOAN_ANONYMIZE_PAYLOAD_JSON = "payloads/loan_anonymize.json";
   public static final String LOAN_AGE_TO_LOST_PAYLOAD_JSON = "payloads/loan_age_to_lost.json";
+  public static final String LOAN_WRONG_ACTION_JSON = "payloads/loan_wrong_action.json";
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
 
   public static final String REQUEST_CREATED_PAYLOAD_JSON = "payloads/request_created.json";

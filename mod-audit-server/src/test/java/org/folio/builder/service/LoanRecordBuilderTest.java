@@ -100,7 +100,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
   void testLoanWithWrongAction() {
     logger.info("===== Test loan log records builder: An IllegalArgumentException will be thrown if action is wrong or null =====");
 
-    JsonObject wrongAction = new JsonObject(getFile(LOAN_AGE_TO_LOST_PAYLOAD_JSON)).put(ACTION.value(), "abc");
+    JsonObject wrongAction = new JsonObject(getFile(LOAN_WRONG_ACTION_JSON));
     assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(wrongAction).get());
 
     JsonObject nullAction = wrongAction.putNull(ACTION.value());

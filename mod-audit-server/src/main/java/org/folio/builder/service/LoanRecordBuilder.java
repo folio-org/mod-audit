@@ -5,6 +5,7 @@ import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
+import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.folio.util.LogEventPayloadField.DATE;
@@ -14,6 +15,7 @@ import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
+import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.SERVICE_POINT_ID;
 import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
@@ -38,7 +40,9 @@ public class LoanRecordBuilder extends LogRecordBuilder {
   }
 
   @Override
-  public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
+  public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
+    JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
+
     if (isAction(payload, ANONYMIZE)) {
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
