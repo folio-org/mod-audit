@@ -1,5 +1,14 @@
 ## 1.1.0 - Unreleased
 
+## 1.0.3 - Released
+This patch release contains improvements and bug fixes for requests and fees/fines log actions
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v1.0.2...v1.0.3)
+
+### Bug Fixes
+ * [MODAUD-31](https://issues.folio.org/browse/MODAUD-31) - Requests log actions - improvements
+ * [MODAUD-41](https://issues.folio.org/browse/MODAUD-41) - Fees/fines records in Circulation log do not contain item details
+
 ## 1.0.2 - Released
 The primary focus of this release was to update RMB and module logging
 
