@@ -2,9 +2,11 @@ package org.folio.builder.service;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.util.Constants.HOLDINGS_URL;
 import static org.folio.util.Constants.ITEMS_URL;
@@ -33,11 +35,9 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -66,9 +66,12 @@ public abstract class LogRecordBuilder {
   public static final String SEARCH_PARAMS = "?limit=%s&offset=%s%s";
   public static final String ID = "id";
   public static final String USERS = "users";
+  public static final String CANCELLATION_REASONS = "cancellationReasons";
 
   protected final Map<String, String> okapiHeaders;
   protected final Context vertxContext;
+
+  public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
 
   public LogRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     this.okapiHeaders = okapiHeaders;
@@ -109,24 +112,15 @@ public abstract class LogRecordBuilder {
     return future;
   }
 
-  public CompletableFuture<JsonObject> fetchUserBarcode(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID))).thenCompose(userJson -> {
-      if (nonNull(userJson)) {
-        return CompletableFuture.completedFuture(payload.put(USER_BARCODE.value(), getProperty(userJson, BARCODE)));
-      }
-      return CompletableFuture.completedFuture(payload);
-    });
-  }
-
   /**
    * Returns list of item records for specified id's.
    *
    * @param ids List of item id's
    * @return future with list of item records
    */
-  public CompletableFuture<List<JsonObject>> getEntitiesByIds(List<String> ids, String key) {
+  public CompletableFuture<List<JsonObject>> getEntitiesByIds(String url, String key, int limit, int offset, String... ids) {
     String query = convertIdsToCqlQuery(ids);
-    String endpoint = String.format(USERS_URL + SEARCH_PARAMS, 2, 0, buildQuery(query));
+    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
     return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
   }
 
@@ -141,14 +135,17 @@ public abstract class LogRecordBuilder {
       });
   }
 
-  public CompletableFuture<JsonObject> fetchPersonalName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, getProperty(payload, USER_ID)))
+  public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, userId))
       .thenCompose(userJson -> {
         if (nonNull(userJson)) {
+          if (userId.equals(getProperty(payload, USER_ID))) {
+            ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
+          }
           JsonObject personal = getObjectProperty(userJson, PERSONAL);
-          if (nonNull(personal)) {
-            return CompletableFuture.completedFuture(payload.put(PERSONAL_NAME.value(),
-              String.format(PERSONAL_NAME_PATTERN, getProperty(personal, LAST_NAME), getProperty(personal, FIRST_NAME))));
+          if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
+            payload.put(PERSONAL_NAME.value(),
+              buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
           }
         }
         return CompletableFuture.completedFuture(payload);
@@ -174,7 +171,7 @@ public abstract class LogRecordBuilder {
    * @return list of the entry records as JsonObject elements
    */
   private List<JsonObject> extractEntities(JsonObject entries, String key) {
-    return Optional.ofNullable(entries.getJsonArray(key))
+    return ofNullable(entries.getJsonArray(key))
       .map(objects -> objects.stream()
         .map(entry -> (JsonObject) entry)
         .collect(toList()))
@@ -200,8 +197,8 @@ public abstract class LogRecordBuilder {
    * @param ids list of id's
    * @return String representing CQL query to get records by id's
    */
-  private String convertIdsToCqlQuery(Collection<String> ids) {
-    return convertIdsToCqlQuery(ids, ID, true);
+  private String convertIdsToCqlQuery(String... ids) {
+    return convertIdsToCqlQuery(ID, true, ids);
   }
 
   /**
@@ -212,7 +209,7 @@ public abstract class LogRecordBuilder {
    * @param strictMatch indicates whether strict match mode (i.e. ==) should be used or not (i.e. =)
    * @return String representing CQL query to get records by some property values
    */
-  private String convertIdsToCqlQuery(Collection<String> values, String fieldName, boolean strictMatch) {
+  private String convertIdsToCqlQuery(String fieldName, boolean strictMatch, String... values) {
     String prefix = fieldName + (strictMatch ? "==(" : "=(");
     return StreamEx.of(values)
       .joining(" or ", prefix, ")");
@@ -220,16 +217,18 @@ public abstract class LogRecordBuilder {
 
   private CompletableFuture<JsonObject> addItemData(JsonObject payload, JsonObject itemJson) {
     if (nonNull(itemJson)) {
-      return CompletableFuture.completedFuture(payload
-        .put(ITEM_BARCODE.value(), getProperty(itemJson, BARCODE))
-        .put(HOLDINGS_RECORD_ID.value(), getProperty(itemJson, HOLDINGS_RECORD_ID)));
+      ofNullable(getProperty(itemJson, BARCODE))
+        .ifPresent(barcode -> payload.put(ITEM_BARCODE.value(), barcode));
+      ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
+        .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
     }
     return CompletableFuture.completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
     if (nonNull(holdingJson)) {
-      return CompletableFuture.completedFuture(payload.put(INSTANCE_ID.value(), getProperty(holdingJson, INSTANCE_ID)));
+      ofNullable(getProperty(holdingJson, INSTANCE_ID))
+        .ifPresent(instanceId -> payload.put(INSTANCE_ID.value(), instanceId));
     }
     return CompletableFuture.completedFuture(payload);
   }
@@ -248,5 +247,23 @@ public abstract class LogRecordBuilder {
     return response.getBody();
   }
 
-  public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
+  protected LogRecord.Action resolveAction(String actionString) {
+    try {
+      return LogRecord.Action.fromValue(actionString);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Builder isn't implemented yet for: " + actionString);
+    }
+  }
+
+  String buildPersonalName(String firstName, String lastName) {
+    if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
+      return lastName + ", " + firstName;
+    } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
+      return lastName;
+    } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
+      return firstName;
+    } else {
+      return null;
+    }
+  }
 }

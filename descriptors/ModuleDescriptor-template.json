@@ -33,6 +33,10 @@
     {
       "id": "holdings-storage",
       "version": "4.4"
+    },
+    {
+      "id": "cancellation-reason-storage",
+      "version": "1.1"
     }
   ],
   "provides": [
@@ -117,7 +121,8 @@
             "users.collection.get",
             "templates.item.get",
             "inventory.items.item.get",
-            "inventory-storage.holdings.item.get"
+            "inventory-storage.holdings.item.get",
+            "circulation-storage.cancellation-reasons.collection.get"
           ]
         }
       ]

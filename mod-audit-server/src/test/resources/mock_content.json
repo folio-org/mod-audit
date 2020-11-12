@@ -13,6 +13,12 @@
       "status": 200
     },
     {
+      "url": "/users/2a81b279-d459-4022-82f6-69a569d196b9",
+      "method": "GET",
+      "receivedPath": "mocks/user_sunny.json",
+      "status": 200
+    },
+    {
       "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
       "method": "GET",
       "status": 404
@@ -27,6 +33,24 @@
       "url": "/users?limit=2&offset=0&query=id%3D%3D%284a52f480-8f9a-49c8-9dbb-65f086e577fb+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
       "method": "GET",
       "receivedPath": "mocks/empty_users.json",
+      "status": 200
+    },
+    {
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%280c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc%29",
+      "method": "GET",
+      "receivedPath": "mocks/one-user-collection.json",
+      "status": 200
+    },
+    {
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%2861da1f1b-eb9e-5a33-9d47-617c84191d12%29",
+      "method": "GET",
+      "receivedPath": "mocks/one-user-collection.json",
+      "status": 200
+    },
+    {
+      "url": "/cancellation-reason-storage/cancellation-reasons?limit=1&offset=0&query=id%3D%3D%2875187e8d-e25a-47a7-89ad-23ba612338de%29",
+      "method": "GET",
+      "receivedPath": "mocks/reason-for-cancellation.json",
       "status": 200
     },
     {

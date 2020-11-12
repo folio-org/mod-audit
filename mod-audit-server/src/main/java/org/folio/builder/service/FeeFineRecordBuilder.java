@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.FEE_FINE;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
+import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
 import static org.folio.util.LogEventPayloadField.ACTION;
@@ -38,9 +39,10 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
-    JsonObject payload = new JsonObject(getProperty(fullPayload, PAYLOAD));
+    JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
-    return fetchUserBarcode(payload)
+    return fetchUserDetails(payload, getProperty(payload, USER_ID))
+      .thenCompose(this::fetchItemDetails)
       .thenCompose(this::createResult);
   }
 
@@ -61,7 +63,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
       .withObject(FEE_FINE)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withItems(Collections.singletonList(item))
-      .withAction(LogRecord.Action.fromValue(getProperty(payload, ACTION)))
+      .withAction(resolveAction(getProperty(payload, ACTION)))
       .withDate(getDateTimeProperty(payload, DATE).toDate())
       .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
       .withSource(getProperty(payload, SOURCE))
