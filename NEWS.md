@@ -9,6 +9,7 @@ This patch release contains improvements and bug fixes for requests and fees/fin
  * [MODAUD-31](https://issues.folio.org/browse/MODAUD-31) - Requests log actions - improvements
  * [MODAUD-41](https://issues.folio.org/browse/MODAUD-41) - Fees/fines records in Circulation log do not contain item details
 
+
 ## 1.0.2 - Released
 The primary focus of this release was to update RMB and module logging
 
