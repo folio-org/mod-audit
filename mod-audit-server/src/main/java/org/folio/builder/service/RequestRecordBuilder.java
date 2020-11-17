@@ -1,12 +1,15 @@
 package org.folio.builder.service;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_CANCELLED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_CREATED;
+import static org.folio.builder.LogRecordBuilderResolver.REQUEST_EXPIRED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_MOVED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_REORDERED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_UPDATED;
 import static org.folio.util.Constants.CANCELLATION_REASONS_URL;
+import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getNestedObjectProperty;
@@ -20,6 +23,7 @@ import static org.folio.util.LogEventPayloadField.FIRST_NAME;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
 import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM;
+import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LAST_NAME;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
@@ -38,6 +42,8 @@ import static org.folio.util.LogEventPayloadField.REQUEST_REASON_FOR_CANCELLATIO
 import static org.folio.util.LogEventPayloadField.STATUS;
 import static org.folio.util.LogEventPayloadField.UPDATED;
 import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
+import static org.folio.util.LogEventPayloadField.USER_BARCODE;
+import static org.folio.util.LogEventPayloadField.USER_ID;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,8 +177,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
 
         Map<String, String> usersGroupedById = StreamEx.of(s)
           .collect(toMap(u -> getProperty(u, LogEventPayloadField.ID),
-              v -> buildPersonalName(getNestedStringProperty(v, PERSONAL, FIRST_NAME),
-                  getNestedStringProperty(v, PERSONAL, LAST_NAME))));
+            v -> buildPersonalName(getNestedStringProperty(v, PERSONAL, FIRST_NAME),
+              getNestedStringProperty(v, PERSONAL, LAST_NAME))));
 
         reordered.forEach(request -> {
           JsonObject r = (JsonObject) request;
@@ -188,6 +194,27 @@ public class RequestRecordBuilder extends LogRecordBuilder {
         });
         return records;
       });
+    } else if (LogRecord.Action.EXPIRED == action) {
+
+      JsonObject original = getObjectProperty(requests, ORIGINAL);
+      JsonObject updated = getObjectProperty(requests, UPDATED);
+
+      return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(original, ITEM_ID)))
+        .thenCompose(itemJson -> fetchUserDetails(new JsonObject()
+          .put(USER_ID.value(), getProperty(original, REQUESTER_ID)), getProperty(original, REQUESTER_ID))
+        .thenApply(userJson -> {
+
+          records.add(new LogRecord().withObject(LogRecord.Object.REQUEST)
+            .withUserBarcode(getProperty(userJson, USER_BARCODE))
+            .withItems(buildItems(itemJson))
+            .withDate(new Date())
+            .withAction(action)
+            .withSource(SYSTEM)
+            .withLinkToIds(buildLinkToIds(original))
+            .withDescription(requestDescriptionBuilder.buildExpiredDescription(original, updated)));
+          return records;
+        }));
+
     } else {
       throw new IllegalArgumentException("Action isn't determined or invalid");
     }
@@ -225,7 +252,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
 
   private List<Item> buildItems(JsonObject payload) {
     return Collections.singletonList(new Item().withItemId(getProperty(payload, ITEM_ID))
-      .withItemBarcode(getNestedStringProperty(payload, ITEM, BARCODE))
+      .withItemBarcode(isNull(getNestedStringProperty(payload, ITEM, BARCODE)) ? getProperty(payload, ITEM_BARCODE) : getNestedStringProperty(payload, ITEM, BARCODE))
       .withHoldingId(getProperty(payload, HOLDINGS_RECORD_ID))
       .withInstanceId(getProperty(payload, INSTANCE_ID))
       .withLoanId(getProperty(payload, LOAN_ID)));
@@ -242,6 +269,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       return LogRecord.Action.QUEUE_POSITION_REORDERED;
     } else if (REQUEST_CANCELLED.equals(logEventType)) {
       return LogRecord.Action.CANCELLED;
+    } else if (REQUEST_EXPIRED.equals(logEventType)) {
+      return LogRecord.Action.EXPIRED;
     } else {
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);
     }
