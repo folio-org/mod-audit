@@ -1,0 +1,40 @@
+{
+  "logEventType":"REQUEST_EXPIRED_EVENT",
+  "payload":{
+    "requests":{
+      "original":{
+        "id":"3335a8e6-9cd6-48e9-8551-450ee3f62aa8",
+        "requestType":"Hold",
+        "requestDate":1500111327000,
+        "requesterId":"2a81b279-d459-4022-82f6-69a569d196b9",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+        "status":"Open - Awaiting pickup",
+        "position":1,
+        "fulfilmentPreference":"Hold Shelf",
+        "holdShelfExpirationDate":1501410174000,
+        "metadata":{
+          "createdDate":1605183316995,
+          "createdByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b",
+          "updatedDate":1605183316995,
+          "updatedByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b"
+        }
+      },
+      "updated":{
+        "id":"3335a8e6-9cd6-48e9-8551-450ee3f62aa8",
+        "requestType":"Hold",
+        "requestDate":1500111327000,
+        "requesterId":"2a81b279-d459-4022-82f6-69a569d196b9",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+        "status":"Closed - Pickup expired",
+        "fulfilmentPreference":"Hold Shelf",
+        "holdShelfExpirationDate":1501410174000,
+        "metadata":{
+          "createdDate":1605183316995,
+          "createdByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b",
+          "updatedDate":1605183316995,
+          "updatedByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b"
+        }
+      }
+    }
+  }
+}

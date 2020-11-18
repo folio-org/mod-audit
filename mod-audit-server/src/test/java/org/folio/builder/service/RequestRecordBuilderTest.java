@@ -24,6 +24,7 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
   private static final String EXPECTED_MOVED_DESCRIPTION = "Type: Hold. New item barcode: 645398607547 (from: 653285216743).";
   private static final String EXPECTED_CANCELLED_DESCRIPTION = "Type: Hold. Reason for cancellation: Cancelled at patron’s request.";
   private static final String EXPECTED_REORDERED_DESCRIPTION = "Type: Recall. New queue position: 2 (from: 3).";
+  private static final String EXPECTED_EXPIRED_DESCRIPTION = "Type: Hold. New request status: Closed - Pickup expired (from: Open - Awaiting pickup).";
 
   private enum TestValue {
 
@@ -31,7 +32,8 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
     EDITED(LogRecord.Action.EDITED, REQUEST_EDITED_PAYLOAD_JSON, EXPECTED_EDITED_DESCRIPTION),
     MOVED(LogRecord.Action.MOVED, REQUEST_MOVED_PAYLOAD_JSON, EXPECTED_MOVED_DESCRIPTION),
     CANCELLED(LogRecord.Action.CANCELLED, REQUEST_CANCELLED_PAYLOAD_JSON, EXPECTED_CANCELLED_DESCRIPTION),
-    REORDERED(LogRecord.Action.QUEUE_POSITION_REORDERED, REQUEST_REORDERED_PAYLOAD_JSON, EXPECTED_REORDERED_DESCRIPTION);
+    REORDERED(LogRecord.Action.QUEUE_POSITION_REORDERED, REQUEST_REORDERED_PAYLOAD_JSON, EXPECTED_REORDERED_DESCRIPTION),
+    EXPIRED(LogRecord.Action.EXPIRED, REQUEST_EXPIRED_PAYLOAD_JSON, EXPECTED_EXPIRED_DESCRIPTION);
 
     TestValue(LogRecord.Action action, String pathToPayload, String description) {
       this.action = action;
@@ -69,8 +71,6 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
     LogRecord requestLogRecord = records.get(0);
     assertThat(requestLogRecord.getObject(), equalTo(LogRecord.Object.REQUEST));
     assertThat(requestLogRecord.getAction(), equalTo(value.getAction()));
-
-    assertThat(requestLogRecord.getServicePointId(), notNullValue());
 
     assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
     assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
