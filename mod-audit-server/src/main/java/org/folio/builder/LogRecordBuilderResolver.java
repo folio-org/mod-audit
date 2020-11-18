@@ -29,6 +29,7 @@ public class LogRecordBuilderResolver {
   public static final String REQUEST_MOVED = "REQUEST_MOVED_EVENT";
   public static final String REQUEST_REORDERED = "REQUEST_REORDERED_EVENT";
   public static final String REQUEST_CANCELLED = "REQUEST_CANCELLED_EVENT";
+  public static final String REQUEST_EXPIRED = "REQUEST_EXPIRED_EVENT";
 
   private LogRecordBuilderResolver() {
   }
@@ -53,6 +54,7 @@ public class LogRecordBuilderResolver {
     case REQUEST_UPDATED:
     case REQUEST_MOVED:
     case REQUEST_REORDERED:
+    case REQUEST_EXPIRED:
       return new RequestRecordBuilder(okapiHeaders, vertxContext);
     default:
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);

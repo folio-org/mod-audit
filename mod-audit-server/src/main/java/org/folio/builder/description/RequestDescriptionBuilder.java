@@ -16,6 +16,7 @@ import static org.folio.util.LogEventPayloadField.REQUEST_POSITION;
 import static org.folio.util.LogEventPayloadField.REQUEST_PREVIOUS_POSITION;
 import static org.folio.util.LogEventPayloadField.REQUEST_SERVICE_POINT;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
+import static org.folio.util.LogEventPayloadField.STATUS;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -148,6 +149,24 @@ public class RequestDescriptionBuilder {
     Optional.ofNullable(getIntegerProperty(reordered, REQUEST_PREVIOUS_POSITION, null))
       .ifPresent(previousPosition -> description.append("(from: ")
         .append(previousPosition)
+        .append(")."));
+
+    return description.toString()
+      .trim();
+  }
+
+  public String buildExpiredDescription(JsonObject original, JsonObject updated) {
+
+    StringBuilder description = buildBaseDescription(original);
+
+    Optional.ofNullable(getProperty(updated, STATUS))
+      .ifPresent(newStatus -> description.append("New request status: ")
+        .append(newStatus)
+        .append(" "));
+
+    Optional.ofNullable(getProperty(original, STATUS))
+      .ifPresent(oldStatus -> description.append("(from: ")
+        .append(oldStatus)
         .append(")."));
 
     return description.toString()

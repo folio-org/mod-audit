@@ -30,6 +30,7 @@ public class TestBase {
   public static final String REQUEST_MOVED_PAYLOAD_JSON = "payloads/request_moved.json";
   public static final String REQUEST_REORDERED_PAYLOAD_JSON = "payloads/request_reordered.json";
   public static final String REQUEST_CANCELLED_PAYLOAD_JSON = "payloads/request_cancelled.json";
+  public static final String REQUEST_EXPIRED_PAYLOAD_JSON = "payloads/request_expired.json";
 
   public String getFile(String filename) {
     String value = EMPTY;
