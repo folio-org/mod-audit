@@ -1,5 +1,13 @@
 ## 1.1.0 - Unreleased
 
+## 1.0.4 - Released
+The primary focus of this release was to update mod-audit requests to handle REQUEST_EXPIRED_EVENT
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v1.0.3...v1.0.4)
+
+### Stories
+* [MODAUD-44](https://issues.folio.org/browse/MODAUD-44) Update mod-audit requests to handle REQUEST_EXPIRED_EVENT
+
 ## 1.0.3 - Released
 This patch release contains improvements and bug fixes for requests and fees/fines log actions
 
