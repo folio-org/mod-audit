@@ -66,7 +66,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
         .withLoanId(getProperty(payload, LOAN_ID))))
       .withAction(resolveAction(getProperty(payload, ACTION)))
       .withDate(getDateTimeProperty(payload, DATE).toDate())
-      .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
+      .withServicePointId(isAction(payload, AGE_TO_LOST) ? null : getProperty(payload, SERVICE_POINT_ID))
       .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
       .withDescription(getProperty(payload, DESCRIPTION))
       .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)))));
