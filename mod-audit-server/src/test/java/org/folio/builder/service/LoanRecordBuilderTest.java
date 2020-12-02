@@ -92,7 +92,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getObject(), equalTo(LogRecord.Object.LOAN));
     assertThat(loanLogRecord.getAction(), equalTo(AGE_TO_LOST));
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
-    assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
+    assertThat(loanLogRecord.getServicePointId(), nullValue());
     assertThat(loanLogRecord.getSource(), equalTo(SYSTEM));
   }
 
