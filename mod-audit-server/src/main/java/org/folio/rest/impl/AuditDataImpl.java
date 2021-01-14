@@ -1,14 +1,20 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.okapi.common.ErrorType.*;
+import static org.folio.okapi.common.ErrorType.INTERNAL;
+import static org.folio.okapi.common.ErrorType.NOT_FOUND;
+import static org.folio.okapi.common.ErrorType.USER;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.ws.rs.core.Response;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.okapi.common.ExtendedAsyncResult;
 import org.folio.okapi.common.Failure;
@@ -19,25 +25,18 @@ import org.folio.rest.jaxrs.model.Audit;
 import org.folio.rest.jaxrs.model.AuditCollection;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.resource.AuditData;
-import org.folio.rest.persist.PgExceptionUtil;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
+import org.folio.rest.persist.PgExceptionUtil;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
-import org.folio.cql2pgjson.CQL2PgJSON;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class AuditDataImpl implements AuditData {
 
@@ -45,7 +44,7 @@ public class AuditDataImpl implements AuditData {
   protected static final String DB_TAB_AUDIT = "audit_data";
   protected static final String DB_TAB_AUDIT_ID = "id";
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LogManager.getLogger(this.getClass());
   private final Messages messages = Messages.getInstance();
 
   private CQLWrapper getCQL(String query, int limit, int offset)
@@ -59,7 +58,7 @@ public class AuditDataImpl implements AuditData {
   public void getAuditData(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.debug("Getting Audit data " + offset + "+" + limit + " q=" + query);
+    logger.debug("Getting Audit data {} + {} q= {}", offset, limit, query);
 
     CQLWrapper cql;
     try {
@@ -89,7 +88,7 @@ public class AuditDataImpl implements AuditData {
   public void postAuditData(String lang, Audit audit, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.debug("Save Audit record " + audit);
+    logger.debug("Save Audit record {}", audit);
 
     String id = audit.getId();
     if (id == null || id.isEmpty()) {
@@ -114,7 +113,7 @@ public class AuditDataImpl implements AuditData {
   public void getAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.debug("Get Audit record by " + id);
+    logger.debug("Get Audit record by {}", id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {
@@ -146,7 +145,7 @@ public class AuditDataImpl implements AuditData {
   public void putAuditDataById(String id, String lang, Audit audit, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.warn("Update Audit record by " + id);
+    logger.warn("Update Audit record by {}", id);
 
     if (audit.getId() == null) {
       audit.setId(id);
@@ -197,7 +196,7 @@ public class AuditDataImpl implements AuditData {
   public void deleteAuditDataById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    logger.warn("Delete Audit record " + id);
+    logger.warn("Delete Audit record {}", id);
 
     getOneAudit(id, okapiHeaders, vertxContext, res -> {
       if (res.succeeded()) {

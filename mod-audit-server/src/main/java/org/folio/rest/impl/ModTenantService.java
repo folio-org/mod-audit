@@ -12,9 +12,17 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -24,21 +32,12 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
 
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 public class ModTenantService extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(ModTenantService.class);
+  private static final Logger log = LogManager.getLogger(ModTenantService.class);
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
-  private List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
+  private final List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
     "notice.json", "patron_block.json", "request.json");
 
   @Override
@@ -103,12 +102,12 @@ public class ModTenantService extends TenantAPI {
   }
 
   @Override
-  public void deleteTenant(Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
-    super.deleteTenant(headers, res -> {
+  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
+    super.deleteTenantByOperationId(operationId, headers, res -> {
       Vertx vertx = context.owner();
       String tenantId = TenantTool.tenantId(headers);
       PostgresClient.getInstance(vertx, tenantId)
-        .closeClient(event -> handlers.handle(res));
+          .closeClient(event -> handlers.handle(res));
     }, context);
   }
 
@@ -128,7 +127,7 @@ public class ModTenantService extends TenantAPI {
   }
 
   private JsonObject getSampleAsJson(String fullPath) throws IOException {
-    log.info("Using mock datafile: " + fullPath);
+    log.info("Using mock datafile: {}", fullPath);
     try (InputStream resourceAsStream = ModTenantService.class.getClassLoader().getResourceAsStream(fullPath)) {
       if (resourceAsStream != null) {
         return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));

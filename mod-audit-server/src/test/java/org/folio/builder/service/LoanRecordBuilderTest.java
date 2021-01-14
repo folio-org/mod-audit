@@ -13,15 +13,16 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 public class LoanRecordBuilderTest extends BuilderTestBase {
-  private static final Logger logger = LoggerFactory.getLogger(LoanRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger(LoanRecordBuilderTest.class);
 
   @Test
   void testLoan() throws Exception {

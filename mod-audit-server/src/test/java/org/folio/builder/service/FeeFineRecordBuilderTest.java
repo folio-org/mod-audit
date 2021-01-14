@@ -8,8 +8,9 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 
 public class FeeFineRecordBuilderTest extends BuilderTestBase {
-  private static final Logger logger = LoggerFactory.getLogger(FeeFineDescriptionBuilder.class);
+  private static final Logger logger = LogManager.getLogger(FeeFineDescriptionBuilder.class);
 
   @Test
   void testFeeFine() throws Exception {

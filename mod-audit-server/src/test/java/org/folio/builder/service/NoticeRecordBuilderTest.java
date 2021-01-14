@@ -8,15 +8,16 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 public class NoticeRecordBuilderTest extends BuilderTestBase {
-  private static final Logger logger = LoggerFactory.getLogger(NoticeRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger(NoticeRecordBuilderTest.class);
 
   @Test
   void testNotice() throws Exception {

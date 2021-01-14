@@ -17,17 +17,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class CheckOutRecordBuilderTest extends BuilderTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger(CheckInRecordBuilderTest.class);
 
   @Test
   public void checkOutTest() throws Exception {

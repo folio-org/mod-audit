@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.Response;
 
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.LogRecordBuilderResolver;
 import org.folio.builder.service.LogRecordBuilder;
 import org.folio.rest.annotations.Validate;
@@ -21,12 +23,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class AuditHandlersService extends BaseService implements AuditHandlers {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuditHandlersService.class);
+  private static final Logger LOGGER = LogManager.getLogger(AuditHandlersService.class);
 
   @Override
   @Validate
