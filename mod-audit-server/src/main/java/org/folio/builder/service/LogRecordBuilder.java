@@ -62,7 +62,6 @@ public abstract class LogRecordBuilder {
   private static final String OKAPI_URL = "x-okapi-url";
   private static final String EXCEPTION_CALLING_ENDPOINT_MSG = "Exception calling {} {}";
 
-  public static final String PERSONAL_NAME_PATTERN = "%s, %s";
   public static final String SEARCH_PARAMS = "?limit=%s&offset=%s%s";
   public static final String ID = "id";
   public static final String USERS = "users";
