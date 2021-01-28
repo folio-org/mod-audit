@@ -114,7 +114,7 @@
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
-            "audit-data.events.post"
+            "pubsub.events.post"
           ],
           "modulePermissions": [
             "users.item.get",
