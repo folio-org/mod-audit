@@ -5,12 +5,9 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.json.JsonObject;
@@ -26,21 +23,28 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
   @Test
   void postLogRecordEvent() {
     logger.info("post valid log event: success");
-    // check initial number of records
-    verifyNumberOfLogRecords(Arrays.asList("Loan", "Request"), 1);
+
+    // get initial number of records
+    int initialNumberOfNaRecords = getNumberOfExistingLogRecords(N_A);
+    int initialNumberOfLoanRecords = getNumberOfExistingLogRecords(LOAN);
+    int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
 
     String payload = getFile(CHECK_IN_PAYLOAD_JSON);
-
-    given().headers(HEADERS)
-      .body(payload)
-      .post(EVENT_HANDLER_ENDPOINT)
-      .then()
-      .log().all()
-      .statusCode(204);
+    postLogRecord(payload);
 
     // check number of created records
-    verifyNumberOfLogRecords(Collections.singletonList(N_A.value()), 1);
-    verifyNumberOfLogRecords(Arrays.asList(LOAN.value(), REQUEST.value()), 2);
+    verifyNumberOfLogRecords(N_A, ++initialNumberOfNaRecords);
+    verifyNumberOfLogRecords(LOAN, ++initialNumberOfLoanRecords);
+    verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
+  }
+
+  @Test
+  void postLogRecordEventForRequestOverride() {
+    logger.info("post valid log event for request creation through override: success");
+
+    int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
+    postLogRecord(getFile(REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON));
+    verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
 
   @Test
@@ -50,23 +54,33 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     JsonObject payload = new JsonObject();
     payload.put(LOG_EVENT_TYPE.value(), "Illegal");
 
+    postLogRecord(payload);
+  }
+
+  private void postLogRecord(JsonObject payload) {
+    postLogRecord(payload.encode());
+  }
+
+  private void postLogRecord(String payload) {
     given().headers(HEADERS)
-      .body(payload.encode())
+      .body(payload)
       .post(EVENT_HANDLER_ENDPOINT)
       .then()
       .log().all()
       .statusCode(204);
   }
 
-  private void verifyNumberOfLogRecords(List<String> objects, int expectedNumberOfRecords) {
-    for (String o : objects) {
-      given().headers(HEADERS)
-        .get(CIRCULATION_LOGS_ENDPOINT + "?query=object=\"" + o +"\"")
-        .then()
-        .log().all()
-        .statusCode(200)
-        .and()
-        .body("totalRecords", equalTo(expectedNumberOfRecords));
-    }
+  private void verifyNumberOfLogRecords(LogRecord.Object object, int expectedNumberOfRecords) {
+    assertEquals(expectedNumberOfRecords, getNumberOfExistingLogRecords(object));
+  }
+
+  private int getNumberOfExistingLogRecords(LogRecord.Object object) {
+    return given().headers(HEADERS)
+      .get(CIRCULATION_LOGS_ENDPOINT + "?query=object=\"" + object.value() +"\"")
+      .then()
+      .log().all()
+      .statusCode(200)
+      .extract()
+      .path("totalRecords");
   }
 }
