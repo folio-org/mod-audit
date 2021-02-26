@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_CANCELLED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_CREATED;
+import static org.folio.builder.LogRecordBuilderResolver.REQUEST_CREATED_THROUGH_OVERRIDE;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_EXPIRED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_MOVED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_REORDERED;
@@ -85,11 +86,11 @@ public class RequestRecordBuilder extends LogRecordBuilder {
 
     JsonObject requests = getNestedObjectProperty(event, PAYLOAD, REQUESTS);
 
-    if (LogRecord.Action.CREATED == action) {
+    if (LogRecord.Action.CREATED == action || LogRecord.Action.CREATED_THROUGH_OVERRIDE == action) {
       JsonObject created = getObjectProperty(requests, CREATED);
       return getEntitiesByIds(USERS_URL, USERS, 1, 0, getSourceIdFromMetadata(created)).thenApply(sources -> {
         records.add(new LogRecord().withObject(LogRecord.Object.REQUEST)
-          .withAction(LogRecord.Action.CREATED)
+          .withAction(action)
           .withUserBarcode(getNestedStringProperty(created, REQUESTER, BARCODE))
           .withServicePointId(getProperty(created, REQUEST_PICKUP_SERVICE_POINT_ID))
           .withItems(buildItems(created))
@@ -261,6 +262,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
   private LogRecord.Action resolveLogRecordAction(String logEventType) {
     if (REQUEST_CREATED.equals(logEventType)) {
       return LogRecord.Action.CREATED;
+    } else if (REQUEST_CREATED_THROUGH_OVERRIDE.equals(logEventType)) {
+      return LogRecord.Action.CREATED_THROUGH_OVERRIDE;
     } else if (REQUEST_UPDATED.equals(logEventType)) {
       return LogRecord.Action.EDITED;
     } else if (REQUEST_MOVED.equals(logEventType)) {
