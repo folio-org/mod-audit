@@ -52,14 +52,6 @@ public class ApiTestBase extends TestBase {
 
   @AfterAll
   public static void globalTearDown() {
-    // delete tenant
-    given().headers(HEADERS)
-      .delete("/_/tenant")
-      .then()
-      .log()
-      .all()
-      .statusCode(204);
-
     if (isInitialized) {
       TestSuite.globalTearDown();
     }
