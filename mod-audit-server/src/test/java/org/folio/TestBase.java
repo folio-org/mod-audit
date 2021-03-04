@@ -26,6 +26,8 @@ public class TestBase {
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
 
   public static final String REQUEST_CREATED_PAYLOAD_JSON = "payloads/request_created.json";
+  public static final String REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON =
+    "payloads/request_created_through_override.json";
   public static final String REQUEST_EDITED_PAYLOAD_JSON = "payloads/request_edited.json";
   public static final String REQUEST_MOVED_PAYLOAD_JSON = "payloads/request_moved.json";
   public static final String REQUEST_REORDERED_PAYLOAD_JSON = "payloads/request_reordered.json";
