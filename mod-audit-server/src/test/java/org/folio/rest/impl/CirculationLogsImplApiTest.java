@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
 import java.util.Map;
@@ -47,8 +48,10 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     assertThat(groupedByObjectRecords.get(LogRecord.Object.ITEM_BLOCK).get(0).getAction(), equalTo(Action.CREATED));
 
     assertThat(groupedByObjectRecords.get(LogRecord.Object.REQUEST), hasSize(2));
-    assertThat(groupedByObjectRecords.get(LogRecord.Object.REQUEST).get(0).getAction(), equalTo(Action.CREATED));
+    Map<Action, List<LogRecord>> requestActions = groupedByObjectRecords.get(LogRecord.Object.REQUEST).stream().collect(groupingBy(LogRecord::getAction));
 
+    assertThat(requestActions.get(Action.CREATED), notNullValue());
+    assertThat(requestActions.get(CREATED_THROUGH_OVERRIDE), notNullValue());
   }
 
   @Test
