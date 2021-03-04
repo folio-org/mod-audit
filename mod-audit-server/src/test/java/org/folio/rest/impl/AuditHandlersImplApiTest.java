@@ -5,15 +5,12 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
-import static org.hamcrest.Matchers.equalTo;
 
 import org.folio.rest.jaxrs.model.LogRecord;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
