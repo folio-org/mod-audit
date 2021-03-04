@@ -26,6 +26,7 @@ public class LogRecordBuilderResolver {
   public static final String FEE_FINE = "FEE_FINE";
 
   public static final String REQUEST_CREATED = "REQUEST_CREATED_EVENT";
+  public static final String REQUEST_CREATED_THROUGH_OVERRIDE = "REQUEST_CREATED_THROUGH_OVERRIDE_EVENT";
   public static final String REQUEST_UPDATED = "REQUEST_UPDATED_EVENT";
   public static final String REQUEST_MOVED = "REQUEST_MOVED_EVENT";
   public static final String REQUEST_REORDERED = "REQUEST_REORDERED_EVENT";
@@ -52,6 +53,7 @@ public class LogRecordBuilderResolver {
     case FEE_FINE:
       return new FeeFineRecordBuilder(okapiHeaders, vertxContext);
     case REQUEST_CREATED:
+    case REQUEST_CREATED_THROUGH_OVERRIDE:
     case REQUEST_UPDATED:
     case REQUEST_MOVED:
     case REQUEST_REORDERED:
