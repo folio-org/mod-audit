@@ -1,25 +1,28 @@
 package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.BILLED;
+import static org.folio.utils.TenantApiTestUtil.FEE_FINE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.List;
+import io.vertx.core.json.JsonObject;
 
 public class FeeFineRecordBuilderTest extends BuilderTestBase {
-  private static final Logger logger = LoggerFactory.getLogger(FeeFineDescriptionBuilder.class);
+  private static final Logger logger = LogManager.getLogger();
 
   @Test
   void testFeeFine() throws Exception {

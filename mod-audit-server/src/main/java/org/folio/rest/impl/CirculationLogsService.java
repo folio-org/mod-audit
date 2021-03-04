@@ -4,9 +4,11 @@ import static io.vertx.core.Future.succeededFuture;
 import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.ErrorUtils.buildError;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.rest.annotations.Validate;
@@ -17,9 +19,9 @@ import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   public static final String LOGS_TABLE_NAME = "circulation_logs";

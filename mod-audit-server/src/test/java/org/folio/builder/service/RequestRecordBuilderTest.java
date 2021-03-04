@@ -1,5 +1,12 @@
 package org.folio.builder.service;
 
+import static org.folio.utils.TenantApiTestUtil.REQUEST_CANCELLED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_EXPIRED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_MOVED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_REORDERED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -7,17 +14,19 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+
 
 public class RequestRecordBuilderTest extends BuilderTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(ManualBlockRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger()
+    ;
 
   private static final String EXPECTED_CREATE_DESCRIPTION = "Type: Recall.";
   private static final String EXPECTED_EDITED_DESCRIPTION = "Type: Recall. New expiration date: 2020-10-23 00:00:00 (from: 2020-10-19 00:00:00). New fulfilment preference: Hold Shelf (from: Hold).";

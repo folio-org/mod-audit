@@ -7,18 +7,18 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
-
 public class CirculationLogsImplApiTest extends ApiTestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(CirculationLogsImplApiTest.class);
+  private final Logger logger = LogManager.getLogger();
 
   @Test
   void getCirculationAuditLogRecordsNoFilter() {

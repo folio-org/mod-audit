@@ -9,6 +9,8 @@ import static org.folio.util.LogEventPayloadField.OLD_REQUEST_STATUS;
 import static org.folio.util.LogEventPayloadField.PROXY_BARCODE;
 import static org.folio.util.LogEventPayloadField.REQUESTS;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
+import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -17,17 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class CheckOutRecordBuilderTest extends BuilderTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(CheckInRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger();
 
   @Test
   public void checkOutTest() throws Exception {

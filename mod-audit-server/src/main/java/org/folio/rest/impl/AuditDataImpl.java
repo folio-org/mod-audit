@@ -1,7 +1,9 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.okapi.common.ErrorType.*;
+import static org.folio.okapi.common.ErrorType.INTERNAL;
+import static org.folio.okapi.common.ErrorType.NOT_FOUND;
+import static org.folio.okapi.common.ErrorType.USER;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,9 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.okapi.common.ExtendedAsyncResult;
 import org.folio.okapi.common.Failure;
@@ -31,13 +36,10 @@ import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
-import org.folio.cql2pgjson.CQL2PgJSON;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class AuditDataImpl implements AuditData {
 
@@ -45,7 +47,8 @@ public class AuditDataImpl implements AuditData {
   protected static final String DB_TAB_AUDIT = "audit_data";
   protected static final String DB_TAB_AUDIT_ID = "id";
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LogManager.getLogger();
+
   private final Messages messages = Messages.getInstance();
 
   private CQLWrapper getCQL(String query, int limit, int offset)

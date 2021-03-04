@@ -1,23 +1,24 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
 import static org.folio.rest.impl.AuditDataImpl.API_CXT;
 import static org.hamcrest.Matchers.containsString;
-import io.vertx.core.json.Json;
-import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Interface test for mod-audit.
  */
 
 public class AuditDataImplApiTest extends ApiTestBase {
-  private final Logger logger = LoggerFactory.getLogger(ApiTestBase.class);
+  private final Logger logger = LogManager.getLogger();
   // test data
   JsonObject audit = new JsonObject().put("tenant", "diku");
   JsonObject badAudit = new JsonObject().put("x", "y");

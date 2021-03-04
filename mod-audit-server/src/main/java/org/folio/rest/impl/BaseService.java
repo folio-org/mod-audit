@@ -1,11 +1,12 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.Context;
+import java.util.Map;
+
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
 
-import java.util.Map;
+import io.vertx.core.Context;
 
 public abstract class BaseService {
 

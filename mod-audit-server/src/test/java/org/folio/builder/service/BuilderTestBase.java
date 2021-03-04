@@ -17,7 +17,11 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import org.folio.TestBase;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.folio.TestSuite;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.AfterAll;
@@ -26,17 +30,13 @@ import org.junit.jupiter.api.BeforeAll;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+public class BuilderTestBase {
 
-public class BuilderTestBase extends TestBase {
-
-  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder,
-    feeFineRecordBuilder, noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder, feeFineRecordBuilder,
+      noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
-  public static void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+  public static void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     if (!isInitialized) {
       TestSuite.globalInitialize();
     }
@@ -59,7 +59,8 @@ public class BuilderTestBase extends TestBase {
   public void validateRequestStatusChangedContent(JsonObject payload, LogRecord requestStatusChanged) {
     JsonArray requests = getArrayProperty(payload, REQUESTS);
     JsonObject request = requests.getJsonObject(0);
-    assertThat(requestStatusChanged.getLinkToIds().getRequestId(), equalTo(getProperty(request, REQUEST_ID)));
+    assertThat(requestStatusChanged.getLinkToIds()
+      .getRequestId(), equalTo(getProperty(request, REQUEST_ID)));
   }
 
   public void validateAdditionalContent(JsonObject payload, LogRecord itemCheckedOutRecord) {
