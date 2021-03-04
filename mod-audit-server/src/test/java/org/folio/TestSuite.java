@@ -60,8 +60,6 @@ public class TestSuite {
   private static void startVerticle(DeploymentOptions options)
     throws InterruptedException, ExecutionException, TimeoutException {
 
-//    logger.info("Start verticle");
-
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {

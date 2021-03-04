@@ -114,15 +114,9 @@ public class ModTenantService extends TenantAPI {
   }
 
   @Override
-  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
-                                        Context cntxt) {
+  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
     log.info("deleteTenant");
-    super.deleteTenantByOperationId(operationId, headers, res -> {
-      Vertx vertx = cntxt.owner();
-      String tenantId = TenantTool.tenantId(headers);
-      PostgresClient.getInstance(vertx, tenantId)
-        .closeClient(event -> hndlr.handle(res));
-    }, cntxt);
+    super.deleteTenantByOperationId(operationId, headers, res -> PostgresClient.closeAllClients(TenantTool.tenantId(headers)), cntxt);
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {
