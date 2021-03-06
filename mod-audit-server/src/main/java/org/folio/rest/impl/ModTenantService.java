@@ -64,7 +64,8 @@ public class ModTenantService extends TenantAPI {
       registerModuleToPubSub(headers, context.owner())
         .thenAccept(vVoid -> handlers.handle(res))
         .exceptionally(throwable -> {
-          handlers.handle(succeededFuture(PostTenantResponse.respond500WithTextPlain(buildError(HTTP_INTERNAL_SERVER_ERROR.toInt(), throwable.getLocalizedMessage()))));
+          handlers.handle(succeededFuture(PostTenantResponse
+            .respond500WithTextPlain(buildError(HTTP_INTERNAL_SERVER_ERROR.toInt(), throwable.getLocalizedMessage()))));
           return null;
         });
     }, context);
@@ -121,7 +122,8 @@ public class ModTenantService extends TenantAPI {
     // if a system parameter is passed from command line, ex: loadSample=true
     // that value is considered,Priority of Parameters:
     // Tenant Attributes > command line parameter > default(false)
-    boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE, "false"));
+    boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE,
+      "false"));
     List<Parameter> parameters = tenantAttributes.getParameters();
     for (Parameter parameter : parameters) {
       if (PARAMETER_LOAD_SAMPLE.equals(parameter.getKey())) {
