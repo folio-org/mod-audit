@@ -1,14 +1,14 @@
 package org.folio.builder.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+
+import java.util.HashMap;
+
 import org.folio.TestSuite;
 import org.folio.builder.LogRecordBuilderResolver;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-
-import java.util.HashMap;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 
 public class LogRecordBuilderResolverTest extends BuilderTestBase {
   @ParameterizedTest

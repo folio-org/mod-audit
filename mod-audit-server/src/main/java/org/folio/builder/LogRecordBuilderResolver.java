@@ -1,6 +1,7 @@
 package org.folio.builder;
 
-import io.vertx.core.Context;
+import java.util.Map;
+
 import org.folio.builder.service.CheckInRecordBuilder;
 import org.folio.builder.service.CheckOutRecordBuilder;
 import org.folio.builder.service.FeeFineRecordBuilder;
@@ -10,7 +11,7 @@ import org.folio.builder.service.ManualBlockRecordBuilder;
 import org.folio.builder.service.NoticeRecordBuilder;
 import org.folio.builder.service.RequestRecordBuilder;
 
-import java.util.Map;
+import io.vertx.core.Context;
 
 public class LogRecordBuilderResolver {
 

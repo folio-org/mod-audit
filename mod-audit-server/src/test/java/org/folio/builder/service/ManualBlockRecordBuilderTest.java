@@ -3,6 +3,10 @@ package org.folio.builder.service;
 import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.USER_ID;
+import static org.folio.utils.TenantApiTestUtil.MANUAL_BLOCK_CREATED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.MANUAL_BLOCK_DELETED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.MANUAL_BLOCK_UPDATED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -10,18 +14,19 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+
 
 public class ManualBlockRecordBuilderTest extends BuilderTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(ManualBlockRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger();
 
   private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
   private static final String EXPECTED_UPDATE_DESCRIPTION = "Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";

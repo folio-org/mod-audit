@@ -1,6 +1,7 @@
 package org.folio;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -9,10 +10,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
-import org.folio.builder.service.LogRecordBuilderResolverTest;
-import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
 import org.folio.builder.service.LoanRecordBuilderTest;
+import org.folio.builder.service.LogRecordBuilderResolverTest;
+import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
 import org.folio.rest.RestVerticle;
@@ -32,37 +33,44 @@ import io.vertx.core.json.JsonObject;
 
 public class TestSuite {
   public static boolean isInitialized = false;
-  private static final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  public static final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
   private static Vertx vertx;
 
   @BeforeAll
-  public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException {
+  public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Locale.setDefault(Locale.US);
+
     vertx = Vertx.vertx();
 
-    try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx)
-        .startEmbeddedPostgres();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return;
-    }
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
 
-    JsonObject conf = new JsonObject().put("http.port", port)
-      .put(HttpClientMock2.MOCK_MODE, "true");
-    DeploymentOptions opt = new DeploymentOptions().setConfig(conf);
+    DeploymentOptions options = new DeploymentOptions();
+
+    options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
+    options.setWorker(true);
+
+    startVerticle(options);
+
+    RestAssured.port = port;
+    isInitialized = true;
+  }
+
+  private static void startVerticle(DeploymentOptions options)
+    throws InterruptedException, ExecutionException, TimeoutException {
+
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-    vertx.deployVerticle(RestVerticle.class.getName(), opt, res -> {
-      if (res.succeeded()) {
+
+    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
+      if(res.succeeded()) {
         deploymentComplete.complete(res.result());
-      } else {
+      }
+      else {
         deploymentComplete.completeExceptionally(res.cause());
       }
     });
     deploymentComplete.get(60, TimeUnit.SECONDS);
-    RestAssured.port = port;
-    isInitialized = true;
   }
 
   public static Vertx getVertx() {

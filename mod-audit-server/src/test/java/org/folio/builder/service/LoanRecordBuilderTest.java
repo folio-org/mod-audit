@@ -5,6 +5,11 @@ import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.RENEWED;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.LogEventPayloadField.ACTION;
+import static org.folio.utils.TenantApiTestUtil.LOAN_AGE_TO_LOST_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -12,16 +17,17 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import io.vertx.core.json.JsonObject;
 
 public class LoanRecordBuilderTest extends BuilderTestBase {
-  private static final Logger logger = LoggerFactory.getLogger(LoanRecordBuilderTest.class);
+  private static final Logger logger = LogManager.getLogger();
 
   @Test
   void testLoan() throws Exception {

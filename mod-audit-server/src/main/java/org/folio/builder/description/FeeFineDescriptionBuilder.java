@@ -19,11 +19,12 @@ import static org.folio.util.LogEventPayloadField.FEE_FINE_OWNER;
 import static org.folio.util.LogEventPayloadField.PAYMENT_METHOD;
 import static org.folio.util.LogEventPayloadField.TYPE;
 
-import io.vertx.core.json.JsonObject;
-import org.folio.util.LogEventPayloadField;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import org.folio.util.LogEventPayloadField;
+
+import io.vertx.core.json.JsonObject;
 
 public class FeeFineDescriptionBuilder implements DescriptionBuilder {
   private static final String BILLED = "Billed";

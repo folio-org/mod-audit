@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import io.vertx.core.Context;
 import org.folio.builder.description.DescriptionBuilder;
 import org.folio.builder.description.ItemCheckInDescriptionBuilder;
 import org.folio.builder.description.LoanCheckInDescriptionBuilder;
@@ -32,6 +31,7 @@ import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
 
+import io.vertx.core.Context;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

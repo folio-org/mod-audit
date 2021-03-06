@@ -7,14 +7,19 @@ import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
 import static org.folio.util.ErrorUtils.buildError;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -24,22 +29,29 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
 
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 
 public class ModTenantService extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(ModTenantService.class);
+  private static final Logger log = LogManager.getLogger();
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
   private List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
     "notice.json", "patron_block.json", "request.json");
+
+  @Override
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
+    log.info("loadData");
+    Promise<Integer> promise = Promise.promise();
+    loadSampleData(attributes, headers, vertxContext).thenAccept(promise::complete);
+    return promise.future();
+  }
 
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
@@ -50,7 +62,6 @@ public class ModTenantService extends TenantAPI {
         return;
       }
       registerModuleToPubSub(headers, context.owner())
-        .thenCompose(vVoid -> loadSampleData(tenantAttributes, headers, context))
         .thenAccept(vVoid -> handlers.handle(res))
         .exceptionally(throwable -> {
           handlers.handle(succeededFuture(PostTenantResponse
@@ -60,9 +71,9 @@ public class ModTenantService extends TenantAPI {
     }, context);
   }
 
-  private CompletableFuture<Void> loadSampleData(TenantAttributes tenantAttributes, Map<String, String> headers,
+  private CompletableFuture<Integer> loadSampleData(TenantAttributes tenantAttributes, Map<String, String> headers,
     Context context) {
-    CompletableFuture<Void> future = new CompletableFuture<>();
+    CompletableFuture<Integer> future = new CompletableFuture<>();
     if (isLoadSample(tenantAttributes)) {
       log.info("Loading sample data...");
 
@@ -73,14 +84,14 @@ public class ModTenantService extends TenantAPI {
         .toArray(CompletableFuture[]::new))
         .thenAccept(vVoid -> {
           log.info("Sample data loaded successfully");
-          future.complete(null);
+          future.complete(samples.size());
         })
         .exceptionally(throwable -> {
           future.completeExceptionally(throwable);
           return null;
         });
     } else {
-      future.complete(null);
+      future.complete(0);
     }
     return future;
   }
@@ -103,13 +114,8 @@ public class ModTenantService extends TenantAPI {
   }
 
   @Override
-  public void deleteTenant(Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
-    super.deleteTenant(headers, res -> {
-      Vertx vertx = context.owner();
-      String tenantId = TenantTool.tenantId(headers);
-      PostgresClient.getInstance(vertx, tenantId)
-        .closeClient(event -> handlers.handle(res));
-    }, context);
+  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
+    super.deleteTenantByOperationId(operationId, headers, res -> PostgresClient.closeAllClients(TenantTool.tenantId(headers)), cntxt);
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {

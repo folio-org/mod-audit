@@ -20,17 +20,18 @@ import static org.folio.util.LogEventPayloadField.SOURCE;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
-import io.vertx.core.Context;
-import io.vertx.core.json.JsonObject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.Context;
+import io.vertx.core.json.JsonObject;
 
 public class FeeFineRecordBuilder extends LogRecordBuilder {
   public FeeFineRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {

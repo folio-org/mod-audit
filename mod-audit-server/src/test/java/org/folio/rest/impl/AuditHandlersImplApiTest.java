@@ -5,18 +5,22 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.getFile;
 
 import org.folio.rest.jaxrs.model.LogRecord;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 public class AuditHandlersImplApiTest extends ApiTestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(AuditHandlersImplApiTest.class);
+  private final Logger logger = LogManager.getLogger();
 
   String EVENT_HANDLER_ENDPOINT = "/audit/handlers/log-record";
 
