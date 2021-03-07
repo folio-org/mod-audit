@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static org.folio.TestSuite.isInitialized;
+import static org.folio.TestSuite.port;
 import static org.folio.utils.TenantApiTestUtil.deleteTenantAndPurgeTables;
 import static org.folio.utils.TenantApiTestUtil.prepareTenant;
 
@@ -19,12 +20,12 @@ import io.restassured.http.Headers;
 
 public class ApiTestBase {
   public static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
-  protected static final Header OKAPI_URL = new Header("X-Okapi-Url", "http://localhost");
+  public static final Header OKAPI_URL = new Header("X-Okapi-Url", "http://localhost:" + port);
   protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
   protected static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
-  protected static final Headers HEADERS = new Headers(TENANT, PERMS, CONTENT_TYPE, OKAPI_URL);
+  public static final Headers HEADERS = new Headers(TENANT, PERMS, CONTENT_TYPE, OKAPI_URL);
 
-  public final String CIRCULATION_LOGS_ENDPOINT = "/audit-data/circulation/logs";
+  public static final String CIRCULATION_LOGS_ENDPOINT = "/audit-data/circulation/logs";
 
   private static TenantJob tenantJob;
 

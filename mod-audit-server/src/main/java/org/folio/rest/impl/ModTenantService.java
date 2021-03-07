@@ -1,11 +1,8 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.succeededFuture;
 import static java.util.concurrent.CompletableFuture.allOf;
-import static org.folio.HttpStatus.HTTP_INTERNAL_SERVER_ERROR;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
-import static org.folio.util.ErrorUtils.buildError;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,14 +20,13 @@ import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -42,33 +36,25 @@ public class ModTenantService extends TenantAPI {
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String SAMPLES_PATH = "samples";
 
-  private List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
+  private final List<String> samples = Arrays.asList("fee_fine.json", "item_block.json", "loan.json", "manual_block.json",
     "notice.json", "patron_block.json", "request.json");
 
   @Override
-  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
-    log.info("loadData");
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context context) {
+    log.info("postTenant");
+    Vertx vertx = context.owner();
     Promise<Integer> promise = Promise.promise();
-    loadSampleData(attributes, headers, vertxContext).thenAccept(promise::complete);
-    return promise.future();
-  }
-
-  @Override
-  public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers,
-    Handler<AsyncResult<Response>> handlers, Context context) {
-    super.postTenant(tenantAttributes, headers, res -> {
-      if (res.failed() || (res.succeeded() && (res.result().getStatus() < 200 || res.result().getStatus() > 299))) {
-        handlers.handle(res);
-        return;
+    TenantLoading tl = new TenantLoading();
+    tl.perform(attributes, headers, vertx, res1 -> {
+      if (res1.failed()) {
+        promise.fail(res1.cause());
+      } else {
+        registerModuleToPubSub(headers, vertx)
+          .thenCompose(vVoid -> loadSampleData(attributes, headers, context)).thenAccept(promise::complete);
       }
-      registerModuleToPubSub(headers, context.owner())
-        .thenAccept(vVoid -> handlers.handle(res))
-        .exceptionally(throwable -> {
-          handlers.handle(succeededFuture(PostTenantResponse
-            .respond500WithTextPlain(buildError(HTTP_INTERNAL_SERVER_ERROR.toInt(), throwable.getLocalizedMessage()))));
-          return null;
-        });
-    }, context);
+    });
+
+    return promise.future();
   }
 
   private CompletableFuture<Integer> loadSampleData(TenantAttributes tenantAttributes, Map<String, String> headers,
@@ -111,11 +97,6 @@ public class ModTenantService extends TenantAPI {
       future.completeExceptionally(e);
     }
     return future;
-  }
-
-  @Override
-  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    super.deleteTenantByOperationId(operationId, headers, res -> PostgresClient.closeAllClients(TenantTool.tenantId(headers)), cntxt);
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {
