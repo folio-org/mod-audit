@@ -54,10 +54,7 @@ public class ModTenantService extends TenantAPI {
         promise.fail(res1.cause());
       } else {
         registerModuleToPubSub(headers, vertx)
-          .thenCompose(vVoid -> loadSampleData(attributes, headers, context)).thenAccept(n -> {
-          System.out.println();
-          promise.complete(n);
-        });
+          .thenCompose(vVoid -> loadSampleData(attributes, headers, context)).thenAccept(promise::complete);
       }
     });
 
@@ -110,11 +107,7 @@ public class ModTenantService extends TenantAPI {
   public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
                                         Context cntxt) {
     log.info("deleteTenant");
-    super.deleteTenantByOperationId(operationId, headers, res -> {
-      String tenantId = TenantTool.tenantId(headers);
-      PostgresClient.getInstance(cntxt.owner(), tenantId)
-        .closeClient(event -> hndlr.handle(res));
-    }, cntxt);
+    super.deleteTenantByOperationId(operationId, headers, res -> PostgresClient.getInstance(cntxt.owner(), TenantTool.tenantId(headers)).closeClient(event -> hndlr.handle(res)), cntxt);
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {
