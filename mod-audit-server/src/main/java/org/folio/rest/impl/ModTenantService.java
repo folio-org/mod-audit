@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,10 +25,8 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.util.pubsub.PubSubClientUtils;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -101,13 +97,6 @@ public class ModTenantService extends TenantAPI {
       future.completeExceptionally(e);
     }
     return future;
-  }
-
-  @Override
-  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
-                                        Context cntxt) {
-    log.info("deleteTenant");
-    super.deleteTenantByOperationId(operationId, headers, res -> PostgresClient.getInstance(cntxt.owner(), TenantTool.tenantId(headers)).closeClient(event -> hndlr.handle(res)), cntxt);
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {
