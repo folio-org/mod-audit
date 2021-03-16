@@ -1,4 +1,15 @@
-## 1.1.0 - Unreleased
+## 2.1.0 - Unreleased
+
+## 2.0.0 - Released
+This release contains improvements and RMB update
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v1.0.3...v2.0.0)
+
+### Stories
+* [MODAUD-47](https://issues.folio.org/browse/MODAUD-47) - mod-audit: RMB Update
+* [MODAUD-50](https://issues.folio.org/browse/MODAUD-50) - Update Age to lost data in Circulation log
+* [MODAUD-51](https://issues.folio.org/browse/MODAUD-51) - Add personal data disclosure form
+* [MODAUD-57](https://issues.folio.org/browse/MODAUD-57) - Add support for log records for requests created through override
 
 ## 1.0.3 - Released
 This patch release contains improvements and bug fixes for requests and fees/fines log actions
