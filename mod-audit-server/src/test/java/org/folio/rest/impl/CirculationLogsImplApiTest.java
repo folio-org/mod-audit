@@ -3,7 +3,7 @@ package org.folio.rest.impl;
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CREATED_THROUGH_OVERRIDE;
-import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.SAMPLES;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
@@ -19,18 +19,31 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecord.Action;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class CirculationLogsImplApiTest extends ApiTestBase {
 
   private final Logger logger = LogManager.getLogger();
 
+  @BeforeAll
+  public static void prepareSampleData() {
+
+    SAMPLES.forEach(sample -> given().headers(HEADERS)
+      .body(getFile(sample))
+      .post("/audit/handlers/log-record")
+      .then()
+      .log().all()
+      .statusCode(204));
+  }
+
+
   @Test
   void getCirculationAuditLogRecordsNoFilter() {
     logger.info("Get circulation audit log records: no filter");
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(8));
+      .assertThat().body("totalRecords", equalTo(20));
   }
 
   @Test
@@ -44,8 +57,8 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
 
     Map<LogRecord.Object, List<LogRecord>> groupedByObjectRecords = records.getLogRecords().stream().collect(groupingBy(LogRecord::getObject));
 
-    assertThat(groupedByObjectRecords.get(LogRecord.Object.ITEM_BLOCK), hasSize(1));
-    assertThat(groupedByObjectRecords.get(LogRecord.Object.ITEM_BLOCK).get(0).getAction(), equalTo(Action.CREATED));
+    assertThat(groupedByObjectRecords.get(LogRecord.Object.MANUAL_BLOCK), hasSize(1));
+    assertThat(groupedByObjectRecords.get(LogRecord.Object.MANUAL_BLOCK).get(0).getAction(), equalTo(Action.CREATED));
 
     assertThat(groupedByObjectRecords.get(LogRecord.Object.REQUEST), hasSize(2));
     Map<Action, List<LogRecord>> requestActions = groupedByObjectRecords.get(LogRecord.Object.REQUEST).stream().collect(groupingBy(LogRecord::getAction));
@@ -57,11 +70,13 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   @Test
   void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=1000024158 AND items=12983765)")
+    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=40187925817754 AND items=326547658598)")
       .then().log().all().statusCode(200)
-      .assertThat().body("logRecords[0].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
-      .and().body("logRecords[1].object", anyOf(equalTo("Item Block"), equalTo("Fee/Fine")))
-      .and().body("totalRecords", equalTo(2));
+      .assertThat()
+      .body("logRecords[0].object", anyOf(equalTo("Loan"), equalTo("Request")))
+      .and().body("logRecords[1].object", anyOf(equalTo("Loan"), equalTo("Request")))
+      .and()
+      .body("totalRecords", equalTo(2));
   }
 
   @Test
@@ -81,15 +96,6 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
 
   @Test
   void getCirculationAuditLogRecordsForRequestCreatedThroughOverride() {
-    verifyNumberOfLogRecordsWithAction(CREATED_THROUGH_OVERRIDE, 0);
-
-    given().headers(HEADERS)
-      .body(getFile(REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON))
-      .post("/audit/handlers/log-record")
-      .then()
-      .log().all()
-      .statusCode(204);
-
     verifyNumberOfLogRecordsWithAction(CREATED_THROUGH_OVERRIDE, 1);
   }
 
