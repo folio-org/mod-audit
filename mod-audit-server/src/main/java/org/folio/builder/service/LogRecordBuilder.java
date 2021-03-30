@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -91,21 +92,21 @@ public abstract class LogRecordBuilder {
           LOGGER.debug("Validating response for GET {}", endpoint);
           return verifyAndExtractBody(response);
         })
-        .thenAccept(body -> {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+        .whenComplete((body, throwable) -> {
+          if (Objects.nonNull(throwable)) {
+            LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
+            future.completeExceptionally(throwable);
+          } else {
+            if (LOGGER.isInfoEnabled()) {
+              LOGGER.info("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+            }
+            future.complete(body);
           }
-          future.complete(body);
-        })
-        .exceptionally(t -> {
-          LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
-          future.completeExceptionally(t);
-          return null;
+          httpClient.closeClient();
         });
     } catch (Exception e) {
       LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
       future.completeExceptionally(e);
-    } finally {
       httpClient.closeClient();
     }
     return future;
