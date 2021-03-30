@@ -25,8 +25,7 @@ import io.vertx.core.json.JsonObject;
 
 public class RequestRecordBuilderTest extends BuilderTestBase {
 
-  private static final Logger logger = LogManager.getLogger()
-    ;
+  private static final Logger logger = LogManager.getLogger();
 
   private static final String EXPECTED_CREATE_DESCRIPTION = "Type: Recall.";
   private static final String EXPECTED_EDITED_DESCRIPTION = "Type: Recall. New expiration date: 2020-10-23 00:00:00 (from: 2020-10-19 00:00:00). New fulfilment preference: Hold Shelf (from: Hold).";

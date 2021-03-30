@@ -5,11 +5,13 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 
+import com.jayway.jsonpath.JsonPath;
 import org.folio.rest.jaxrs.model.LogRecord;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +25,7 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
   private final Logger logger = LogManager.getLogger();
 
   String EVENT_HANDLER_ENDPOINT = "/audit/handlers/log-record";
+  public static final String FAILED_USER_ID = "1d0581d5-7f44-4cfb-b866-5f6f1d849f6d";
 
   @Test
   void postLogRecordEvent() {
@@ -49,6 +52,18 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
     postLogRecord(getFile(REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON));
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
+  }
+
+  @Test
+  void postLogRecordEventForUserRetrieveError() {
+    logger.info("post valid log event for request creation : fail due to user retrieving error");
+
+    var dc = JsonPath.parse(getFile(REQUEST_CREATED_PAYLOAD_JSON))
+      .set("$.payload.requests.created.metadata.updatedByUserId", FAILED_USER_ID);
+
+    int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
+    postLogRecord(dc.jsonString());
+    verifyNumberOfLogRecords(REQUEST, initialNumberOfRequestRecords);
   }
 
   @Test
