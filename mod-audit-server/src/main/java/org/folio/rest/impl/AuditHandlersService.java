@@ -34,9 +34,8 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       JsonObject payload = new JsonObject(entity);
-      LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()),
-        okapiHeaders, vertxContext);
-      builder.buildLogRecord(new JsonObject(entity))
+      LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()), okapiHeaders, vertxContext);
+      builder.buildLogRecord(payload)
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
           LOGGER.error("Error saving log event: " + entity, throwable.getLocalizedMessage());
