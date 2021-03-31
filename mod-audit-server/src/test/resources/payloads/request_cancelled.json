@@ -2,7 +2,7 @@
   "logEventType":"REQUEST_UPDATED_EVENT",
   "payload":{
     "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
-    "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+    "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
     "itemBarcode":"765475420716",
     "itemStatusName":"Awaiting pickup",
     "requests":{
@@ -10,8 +10,8 @@
         "id":"40fab03a-c5ce-4afb-b511-2df3c9af817a",
         "requestType":"Hold",
         "requestDate":"2020-10-11T18:50:54.000+0000",
-        "requesterId":"d20d2f4e-6356-4dc3-b7b1-8b9fb5564e02",
-        "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Open - Not yet filled",
         "position":3,
         "item":{
@@ -44,8 +44,8 @@
         "id":"40fab03a-c5ce-4afb-b511-2df3c9af817a",
         "requestType":"Hold",
         "requestDate":"2020-10-11T18:50:54.000+0000",
-        "requesterId":"d20d2f4e-6356-4dc3-b7b1-8b9fb5564e02",
-        "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Closed - Cancelled",
         "cancellationReasonId":"75187e8d-e25a-47a7-89ad-23ba612338de",
         "cancelledByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc",

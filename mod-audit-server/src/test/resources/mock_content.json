@@ -21,7 +21,8 @@
     {
       "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
       "method": "GET",
-      "status": 404
+      "receivedPath": "mocks/user.json",
+      "status": 200
     },
     {
       "url": "/users?limit=2&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
@@ -40,6 +41,16 @@
       "method": "GET",
       "receivedPath": "mocks/one-user-collection.json",
       "status": 200
+    },
+    {
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%281d0581d5-7f44-4cfb-b866-5f6f1d849f6d%29",
+      "method": "GET",
+      "status": 500
+    },
+    {
+      "url": "/users/1d0581d5-7f44-4cfb-b866-5f6f1d849f6d",
+      "method": "GET",
+      "status": 500
     },
     {
       "url": "/users?limit=1&offset=0&query=id%3D%3D%2861da1f1b-eb9e-5a33-9d47-617c84191d12%29",
