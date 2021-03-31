@@ -13,9 +13,10 @@ import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_RENEWALS;
 import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_REQUESTS;
 import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_STAFF_INFORMATION;
 
-import java.util.Optional;
-
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
 
 public class ManualBlockDescriptionBuilder implements DescriptionBuilder {
 
@@ -26,28 +27,40 @@ public class ManualBlockDescriptionBuilder implements DescriptionBuilder {
 
     populateBlockActionsDescription(logEventPayload, description);
 
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_DESCRIPTION))
-      .ifPresent(desc -> description.append("Description: ")
+    var desc = getProperty(logEventPayload, MANUAL_BLOCK_DESCRIPTION);
+
+    if (isPropertyPresented(desc)) {
+      description.append("Description: ")
         .append(desc)
-        .append(". "));
+        .append(". ");
+    }
 
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION))
-      .ifPresent(staffInfo -> description.append("Staff only information: ")
+    var staffInfo= getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION);
+    if (isPropertyPresented(staffInfo)) {
+      description.append("Staff only information: ")
         .append(staffInfo)
-        .append(". "));
+        .append(". ");
+    }
 
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON))
-      .ifPresent(msgToPatron -> description.append("Message to patron: ")
+    var msgToPatron= getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON);
+    if (isPropertyPresented(msgToPatron)) {
+      description.append("Message to patron: ")
         .append(msgToPatron)
-        .append(". "));
+        .append(". ");
+    }
 
-    Optional.ofNullable(getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE))
-      .ifPresent(expDate -> description.append("Expiration date: ")
+    var expDate= getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE);
+    if (Objects.nonNull(expDate)) {
+      description.append("Expiration date: ")
         .append(getFormattedDateTime(expDate))
-        .append(". "));
+        .append(". ");
+    }
 
-    return description.toString()
-      .trim();
+    return description.toString().trim();
+  }
+
+  private boolean isPropertyPresented(String property) {
+    return StringUtils.isNotEmpty(property) && StringUtils.isNotBlank(property);
   }
 
   private void populateBlockActionsDescription(JsonObject logEventPayload, StringBuilder description) {
