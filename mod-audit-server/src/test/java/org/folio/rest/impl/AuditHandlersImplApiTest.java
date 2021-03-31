@@ -59,11 +59,13 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     logger.info("post valid log event for request creation : fail due to user retrieving error");
 
     var dc = JsonPath.parse(getFile(REQUEST_CREATED_PAYLOAD_JSON))
-      .set("$.payload.requests.created.metadata.updatedByUserId", FAILED_USER_ID);
+      .set("$.payload.requests.created.requesterId", FAILED_USER_ID);
 
     int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
     postLogRecord(dc.jsonString());
-    verifyNumberOfLogRecords(REQUEST, initialNumberOfRequestRecords);
+
+    // Record is created but without details of user
+    verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
 
   @Test
