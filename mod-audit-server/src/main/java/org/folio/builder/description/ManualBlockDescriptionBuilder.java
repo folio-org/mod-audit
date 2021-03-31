@@ -35,21 +35,21 @@ public class ManualBlockDescriptionBuilder implements DescriptionBuilder {
         .append(". ");
     }
 
-    var staffInfo= getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION);
+    var staffInfo = getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION);
     if (isPropertyPresented(staffInfo)) {
       description.append("Staff only information: ")
         .append(staffInfo)
         .append(". ");
     }
 
-    var msgToPatron= getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON);
+    var msgToPatron = getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON);
     if (isPropertyPresented(msgToPatron)) {
       description.append("Message to patron: ")
         .append(msgToPatron)
         .append(". ");
     }
 
-    var expDate= getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE);
+    var expDate = getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE);
     if (Objects.nonNull(expDate)) {
       description.append("Expiration date: ")
         .append(getFormattedDateTime(expDate))
