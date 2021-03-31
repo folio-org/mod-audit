@@ -17,6 +17,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -81,7 +82,8 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
     assertThat(requestLogRecord.getAction(), equalTo(value.getAction()));
 
     assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
-    assertThat(requestLogRecord.getItems().get(0).getItemBarcode(), notNullValue());
+    assertThat(requestLogRecord.getItems().get(0).getHoldingId(), notNullValue());
+    assertThat(requestLogRecord.getItems().get(0).getInstanceId(), notNullValue());
 
     assertThat(requestLogRecord.getUserBarcode(), notNullValue());
     assertThat(requestLogRecord.getLinkToIds().getUserId(), notNullValue());

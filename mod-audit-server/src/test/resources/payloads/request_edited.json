@@ -2,7 +2,7 @@
   "logEventType":"REQUEST_UPDATED_EVENT",
   "payload":{
     "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
-    "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+    "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
     "itemBarcode":"765475420716",
     "itemStatusName":"Awaiting pickup",
     "requests":{
@@ -11,7 +11,7 @@
         "requestType":"Recall",
         "requestDate":"2020-10-11T18:58:13.000+0000",
         "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
-        "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Open - Not yet filled",
         "position":3,
         "item":{
@@ -45,7 +45,7 @@
         "requestType":"Recall",
         "requestDate":"2020-10-11T18:58:13.000+0000",
         "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
-        "itemId":"459afaba-5b39-468d-9072-eb1685e0ddf4",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Open - Not yet filled",
         "position":3,
         "fulfilmentPreference":"Hold Shelf",
