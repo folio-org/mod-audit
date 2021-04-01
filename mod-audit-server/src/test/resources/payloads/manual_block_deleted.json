@@ -3,7 +3,7 @@
   "payload":{
     "type":"Manual",
     "desc":"Manual Block Description",
-    "staffInformation":"Staff information",
+    "staffInformation":"",
     "patronMessage":"Message To Patron",
     "expirationDate": "2018-10-23T00:00:00Z",
     "borrowing":true,
