@@ -1,8 +1,7 @@
 {
   "logEventType":"NOTICE",
   "payload": {
-    "userId":"6f36265e-722a-490a-b436-806e63af2ea7",
-    "userBarcode":"693787594998493",
+    "userBarcode":"605566117903595",
     "source":"ADMINISTRATOR, DIKU",
     "accountId":"7ad9dfa0-6ee9-43ba-8db5-7a034ce05838",
     "items": [

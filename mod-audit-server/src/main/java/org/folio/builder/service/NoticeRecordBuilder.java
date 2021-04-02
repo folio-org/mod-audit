@@ -51,7 +51,8 @@ public class NoticeRecordBuilder extends LogRecordBuilder {
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
     JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
-    return fetchTemplateName(payload)
+    return fetchUserDetailsByUserBarcode(payload, getProperty(payload, USER_BARCODE))
+      .thenCompose(this::fetchTemplateName)
       .thenCompose(this::createResult);
   }
 
