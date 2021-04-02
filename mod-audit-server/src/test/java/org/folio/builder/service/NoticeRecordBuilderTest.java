@@ -32,7 +32,7 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
     assertThat(records.size(), equalTo(1));
 
     LogRecord noticeLogRecord = records.get(0);
-    assertThat(noticeLogRecord.getUserBarcode(), equalTo("693787594998493"));
+    assertThat(noticeLogRecord.getUserBarcode(), equalTo("605566117903595"));
     assertThat(noticeLogRecord.getItems().size(), equalTo(1));
     assertThat(noticeLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
     assertThat(noticeLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
@@ -41,6 +41,8 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
     assertThat(noticeLogRecord.getDate(), is(not(nullValue())));
     assertThat(noticeLogRecord.getServicePointId(), equalTo("7c5abc9f-f3d7-4856-b8d7-6712462ca007"));
     assertThat(noticeLogRecord.getLinkToIds().getFeeFineId(), equalTo("7ad9dfa0-6ee9-43ba-8db5-7a034ce05838"));
+    assertThat(noticeLogRecord.getLinkToIds().getUserId(), equalTo("61da1f1b-eb9e-5a33-9d47-617c84191d12"));
+    assertThat(noticeLogRecord.getLinkToIds().getTemplateId(), equalTo("21f4fd8e-cf19-4870-8288-eb675aec8b3c"));
     assertThat(noticeLogRecord.getSource(), equalTo("System"));
     assertThat(noticeLogRecord.getDescription(),
       equalTo("Template: sample template. Triggering event: manual charge."));

@@ -56,6 +56,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import one.util.streamex.StreamEx;
+import org.folio.util.LogEventPayloadField;
 
 public abstract class LogRecordBuilder {
   private static final Logger LOGGER = LogManager.getLogger();
@@ -105,6 +106,11 @@ public abstract class LogRecordBuilder {
     return future;
   }
 
+  public CompletableFuture<List<JsonObject>> getEntitiesByQuery(String url, String key, int limit, int offset, String query) {
+    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
+    return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
+  }
+
   /**
    * Returns list of item records for specified id's.
    *
@@ -112,9 +118,7 @@ public abstract class LogRecordBuilder {
    * @return future with list of item records
    */
   public CompletableFuture<List<JsonObject>> getEntitiesByIds(String url, String key, int limit, int offset, String... ids) {
-    String query = convertIdsToCqlQuery(ids);
-    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
-    return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
+    return getEntitiesByQuery(url, key, limit, offset, convertIdsToCqlQuery(ids));
   }
 
   public CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
@@ -135,14 +139,32 @@ public abstract class LogRecordBuilder {
           if (userId.equals(getProperty(payload, USER_ID))) {
             ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
           }
-          JsonObject personal = getObjectProperty(userJson, PERSONAL);
-          if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
-            payload.put(PERSONAL_NAME.value(),
-              buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
-          }
+          fetchUserPersonal(payload, userJson);
         }
         return CompletableFuture.completedFuture(payload);
       });
+  }
+
+  public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
+    return getEntitiesByQuery(USERS_URL, USERS, 1, 0, "barcode==" + userBarcode)
+      .thenCompose(users -> {
+        var user = users.get(0);
+        if (nonNull(user)) {
+          if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
+            ofNullable(getProperty(user, LogEventPayloadField.ID)).ifPresent(id -> payload.put(USER_ID.value(), id));
+          }
+          fetchUserPersonal(payload, user);
+        }
+        return CompletableFuture.completedFuture(payload);
+      });
+  }
+
+  private void fetchUserPersonal(JsonObject payload, JsonObject user) {
+    JsonObject personal = getObjectProperty(user, PERSONAL);
+    if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
+      payload.put(PERSONAL_NAME.value(),
+        buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
+    }
   }
 
   public CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
