@@ -25,6 +25,12 @@
       "status": 200
     },
     {
+      "url": "/users?limit=1&offset=0&query=barcode%3D%3D605566117903595",
+      "method": "GET",
+      "receivedPath": "mocks/one-user-collection.json",
+      "status": 200
+    },
+    {
       "url": "/users?limit=2&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7+or+61da1f1b-eb9e-5a33-9d47-617c84191d12%29",
       "method": "GET",
       "receivedPath": "mocks/users.json",
