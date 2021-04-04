@@ -5,7 +5,7 @@
     "desc":"Manual Block Description",
     "staffInformation":"",
     "patronMessage":"Message To Patron",
-    "expirationDate": "2018-10-23T00:00:00Z",
+    "expirationDate": "1619136000000",
     "borrowing":true,
     "renewals":false,
     "requests":true,

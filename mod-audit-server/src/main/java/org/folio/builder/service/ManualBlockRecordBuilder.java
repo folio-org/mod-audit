@@ -13,11 +13,8 @@ import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.FIRST_NAME;
 import static org.folio.util.LogEventPayloadField.LAST_NAME;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
-import static org.folio.util.LogEventPayloadField.METADATA;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.PERSONAL;
-import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
-import static org.folio.util.LogEventPayloadField.USER_ID;
 
 import java.util.Date;
 import java.util.List;
@@ -28,6 +25,7 @@ import java.util.function.Function;
 import org.folio.builder.description.ManualBlockDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
+import org.folio.rest.manualblock.ManualBlock;
 import org.folio.util.LogEventPayloadField;
 
 import io.vertx.core.Context;
@@ -42,29 +40,30 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject event) {
 
-    JsonObject payload = getObjectProperty(event, PAYLOAD);
     String logEventType = getProperty(event, LOG_EVENT_TYPE);
+    var block = getObjectProperty(event, PAYLOAD).mapTo(ManualBlock.class);
 
-    String userId = getProperty(payload, USER_ID);
-    String sourceId = getNestedStringProperty(payload, METADATA, UPDATED_BY_USER_ID);
+    String userId = block.getUserId();
+    String sourceId = block.getMetadata()
+      .getUpdatedByUserId();
 
     return getEntitiesByIds(USERS_URL, USERS, 2, 0, userId, sourceId).thenCompose(users -> {
       Map<String, JsonObject> usersGroupedById = StreamEx.of(users)
         .collect(toMap(u -> getProperty(u, LogEventPayloadField.ID), Function.identity()));
-      LogRecord manualBlockLogRecord = buildManualBlockLogRecord(payload, logEventType, userId, sourceId, usersGroupedById);
+      LogRecord manualBlockLogRecord = buildManualBlockLogRecord(block, logEventType, userId, sourceId, usersGroupedById);
       return CompletableFuture.completedFuture(singletonList(manualBlockLogRecord));
     });
   }
 
-  private LogRecord buildManualBlockLogRecord(JsonObject payload, String logEventType, String userId, String sourceId,
+  private LogRecord buildManualBlockLogRecord(ManualBlock block, String logEventType, String userId, String sourceId,
       Map<String, JsonObject> usersGroupedById) {
     return new LogRecord().withObject(LogRecord.Object.MANUAL_BLOCK)
       .withUserBarcode(getProperty(usersGroupedById.get(userId), BARCODE))
       .withSource(getSource(logEventType, sourceId, usersGroupedById))
       .withAction(resolveLogRecordAction(logEventType))
       .withDate(new Date())
-      .withDescription(new ManualBlockDescriptionBuilder().buildDescription(payload))
-      .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)));
+      .withDescription(new ManualBlockDescriptionBuilder().buildDescription(block))
+      .withLinkToIds(new LinkToIds().withUserId(userId));
   }
 
   private String getSource(String logEventType, String sourceId, Map<String, JsonObject> usersGroupedById) {
