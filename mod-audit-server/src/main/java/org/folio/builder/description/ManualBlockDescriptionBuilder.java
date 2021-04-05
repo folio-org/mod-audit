@@ -2,76 +2,50 @@ package org.folio.builder.description;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.builder.description.DescriptionHelper.getFormattedDateTime;
-import static org.folio.util.JsonPropertyFetcher.getBooleanProperty;
-import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
-import static org.folio.util.JsonPropertyFetcher.getProperty;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_BORROWING;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_DESCRIPTION;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_EXPIRATION_DATE;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_MESSAGE_TO_PATRON;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_RENEWALS;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_REQUESTS;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_STAFF_INFORMATION;
 
-import io.vertx.core.json.JsonObject;
+import java.util.function.Consumer;
+
 import org.apache.commons.lang3.StringUtils;
+import org.folio.rest.manualblock.ManualBlock;
 
-import java.util.Objects;
+public class ManualBlockDescriptionBuilder {
 
-public class ManualBlockDescriptionBuilder implements DescriptionBuilder {
+  public String buildDescription(ManualBlock block) {
 
-  @Override
-  public String buildDescription(JsonObject logEventPayload) {
+    var description = new StringBuilder();
 
-    StringBuilder description = new StringBuilder();
+    populateBlockActionDescription(block, description);
 
-    populateBlockActionsDescription(logEventPayload, description);
+    isPropertyPresented(block.getDesc(), desc -> appendDescriptionPart(description, "Description: ", desc));
+    isPropertyPresented(block.getStaffInformation(), info -> appendDescriptionPart(description, "Staff only information: ", info));
+    isPropertyPresented(block.getPatronMessage(), msg -> appendDescriptionPart(description, "Message to patron: ", msg));
+    isPropertyPresented(getFormattedDateTime(block.getExpirationDate()), date -> appendDescriptionPart(description, "Expiration date: ", date));
 
-    var desc = getProperty(logEventPayload, MANUAL_BLOCK_DESCRIPTION);
-
-    if (isPropertyPresented(desc)) {
-      description.append("Description: ")
-        .append(desc)
-        .append(". ");
-    }
-
-    var staffInfo = getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION);
-    if (isPropertyPresented(staffInfo)) {
-      description.append("Staff only information: ")
-        .append(staffInfo)
-        .append(". ");
-    }
-
-    var msgToPatron = getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON);
-    if (isPropertyPresented(msgToPatron)) {
-      description.append("Message to patron: ")
-        .append(msgToPatron)
-        .append(". ");
-    }
-
-    var expDate = getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE);
-    if (Objects.nonNull(expDate)) {
-      description.append("Expiration date: ")
-        .append(getFormattedDateTime(expDate))
-        .append(". ");
-    }
-
-    return description.toString().trim();
+    return description.toString()
+      .trim();
   }
 
-  private boolean isPropertyPresented(String property) {
-    return StringUtils.isNotEmpty(property) && StringUtils.isNotBlank(property);
+  private void appendDescriptionPart(StringBuilder description, String key, String value) {
+    description.append(key)
+      .append(value)
+      .append(". ");
   }
 
-  private void populateBlockActionsDescription(JsonObject logEventPayload, StringBuilder description) {
+  private void isPropertyPresented(String value, Consumer<String> consumer) {
+    if (StringUtils.isNotEmpty(value) && StringUtils.isNotBlank(value)) {
+      consumer.accept(value);
+    }
+  }
+
+  private void populateBlockActionDescription(ManualBlock block, StringBuilder description) {
     StringBuilder actions = new StringBuilder();
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_BORROWING)) {
+    if (block.getBorrowing()) {
       actions.append("borrowing, ");
     }
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_RENEWALS)) {
+    if (block.getRenewals()) {
       actions.append("renewals, ");
     }
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_REQUESTS)) {
+    if (block.getRequests()) {
       actions.append("requests, ");
     }
     if (isNotEmpty(actions)) {

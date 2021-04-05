@@ -5,7 +5,6 @@
     "desc":"Manual Block Description",
     "staffInformation":"Staff information",
     "patronMessage":"  ",
-    "expirationDate": "2018-10-23T00:00:00Z",
     "borrowing":false,
     "renewals":false,
     "requests":false,
