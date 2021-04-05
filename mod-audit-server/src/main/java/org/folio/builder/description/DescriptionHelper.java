@@ -14,9 +14,8 @@ public class DescriptionHelper {
   private DescriptionHelper() {
   }
 
-  private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-  private static final DateTimeFormatter FORMAT = DateTimeFormat.forPattern(DATE_TIME_PATTERN);
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  private static final DateTimeFormatter FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
   public static String getFormattedDateTime(DateTime dateTime) {
     return dateTime.toString(FORMAT);
