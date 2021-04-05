@@ -28,7 +28,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
 
   private static final Logger logger = LogManager.getLogger();
 
-  private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2021-04-23 03:00:00.";
+  private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2021-04-23 03:01:40.";
   private static final String EXPECTED_UPDATE_DESCRIPTION = "Description: Manual Block Description. Staff only information: Staff information.";
   private static final String EXPECTED_DELETE_DESCRIPTION = "Block actions: borrowing, requests. Description: Manual Block Description. Message to patron: Message To Patron. Expiration date: 2021-04-23 03:00:00.";
 
