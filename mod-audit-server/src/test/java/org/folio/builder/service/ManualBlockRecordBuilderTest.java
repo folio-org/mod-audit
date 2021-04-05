@@ -28,9 +28,9 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
 
   private static final Logger logger = LogManager.getLogger();
 
-  private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
-  private static final String EXPECTED_UPDATE_DESCRIPTION = "Description: Manual Block Description. Staff only information: Staff information. Expiration date: 2018-10-23 00:00:00.";
-  private static final String EXPECTED_DELETE_DESCRIPTION = "Block actions: borrowing, requests. Description: Manual Block Description. Message to patron: Message To Patron. Expiration date: 2018-10-23 00:00:00.";
+  private static final String EXPECTED_CREATE_DESCRIPTION = "Block actions: borrowing, renewals, requests. Description: Manual Block Description. Staff only information: Staff information. Message to patron: Message To Patron. Expiration date: 2021-05-01 02:38:44.";
+  private static final String EXPECTED_UPDATE_DESCRIPTION = "Description: Manual Block Description. Staff only information: Staff information.";
+  private static final String EXPECTED_DELETE_DESCRIPTION = "Block actions: borrowing, requests. Description: Manual Block Description. Message to patron: Message To Patron. Expiration date: 2021-04-23 00:00:00.";
 
   public static final String USER_NOT_FOUND_ID = "4a52f480-8f9a-49c8-9dbb-65f086e577fb";
   public static final String EXPECTED_SOURCE = "Denesik, Toney";

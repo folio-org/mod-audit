@@ -181,6 +181,30 @@
       </plugin>
 
       <plugin>
+        <groupId>org.jsonschema2pojo</groupId>
+        <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <includes>
+            <include>*.json</include>
+          </includes>
+          <generateBuilders>true</generateBuilders>
+        </configuration>
+        <executions>
+          <execution>
+            <id>audit</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.parent.basedir}/ramls/schemas/manualblocks</sourceDirectory>
+              <targetPackage>org.folio.rest.manualblock</targetPackage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>com.nickwongdev</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
         <version>1.12.6</version>
