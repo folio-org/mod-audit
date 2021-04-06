@@ -2,63 +2,50 @@ package org.folio.builder.description;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.builder.description.DescriptionHelper.getFormattedDateTime;
-import static org.folio.util.JsonPropertyFetcher.getBooleanProperty;
-import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
-import static org.folio.util.JsonPropertyFetcher.getProperty;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_BORROWING;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_DESCRIPTION;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_EXPIRATION_DATE;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_MESSAGE_TO_PATRON;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_RENEWALS;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_REQUESTS;
-import static org.folio.util.LogEventPayloadField.MANUAL_BLOCK_STAFF_INFORMATION;
 
-import java.util.Optional;
+import java.util.function.Consumer;
 
-import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.rest.manualblock.ManualBlock;
 
-public class ManualBlockDescriptionBuilder implements DescriptionBuilder {
+public class ManualBlockDescriptionBuilder {
 
-  @Override
-  public String buildDescription(JsonObject logEventPayload) {
+  public String buildDescription(ManualBlock block) {
 
-    StringBuilder description = new StringBuilder();
+    var description = new StringBuilder();
 
-    populateBlockActionsDescription(logEventPayload, description);
+    populateBlockActionDescription(block, description);
 
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_DESCRIPTION))
-      .ifPresent(desc -> description.append("Description: ")
-        .append(desc)
-        .append(". "));
-
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_STAFF_INFORMATION))
-      .ifPresent(staffInfo -> description.append("Staff only information: ")
-        .append(staffInfo)
-        .append(". "));
-
-    Optional.ofNullable(getProperty(logEventPayload, MANUAL_BLOCK_MESSAGE_TO_PATRON))
-      .ifPresent(msgToPatron -> description.append("Message to patron: ")
-        .append(msgToPatron)
-        .append(". "));
-
-    Optional.ofNullable(getDateTimeProperty(logEventPayload, MANUAL_BLOCK_EXPIRATION_DATE))
-      .ifPresent(expDate -> description.append("Expiration date: ")
-        .append(getFormattedDateTime(expDate))
-        .append(". "));
+    isPropertyPresented(block.getDesc(), desc -> appendDescriptionPart(description, "Description: ", desc));
+    isPropertyPresented(block.getStaffInformation(), info -> appendDescriptionPart(description, "Staff only information: ", info));
+    isPropertyPresented(block.getPatronMessage(), msg -> appendDescriptionPart(description, "Message to patron: ", msg));
+    isPropertyPresented(getFormattedDateTime(block.getExpirationDate()), date -> appendDescriptionPart(description, "Expiration date: ", date));
 
     return description.toString()
       .trim();
   }
 
-  private void populateBlockActionsDescription(JsonObject logEventPayload, StringBuilder description) {
+  private void appendDescriptionPart(StringBuilder description, String key, String value) {
+    description.append(key)
+      .append(value)
+      .append(". ");
+  }
+
+  private void isPropertyPresented(String value, Consumer<String> consumer) {
+    if (StringUtils.isNotEmpty(value) && StringUtils.isNotBlank(value)) {
+      consumer.accept(value);
+    }
+  }
+
+  private void populateBlockActionDescription(ManualBlock block, StringBuilder description) {
     StringBuilder actions = new StringBuilder();
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_BORROWING)) {
+    if (block.getBorrowing()) {
       actions.append("borrowing, ");
     }
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_RENEWALS)) {
+    if (block.getRenewals()) {
       actions.append("renewals, ");
     }
-    if (getBooleanProperty(logEventPayload, MANUAL_BLOCK_REQUESTS)) {
+    if (block.getRequests()) {
       actions.append("requests, ");
     }
     if (isNotEmpty(actions)) {

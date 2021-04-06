@@ -4,13 +4,18 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.TestSuite.port;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -25,6 +30,7 @@ public class TenantApiTestUtil {
   public static final String LOAD_SYNC_PARAMETER = "loadSync";
   private static final int TENANT_OP_WAITINGTIME = 60000;
   public static final Header X_OKAPI_URL = new Header("X-Okapi-Url", "http://localhost:" + port);
+  public static final Header X_OKAPI_URL_TO = new Header("X-Okapi-Url-To", "http://localhost:" + port);
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";
@@ -47,6 +53,11 @@ public class TenantApiTestUtil {
   public static final String REQUEST_REORDERED_PAYLOAD_JSON = "payloads/request_reordered.json";
   public static final String REQUEST_CANCELLED_PAYLOAD_JSON = "payloads/request_cancelled.json";
   public static final String REQUEST_EXPIRED_PAYLOAD_JSON = "payloads/request_expired.json";
+
+  public static final List<String> SAMPLES = Arrays.asList(CHECK_IN_PAYLOAD_JSON, CHECK_OUT_PAYLOAD_JSON, MANUAL_BLOCK_CREATED_PAYLOAD_JSON, MANUAL_BLOCK_UPDATED_PAYLOAD_JSON, MANUAL_BLOCK_DELETED_PAYLOAD_JSON,
+    FEE_FINE_PAYLOAD_JSON, LOAN_PAYLOAD_JSON, LOAN_ANONYMIZE_PAYLOAD_JSON, LOAN_AGE_TO_LOST_PAYLOAD_JSON, LOAN_WRONG_ACTION_JSON, NOTICE_PAYLOAD_JSON,
+    REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON, REQUEST_CREATED_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_JSON, REQUEST_MOVED_PAYLOAD_JSON,
+    REQUEST_REORDERED_PAYLOAD_JSON, REQUEST_CANCELLED_PAYLOAD_JSON, REQUEST_EXPIRED_PAYLOAD_JSON);
 
   private TenantApiTestUtil() {
 
@@ -103,7 +114,7 @@ public class TenantApiTestUtil {
 
   public static void deleteTenantAndPurgeTables(Header tenantHeader) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    TenantClient tClient = new TenantClient(X_OKAPI_URL.getValue(), tenantHeader.getValue(), null);
+    TenantClient tClient = new TenantClient(X_OKAPI_URL_TO.getValue(), tenantHeader.getValue(), null);
     TenantAttributes tenantAttributes = prepareTenantBody(false, false).withPurge(true);
     try {
       tClient.postTenant(tenantAttributes, event -> {
@@ -117,6 +128,37 @@ public class TenantApiTestUtil {
     } catch (Exception e) {
       fail(e);
     }
+  }
+
+  public static void deleteTenant(TenantJob tenantJob, Header tenantHeader) {
+    TenantClient tenantClient = new TenantClient(X_OKAPI_URL_TO.getValue(), tenantHeader.getValue(), null);
+
+    if (tenantJob != null) {
+      CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+      tenantClient.deleteTenantByOperationId(tenantJob.getId(), event -> {
+        if (event.failed()) {
+          completableFuture.completeExceptionally(event.cause());
+        } else {
+          completableFuture.complete(null);
+        }
+      });
+      try {
+        completableFuture.get(60, TimeUnit.SECONDS);
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        fail(e);
+      }
+
+    }
+
+  }
+
+  private JsonObject getSampleAsJson(String fullPath) throws IOException {
+    try (InputStream resourceAsStream = TenantApiTestUtil.class.getClassLoader().getResourceAsStream(fullPath)) {
+      if (resourceAsStream != null) {
+        return new JsonObject(IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8));
+      }
+    }
+    throw new IOException("Error loading sample file");
   }
 
   public static String getFile(String filename) {

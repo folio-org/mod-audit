@@ -38,26 +38,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.Response;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Context;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import one.util.streamex.StreamEx;
+import org.folio.util.LogEventPayloadField;
 
 public abstract class LogRecordBuilder {
-  private static final Logger LOGGER = LoggerFactory.getLogger(LogRecordBuilder.class);
+  private static final Logger LOGGER = LogManager.getLogger();
 
   private static final String OKAPI_URL = "x-okapi-url";
   private static final String EXCEPTION_CALLING_ENDPOINT_MSG = "Exception calling {} {}";
@@ -87,28 +89,26 @@ public abstract class LogRecordBuilder {
     try {
       LOGGER.info("Calling GET {}", endpoint);
       httpClient.request(HttpMethod.GET, endpoint, okapiHeaders)
-        .thenApply(response -> {
-          LOGGER.debug("Validating response for GET {}", endpoint);
-          return verifyAndExtractBody(response);
-        })
-        .thenAccept(body -> {
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+        .whenComplete((response, throwable) -> {
+          if (Objects.nonNull(throwable)) {
+            LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
+            future.completeExceptionally(throwable);
+          } else {
+            future.complete(verifyAndExtractBody(response));
           }
-          future.complete(body);
-        })
-        .exceptionally(t -> {
-          LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
-          future.completeExceptionally(t);
-          return null;
+          httpClient.closeClient();
         });
     } catch (Exception e) {
       LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
       future.completeExceptionally(e);
-    } finally {
       httpClient.closeClient();
     }
     return future;
+  }
+
+  public CompletableFuture<List<JsonObject>> getEntitiesByQuery(String url, String key, int limit, int offset, String query) {
+    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
+    return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
   }
 
   /**
@@ -118,9 +118,7 @@ public abstract class LogRecordBuilder {
    * @return future with list of item records
    */
   public CompletableFuture<List<JsonObject>> getEntitiesByIds(String url, String key, int limit, int offset, String... ids) {
-    String query = convertIdsToCqlQuery(ids);
-    String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
-    return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
+    return getEntitiesByQuery(url, key, limit, offset, convertIdsToCqlQuery(ids));
   }
 
   public CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
@@ -141,14 +139,32 @@ public abstract class LogRecordBuilder {
           if (userId.equals(getProperty(payload, USER_ID))) {
             ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
           }
-          JsonObject personal = getObjectProperty(userJson, PERSONAL);
-          if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
-            payload.put(PERSONAL_NAME.value(),
-              buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
-          }
+          fetchUserPersonal(payload, userJson);
         }
         return CompletableFuture.completedFuture(payload);
       });
+  }
+
+  public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
+    return getEntitiesByQuery(USERS_URL, USERS, 1, 0, "barcode==" + userBarcode)
+      .thenCompose(users -> {
+        var user = users.get(0);
+        if (nonNull(user)) {
+          if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
+            ofNullable(getProperty(user, LogEventPayloadField.ID)).ifPresent(id -> payload.put(USER_ID.value(), id));
+          }
+          fetchUserPersonal(payload, user);
+        }
+        return CompletableFuture.completedFuture(payload);
+      });
+  }
+
+  private void fetchUserPersonal(JsonObject payload, JsonObject user) {
+    JsonObject personal = getObjectProperty(user, PERSONAL);
+    if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
+      payload.put(PERSONAL_NAME.value(),
+        buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
+    }
   }
 
   public CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
@@ -240,9 +256,14 @@ public abstract class LogRecordBuilder {
   }
 
   private static JsonObject verifyAndExtractBody(Response response) {
-    if (!Response.isSuccess(response.getCode())) {
+    var endpoint = response.getEndpoint();
+    var code = response.getCode();
+    var body = response.getBody();
+    if (!Response.isSuccess(code)) {
+      LOGGER.error("Error calling {} with code {}, response body: {}", endpoint, code, body);
       return null;
     }
+    LOGGER.info("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
     return response.getBody();
   }
 

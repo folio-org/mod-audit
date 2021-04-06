@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>mod-audit-server</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>2.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <artifactId>mod-audit</artifactId>
     <groupId>org.folio</groupId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -19,6 +19,7 @@
   </licenses>
 
   <properties>
+    <json.path.version>2.5.0</json.path.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <argLine />
   </properties>
@@ -82,6 +83,11 @@
       <groupId>one.util</groupId>
       <artifactId>streamex</artifactId>
       <version>${streamx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${json.path.version}</version>
     </dependency>
   </dependencies>
 
@@ -169,6 +175,30 @@
                   <value>true</value>
                 </systemProperty>
               </systemProperties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jsonschema2pojo</groupId>
+        <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <includes>
+            <include>*.json</include>
+          </includes>
+          <generateBuilders>true</generateBuilders>
+        </configuration>
+        <executions>
+          <execution>
+            <id>audit</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${project.parent.basedir}/ramls/schemas/manualblocks</sourceDirectory>
+              <targetPackage>org.folio.rest.manualblock</targetPackage>
             </configuration>
           </execution>
         </executions>

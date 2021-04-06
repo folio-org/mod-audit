@@ -1,5 +1,16 @@
 ## 2.1.0 - Unreleased
 
+## 2.0.1 - Released
+This release contains bug fixes 
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.0...v2.0.1)
+
+### Bug Fixes
+ * [MODAUD-66](https://issues.folio.org/browse/MODAUD-66) - User ID is `undefined` for Notice entries
+ * [MODAUD-64](https://issues.folio.org/browse/MODAUD-64) - Filter circulation log on description is not working
+ * [MODAUD-62](https://issues.folio.org/browse/MODAUD-62) - Remove sample data for Circulation Log App
+ * [MODAUD-54](https://issues.folio.org/browse/MODAUD-54) - Click on item barcode results in error message
+
 ## 2.0.0 - Released
 This release contains improvements and RMB update
 
