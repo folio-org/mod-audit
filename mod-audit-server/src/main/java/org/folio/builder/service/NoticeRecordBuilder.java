@@ -7,7 +7,6 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.Constants.UUID_PATTERN;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
-import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
@@ -29,6 +28,7 @@ import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -91,7 +91,7 @@ public class NoticeRecordBuilder extends LogRecordBuilder {
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withItems(fetchItems(getArrayProperty(payload, ITEMS)))
       .withAction(LogRecord.Action.SEND)
-      .withDate(getDateTimeProperty(payload, DATE).toDate())
+      .withDate(new Date())
       .withServicePointId(getProperty(extractFirstItem(payload), SERVICE_POINT_ID))
       .withSource(SYSTEM)
       .withLinkToIds(new LinkToIds()
