@@ -70,7 +70,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
       .withServicePointId(isAction(payload, AGE_TO_LOST) ? null : getProperty(payload, SERVICE_POINT_ID))
       .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
       .withDescription(getProperty(payload, DESCRIPTION))
-      .withLinkToIds(new LinkToIds().withUserId(getProperty(payload, USER_ID)))));
+      .withLinkToIds(new LinkToIds().withUserId(isAction(payload, ANONYMIZE) ? null : getProperty(payload, USER_ID)))));
   }
 
   private boolean isAction(JsonObject payload, LogRecord.Action action) {

@@ -1,0 +1,24 @@
+{
+  "logEventType":"CHECK_OUT_EVENT",
+  "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+  "loanId":"f93c3359-682c-4c87-aed5-2d3e9357d41d",
+  "isLoanClosed":false,
+  "dueDate":"2020-09-25T09:48:48.000Z",
+  "holdingsRecordId": "2e96afd4-7027-4cb8-bc40-efc5d1bf155b",
+  "instanceId":"c361cda5-ee48-43b4-88eb-1d5c32c165cf",
+  "userId":"dae6d820-14df-488f-9dd7-61dc81a17fd0",
+  "userBarcode":"159456753",
+  "itemId":"e038e283-4104-455d-80b7-e6d05ca4e5a7",
+  "itemBarcode":"845687423",
+  "itemStatusName":"Checked out",
+  "proxyBarcode": "498523980412",
+  "source":"folio",
+  "requests":[
+    {
+      "id":"03279209-a273-4fff-8d96-8aa43f013df4",
+      "oldRequestStatus":"Open - In transit",
+      "newRequestStatus":"Closed - Filled",
+      "requestType":"Recall"
+    }
+  ]
+}

@@ -5,19 +5,13 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.ErrorUtils.buildError;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
-import org.folio.cql2pgjson.CQL2PgJSON;
-import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
 import org.folio.rest.jaxrs.resource.AuditDataCirculation;
-import org.folio.rest.persist.Criteria.Limit;
-import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.cql.CQLWrapper;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -48,16 +42,5 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
         return null;
       });
-  }
-
-  private CompletableFuture<CQLWrapper> createCqlWrapper(String tableName, String query, int limit, int offset) {
-    CompletableFuture<CQLWrapper> future = new CompletableFuture<>();
-    try {
-      CQL2PgJSON cql2PgJSON = new CQL2PgJSON(tableName + ".jsonb");
-      future.complete(new CQLWrapper(cql2PgJSON, query).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
-    } catch (FieldException e) {
-      future.completeExceptionally(e);
-    }
-    return future;
   }
 }
