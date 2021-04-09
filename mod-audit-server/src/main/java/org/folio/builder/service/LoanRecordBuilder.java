@@ -4,7 +4,6 @@ import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
-import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACTION;
@@ -23,6 +22,7 @@ import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +66,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
         .withHoldingId(getProperty(payload, HOLDINGS_RECORD_ID))
         .withLoanId(getProperty(payload, LOAN_ID))))
       .withAction(resolveAction(getProperty(payload, ACTION)))
-      .withDate(getDateTimeProperty(payload, DATE).toDate())
+      .withDate(new Date())
       .withServicePointId(isAction(payload, AGE_TO_LOST) ? null : getProperty(payload, SERVICE_POINT_ID))
       .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
       .withDescription(getProperty(payload, DESCRIPTION))
