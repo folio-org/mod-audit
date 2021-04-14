@@ -3,12 +3,14 @@ package org.folio.rest.impl;
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CREATED_THROUGH_OVERRIDE;
+import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.SAMPLES;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
@@ -43,7 +45,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     logger.info("Get circulation audit log records: no filter");
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(20));
+      .assertThat().body("totalRecords", equalTo(25));
   }
 
   @Test
@@ -77,6 +79,35 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .and().body("logRecords[1].object", anyOf(equalTo("Loan"), equalTo("Request")))
       .and()
       .body("totalRecords", equalTo(2));
+  }
+
+  @Test
+  void anonymizeLoanShouldRemoveUserDataFromRelatedRecords() {
+    logger.info("Anonymize loan: user data from related records should be removed");
+
+    given().headers(HEADERS)
+      .body(getFile(LOAN_ANONYMIZE_PAYLOAD_JSON))
+      .post("/audit/handlers/log-record")
+      .then()
+      .log().all()
+      .statusCode(204);
+
+    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=845687423)")
+      .then().log().all().statusCode(200)
+      .assertThat()
+      .body("totalRecords", equalTo(6))
+      .body("logRecords[0].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[0].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[1].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[1].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[2].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[2].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[3].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[3].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[4].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[4].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[5].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[5].linkToIds.userId", isEmptyOrNullString());
   }
 
   @Test

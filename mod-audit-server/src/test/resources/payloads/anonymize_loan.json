@@ -1,10 +1,10 @@
 {
   "logEventType" : "LOAN",
   "payload": {
-    "itemId" : "100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+    "itemId" : "e038e283-4104-455d-80b7-e6d05ca4e5a7",
     "action" : "Anonymize",
     "date" : "2020-10-14T10:10:41.610Z",
     "servicePointId" : "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
-    "loanId" : "336ec84c-27ed-483d-92e3-926fafa7ed1c"
+    "loanId" : "f93c3359-682c-4c87-aed5-2d3e9357d41d"
   }
 }

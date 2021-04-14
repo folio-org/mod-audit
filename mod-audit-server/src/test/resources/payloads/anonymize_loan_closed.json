@@ -1,0 +1,17 @@
+{
+  "logEventType" : "LOAN",
+  "payload": {
+    "userBarcode" : "159456753",
+    "userId" : "dae6d820-14df-488f-9dd7-61dc81a17fd0",
+    "itemBarcode" : "845687423",
+    "itemId" : "e038e283-4104-455d-80b7-e6d05ca4e5a7",
+    "instanceId" : "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
+    "holdingsRecordId" : "e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19",
+    "action" : "Closed",
+    "date" : "2020-10-14T10:10:41.610Z",
+    "servicePointId" : "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+    "updatedByUserId" : "fa96fec8-786f-505b-b55e-e0bb1150d548",
+    "description" : "New due date: 2020-10-14T11:10:41.554Z (from 2020-10-14T11:03:00.751Z)",
+    "loanId" : "f93c3359-682c-4c87-aed5-2d3e9357d41d"
+  }
+}

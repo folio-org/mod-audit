@@ -13,6 +13,7 @@ import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,16 +67,18 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
 
     LogRecord loanLogRecord = records.get(0);
     assertThat(loanLogRecord.getItems().size(), equalTo(1));
-    assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
-    assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
+    assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("845687423"));
+    assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("e038e283-4104-455d-80b7-e6d05ca4e5a7"));
     assertThat(loanLogRecord.getItems().get(0).getInstanceId(), equalTo("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"));
     assertThat(loanLogRecord.getItems().get(0).getHoldingId(), equalTo("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
-    assertThat(loanLogRecord.getItems().get(0).getLoanId(), equalTo("336ec84c-27ed-483d-92e3-926fafa7ed1c"));
+    assertThat(loanLogRecord.getItems().get(0).getLoanId(), equalTo("f93c3359-682c-4c87-aed5-2d3e9357d41d"));
     assertThat(loanLogRecord.getObject(), equalTo(LogRecord.Object.LOAN));
     assertThat(loanLogRecord.getAction(), equalTo(ANONYMIZE));
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
     assertThat(loanLogRecord.getSource(), equalTo(SYSTEM));
+    assertThat(loanLogRecord.getUserBarcode(), isEmptyOrNullString());
+    assertThat(loanLogRecord.getLinkToIds().getUserId(), isEmptyOrNullString());
   }
 
   @Test
