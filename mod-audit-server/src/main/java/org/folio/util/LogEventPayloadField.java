@@ -13,12 +13,10 @@ public enum LogEventPayloadField {
   LAST_NAME("lastName"),
   PERSONAL_NAME("personalName"),
   PERSONAL("personal"),
-  UPDATED_BY_USER_ID("updatedByUserId"),
   COMMENTS("comments"),
   PAYMENT_METHOD("paymentMethod"),
   BALANCE("balance"),
   AMOUNT("amount"),
-  METADATA("metadata"),
   FEE_FINE_OWNER("feeFineOwner"),
   TYPE("type"),
   DESCRIPTION("description"),
@@ -67,14 +65,7 @@ public enum LogEventPayloadField {
   REQUEST_PICKUP_SERVICE_POINT_ID("pickupServicePointId"),
   REQUESTER("requester"),
   REQUESTER_ID("requesterId"),
-  BARCODE("barcode"),
-  MANUAL_BLOCK_BORROWING("borrowing"),
-  MANUAL_BLOCK_RENEWALS("renewals"),
-  MANUAL_BLOCK_REQUESTS("requests"),
-  MANUAL_BLOCK_DESCRIPTION("desc"),
-  MANUAL_BLOCK_STAFF_INFORMATION("staffInformation"),
-  MANUAL_BLOCK_MESSAGE_TO_PATRON("patronMessage"),
-  MANUAL_BLOCK_EXPIRATION_DATE("expirationDate");
+  BARCODE("barcode");
 
 
   private final String value;

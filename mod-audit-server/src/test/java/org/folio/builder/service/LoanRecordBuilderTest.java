@@ -8,6 +8,7 @@ import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.folio.utils.TenantApiTestUtil.LOAN_AGE_TO_LOST_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_RECALL_REQUESTED_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,7 +52,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getAction(), equalTo(RENEWED));
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
-    assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
+    assertThat(loanLogRecord.getSource(), equalTo("Bernhard, Cordell"));
     assertThat(loanLogRecord.getDescription(),
       equalTo("New due date: 2020-10-14T11:10:41.554Z (from 2020-10-14T11:03:00.751Z)"));
   }
