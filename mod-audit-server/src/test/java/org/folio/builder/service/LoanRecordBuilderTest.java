@@ -8,7 +8,6 @@ import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.folio.utils.TenantApiTestUtil.LOAN_AGE_TO_LOST_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
-import static org.folio.utils.TenantApiTestUtil.LOAN_RECALL_REQUESTED_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
