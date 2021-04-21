@@ -16,6 +16,7 @@ import static org.folio.util.LogEventPayloadField.LOAN_ID;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.SERVICE_POINT_ID;
+import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
@@ -45,10 +46,12 @@ public class LoanRecordBuilder extends LogRecordBuilder {
     if (isAction(payload, ANONYMIZE)) {
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
-    } else {
+    } else if (isAction(payload, AGE_TO_LOST)) {
       return fetchUserDetails(payload, getProperty(payload, USER_ID))
         .thenCompose(this::createResult);
     }
+    return fetchUserDetails(payload, getProperty(payload, UPDATED_BY_USER_ID))
+      .thenCompose(this::createResult);
   }
 
   private CompletableFuture<List<LogRecord>> createResult(JsonObject payload) {
