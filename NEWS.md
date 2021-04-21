@@ -1,5 +1,13 @@
 ## 2.1.0 - Unreleased
 
+## 2.0.2 - Released
+This release contains bug fixes for anonymization
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.1...v2.0.2)
+
+### Bug Fixes
+ * [MODAUD-58](https://issues.folio.org/browse/MODAUD-58) - Incomplete anonymization in Circulation log
+
 ## 2.0.1 - Released
 This release contains bug fixes 
 
