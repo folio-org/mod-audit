@@ -197,8 +197,8 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <sourceDirectory>${project.parent.basedir}/ramls/schemas/manualblocks</sourceDirectory>
-              <targetPackage>org.folio.rest.manualblock</targetPackage>
+              <sourceDirectory>${project.parent.basedir}/ramls/schemas/external</sourceDirectory>
+              <targetPackage>org.folio.rest.external</targetPackage>
             </configuration>
           </execution>
         </executions>
