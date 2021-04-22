@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Cancellation reason object",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description" : "A globally unique (UUID) identifier for cancellation reason",
+      "type": "string"
+    },
+    "name": {
+      "description" : "Cancellation reason name",
+      "type": "string"
+    },
+    "description" : {
+      "description" : "Cancellation reason description",
+      "type": "string"
+    },
+    "publicDescription": {
+      "description" : "Public description",
+      "type": "string"
+    },
+    "requiresAdditionalInformation": {
+      "description" : "Requires additional information",
+      "type": "boolean"
+    },
+    "metadata": {
+      "$ref": "../../raml-util/schemas/metadata.schema",
+      "readonly": true
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ]
+}
