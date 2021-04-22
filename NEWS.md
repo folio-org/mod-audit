@@ -1,5 +1,13 @@
 ## 2.1.0 - Unreleased
 
+## 2.0.3 - Released
+This release contains bug fixes for request source
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.2...v2.0.3)
+
+### Bug Fixes
+ * [MODAUD-74](https://issues.folio.org/browse/MODAUD-74) - Invalid source value for requests actions
+
 ## 2.0.2 - Released
 This release contains bug fixes for anonymization
 
