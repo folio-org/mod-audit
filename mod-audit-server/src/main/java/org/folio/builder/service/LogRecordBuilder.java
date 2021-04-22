@@ -3,7 +3,9 @@ package org.folio.builder.service;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -14,19 +16,16 @@ import static org.folio.util.Constants.TEMPLATES_URL;
 import static org.folio.util.Constants.URL_WITH_ID_PATTERN;
 import static org.folio.util.Constants.USERS_URL;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
-import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.BARCODE;
-import static org.folio.util.LogEventPayloadField.FIRST_NAME;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
 import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEMS;
 import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
-import static org.folio.util.LogEventPayloadField.LAST_NAME;
 import static org.folio.util.LogEventPayloadField.NAME;
-import static org.folio.util.LogEventPayloadField.PERSONAL;
 import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
+import static org.folio.util.LogEventPayloadField.SOURCE;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_ID;
 import static org.folio.util.LogEventPayloadField.TEMPLATE_NAME;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
@@ -45,6 +44,8 @@ import java.util.concurrent.CompletionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.rest.external.User;
+import org.folio.rest.external.UserCollection;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.Response;
@@ -56,7 +57,6 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import one.util.streamex.StreamEx;
-import org.folio.util.LogEventPayloadField;
 
 public abstract class LogRecordBuilder {
   private static final Logger LOGGER = LogManager.getLogger();
@@ -66,8 +66,6 @@ public abstract class LogRecordBuilder {
 
   public static final String SEARCH_PARAMS = "?limit=%s&offset=%s%s";
   public static final String ID = "id";
-  public static final String USERS = "users";
-  public static final String CANCELLATION_REASONS = "cancellationReasons";
 
   protected final Map<String, String> okapiHeaders;
   protected final Context vertxContext;
@@ -106,9 +104,9 @@ public abstract class LogRecordBuilder {
     return future;
   }
 
-  public CompletableFuture<List<JsonObject>> getEntitiesByQuery(String url, String key, int limit, int offset, String query) {
+  public <T> CompletableFuture<T> getEntitiesByQuery(String url, Class<T> collection, int limit, int offset, String query) {
     String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
-    return handleGetRequest(endpoint).thenApply(response -> extractEntities(response, key));
+    return handleGetRequest(endpoint).thenApply(response -> response.mapTo(collection));
   }
 
   /**
@@ -117,8 +115,8 @@ public abstract class LogRecordBuilder {
    * @param ids List of item id's
    * @return future with list of item records
    */
-  public CompletableFuture<List<JsonObject>> getEntitiesByIds(String url, String key, int limit, int offset, String... ids) {
-    return getEntitiesByQuery(url, key, limit, offset, convertIdsToCqlQuery(ids));
+  public <T> CompletableFuture<T> getEntitiesByIds(String url, Class<T> collection, int limit, int offset, String... ids) {
+    return getEntitiesByQuery(url, collection, limit, offset, convertIdsToCqlQuery(ids));
   }
 
   public CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
@@ -133,25 +131,12 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, USERS_URL, userId))
-      .thenCompose(userJson -> {
-        if (nonNull(userJson)) {
-          if (userId.equals(getProperty(payload, USER_ID))) {
-            ofNullable(getProperty(userJson, BARCODE)).ifPresent(barcode -> payload.put(USER_BARCODE.value(), barcode));
-          }
-          fetchUserPersonal(payload, userJson);
-        }
-        return CompletableFuture.completedFuture(payload);
-      });
-  }
-
-  public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
-    return getEntitiesByQuery(USERS_URL, USERS, 1, 0, "barcode==" + userBarcode)
+    return getEntitiesByIds(USERS_URL, UserCollection.class, 1, 0, userId)
       .thenCompose(users -> {
-        var user = users.get(0);
+        var user = users.getUsers().get(0);
         if (nonNull(user)) {
-          if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
-            ofNullable(getProperty(user, LogEventPayloadField.ID)).ifPresent(id -> payload.put(USER_ID.value(), id));
+          if (userId.equals(getProperty(payload, USER_ID))) {
+            payload.put(USER_BARCODE.value(), user.getBarcode());
           }
           fetchUserPersonal(payload, user);
         }
@@ -159,11 +144,48 @@ public abstract class LogRecordBuilder {
       });
   }
 
-  private void fetchUserPersonal(JsonObject payload, JsonObject user) {
-    JsonObject personal = getObjectProperty(user, PERSONAL);
-    if (nonNull(personal) && nonNull(buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)))) {
+  public CompletableFuture<JsonObject> fetchUserAndSourceDetails(JsonObject payload, String userId, String sourceId) {
+
+    return getEntitiesByIds(USERS_URL, UserCollection.class, 2, 0, userId, sourceId)
+      .thenCompose(users -> {
+      Map<String, User> usersGroupedById = StreamEx.of(users.getUsers()).collect(toMap(User::getId, identity()));
+
+      var user = usersGroupedById.get(userId);
+      var source = usersGroupedById.get(sourceId);
+        if (nonNull(user)) {
+          if (userId.equals(getProperty(payload, USER_ID))) {
+            payload.put(USER_BARCODE.value(), user.getBarcode());
+          }
+          fetchUserPersonal(payload, user);
+        }
+
+        if (nonNull(source)) {
+          payload.put(SOURCE.value(),
+            buildPersonalName(source.getPersonal().getFirstName(), source.getPersonal().getLastName()));
+        }
+        return CompletableFuture.completedFuture(payload);
+    });
+  }
+
+  public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
+    return getEntitiesByQuery(USERS_URL, UserCollection.class, 1, 0, "barcode==" + userBarcode)
+      .thenCompose(users -> {
+        var user = users.getUsers().get(0);
+        if (nonNull(user)) {
+          if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
+            payload.put(USER_ID.value(), user.getId());
+          }
+          fetchUserPersonal(payload, user);
+        }
+        return CompletableFuture.completedFuture(payload);
+      });
+  }
+
+  private void fetchUserPersonal(JsonObject payload, User user) {
+    var personal = user.getPersonal();
+    if (nonNull(personal) && nonNull(buildPersonalName(personal.getFirstName(), personal.getLastName()))) {
       payload.put(PERSONAL_NAME.value(),
-        buildPersonalName(getProperty(personal, FIRST_NAME), getProperty(personal, LAST_NAME)));
+        buildPersonalName(personal.getFirstName(), personal.getLastName()));
     }
   }
 

@@ -17,7 +17,6 @@ import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.BARCODE;
 import static org.folio.util.LogEventPayloadField.CREATED;
-import static org.folio.util.LogEventPayloadField.DESCRIPTION;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
 import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEM;
@@ -25,9 +24,9 @@ import static org.folio.util.LogEventPayloadField.ITEM_BARCODE;
 import static org.folio.util.LogEventPayloadField.ITEM_ID;
 import static org.folio.util.LogEventPayloadField.LOAN_ID;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
+import static org.folio.util.LogEventPayloadField.METADATA;
 import static org.folio.util.LogEventPayloadField.ORIGINAL;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
-import static org.folio.util.LogEventPayloadField.PERSONAL_NAME;
 import static org.folio.util.LogEventPayloadField.REORDERED;
 import static org.folio.util.LogEventPayloadField.REQUESTER;
 import static org.folio.util.LogEventPayloadField.REQUESTER_ID;
@@ -35,8 +34,10 @@ import static org.folio.util.LogEventPayloadField.REQUESTS;
 import static org.folio.util.LogEventPayloadField.REQUEST_ID;
 import static org.folio.util.LogEventPayloadField.REQUEST_PICKUP_SERVICE_POINT_ID;
 import static org.folio.util.LogEventPayloadField.REQUEST_REASON_FOR_CANCELLATION_ID;
+import static org.folio.util.LogEventPayloadField.SOURCE;
 import static org.folio.util.LogEventPayloadField.STATUS;
 import static org.folio.util.LogEventPayloadField.UPDATED;
+import static org.folio.util.LogEventPayloadField.UPDATED_BY_USER_ID;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
@@ -49,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.folio.builder.description.RequestDescriptionBuilder;
+import org.folio.rest.external.CancellationReasonCollection;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -81,8 +83,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       var created = getObjectProperty(requests, CREATED);
 
       return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(created, ITEM_ID)))
-        .thenCompose(item -> fetchUserDetails(new JsonObject().put(USER_ID.value(), getProperty(created, REQUESTER_ID)),
-            getProperty(created, REQUESTER_ID)).thenApply(user -> {
+        .thenCompose(item -> fetchUserAndSourceDetails(new JsonObject().put(USER_ID.value(), getProperty(created, REQUESTER_ID)),
+            getProperty(created, REQUESTER_ID), getNestedStringProperty(created, METADATA, UPDATED_BY_USER_ID)).thenApply(user -> {
               records.add(buildBaseContent(created, item, user).withAction(action)
                 .withDescription(requestDescriptionBuilder.buildCreateDescription(created)));
               return records;
@@ -94,15 +96,15 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       var updated = getObjectProperty(requests, UPDATED);
 
       return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(original, ITEM_ID)))
-        .thenCompose(item -> fetchUserDetails(new JsonObject().put(USER_ID.value(), getProperty(original, REQUESTER_ID)),
-            getProperty(original, REQUESTER_ID)).thenCompose(user -> {
+        .thenCompose(item -> fetchUserAndSourceDetails(new JsonObject().put(USER_ID.value(), getProperty(original, REQUESTER_ID)),
+            getProperty(original, REQUESTER_ID), getNestedStringProperty(updated, METADATA, UPDATED_BY_USER_ID)).thenCompose(user -> {
 
               if (CLOSED_CANCELLED_STATUS.equals(getProperty(updated, STATUS))) {
-                return getEntitiesByIds(CANCELLATION_REASONS_URL, CANCELLATION_REASONS, 1, 0,
+                return getEntitiesByIds(CANCELLATION_REASONS_URL, CancellationReasonCollection.class, 1, 0,
                     getProperty(updated, REQUEST_REASON_FOR_CANCELLATION_ID)).thenApply(reasons -> {
                       records.add(buildBaseContent(updated, item, user).withAction(LogRecord.Action.CANCELLED)
                         .withDescription(requestDescriptionBuilder.buildCancelledDescription(original,
-                            getProperty(reasons.get(0), DESCRIPTION))));
+                          reasons.getCancellationReasons().get(0).getDescription())));
                       return records;
                     });
               } else {
@@ -118,8 +120,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       var updated = getObjectProperty(requests, UPDATED);
 
       return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(original, ITEM_ID)))
-        .thenCompose(item -> fetchUserDetails(new JsonObject().put(USER_ID.value(), getProperty(updated, REQUESTER_ID)),
-            getProperty(updated, REQUESTER_ID)).thenApply(user -> {
+        .thenCompose(item -> fetchUserAndSourceDetails(new JsonObject().put(USER_ID.value(), getProperty(updated, REQUESTER_ID)),
+            getProperty(updated, REQUESTER_ID), getNestedStringProperty(updated, METADATA, UPDATED_BY_USER_ID)).thenApply(user -> {
               records.add(buildBaseContent(updated, item, user).withAction(LogRecord.Action.MOVED)
                 .withDescription(requestDescriptionBuilder.buildMovedDescription(original, updated)));
               return records;
@@ -133,8 +135,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
         .map(req -> {
           var request = (JsonObject) req;
           return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(request, ITEM_ID)))
-            .thenCompose(item -> fetchUserDetails(new JsonObject().put(USER_ID.value(), getProperty(request, REQUESTER_ID)),
-                getProperty(request, REQUESTER_ID))
+            .thenCompose(item -> fetchUserAndSourceDetails(new JsonObject().put(USER_ID.value(), getProperty(request, REQUESTER_ID)),
+                getProperty(request, REQUESTER_ID), getNestedStringProperty(request, METADATA, UPDATED_BY_USER_ID))
                   .thenApply(user -> buildBaseContent(request, item, user)
                     .withUserBarcode(getNestedStringProperty(request, REQUESTER, BARCODE))
                     .withAction(action)
@@ -154,8 +156,8 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       var updated = getObjectProperty(requests, UPDATED);
 
       return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(original, ITEM_ID)))
-        .thenCompose(item -> fetchUserDetails(new JsonObject().put(USER_ID.value(), getProperty(original, REQUESTER_ID)),
-            getProperty(original, REQUESTER_ID)).thenApply(user -> {
+        .thenCompose(item -> fetchUserAndSourceDetails(new JsonObject().put(USER_ID.value(), getProperty(original, REQUESTER_ID)),
+            getProperty(original, REQUESTER_ID), getNestedStringProperty(updated, METADATA, UPDATED_BY_USER_ID)).thenApply(user -> {
 
               records.add(buildBaseContent(original, item, user).withSource(SYSTEM)
                 .withAction(action)
@@ -175,7 +177,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
       .withItems(buildItemData(item))
       .withDate(new Date())
       .withLinkToIds(buildLinkToIds(created))
-      .withSource(getProperty(user, PERSONAL_NAME));
+      .withSource(getProperty(user, SOURCE));
   }
 
   private LinkToIds buildLinkToIds(JsonObject created) {
