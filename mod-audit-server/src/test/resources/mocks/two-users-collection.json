@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "username": "diku_admin",
+      "id": "0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc",
+      "active": true,
+      "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "ADMINISTRATOR",
+        "firstName": "DIKU",
+        "email": "admin@diku.example.org",
+        "addresses": []
+      },
+      "createdDate": "2020-11-01T03:21:31.046+00:00",
+      "updatedDate": "2020-11-01T03:21:31.046+00:00",
+      "metadata": {
+        "createdDate": "2020-11-01T03:19:36.441+00:00",
+        "updatedDate": "2020-11-01T03:21:31.042+00:00",
+        "updatedByUserId": "fa96fec8-786f-505b-b55e-e0bb1150d548"
+      }
+    },
+    {
+      "username": "carlo",
+      "id": "6f36265e-722a-490a-b436-806e63af2ea7",
+      "barcode": "605566117903595",
+      "active": false,
+      "type": "patron",
+      "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "Denesik",
+        "firstName": "Toney",
+        "middleName": "Alexzander",
+        "email": "tod@crooks-llc.io",
+        "phone": "1-308-768-9868",
+        "mobilePhone": "1-925-901-9660",
+        "dateOfBirth": "2011-07-10T00:00:00.000+00:00",
+        "addresses": [
+          {
+            "countryId": "US",
+            "addressLine1": "65343 Ewald Mission",
+            "city": "Rosemead",
+            "region": "IA",
+            "postalCode": "24959-2664",
+            "addressTypeId": "93d3d88d-499b-45d0-9bc7-ac73c3a19880",
+            "primaryAddress": true
+          }
+        ],
+        "preferredContactTypeId": "004"
+      },
+      "enrollmentDate": "2017-11-17T00:00:00.000+00:00",
+      "expirationDate": "2019-10-08T00:00:00.000+00:00",
+      "createdDate": "2020-11-01T01:41:52.878+00:00",
+      "updatedDate": "2020-11-01T01:41:52.878+00:00",
+      "metadata": {
+        "createdDate": "2020-11-01T01:41:52.874+00:00",
+        "updatedDate": "2020-11-01T01:41:52.874+00:00"
+      }
+    }
+  ],
+  "totalRecords": 2,
+  "resultInfo": {
+    "totalRecords": 2,
+    "facets": [],
+    "diagnostics": []
+  }
+}

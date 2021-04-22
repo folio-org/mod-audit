@@ -1,39 +1,49 @@
 {
-  "username": "sunny",
-  "id": "2a81b279-d459-4022-82f6-69a569d196b9",
-  "barcode": "631888472578232",
-  "active": true,
-  "type": "patron",
-  "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
-  "departments": [],
-  "proxyFor": [],
-  "personal": {
-    "lastName": "Bernhard",
-    "firstName": "Cordell",
-    "middleName": "Mafalda",
-    "email": "nash@hansen-koepp-and-prohaska.gt",
-    "phone": "(675)279-7737 x58358",
-    "mobilePhone": "1-658-739-5448 x619",
-    "dateOfBirth": "2008-02-20T00:00:00.000+00:00",
-    "addresses": [
-      {
-        "countryId": "US",
-        "addressLine1": "64292 Salvatore Trafficway #413",
-        "city": "Demopolis",
-        "region": "AR",
-        "postalCode": "27791",
-        "addressTypeId": "1c4b225f-f669-4e9b-afcd-ebc0e273a34e",
-        "primaryAddress": true
+  "users": [
+    {
+      "username": "sunny",
+      "id": "2a81b279-d459-4022-82f6-69a569d196b9",
+      "barcode": "631888472578232",
+      "active": true,
+      "type": "patron",
+      "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "Bernhard",
+        "firstName": "Cordell",
+        "middleName": "Mafalda",
+        "email": "nash@hansen-koepp-and-prohaska.gt",
+        "phone": "(675)279-7737 x58358",
+        "mobilePhone": "1-658-739-5448 x619",
+        "dateOfBirth": "2008-02-20T00:00:00.000+00:00",
+        "addresses": [
+          {
+            "countryId": "US",
+            "addressLine1": "64292 Salvatore Trafficway #413",
+            "city": "Demopolis",
+            "region": "AR",
+            "postalCode": "27791",
+            "addressTypeId": "1c4b225f-f669-4e9b-afcd-ebc0e273a34e",
+            "primaryAddress": true
+          }
+        ],
+        "preferredContactTypeId": "002"
+      },
+      "enrollmentDate": "2017-12-01T00:00:00.000+00:00",
+      "expirationDate": "2020-12-20T00:00:00.000+00:00",
+      "createdDate": "2020-11-02T11:01:30.272+00:00",
+      "updatedDate": "2020-11-02T11:01:30.272+00:00",
+      "metadata": {
+        "createdDate": "2020-11-02T11:01:30.258+00:00",
+        "updatedDate": "2020-11-02T11:01:30.258+00:00"
       }
-    ],
-    "preferredContactTypeId": "002"
-  },
-  "enrollmentDate": "2017-12-01T00:00:00.000+00:00",
-  "expirationDate": "2020-12-20T00:00:00.000+00:00",
-  "createdDate": "2020-11-02T11:01:30.272+00:00",
-  "updatedDate": "2020-11-02T11:01:30.272+00:00",
-  "metadata": {
-    "createdDate": "2020-11-02T11:01:30.258+00:00",
-    "updatedDate": "2020-11-02T11:01:30.258+00:00"
+    }
+  ],
+  "totalRecords": 1,
+  "resultInfo": {
+    "totalRecords": 1,
+    "facets": [],
+    "diagnostics": []
   }
 }

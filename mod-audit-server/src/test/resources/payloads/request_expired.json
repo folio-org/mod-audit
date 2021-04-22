@@ -6,7 +6,7 @@
         "id":"3335a8e6-9cd6-48e9-8551-450ee3f62aa8",
         "requestType":"Hold",
         "requestDate":1500111327000,
-        "requesterId":"2a81b279-d459-4022-82f6-69a569d196b9",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
         "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Open - Awaiting pickup",
         "position":1,
@@ -14,25 +14,25 @@
         "holdShelfExpirationDate":1501410174000,
         "metadata":{
           "createdDate":1605183316995,
-          "createdByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b",
+          "createdByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc",
           "updatedDate":1605183316995,
-          "updatedByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b"
+          "updatedByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc"
         }
       },
       "updated":{
         "id":"3335a8e6-9cd6-48e9-8551-450ee3f62aa8",
         "requestType":"Hold",
         "requestDate":1500111327000,
-        "requesterId":"2a81b279-d459-4022-82f6-69a569d196b9",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
         "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
         "status":"Closed - Pickup expired",
         "fulfilmentPreference":"Hold Shelf",
         "holdShelfExpirationDate":1501410174000,
         "metadata":{
           "createdDate":1605183316995,
-          "createdByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b",
+          "createdByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc",
           "updatedDate":1605183316995,
-          "updatedByUserId":"06b42b4e-e5ed-4481-bbc7-30ce63901c3b"
+          "updatedByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc"
         }
       }
     }
