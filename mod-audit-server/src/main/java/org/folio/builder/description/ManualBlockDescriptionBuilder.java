@@ -6,7 +6,7 @@ import static org.folio.builder.description.DescriptionHelper.getFormattedDateTi
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.folio.rest.manualblock.ManualBlock;
+import org.folio.rest.external.ManualBlock;
 
 public class ManualBlockDescriptionBuilder {
 

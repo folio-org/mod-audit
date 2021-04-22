@@ -7,19 +7,19 @@
       "status": 200
     },
     {
-      "url": "/users/fa96fec8-786f-505b-b55e-e0bb1150d548",
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%28fa96fec8-786f-505b-b55e-e0bb1150d548%29",
       "method": "GET",
       "receivedPath": "mocks/user_diku.json",
       "status": 200
     },
     {
-      "url": "/users/2a81b279-d459-4022-82f6-69a569d196b9",
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%282a81b279-d459-4022-82f6-69a569d196b9%29",
       "method": "GET",
       "receivedPath": "mocks/user_sunny.json",
       "status": 200
     },
     {
-      "url": "/users/6f36265e-722a-490a-b436-806e63af2ea7",
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7%29",
       "method": "GET",
       "receivedPath": "mocks/user.json",
       "status": 200
@@ -49,12 +49,18 @@
       "status": 200
     },
     {
+      "url": "/users?limit=2&offset=0&query=id%3D%3D%286f36265e-722a-490a-b436-806e63af2ea7+or+0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc%29",
+      "method": "GET",
+      "receivedPath": "mocks/two-users-collection.json",
+      "status": 200
+    },
+    {
       "url": "/users?limit=1&offset=0&query=id%3D%3D%281d0581d5-7f44-4cfb-b866-5f6f1d849f6d%29",
       "method": "GET",
       "status": 500
     },
     {
-      "url": "/users/1d0581d5-7f44-4cfb-b866-5f6f1d849f6d",
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%281d0581d5-7f44-4cfb-b866-5f6f1d849f6d%29",
       "method": "GET",
       "status": 500
     },

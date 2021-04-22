@@ -1,32 +1,31 @@
 package org.folio.builder.service;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_CREATED;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_DELETED;
 import static org.folio.builder.LogRecordBuilderResolver.MANUAL_BLOCK_MODIFIED;
 import static org.folio.util.Constants.USERS_URL;
-import static org.folio.util.JsonPropertyFetcher.getNestedStringProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
-import static org.folio.util.LogEventPayloadField.BARCODE;
-import static org.folio.util.LogEventPayloadField.FIRST_NAME;
-import static org.folio.util.LogEventPayloadField.LAST_NAME;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 import static org.folio.util.LogEventPayloadField.PAYLOAD;
-import static org.folio.util.LogEventPayloadField.PERSONAL;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import org.folio.builder.description.ManualBlockDescriptionBuilder;
+import org.folio.rest.external.User;
+import org.folio.rest.external.UserCollection;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.folio.rest.manualblock.ManualBlock;
-import org.folio.util.LogEventPayloadField;
+import org.folio.rest.external.ManualBlock;
 
 import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
@@ -47,18 +46,17 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
     String sourceId = block.getMetadata()
       .getUpdatedByUserId();
 
-    return getEntitiesByIds(USERS_URL, USERS, 2, 0, userId, sourceId).thenCompose(users -> {
-      Map<String, JsonObject> usersGroupedById = StreamEx.of(users)
-        .collect(toMap(u -> getProperty(u, LogEventPayloadField.ID), Function.identity()));
+    return getEntitiesByIds(USERS_URL, UserCollection.class, 2, 0, userId, sourceId).thenCompose(users -> {
+      Map<String, User> usersGroupedById = StreamEx.of(users.getUsers()).collect(toMap(User::getId, identity()));
       LogRecord manualBlockLogRecord = buildManualBlockLogRecord(block, logEventType, userId, sourceId, usersGroupedById);
       return CompletableFuture.completedFuture(singletonList(manualBlockLogRecord));
     });
   }
 
   private LogRecord buildManualBlockLogRecord(ManualBlock block, String logEventType, String userId, String sourceId,
-      Map<String, JsonObject> usersGroupedById) {
+      Map<String, User> usersGroupedById) {
     return new LogRecord().withObject(LogRecord.Object.MANUAL_BLOCK)
-      .withUserBarcode(getProperty(usersGroupedById.get(userId), BARCODE))
+      .withUserBarcode(ofNullable(usersGroupedById.get(userId)).flatMap(user -> of(user.getBarcode())).orElse(null))
       .withSource(getSource(logEventType, sourceId, usersGroupedById))
       .withAction(resolveLogRecordAction(logEventType))
       .withDate(new Date())
@@ -66,11 +64,10 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
       .withLinkToIds(new LinkToIds().withUserId(userId));
   }
 
-  private String getSource(String logEventType, String sourceId, Map<String, JsonObject> usersGroupedById) {
-    JsonObject sourceJson = usersGroupedById.get(sourceId);
-    return MANUAL_BLOCK_DELETED.equals(logEventType) ? null
-        : buildPersonalName(getNestedStringProperty(sourceJson, PERSONAL, FIRST_NAME),
-            getNestedStringProperty(sourceJson, PERSONAL, LAST_NAME));
+  private String getSource(String logEventType, String sourceId, Map<String, User> usersGroupedById) {
+    var user = usersGroupedById.get(sourceId);
+    return MANUAL_BLOCK_DELETED.equals(logEventType) || isNull(user) || isNull(user.getPersonal()) ? null
+        : buildPersonalName(user.getPersonal().getFirstName(), user.getPersonal().getLastName());
   }
 
   private LogRecord.Action resolveLogRecordAction(String logEventType) {

@@ -1,5 +1,6 @@
 package org.folio.builder.service;
 
+import static org.folio.util.Constants.SYSTEM;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CANCELLED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_JSON;
@@ -17,7 +18,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -89,7 +89,11 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
     assertThat(requestLogRecord.getLinkToIds().getUserId(), notNullValue());
     assertThat(requestLogRecord.getLinkToIds().getRequestId(), notNullValue());
 
-    assertThat(requestLogRecord.getSource(), notNullValue());
+    if (TestValue.EXPIRED == value) {
+      assertThat(requestLogRecord.getSource(), equalTo(SYSTEM));
+    } else {
+      assertThat(requestLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
+    }
 
     assertThat(requestLogRecord.getDescription(), equalTo(value.getDescription()));
   }

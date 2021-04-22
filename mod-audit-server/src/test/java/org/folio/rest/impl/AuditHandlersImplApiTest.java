@@ -64,8 +64,8 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
     postLogRecord(dc.jsonString());
 
-    // Record is created but without details of user
-    verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
+    // Record isn't created without details of user
+    verifyNumberOfLogRecords(REQUEST, initialNumberOfRequestRecords);
   }
 
   @Test
