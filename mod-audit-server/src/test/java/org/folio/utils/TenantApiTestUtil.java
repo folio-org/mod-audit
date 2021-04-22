@@ -40,7 +40,7 @@ public class TenantApiTestUtil {
   public static final String MANUAL_BLOCK_DELETED_PAYLOAD_JSON = "payloads/manual_block_deleted.json";
   public static final String FEE_FINE_PAYLOAD_JSON = "payloads/fee_fine_billed.json";
   public static final String LOAN_PAYLOAD_JSON = "payloads/loan.json";
-  public static final String LOAN_ANONYMIZE_PAYLOAD_JSON = "payloads/loan_anonymize.json";
+  public static final String LOAN_ANONYMIZE_PAYLOAD_JSON = "payloads/anonymize_loan.json";
   public static final String LOAN_AGE_TO_LOST_PAYLOAD_JSON = "payloads/loan_age_to_lost.json";
   public static final String LOAN_WRONG_ACTION_JSON = "payloads/loan_wrong_action.json";
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
@@ -54,10 +54,14 @@ public class TenantApiTestUtil {
   public static final String REQUEST_CANCELLED_PAYLOAD_JSON = "payloads/request_cancelled.json";
   public static final String REQUEST_EXPIRED_PAYLOAD_JSON = "payloads/request_expired.json";
 
+  public static final String ANONYMIZE_CHECK_IN = "payloads/anonymize_check_in.json";
+  public static final String ANONYMIZE_CHECK_OUT = "payloads/anonymize_check_out.json";
+  public static final String ANONYMIZE_LOAN_CLOSED = "payloads/anonymize_loan_closed.json";
+
   public static final List<String> SAMPLES = Arrays.asList(CHECK_IN_PAYLOAD_JSON, CHECK_OUT_PAYLOAD_JSON, MANUAL_BLOCK_CREATED_PAYLOAD_JSON, MANUAL_BLOCK_UPDATED_PAYLOAD_JSON, MANUAL_BLOCK_DELETED_PAYLOAD_JSON,
-    FEE_FINE_PAYLOAD_JSON, LOAN_PAYLOAD_JSON, LOAN_ANONYMIZE_PAYLOAD_JSON, LOAN_AGE_TO_LOST_PAYLOAD_JSON, LOAN_WRONG_ACTION_JSON, NOTICE_PAYLOAD_JSON,
+    FEE_FINE_PAYLOAD_JSON, LOAN_PAYLOAD_JSON, LOAN_AGE_TO_LOST_PAYLOAD_JSON, LOAN_WRONG_ACTION_JSON, NOTICE_PAYLOAD_JSON,
     REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON, REQUEST_CREATED_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_JSON, REQUEST_MOVED_PAYLOAD_JSON,
-    REQUEST_REORDERED_PAYLOAD_JSON, REQUEST_CANCELLED_PAYLOAD_JSON, REQUEST_EXPIRED_PAYLOAD_JSON);
+    REQUEST_REORDERED_PAYLOAD_JSON, REQUEST_CANCELLED_PAYLOAD_JSON, REQUEST_EXPIRED_PAYLOAD_JSON, ANONYMIZE_CHECK_OUT, ANONYMIZE_CHECK_IN, ANONYMIZE_LOAN_CLOSED);
 
   private TenantApiTestUtil() {
 

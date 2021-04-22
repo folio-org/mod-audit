@@ -21,7 +21,9 @@
           "fieldName": "items",
           "tOps": "ADD",
           "caseSensitive": false,
-          "arraySubfield": "itemBarcode"
+          "removeAccents": true,
+          "arraySubfield": "itemBarcode",
+          "arrayModifiers": ["loanId"]
         }
       ],
       "index": [
