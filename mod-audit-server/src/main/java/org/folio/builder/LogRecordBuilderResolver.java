@@ -17,6 +17,7 @@ public class LogRecordBuilderResolver {
 
   public static final String CHECK_IN_EVENT = "CHECK_IN_EVENT";
   public static final String CHECK_OUT_EVENT = "CHECK_OUT_EVENT";
+  public static final String CHECK_OUT_THROUGH_OVERRIDE_EVENT = "CHECK_OUT_THROUGH_OVERRIDE_EVENT";
 
   public static final String MANUAL_BLOCK_CREATED = "MANUAL_BLOCK_CREATED_EVENT";
   public static final String MANUAL_BLOCK_MODIFIED = "MANUAL_BLOCK_MODIFIED_EVENT";
@@ -41,7 +42,8 @@ public class LogRecordBuilderResolver {
     case CHECK_IN_EVENT:
       return new CheckInRecordBuilder(okapiHeaders, vertxContext);
     case CHECK_OUT_EVENT:
-      return new CheckOutRecordBuilder(okapiHeaders, vertxContext);
+    case CHECK_OUT_THROUGH_OVERRIDE_EVENT:
+      return new CheckOutRecordBuilder(okapiHeaders, vertxContext, logEventType);
     case MANUAL_BLOCK_CREATED:
     case MANUAL_BLOCK_MODIFIED:
     case MANUAL_BLOCK_DELETED:

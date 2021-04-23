@@ -34,6 +34,7 @@ public class TenantApiTestUtil {
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";
+  public static final String CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON = "payloads/check_out_through_override.json";
 
   public static final String MANUAL_BLOCK_CREATED_PAYLOAD_JSON = "payloads/manual_block_created.json";
   public static final String MANUAL_BLOCK_UPDATED_PAYLOAD_JSON = "payloads/manual_block_updated.json";

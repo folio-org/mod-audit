@@ -10,6 +10,7 @@ import static org.folio.util.LogEventPayloadField.PROXY_BARCODE;
 import static org.folio.util.LogEventPayloadField.REQUESTS;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
 import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -70,5 +71,44 @@ public class CheckOutRecordBuilderTest extends BuilderTestBase {
 
     assertThat(requestStatusChangedRecord.getDescription(),
         equalTo(String.format("Type: %s. New request status: %s (from: %s).", requestType, newRequestStatus, oldRequestStatus)));
+  }
+
+  @Test
+  public void checkOutThroughOverrideTest() throws Exception {
+    logger.info("===== Test check-out log records builder =====");
+
+    JsonObject payload = new JsonObject(getFile(CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON));
+
+    Map<LogRecord.Object, Map<LogRecord.Action, List<LogRecord>>> records = checkOutThroughOverrideRecordBuilder.buildLogRecord(payload)
+      .get().stream()
+      .collect(groupingBy(LogRecord::getObject, groupingBy(LogRecord::getAction)));
+
+    assertThat(records.entrySet(), hasSize(2));
+    assertThat(records.get(LogRecord.Object.LOAN)
+      .get(LogRecord.Action.CHECKED_OUT_THROUGH_OVERRIDE), hasSize(1));
+
+    LogRecord loanCheckedOutRecord = records.get(LogRecord.Object.LOAN)
+      .get(LogRecord.Action.CHECKED_OUT_THROUGH_OVERRIDE).get(0);
+
+    validateBaseContent(payload, loanCheckedOutRecord);
+    validateAdditionalContent(payload, loanCheckedOutRecord);
+    assertThat(loanCheckedOutRecord.getDescription(), equalTo("Checked out to proxy: "
+      + (Objects.nonNull(getProperty(payload, PROXY_BARCODE)) ? getProperty(payload, PROXY_BARCODE) : "no") + DOT_MSG));
+
+    LogRecord requestStatusChangedRecord = records.get(LogRecord.Object.REQUEST)
+      .get(LogRecord.Action.REQUEST_STATUS_CHANGED).get(0);
+
+    validateBaseContent(payload, requestStatusChangedRecord);
+    validateRequestStatusChangedContent(payload, requestStatusChangedRecord);
+
+    JsonArray requests = getArrayProperty(payload, REQUESTS);
+    JsonObject request = requests.getJsonObject(0);
+
+    String requestType = getProperty(request, REQUEST_TYPE);
+    String oldRequestStatus = getProperty(request, OLD_REQUEST_STATUS);
+    String newRequestStatus = getProperty(request, NEW_REQUEST_STATUS);
+
+    assertThat(requestStatusChangedRecord.getDescription(),
+      equalTo(String.format("Type: %s. New request status: %s (from: %s).", requestType, newRequestStatus, oldRequestStatus)));
   }
 }
