@@ -67,12 +67,20 @@ public abstract class LogRecordBuilder {
 
   protected final Map<String, String> okapiHeaders;
   protected final Context vertxContext;
+  protected final String logEventType;
 
   public abstract CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload);
 
   public LogRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     this.okapiHeaders = okapiHeaders;
     this.vertxContext = vertxContext;
+    this.logEventType = null;
+  }
+
+  public LogRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext, String logEventType) {
+    this.okapiHeaders = okapiHeaders;
+    this.vertxContext = vertxContext;
+    this.logEventType = logEventType;
   }
 
   private CompletableFuture<JsonObject> handleGetRequest(String endpoint) {
