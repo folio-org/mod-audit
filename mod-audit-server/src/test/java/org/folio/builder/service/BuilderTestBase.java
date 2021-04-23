@@ -1,6 +1,8 @@
 package org.folio.builder.service;
 
 import static org.folio.TestSuite.isInitialized;
+import static org.folio.builder.LogRecordBuilderResolver.CHECK_OUT_EVENT;
+import static org.folio.builder.LogRecordBuilderResolver.CHECK_OUT_THROUGH_OVERRIDE_EVENT;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
@@ -32,7 +34,7 @@ import io.vertx.core.json.JsonObject;
 
 public class BuilderTestBase {
 
-  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, manualBlockRecordBuilder, feeFineRecordBuilder,
+  static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, checkOutThroughOverrideRecordBuilder, manualBlockRecordBuilder, feeFineRecordBuilder,
       noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
@@ -41,7 +43,8 @@ public class BuilderTestBase {
       TestSuite.globalInitialize();
     }
     checkInRecordBuilder = new CheckInRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    checkOutRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    checkOutRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext(), CHECK_OUT_EVENT);
+    checkOutThroughOverrideRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext(), CHECK_OUT_THROUGH_OVERRIDE_EVENT);
     manualBlockRecordBuilder = new ManualBlockRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     feeFineRecordBuilder = new FeeFineRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     noticeRecordBuilder = new NoticeRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());

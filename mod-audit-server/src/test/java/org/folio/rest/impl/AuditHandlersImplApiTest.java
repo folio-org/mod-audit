@@ -5,6 +5,7 @@ import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
+import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +42,22 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
 
     // check number of created records
     verifyNumberOfLogRecords(N_A, ++initialNumberOfNaRecords);
+    verifyNumberOfLogRecords(LOAN, ++initialNumberOfLoanRecords);
+    verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
+  }
+
+  @Test
+  void postLogRecordForCheckOutThroughOverrideEvent() {
+    logger.info("post valid log event: success");
+
+    // get initial number of records
+    int initialNumberOfLoanRecords = getNumberOfExistingLogRecords(LOAN);
+    int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
+
+    String payload = getFile(CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON);
+    postLogRecord(payload);
+
+    // check number of created records
     verifyNumberOfLogRecords(LOAN, ++initialNumberOfLoanRecords);
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
