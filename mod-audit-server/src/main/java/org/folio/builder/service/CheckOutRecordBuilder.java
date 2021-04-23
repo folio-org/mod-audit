@@ -1,5 +1,8 @@
 package org.folio.builder.service;
 
+import static org.folio.builder.LogRecordBuilderResolver.CHECK_OUT_THROUGH_OVERRIDE_EVENT;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.CHECKED_OUT;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.CHECKED_OUT_THROUGH_OVERRIDE;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
@@ -32,8 +35,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class CheckOutRecordBuilder extends LogRecordBuilder {
-  public CheckOutRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
-    super(okapiHeaders, vertxContext);
+  public CheckOutRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext, String logEventType) {
+    super(okapiHeaders, vertxContext, logEventType);
   }
 
   @Override
@@ -64,7 +67,7 @@ public class CheckOutRecordBuilder extends LogRecordBuilder {
 
   private LogRecord buildLoanCheckOutRecord(JsonObject payload) {
     return new LogRecord().withObject(LogRecord.Object.LOAN)
-      .withAction(LogRecord.Action.CHECKED_OUT)
+      .withAction(CHECK_OUT_THROUGH_OVERRIDE_EVENT.equals(logEventType) ? CHECKED_OUT_THROUGH_OVERRIDE : CHECKED_OUT)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withSource(getProperty(payload, SOURCE))
       .withItems(buildItems(payload))
