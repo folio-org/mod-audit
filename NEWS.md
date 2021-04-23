@@ -1,5 +1,13 @@
 ## 2.1.0 - Unreleased
 
+## 2.0.4 - Released
+This release contains bug fix for check out through override processing
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.3...v2.0.4)
+
+### Bug fixes
+ * [MODAUD-77](https://issues.folio.org/browse/MODAUD-77) - Check out through override support
+
 ## 2.0.3 - Released
 This release contains bug fixes for request source
 
