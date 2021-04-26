@@ -54,6 +54,7 @@ public class TenantApiTestUtil {
   public static final String REQUEST_REORDERED_PAYLOAD_JSON = "payloads/request_reordered.json";
   public static final String REQUEST_CANCELLED_PAYLOAD_JSON = "payloads/request_cancelled.json";
   public static final String REQUEST_EXPIRED_PAYLOAD_JSON = "payloads/request_expired.json";
+  public static final String REQUEST_PICKUP_EXPIRED_PAYLOAD_JSON = "payloads/request_pickup_expired.json";
 
   public static final String ANONYMIZE_CHECK_IN = "payloads/anonymize_check_in.json";
   public static final String ANONYMIZE_CHECK_OUT = "payloads/anonymize_check_out.json";
