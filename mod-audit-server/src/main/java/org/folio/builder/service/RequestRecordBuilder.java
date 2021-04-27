@@ -8,6 +8,7 @@ import static org.folio.builder.LogRecordBuilderResolver.REQUEST_EXPIRED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_MOVED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_REORDERED;
 import static org.folio.builder.LogRecordBuilderResolver.REQUEST_UPDATED;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.PICKUP_EXPIRED;
 import static org.folio.util.Constants.CANCELLATION_REASONS_URL;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
@@ -61,6 +62,7 @@ import io.vertx.core.json.JsonObject;
 public class RequestRecordBuilder extends LogRecordBuilder {
 
   public static final String CLOSED_CANCELLED_STATUS = "Closed - Cancelled";
+  public static final String PICKUP_EXPIRED_STATUS = "Closed - Pickup expired";
   RequestDescriptionBuilder requestDescriptionBuilder = new RequestDescriptionBuilder();
 
   public RequestRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
@@ -160,7 +162,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
             getProperty(original, REQUESTER_ID), getNestedStringProperty(updated, METADATA, UPDATED_BY_USER_ID)).thenApply(user -> {
 
               records.add(buildBaseContent(original, item, user).withSource(SYSTEM)
-                .withAction(action)
+                .withAction(PICKUP_EXPIRED_STATUS.equals(getProperty(updated, STATUS)) ? PICKUP_EXPIRED : action)
                 .withDescription(requestDescriptionBuilder.buildExpiredDescription(original, updated)));
               return records;
             }));

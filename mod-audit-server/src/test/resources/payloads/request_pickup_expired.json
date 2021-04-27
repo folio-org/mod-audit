@@ -25,7 +25,7 @@
         "requestDate":1500111327000,
         "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
         "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
-        "status":"Closed - Unfilled",
+        "status":"Closed - Pickup expired",
         "fulfilmentPreference":"Hold Shelf",
         "holdShelfExpirationDate":1501410174000,
         "metadata":{
