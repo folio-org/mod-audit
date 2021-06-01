@@ -20,6 +20,7 @@
 
   <properties>
     <json.path.version>2.5.0</json.path.version>
+    <postgres-testing.version>33.0.0</postgres-testing.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <argLine />
   </properties>
@@ -89,6 +90,11 @@
       <artifactId>json-path</artifactId>
       <version>${json.path.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>postgres-testing</artifactId>
+      <version>${postgres-testing.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -131,50 +137,24 @@
       </plugin>
 
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
+        <groupId>org.folio</groupId>
+        <artifactId>domain-models-maven-plugin</artifactId>
+        <version>${raml-module-builder.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.folio</groupId>
+            <artifactId>mod-audit-server</artifactId>
+            <version>${project.parent.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
-            <id>git submodule update</id>
-            <phase>initialize</phase>
-            <configuration>
-              <executable>git</executable>
-              <arguments>
-                <argument>submodule</argument>
-                <argument>update</argument>
-                <argument>--init</argument>
-                <argument>--recursive</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-          <execution>
             <id>generate_interfaces</id>
-            <phase>generate-sources</phase>
             <goals>
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.folio.rest.tools.GenerateRunner</mainClass>
-              <!-- <executable>java</executable> -->
-              <cleanupDaemonThreads>false</cleanupDaemonThreads>
-              <systemProperties>
-                <systemProperty>
-                  <key>project.basedir</key>
-                  <value>${basedir}</value>
-                </systemProperty>
-                <systemProperty>
-                  <key>raml_files</key>
-                  <value>${ramlfiles_path}</value>
-                </systemProperty>
-                <systemProperty>
-                  <key>jsonschema2pojo.config.includeHashcodeAndEquals</key>
-                  <value>true</value>
-                </systemProperty>
-              </systemProperties>
+              <generateClients>true</generateClients>
             </configuration>
           </execution>
         </executions>
