@@ -1,7 +1,7 @@
 package org.folio.builder.service;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.NOTICE_MSG;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.util.Constants.SYSTEM;
@@ -10,6 +10,7 @@ import static org.folio.util.JsonPropertyFetcher.getArrayProperty;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
 import static org.folio.util.LogEventPayloadField.ACCOUNT_ID;
+import static org.folio.util.LogEventPayloadField.DATE;
 import static org.folio.util.LogEventPayloadField.HOLDINGS_RECORD_ID;
 import static org.folio.util.LogEventPayloadField.INSTANCE_ID;
 import static org.folio.util.LogEventPayloadField.ITEMS;

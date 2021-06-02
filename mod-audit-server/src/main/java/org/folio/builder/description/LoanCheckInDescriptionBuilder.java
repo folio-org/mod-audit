@@ -15,8 +15,8 @@ import static org.folio.util.LogEventPayloadField.ITEM_STATUS_NAME;
 import static org.folio.util.LogEventPayloadField.RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
 
-import java.time.LocalDateTime;
 import org.folio.builder.ItemStatus;
+import org.joda.time.DateTime;
 
 import io.vertx.core.json.JsonObject;
 
@@ -35,9 +35,9 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
         .append(claimedReturnedResolution);
     }
 
-    LocalDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE);
-    LocalDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE);
-    LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
+    DateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE);
+    DateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE);
+    DateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
     if (!returnDate.isEqual(systemReturnDate)) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate));
