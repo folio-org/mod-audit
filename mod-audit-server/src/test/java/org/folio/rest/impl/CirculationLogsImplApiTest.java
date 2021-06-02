@@ -8,10 +8,9 @@ import static org.folio.utils.TenantApiTestUtil.SAMPLES;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
@@ -39,6 +38,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .log().all()
       .statusCode(204));
   }
+
 
   @Test
   void getCirculationAuditLogRecordsNoFilter() {
@@ -96,18 +96,18 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .then().log().all().statusCode(200)
       .assertThat()
       .body("totalRecords", equalTo(6))
-      .body("logRecords[0].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[0].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[1].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[1].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[2].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[2].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[3].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[3].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[4].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[4].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[5].userBarcode", is(emptyOrNullString()))
-      .and().body("logRecords[5].linkToIds.userId", is(emptyOrNullString()));
+      .body("logRecords[0].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[0].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[1].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[1].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[2].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[2].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[3].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[3].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[4].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[4].linkToIds.userId", isEmptyOrNullString())
+      .and().body("logRecords[5].userBarcode", isEmptyOrNullString())
+      .and().body("logRecords[5].linkToIds.userId", isEmptyOrNullString());
   }
 
   @Test

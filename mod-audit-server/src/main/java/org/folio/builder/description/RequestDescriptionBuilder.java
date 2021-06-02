@@ -21,7 +21,7 @@ import static org.folio.util.LogEventPayloadField.STATUS;
 import java.util.Objects;
 import java.util.Optional;
 
-import java.time.LocalDateTime;
+import org.joda.time.DateTime;
 
 import io.vertx.core.json.JsonObject;
 
@@ -55,8 +55,8 @@ public class RequestDescriptionBuilder {
           .append(")."));
     }
 
-    LocalDateTime oldRequestExpDate = getDateTimeProperty(original, REQUEST_EXPIRATION_DATE);
-    LocalDateTime newRequestExpDate = getDateTimeProperty(updated, REQUEST_EXPIRATION_DATE);
+    DateTime oldRequestExpDate = getDateTimeProperty(original, REQUEST_EXPIRATION_DATE);
+    DateTime newRequestExpDate = getDateTimeProperty(updated, REQUEST_EXPIRATION_DATE);
 
     if (isNeedToBeDescribed(newRequestExpDate, oldRequestExpDate)) {
       description.append("New expiration date: ")
@@ -198,7 +198,7 @@ public class RequestDescriptionBuilder {
     return !(isNull(str1) & isNull(str2)) && !str1.equals(str2);
   }
 
-  private boolean isNeedToBeDescribed(LocalDateTime dateTime1, LocalDateTime dateTime2) {
+  private boolean isNeedToBeDescribed(DateTime dateTime1, DateTime dateTime2) {
     return !(isNull(dateTime1) & isNull(dateTime2)) && !dateTime1.isEqual(dateTime2);
   }
 }

@@ -1,9 +1,9 @@
 package org.folio.util;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.joda.time.DateTime.parse;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import org.joda.time.DateTime;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,13 +37,13 @@ public class JsonPropertyFetcher {
     }
   }
 
-  public static LocalDateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field) {
+  public static DateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field) {
     return getDateTimeProperty(representation, field, null);
   }
 
-  public static LocalDateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field, LocalDateTime defaultValue) {
+  public static DateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field, DateTime defaultValue) {
     if (representation != null && isNotBlank(representation.getString(field.value()))) {
-      return LocalDateTime.parse(representation.getString(field.value()), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"));
+      return parse(representation.getString(field.value()));
     } else {
       return defaultValue;
     }
