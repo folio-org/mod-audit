@@ -42,7 +42,7 @@ public class AuditDataImplApiTest extends ApiTestBase {
     id = id.substring(id.lastIndexOf("/") + 1);
     // create with invalid content - non JSON
     given().header(CONTENT_TYPE).header(TENANT).header(CONTENT_TYPE).body("This is not json").post(API_CXT).then().log().all()
-      .statusCode(400).body(containsString("Unrecognized token 'This'"));
+      .statusCode(400).body(containsString("Json content error"));
     // create with invalid content - missing field
     given().header(CONTENT_TYPE).header(TENANT).header(CONTENT_TYPE).body(Json.encode(badAudit)).post(API_CXT).then().log().all()
       .statusCode(422);
