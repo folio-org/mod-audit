@@ -28,11 +28,11 @@
     },
     {
       "id": "inventory",
-      "version": "10.7"
+      "version": "10.7 11.0"
     },
     {
       "id": "holdings-storage",
-      "version": "4.4"
+      "version": "4.4 5.0"
     },
     {
       "id": "cancellation-reason-storage",
