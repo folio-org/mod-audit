@@ -12,7 +12,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import org.folio.util.PubSubClientUtils;
+import org.folio.util.pubsub.PubSubClientUtils;
 
 public class ModTenantService extends TenantAPI {
   private static final Logger log = LogManager.getLogger();
