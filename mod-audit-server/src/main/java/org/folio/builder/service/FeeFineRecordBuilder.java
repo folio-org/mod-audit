@@ -20,9 +20,7 @@ import static org.folio.util.LogEventPayloadField.SOURCE;
 import static org.folio.util.LogEventPayloadField.USER_BARCODE;
 import static org.folio.util.LogEventPayloadField.USER_ID;
 
-import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -67,7 +65,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withItems(Collections.singletonList(item))
       .withAction(resolveAction(getProperty(payload, ACTION)))
-      .withDate(Date.from(getDateTimeProperty(payload, DATE).toInstant(ZoneOffset.UTC)))
+      .withDate(getDateTimeProperty(payload, DATE).toDate())
       .withServicePointId(getProperty(payload, SERVICE_POINT_ID))
       .withSource(getProperty(payload, SOURCE))
       .withDescription(new FeeFineDescriptionBuilder().buildDescription(payload))

@@ -19,8 +19,8 @@
 
   <properties>
     <aspectj.version>1.9.6</aspectj.version>
-    <raml-module-builder.version>33.0.0</raml-module-builder.version>
-    <vertx.version>4.1.0.CR1</vertx.version>
+    <raml-module-builder.version>32.2.0</raml-module-builder.version>
+    <vertx.version>4.0.0</vertx.version>
     <wiremock.version>2.25.1</wiremock.version>
     <junit.jupiter.version>5.6.2</junit.jupiter.version>
     <rest-assured.version>4.3.0</rest-assured.version>
@@ -85,15 +85,25 @@
       </plugin>
 
       <plugin>
-        <groupId>org.folio</groupId>
-        <artifactId>domain-models-maven-plugin</artifactId>
-        <version>${raml-module-builder.version}</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
         <executions>
           <execution>
-            <id>generate_interfaces</id>
+            <id>git submodule update</id>
+            <phase>initialize</phase>
             <goals>
-              <goal>java</goal>
+              <goal>exec</goal>
             </goals>
+            <configuration>
+              <executable>git</executable>
+              <arguments>
+                <argument>submodule</argument>
+                <argument>update</argument>
+                <argument>--init</argument>
+                <argument>--recursive</argument>
+              </arguments>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -213,14 +223,6 @@
       <url>https://repository.folio.org/repository/maven-folio</url>
     </repository>
   </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>folio-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://repository.folio.org/repository/maven-folio</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <distributionManagement>
     <repository>
