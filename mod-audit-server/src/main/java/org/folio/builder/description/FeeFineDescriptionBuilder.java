@@ -1,7 +1,8 @@
 package org.folio.builder.description;
 
+import io.vertx.core.json.JsonObject;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.BILLED_MSG;
 import static org.folio.builder.description.Descriptions.CANCELLED_MSG;
 import static org.folio.builder.description.Descriptions.FEE_FINE_PAID_MSG;
@@ -11,6 +12,7 @@ import static org.folio.builder.description.Descriptions.FEE_FINE_WAIVED_MSG;
 import static org.folio.util.JsonPropertyFetcher.getBooleanProperty;
 import static org.folio.util.JsonPropertyFetcher.getDoubleProperty;
 import static org.folio.util.JsonPropertyFetcher.getProperty;
+import org.folio.util.LogEventPayloadField;
 import static org.folio.util.LogEventPayloadField.AMOUNT;
 import static org.folio.util.LogEventPayloadField.AUTOMATED;
 import static org.folio.util.LogEventPayloadField.BALANCE;
@@ -21,10 +23,6 @@ import static org.folio.util.LogEventPayloadField.TYPE;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
-import org.folio.util.LogEventPayloadField;
-
-import io.vertx.core.json.JsonObject;
 
 public class FeeFineDescriptionBuilder implements DescriptionBuilder {
   private static final String BILLED = "Billed";
