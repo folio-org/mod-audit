@@ -31,7 +31,6 @@
     <main.basedir>${project.basedir}</main.basedir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <sonar.exclusions>src/main/java/org/folio/util/PubSubClientUtils.java</sonar.exclusions>
     <argLine />
   </properties>
 
