@@ -1,12 +1,10 @@
 package org.folio.builder.description;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
 
@@ -17,11 +15,11 @@ public class DescriptionHelper {
 
   public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
   public static final String DATE_PATTERN = "yyyy-MM-dd";
-  private static final DateTimeFormatter JODA_TIME_FORMATTER = DateTimeFormat.forPattern(DATE_TIME_PATTERN);
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
   private static final java.time.format.DateTimeFormatter DATE_FORMATTER = java.time.format.DateTimeFormatter.ofPattern(DATE_PATTERN);
 
-  public static String getFormattedDateTime(DateTime dateTime) {
-    return dateTime.toString(JODA_TIME_FORMATTER);
+  public static String getFormattedDateTime(LocalDateTime dateTime) {
+    return dateTime.format(DATE_TIME_FORMATTER);
   }
 
   public static String getFormattedDateTime(Date date) {
