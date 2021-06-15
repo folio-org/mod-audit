@@ -1,6 +1,5 @@
 package org.folio;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -16,12 +15,12 @@ import org.folio.builder.service.LogRecordBuilderResolverTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
+import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -38,17 +37,16 @@ public class TestSuite {
   private static Vertx vertx;
 
   @BeforeAll
-  public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public static void globalInitialize() throws InterruptedException, ExecutionException, TimeoutException {
     Locale.setDefault(Locale.US);
 
     vertx = Vertx.vertx();
 
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
     DeploymentOptions options = new DeploymentOptions();
 
-    options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
+    options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
     options.setWorker(true);
 
     startVerticle(options);
