@@ -1,4 +1,12 @@
-## 2.1.0 - Unreleased
+## 2.1.0 - Released
+This release contains bug fixes and RMB update
+
+### Stories
+* [MODAUD-60](https://issues.folio.org/browse/MODAUD-60) - mod-audit: RMB Update
+
+### Bug Fixes
+* [MODAUD-79](https://issues.folio.org/browse/MODAUD-79) - Both Expired and Pickup expired request statuses are shown as Expired in circulation log
+* [MODAUD-83](https://issues.folio.org/browse/MODAUD-83) - Update mod-pubsub-client dependency to v2.3.0
 
 ## 2.0.0 - Released
 This release contains improvements and RMB update
