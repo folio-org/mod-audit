@@ -140,22 +140,12 @@
         <groupId>org.folio</groupId>
         <artifactId>domain-models-maven-plugin</artifactId>
         <version>${raml-module-builder.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.folio</groupId>
-            <artifactId>mod-audit-server</artifactId>
-            <version>${project.parent.version}</version>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <id>generate_interfaces</id>
             <goals>
               <goal>java</goal>
             </goals>
-            <configuration>
-              <generateClients>true</generateClients>
-            </configuration>
           </execution>
         </executions>
       </plugin>
