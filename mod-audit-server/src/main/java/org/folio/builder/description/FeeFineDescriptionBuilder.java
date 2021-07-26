@@ -34,7 +34,7 @@ public class FeeFineDescriptionBuilder implements DescriptionBuilder {
   private static final String REFUNDED_PARTIALLY = "Refunded partially";
   private static final String TRANSFERRED_FULLY = "Transferred fully";
   private static final String TRANSFERRED_PARTIALLY = "Transferred partially";
-  private static final String STAFF_INFO_ONLY = "Staff info only";
+  private static final String STAFF_INFO_ONLY = "Staff information only added";
   private static final String CANCELLED = "Cancelled as error";
   private static final String STAFF = "STAFF : ";
   private static final String PATRON = "PATRON : ";
