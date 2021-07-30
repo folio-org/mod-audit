@@ -35,7 +35,7 @@ import io.vertx.core.json.JsonObject;
 public class BuilderTestBase {
 
   static LogRecordBuilder checkInRecordBuilder, checkOutRecordBuilder, checkOutThroughOverrideRecordBuilder, manualBlockRecordBuilder, feeFineRecordBuilder,
-      noticeRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
+      noticeRecordBuilder, noticeErrorRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
   public static void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
@@ -47,7 +47,8 @@ public class BuilderTestBase {
     checkOutThroughOverrideRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext(), CHECK_OUT_THROUGH_OVERRIDE_EVENT);
     manualBlockRecordBuilder = new ManualBlockRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     feeFineRecordBuilder = new FeeFineRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
-    noticeRecordBuilder = new NoticeRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    noticeRecordBuilder = new NoticeSuccessRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
+    noticeErrorRecordBuilder = new NoticeErrorRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     loanRecordBuilder = new LoanRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     requestLogRecordBuilder = new RequestRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
   }

@@ -8,7 +8,8 @@ import org.folio.builder.service.FeeFineRecordBuilder;
 import org.folio.builder.service.LoanRecordBuilder;
 import org.folio.builder.service.LogRecordBuilder;
 import org.folio.builder.service.ManualBlockRecordBuilder;
-import org.folio.builder.service.NoticeRecordBuilder;
+import org.folio.builder.service.NoticeErrorRecordBuilder;
+import org.folio.builder.service.NoticeSuccessRecordBuilder;
 import org.folio.builder.service.RequestRecordBuilder;
 
 import io.vertx.core.Context;
@@ -24,6 +25,7 @@ public class LogRecordBuilderResolver {
   public static final String MANUAL_BLOCK_DELETED = "MANUAL_BLOCK_DELETED_EVENT";
   public static final String LOAN = "LOAN";
   public static final String NOTICE = "NOTICE";
+  public static final String NOTICE_ERROR = "NOTICE_ERROR";
   public static final String FEE_FINE = "FEE_FINE";
 
   public static final String REQUEST_CREATED = "REQUEST_CREATED_EVENT";
@@ -51,7 +53,9 @@ public class LogRecordBuilderResolver {
     case LOAN:
       return new LoanRecordBuilder(okapiHeaders, vertxContext);
     case NOTICE:
-      return new NoticeRecordBuilder(okapiHeaders, vertxContext);
+      return new NoticeSuccessRecordBuilder(okapiHeaders, vertxContext);
+    case NOTICE_ERROR:
+      return new NoticeErrorRecordBuilder(okapiHeaders, vertxContext);
     case FEE_FINE:
       return new FeeFineRecordBuilder(okapiHeaders, vertxContext);
     case REQUEST_CREATED:

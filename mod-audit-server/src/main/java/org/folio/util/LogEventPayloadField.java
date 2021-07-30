@@ -67,7 +67,8 @@ public enum LogEventPayloadField {
   REQUEST_PICKUP_SERVICE_POINT_ID("pickupServicePointId"),
   REQUESTER("requester"),
   REQUESTER_ID("requesterId"),
-  BARCODE("barcode");
+  BARCODE("barcode"),
+  ERROR_MESSAGE("errorMessage");
 
 
   private final String value;

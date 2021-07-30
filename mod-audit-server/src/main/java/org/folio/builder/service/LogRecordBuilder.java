@@ -3,6 +3,7 @@ package org.folio.builder.service;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -126,13 +127,19 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
-    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, TEMPLATES_URL, getProperty(extractFirstItem(payload), TEMPLATE_ID)))
+    String templateId = getProperty(extractFirstItem(payload), TEMPLATE_ID);
+
+    if (templateId == null) {
+      return completedFuture(payload);
+    }
+
+    return handleGetRequest(String.format(URL_WITH_ID_PATTERN, TEMPLATES_URL, templateId))
       .thenCompose(templateJson -> {
         if (nonNull(templateJson)) {
-          return CompletableFuture.completedFuture(payload.put(TEMPLATE_NAME.value(),
+          return completedFuture(payload.put(TEMPLATE_NAME.value(),
               isNull(getProperty(templateJson, NAME)) ? EMPTY : getProperty(templateJson, NAME)));
         }
-        return CompletableFuture.completedFuture(payload.put(TEMPLATE_NAME.value(), EMPTY));
+        return completedFuture(payload.put(TEMPLATE_NAME.value(), EMPTY));
       });
   }
 
@@ -146,7 +153,7 @@ public abstract class LogRecordBuilder {
           }
           fetchUserPersonal(payload, user);
         }
-        return CompletableFuture.completedFuture(payload);
+        return completedFuture(payload);
       });
   }
 
@@ -169,7 +176,7 @@ public abstract class LogRecordBuilder {
           payload.put(SOURCE.value(),
             buildPersonalName(source.getPersonal().getFirstName(), source.getPersonal().getLastName()));
         }
-        return CompletableFuture.completedFuture(payload);
+        return completedFuture(payload);
     });
   }
 
@@ -183,7 +190,7 @@ public abstract class LogRecordBuilder {
           }
           fetchUserPersonal(payload, user);
         }
-        return CompletableFuture.completedFuture(payload);
+        return completedFuture(payload);
       });
   }
 
@@ -251,7 +258,7 @@ public abstract class LogRecordBuilder {
       ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
         .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
     }
-    return CompletableFuture.completedFuture(payload);
+    return completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
@@ -259,7 +266,7 @@ public abstract class LogRecordBuilder {
       ofNullable(getProperty(holdingJson, INSTANCE_ID))
         .ifPresent(instanceId -> payload.put(INSTANCE_ID.value(), instanceId));
     }
-    return CompletableFuture.completedFuture(payload);
+    return completedFuture(payload);
   }
 
   private JsonObject extractFirstItem(JsonObject payload) {
