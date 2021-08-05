@@ -1,0 +1,21 @@
+{
+  "logEventType": "NOTICE_ERROR",
+  "payload": {
+    "userId": "61da1f1b-eb9e-5a33-9d47-617c84191d12",
+    "userBarcode": "605566117903595",
+    "items": [{
+      "itemBarcode": "90000",
+      "itemId": "7212ba6a-8dcf-45a1-be9a-ffaa847c4423",
+      "instanceId": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
+      "holdingsRecordId": "e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19",
+      "loanId": "27e9085d-305a-455a-a375-c6c87a388a6a",
+      "servicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "templateId": "21f4fd8e-cf19-4870-8288-eb675aec8b3c",
+      "noticePolicyId": "60c7d3c0-6786-449d-bd28-d7449667cfde",
+      "triggeringEvent": "Due date"
+    }
+    ],
+    "date": "2021-07-30T03:56:01.456Z",
+    "errorMessage": "Server error failure"
+  }
+}

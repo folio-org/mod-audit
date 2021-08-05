@@ -2,10 +2,12 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
+import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.REQUEST;
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_FULL_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,6 +71,15 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
     postLogRecord(getFile(REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON));
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
+  }
+
+  @Test
+  void postLogRecordEventForNoticeError() {
+    logger.info("post valid log event for notice error: success");
+
+    int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(NOTICE);
+    postLogRecord(getFile(NOTICE_ERROR_FULL_PAYLOAD_JSON));
+    verifyNumberOfLogRecords(NOTICE, ++initialNumberOfRequestRecords);
   }
 
   @Test
