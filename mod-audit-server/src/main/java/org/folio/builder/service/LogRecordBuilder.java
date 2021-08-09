@@ -146,15 +146,22 @@ public abstract class LogRecordBuilder {
   public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
     return getEntitiesByIds(USERS_URL, UserCollection.class, 1, 0, userId)
       .thenCompose(users -> {
-        var user = users.getUsers().get(0);
-        if (nonNull(user)) {
-          if (userId.equals(getProperty(payload, USER_ID))) {
-            payload.put(USER_BARCODE.value(), user.getBarcode());
-          }
-          fetchUserPersonal(payload, user);
-        }
-        return completedFuture(payload);
+        users.getUsers()
+          .stream()
+          .findFirst()
+          .ifPresent(user -> updatePayload(payload, userId, user));
+
+        return CompletableFuture.completedFuture(payload);
       });
+  }
+
+  private void updatePayload(JsonObject payload, String userId, User user) {
+    if (nonNull(user)) {
+      if (userId.equals(getProperty(payload, USER_ID))) {
+        payload.put(USER_BARCODE.value(), user.getBarcode());
+      }
+      fetchUserPersonal(payload, user);
+    }
   }
 
   public CompletableFuture<JsonObject> fetchUserAndSourceDetails(JsonObject payload, String userId, String sourceId) {
@@ -163,14 +170,9 @@ public abstract class LogRecordBuilder {
       .thenCompose(users -> {
       Map<String, User> usersGroupedById = StreamEx.of(users.getUsers()).collect(toMap(User::getId, identity()));
 
-      var user = usersGroupedById.get(userId);
-      var source = usersGroupedById.get(sourceId);
-        if (nonNull(user)) {
-          if (userId.equals(getProperty(payload, USER_ID))) {
-            payload.put(USER_BARCODE.value(), user.getBarcode());
-          }
-          fetchUserPersonal(payload, user);
-        }
+        var user = usersGroupedById.get(userId);
+        var source = usersGroupedById.get(sourceId);
+        updatePayload(payload, userId, user);
 
         if (nonNull(source)) {
           payload.put(SOURCE.value(),
