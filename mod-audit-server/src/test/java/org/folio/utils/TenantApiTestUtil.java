@@ -49,6 +49,7 @@ public class TenantApiTestUtil {
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
   public static final String NOTICE_ERROR_FULL_PAYLOAD_JSON = "payloads/notice_error_full.json";
   public static final String NOTICE_ERROR_MINIMAL_PAYLOAD_JSON = "payloads/notice_error_minimal.json";
+  public static final String NOTICE_ERROR_NON_EXISTENT_USER_ID = "payloads/notice_error_non_existent_user_id.json";
   public static final String REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON =
     "payloads/request_created_through_override.json";
 

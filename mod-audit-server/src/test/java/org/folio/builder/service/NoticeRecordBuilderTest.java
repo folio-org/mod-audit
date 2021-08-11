@@ -4,6 +4,7 @@ import static org.folio.rest.jaxrs.model.LogRecord.Action.SEND;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.SEND_ERROR;
 import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_FULL_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_MINIMAL_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_NON_EXISTENT_USER_ID;
 import static org.folio.utils.TenantApiTestUtil.NOTICE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -109,6 +110,37 @@ public class NoticeRecordBuilderTest extends BuilderTestBase {
     assertThat(logRecord.getItems(), hasSize(0));
 
     assertThat(logRecord.getLinkToIds().getUserId(), equalTo("61da1f1b-eb9e-5a33-9d47-617c84191d12"));
+    assertThat(logRecord.getLinkToIds().getTemplateId(), is(nullValue()));
+    assertThat(logRecord.getLinkToIds().getNoticePolicyId(), is(nullValue()));
+    assertThat(logRecord.getLinkToIds().getFeeFineId(), is(nullValue()));
+    assertThat(logRecord.getLinkToIds().getRequestId(), is(nullValue()));
+    assertThat(logRecord.getLinkToIds().getNoticePolicyId(), is(nullValue()));
+    assertThat(logRecord.getDescription(), equalTo(
+      "Template: unknown. Triggering event: unknown. Error message: unknown"));
+  }
+
+  @Test
+  void testNoticeErrorEventWithNonExistentUserId() throws Exception {
+    logger.info("===== Test notice error log record builder for event with non-existent user ID =====");
+
+    JsonObject payload = new JsonObject(getFile(NOTICE_ERROR_NON_EXISTENT_USER_ID));
+
+    List<LogRecord> records = noticeErrorRecordBuilder.buildLogRecord(payload).get();
+
+    assertThat(records.size(), equalTo(1));
+
+    LogRecord logRecord = records.get(0);
+
+    assertThat(logRecord.getUserBarcode(), is(nullValue()));
+    assertThat(logRecord.getSource(), equalTo("System"));
+    assertThat(logRecord.getObject(), equalTo(LogRecord.Object.NOTICE));
+    assertThat(logRecord.getAction(), equalTo(SEND_ERROR));
+    assertThat(logRecord.getDate(), is(not(nullValue())));
+    assertThat(logRecord.getServicePointId(), is(nullValue()));
+
+    assertThat(logRecord.getItems(), hasSize(0));
+
+    assertThat(logRecord.getLinkToIds().getUserId(), equalTo("284a52f480-8f9a-49c8-9dbb-65f086e577fb"));
     assertThat(logRecord.getLinkToIds().getTemplateId(), is(nullValue()));
     assertThat(logRecord.getLinkToIds().getNoticePolicyId(), is(nullValue()));
     assertThat(logRecord.getLinkToIds().getFeeFineId(), is(nullValue()));
