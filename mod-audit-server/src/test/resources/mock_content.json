@@ -43,6 +43,12 @@
       "status": 200
     },
     {
+      "url": "/users?limit=1&offset=0&query=id%3D%3D%28284a52f480-8f9a-49c8-9dbb-65f086e577fb%29",
+      "method": "GET",
+      "receivedPath": "mocks/empty_users.json",
+      "status": 200
+    },
+    {
       "url": "/users?limit=1&offset=0&query=id%3D%3D%280c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc%29",
       "method": "GET",
       "receivedPath": "mocks/one-user-collection.json",

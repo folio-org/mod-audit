@@ -1,7 +1,6 @@
 package org.folio.builder.service;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.builder.description.Descriptions.NOTICE_MSG;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.util.Constants.SYSTEM;
@@ -41,18 +40,32 @@ import io.vertx.core.Context;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class NoticeRecordBuilder extends LogRecordBuilder {
-  public NoticeRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
+public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
+  protected static final String UNKNOWN_VALUE = "unknown";
+  private final LogRecord.Action action;
+
+  protected AbstractNoticeRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext,
+    LogRecord.Action action) {
+
     super(okapiHeaders, vertxContext);
+    this.action = action;
   }
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
     JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
-    return fetchUserDetailsByUserBarcode(payload, getProperty(payload, USER_BARCODE))
+    return fetchUserDetails(payload)
       .thenCompose(this::fetchTemplateName)
       .thenCompose(this::createResult);
+  }
+
+  private CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload) {
+    String userBarcode = getProperty(payload, USER_BARCODE);
+
+    return userBarcode != null
+      ? fetchUserDetailsByUserBarcode(payload, userBarcode)
+      : fetchUserDetails(payload, getProperty(payload, USER_ID));
   }
 
   private JsonObject extractFirstItem(JsonObject payload) {
@@ -89,10 +102,11 @@ public class NoticeRecordBuilder extends LogRecordBuilder {
       .withObject(NOTICE)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
       .withItems(fetchItems(getArrayProperty(payload, ITEMS)))
-      .withAction(LogRecord.Action.SEND)
+      .withAction(action)
       .withDate(new Date())
       .withServicePointId(getProperty(extractFirstItem(payload), SERVICE_POINT_ID))
       .withSource(SYSTEM)
+      .withDescription(buildDescription(payload, itemJson))
       .withLinkToIds(new LinkToIds()
         .withUserId(getProperty(payload, USER_ID))
         .withRequestId(getProperty(payload, REQUEST_ID))
@@ -100,10 +114,13 @@ public class NoticeRecordBuilder extends LogRecordBuilder {
         .withTemplateId(getProperty(itemJson, TEMPLATE_ID))
         .withNoticePolicyId(getProperty(itemJson, NOTICE_POLICY_ID)));
 
-    logRecord.setDescription(String.format(NOTICE_MSG,
-      getProperty(payload, TEMPLATE_NAME),
-      ofNullable(getProperty(itemJson, TRIGGERING_EVENT)).orElse(EMPTY)));
-
     return CompletableFuture.completedFuture(Collections.singletonList(logRecord));
   }
+
+  protected String buildDescription(JsonObject payload, JsonObject itemJson) {
+    return String.format(NOTICE_MSG,
+      ofNullable(getProperty(payload, TEMPLATE_NAME)).orElse(UNKNOWN_VALUE),
+      ofNullable(getProperty(itemJson, TRIGGERING_EVENT)).orElse(UNKNOWN_VALUE));
+  }
+
 }

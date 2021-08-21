@@ -66,7 +66,7 @@ public class ManualBlockRecordBuilder extends LogRecordBuilder {
 
   private String getSource(String logEventType, String sourceId, Map<String, User> usersGroupedById) {
     var user = usersGroupedById.get(sourceId);
-    return MANUAL_BLOCK_DELETED.equals(logEventType) || isNull(user) || isNull(user.getPersonal()) ? null
+    return isNull(user) || isNull(user.getPersonal()) ? null
         : buildPersonalName(user.getPersonal().getFirstName(), user.getPersonal().getLastName());
   }
 

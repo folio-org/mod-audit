@@ -78,7 +78,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     assertManualBlockLogRecord(value, payload, manualBlockLogRecord);
     assertThat(manualBlockLogRecord.getUserBarcode(), equalTo("693787594998493"));
 
-    assertSource(value, manualBlockLogRecord);
+    assertSource(manualBlockLogRecord);
   }
 
   @Test
@@ -106,11 +106,7 @@ public class ManualBlockRecordBuilderTest extends BuilderTestBase {
     assertThat(manualBlockCreatedRecord.getDescription(), equalTo(value.getDescription()));
   }
 
-  private void assertSource(TestValue value, LogRecord manualBlockLogRecord) {
-    if (value == TestValue.DELETED) {
-      assertThat(manualBlockLogRecord.getSource(), nullValue());
-    } else {
+  private void assertSource(LogRecord manualBlockLogRecord) {
       assertThat(manualBlockLogRecord.getSource(), equalTo(EXPECTED_SOURCE));
-    }
   }
 }

@@ -1,4 +1,49 @@
-## 2.1.0 - Unreleased
+## 2.2.0 - Unreleased
+
+## 2.1.0 - Released
+This release contains bug fixes and RMB update
+
+### Stories
+* [MODAUD-60](https://issues.folio.org/browse/MODAUD-60) - mod-audit: RMB Update
+
+### Bug Fixes
+* [MODAUD-79](https://issues.folio.org/browse/MODAUD-79) - Both Expired and Pickup expired request statuses are shown as Expired in circulation log
+* [MODAUD-83](https://issues.folio.org/browse/MODAUD-83) - Update mod-pubsub-client dependency to v2.3.0
+
+## 2.0.4 - Released
+This release contains bug fix for check out through override processing
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.3...v2.0.4)
+
+### Bug fixes
+* [MODAUD-77](https://issues.folio.org/browse/MODAUD-77) - Check out through override support
+
+## 2.0.3 - Released
+This release contains bug fixes for request source
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.2...v2.0.3)
+
+### Bug Fixes
+* [MODAUD-74](https://issues.folio.org/browse/MODAUD-74) - Invalid source value for requests actions
+
+## 2.0.2 - Released
+This release contains bug fixes for anonymization
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.1...v2.0.2)
+
+### Bug Fixes
+* [MODAUD-58](https://issues.folio.org/browse/MODAUD-58) - Incomplete anonymization in Circulation log
+
+## 2.0.1 - Released
+This release contains bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.0...v2.0.1)
+
+### Bug Fixes
+* [MODAUD-66](https://issues.folio.org/browse/MODAUD-66) - User ID is `undefined` for Notice entries
+* [MODAUD-64](https://issues.folio.org/browse/MODAUD-64) - Filter circulation log on description is not working
+* [MODAUD-62](https://issues.folio.org/browse/MODAUD-62) - Remove sample data for Circulation Log App
+* [MODAUD-54](https://issues.folio.org/browse/MODAUD-54) - Click on item barcode results in error message
 
 ## 2.0.0 - Released
 This release contains improvements and RMB update
