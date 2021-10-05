@@ -1,4 +1,22 @@
-## 2.2.0 - Unreleased
+## 2.3.0 - Unreleased
+
+## 2.2.0 - Released
+This release contains bug fixes and other improvements for the circulation log
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.1.0...v2.2.0)
+
+### Stories
+* [MODAUD-85](https://issues.folio.org/browse/MODAUD-85) - [SPIKE] Find approach to handling patron notice error events
+* [MODAUD-53](https://issues.folio.org/browse/MODAUD-53) - [SPIKE] Spike: user name during manual block deleting
+* [MODAUD-38](https://issues.folio.org/browse/MODAUD-38) - Source for ManualBlock deleting
+* [MODAUD-86](https://issues.folio.org/browse/MODAUD-86) - Add support for NOTICE_ERROR log event type
+* [MODAUD-81](https://issues.folio.org/browse/MODAUD-81) - align dependency versions affected by Inventory's Optimistic Locking
+
+### Bug Fixes
+* [MODAUD-88](https://issues.folio.org/browse/MODAUD-88) - The Description column is empty after applying the filter "staff information only added" in the "Circulation log" pane
+* [MODAUD-90](https://issues.folio.org/browse/MODAUD-90) - Screen is hanging on a loading screen when trying to view loan details on the Circulation log page
+* [MODAUD-89](https://issues.folio.org/browse/MODAUD-89) - User barcode is not displayed in some rows in the Circulation log pane
+
 
 ## 2.1.0 - Released
 This release contains bug fixes and RMB update
