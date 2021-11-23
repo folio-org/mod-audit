@@ -1,5 +1,13 @@
 ## 2.3.0 - Unreleased
 
+## 2.2.1 - Released
+This release contains only logging improvement
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.2.0...v2.2.1)
+
+### Bug Fixes
+* [MODAUD-95](https://issues.folio.org/browse/MODAUD-95) - Improve logging
+
 ## 2.2.0 - Released
 This release contains bug fixes and other improvements for the circulation log
 
