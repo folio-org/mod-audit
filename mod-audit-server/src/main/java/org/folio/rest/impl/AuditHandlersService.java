@@ -41,11 +41,11 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
-          LOGGER.error("Error saving log event: " + entity, throwable.getLocalizedMessage());
+          LOGGER.error("Error saving log event: " + entity, throwable);
           return null;
         });
     } catch (Exception e) {
-      LOGGER.error("Error saving log event: " + entity);
+      LOGGER.error("Error saving log event: " + entity, e);
     } finally {
       asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()));
     }
