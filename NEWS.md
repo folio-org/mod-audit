@@ -1,5 +1,13 @@
 ## 2.3.0 - Unreleased
 
+## 2.2.2 - Released
+This bugfix fixes log4j vulnerability 
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.2.1...v2.2.2)
+
+### Bug Fixes
+* [MODAUD-97](https://issues.folio.org/browse/MODAUD-97) - Kiwi R3 2021 - Log4j vulnerability verification and correction
+
 ## 2.2.1 - Released
 This release contains only logging improvement
 
