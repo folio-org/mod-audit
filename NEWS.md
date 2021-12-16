@@ -1,5 +1,13 @@
 ## 2.1.0 - Unreleased
 
+## 2.0.5 - Released
+This release fixes log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.0.4...v2.0.5)
+
+### Bug fixes
+* [MODAUD-97](https://issues.folio.org/browse/MODAUD-97) - Kiwi R3 2021 - Log4j vulnerability verification and correction
+
 ## 2.0.4 - Released
 This release contains bug fix for check out through override processing
 
