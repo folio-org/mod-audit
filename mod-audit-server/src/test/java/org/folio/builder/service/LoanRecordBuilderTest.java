@@ -11,6 +11,7 @@ import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_CHANGED_DUE_DATE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_EMPTY_ACTION_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -140,5 +142,9 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
 
     JsonObject nullAction = wrongAction.putNull(ACTION.value());
     assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+
+    JsonObject emptyAction = new JsonObject(getFile(LOAN_EMPTY_ACTION_JSON));
+    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
+    assertEquals("Action is empty", thrown.getMessage());
   }
 }
