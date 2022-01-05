@@ -294,7 +294,12 @@ public abstract class LogRecordBuilder {
     try {
       return LogRecord.Action.fromValue(actionString);
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("Builder isn't implemented yet for: " + actionString);
+      String errorMessage = "Builder isn't implemented yet for: " + actionString;
+      if (actionString.isEmpty()) {
+        errorMessage = "Action is empty";
+        LOGGER.error(errorMessage);
+      }
+      throw new IllegalArgumentException(errorMessage);
     }
   }
 
