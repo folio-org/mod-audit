@@ -3,7 +3,6 @@ package org.folio.builder.service;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
-import static org.folio.rest.jaxrs.model.LogRecord.Action.CHARGE_LOST_FEES;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
@@ -37,8 +36,6 @@ import io.vertx.core.json.JsonObject;
 
 public class LoanRecordBuilder extends LogRecordBuilder {
 
-  private static final String CHARGE_LOST_FEES_DESCRIPTION = "Lost fees charging after item aged to lost";
-
   public LoanRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
@@ -50,7 +47,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
     if (isAction(payload, ANONYMIZE)) {
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
-    } else if (isAction(payload, AGE_TO_LOST) || isAction(payload, CHANGED_DUE_DATE) || isAction(payload, CHARGE_LOST_FEES)) {
+    } else if (isAction(payload, AGE_TO_LOST) || isAction(payload, CHANGED_DUE_DATE)) {
       return fetchUserDetails(payload, getProperty(payload, USER_ID))
         .thenCompose(this::createResult);
     }
@@ -71,8 +68,8 @@ public class LoanRecordBuilder extends LogRecordBuilder {
       .withAction(resolveAction(getProperty(payload, ACTION)))
       .withDate(new Date())
       .withServicePointId(isAction(payload, AGE_TO_LOST) ? null : getProperty(payload, SERVICE_POINT_ID))
-      .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) || isAction(payload, CHARGE_LOST_FEES) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
-      .withDescription(isAction(payload, CHARGE_LOST_FEES) ? CHARGE_LOST_FEES_DESCRIPTION : getProperty(payload, DESCRIPTION))
+      .withSource(isAction(payload, ANONYMIZE) || isAction(payload, AGE_TO_LOST) ? SYSTEM : getProperty(payload, PERSONAL_NAME))
+      .withDescription(getProperty(payload, DESCRIPTION))
       .withLinkToIds(new LinkToIds().withUserId(isAction(payload, ANONYMIZE) ? null : getProperty(payload, USER_ID)))));
   }
 

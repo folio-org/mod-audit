@@ -1,18 +1,17 @@
 package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
-import static org.folio.rest.jaxrs.model.LogRecord.Action.CHARGE_LOST_FEES;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.RENEWED;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.LogEventPayloadField.ACTION;
 import static org.folio.utils.TenantApiTestUtil.LOAN_AGE_TO_LOST_PAYLOAD_JSON;
-import static org.folio.utils.TenantApiTestUtil.LOAN_CHARGE_LOST_FEES_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_CHANGED_DUE_DATE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_EMPTY_ACTION_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -21,6 +20,7 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -110,30 +110,6 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
   }
 
   @Test
-  void testChargeLostFees() throws Exception {
-    logger.info("===== Test loan log records builder: Charge lost fees loan =====");
-
-    JsonObject payload = new JsonObject(getFile(LOAN_CHARGE_LOST_FEES_PAYLOAD_JSON));
-    List<LogRecord> records = loanRecordBuilder.buildLogRecord(payload).get();
-
-    assertThat(records.size(), equalTo(1));
-
-    LogRecord loanLogRecord = records.get(0);
-    assertThat(loanLogRecord.getItems().size(), equalTo(1));
-    assertThat(loanLogRecord.getUserBarcode(), equalTo("631888472578232"));
-    assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
-    assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
-    assertThat(loanLogRecord.getItems().get(0).getInstanceId(), equalTo("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"));
-    assertThat(loanLogRecord.getItems().get(0).getHoldingId(), equalTo("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
-    assertThat(loanLogRecord.getItems().get(0).getLoanId(), equalTo("336ec84c-27ed-483d-92e3-926fafa7ed1c"));
-    assertThat(loanLogRecord.getObject(), equalTo(LogRecord.Object.LOAN));
-    assertThat(loanLogRecord.getAction(), equalTo(CHARGE_LOST_FEES));
-    assertThat(loanLogRecord.getDate(), is(not(nullValue())));
-    assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
-    assertThat(loanLogRecord.getSource(), equalTo(SYSTEM));
-  }
-
-  @Test
   void testChangedDueDate() throws Exception {
     logger.info("===== Test loan log records builder: Changed due date loan =====");
 
@@ -166,5 +142,9 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
 
     JsonObject nullAction = wrongAction.putNull(ACTION.value());
     assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+
+    JsonObject emptyAction = new JsonObject(getFile(LOAN_EMPTY_ACTION_JSON));
+    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
+    assertEquals("Action is empty", thrown.getMessage());
   }
 }
