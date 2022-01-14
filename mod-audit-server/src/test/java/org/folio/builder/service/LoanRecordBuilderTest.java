@@ -141,10 +141,11 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(wrongAction).get());
 
     JsonObject nullAction = wrongAction.putNull(ACTION.value());
-    assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+    assertEquals("Action is empty", thrown.getMessage());
 
     JsonObject emptyAction = new JsonObject(getFile(LOAN_EMPTY_ACTION_JSON));
-    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
+    thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
     assertEquals("Action is empty", thrown.getMessage());
   }
 }
