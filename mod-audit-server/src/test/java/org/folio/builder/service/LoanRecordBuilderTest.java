@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -140,11 +141,12 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     JsonObject wrongAction = new JsonObject(getFile(LOAN_WRONG_ACTION_JSON));
     assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(wrongAction).get());
 
-    JsonObject nullAction = wrongAction.putNull(ACTION.value());
-    assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+    JsonObject nullAction = wrongAction.getJsonObject("payload").putNull(ACTION.value());
+    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(nullAction).get());
+    assertEquals("Action is empty", thrown.getMessage());
 
     JsonObject emptyAction = new JsonObject(getFile(LOAN_EMPTY_ACTION_JSON));
-    Exception thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
+    thrown = assertThrows(IllegalArgumentException.class, () -> loanRecordBuilder.buildLogRecord(emptyAction).get());
     assertEquals("Action is empty", thrown.getMessage());
   }
 }

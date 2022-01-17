@@ -45,7 +45,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
           return null;
         });
     } catch (Exception e) {
-      LOGGER.error("Error saving log event for entity {} due to {} " + entity, e.getMessage());
+      LOGGER.error("Error saving log event for entity {} due to {} ", entity, e.getMessage());
     } finally {
       asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()));
     }

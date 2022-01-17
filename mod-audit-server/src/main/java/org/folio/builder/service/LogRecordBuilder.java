@@ -295,7 +295,7 @@ public abstract class LogRecordBuilder {
       return LogRecord.Action.fromValue(actionString);
     } catch (IllegalArgumentException e) {
       String errorMessage = "Builder isn't implemented yet for: " + actionString;
-      if (actionString.isEmpty()) {
+      if (isEmpty(actionString)) {
         errorMessage = "Action is empty";
         LOGGER.error(errorMessage);
       }
