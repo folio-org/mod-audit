@@ -46,6 +46,7 @@ public class TenantApiTestUtil {
   public static final String LOAN_AGE_TO_LOST_PAYLOAD_JSON = "payloads/loan_age_to_lost.json";
   public static final String LOAN_CHANGED_DUE_DATE_PAYLOAD_JSON = "payloads/loan_changed_due_date.json";
   public static final String LOAN_WRONG_ACTION_JSON = "payloads/loan_wrong_action.json";
+  public static final String LOAN_EMPTY_ACTION_JSON = "payloads/loan_empty_action.json";
   public static final String NOTICE_PAYLOAD_JSON = "payloads/notice.json";
   public static final String NOTICE_ERROR_FULL_PAYLOAD_JSON = "payloads/notice_error_full.json";
   public static final String NOTICE_ERROR_MINIMAL_PAYLOAD_JSON = "payloads/notice_error_minimal.json";
@@ -66,7 +67,7 @@ public class TenantApiTestUtil {
   public static final String ANONYMIZE_LOAN_CLOSED = "payloads/anonymize_loan_closed.json";
 
   public static final List<String> SAMPLES = Arrays.asList(CHECK_IN_PAYLOAD_JSON, CHECK_OUT_PAYLOAD_JSON, MANUAL_BLOCK_CREATED_PAYLOAD_JSON, MANUAL_BLOCK_UPDATED_PAYLOAD_JSON, MANUAL_BLOCK_DELETED_PAYLOAD_JSON,
-    FEE_FINE_PAYLOAD_JSON, LOAN_PAYLOAD_JSON, LOAN_AGE_TO_LOST_PAYLOAD_JSON, LOAN_WRONG_ACTION_JSON, NOTICE_PAYLOAD_JSON,
+    FEE_FINE_PAYLOAD_JSON, LOAN_PAYLOAD_JSON, LOAN_AGE_TO_LOST_PAYLOAD_JSON, LOAN_WRONG_ACTION_JSON, LOAN_EMPTY_ACTION_JSON, NOTICE_PAYLOAD_JSON,
     REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON, REQUEST_CREATED_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_JSON, REQUEST_MOVED_PAYLOAD_JSON,
     REQUEST_REORDERED_PAYLOAD_JSON, REQUEST_CANCELLED_PAYLOAD_JSON, REQUEST_EXPIRED_PAYLOAD_JSON, ANONYMIZE_CHECK_OUT, ANONYMIZE_CHECK_IN, ANONYMIZE_LOAN_CLOSED);
 
