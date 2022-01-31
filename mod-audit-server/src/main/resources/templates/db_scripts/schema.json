@@ -15,11 +15,11 @@
     },
     {
       "tableName": "circulation_logs",
-      "fromModuleVersion": "0.0.4",
+      "fromModuleVersion": "2.4.0",
       "ginIndex": [
         {
           "fieldName": "items",
-          "tOps": "ADD",
+          "tOps": "DELETE",
           "caseSensitive": false,
           "removeAccents": true,
           "arraySubfield": "itemBarcode",
@@ -51,6 +51,12 @@
       "fullTextIndex": [
         {
           "fieldName": "description",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "items",
           "tOps": "ADD",
           "caseSensitive": false,
           "removeAccents": true
