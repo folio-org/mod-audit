@@ -1,4 +1,13 @@
-## 2.3.0 - Unreleased
+## 2.4.0 - Unreleased
+
+## 2.3.0 - Released
+This release includes mod-audit performance and logic improvements
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.2.2...v2.3.0)
+
+### Bug Fixes
+* [MODAUD-93](https://issues.folio.org/browse/MODAUD-93) - Error logging is missing key information
+* [MODAUD-69](https://issues.folio.org/browse/MODAUD-69) - mod_audit.circulation_logs query utilizing excessive DB CPU
 
 ## 2.2.2 - Released
 This bugfix fixes log4j vulnerability 
