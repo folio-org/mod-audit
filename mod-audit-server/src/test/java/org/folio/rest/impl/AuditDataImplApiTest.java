@@ -3,6 +3,8 @@ package org.folio.rest.impl;
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.impl.AuditDataImpl.API_CXT;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
 
 import java.util.UUID;
 
@@ -55,7 +57,8 @@ public class AuditDataImplApiTest extends ApiTestBase {
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(API_CXT + "/" + nonExistingId).then().log().all()
       .statusCode(404);
     // get by bad id
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(API_CXT + "/" + badId).then().log().all().statusCode(400);
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(API_CXT + "/" + badId).then().log().all()
+      .statusCode(is(oneOf(400, 404)));
 
     // update by id
     audit.put("id", id).put("tenant", "diku2");
@@ -64,9 +67,6 @@ public class AuditDataImplApiTest extends ApiTestBase {
     // verify update
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(API_CXT + "/" + id).then().log().all().log()
       .ifValidationFails().statusCode(200).body(containsString("diku2")).body(containsString(id));
-    // update with conflict ids
-    given().header(CONTENT_TYPE).header(TENANT).body(Json.encode(audit)).put(API_CXT + "/" + nonExistingId).then().log().all()
-      .statusCode(422);
     // update by non-existing id
     audit.put("id", nonExistingId);
     given().header(CONTENT_TYPE).header(TENANT).body(Json.encode(audit)).put(API_CXT + "/" + nonExistingId).then().log().all()
@@ -74,7 +74,7 @@ public class AuditDataImplApiTest extends ApiTestBase {
     // update by bad id
     audit.put("id", badId);
     given().header(CONTENT_TYPE).header(TENANT).body(Json.encode(audit)).put(API_CXT + "/" + badId).then().log().all()
-      .statusCode(400);
+      .statusCode(is(oneOf(400, 422)));
     // restore id
     audit.put("id", id);
 
