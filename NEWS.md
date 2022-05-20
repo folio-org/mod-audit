@@ -1,4 +1,12 @@
-## 2.4.0 - Unreleased
+## 2.5.0 - Unreleased
+
+## 2.4.0 - Released
+This release includes Spring4Shell vulnerability fixes
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.3.0...v2.4.0)
+
+### Bug Fixes
+* [MODAUD-118](https://issues.folio.org/browse/MODAUD-118) - Spring4Shell Lotus R1 2022 (CVE-2022-22965)
 
 ## 2.3.0 - Released
 This release includes mod-audit performance and logic improvements
