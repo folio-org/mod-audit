@@ -23,7 +23,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 public class AuditHandlersService extends BaseService implements AuditHandlers {
   private static final String SEARCH_BY_LOAN_ID_QUERY_PATTERN = "items=@loanId %s";
@@ -89,7 +88,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
-    CompletableFuture<Void> future = new VertxCompletableFuture<>(vertxContext);
+    CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
         future.completeExceptionally(reply.cause());
