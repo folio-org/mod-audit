@@ -54,7 +54,6 @@ import org.folio.rest.tools.utils.TenantTool;
 import io.vertx.core.Context;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import one.util.streamex.StreamEx;
 
 public abstract class LogRecordBuilder {
@@ -85,7 +84,7 @@ public abstract class LogRecordBuilder {
   }
 
   private CompletableFuture<JsonObject> handleGetRequest(String endpoint) {
-    CompletableFuture<JsonObject> future = new VertxCompletableFuture<>(vertxContext);
+    CompletableFuture<JsonObject> future = new CompletableFuture<>();
 
     final String okapiURL = okapiHeaders.getOrDefault(OKAPI_URL, "");
     final String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(OKAPI_HEADER_TENANT));

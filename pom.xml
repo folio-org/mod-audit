@@ -26,7 +26,6 @@
     <rest-assured.version>4.3.0</rest-assured.version>
     <jackson.version>2.11.1</jackson.version>
     <pubsub.client.version>2.5.1</pubsub.client.version>
-    <vertx-completable-future.version>0.1.2</vertx-completable-future.version>
     <streamx.version>0.7.3</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
