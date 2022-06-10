@@ -37,6 +37,11 @@
       "metadata": {
         "createdDate": "2020-11-01T01:41:52.874+00:00",
         "updatedDate": "2020-11-01T01:41:52.874+00:00"
+      },
+      "tags": {
+        "tagList": [
+          "test_tag"
+        ]
       }
     }
   ],
