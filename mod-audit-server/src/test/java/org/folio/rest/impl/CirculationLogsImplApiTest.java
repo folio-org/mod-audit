@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.groupingBy;
+import static org.awaitility.Awaitility.await;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CREATED_THROUGH_OVERRIDE;
 import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.SAMPLES;
@@ -16,6 +17,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,6 +93,8 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .then()
       .log().all()
       .statusCode(204);
+
+    await().atLeast(1, TimeUnit.SECONDS);
 
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=845687423)")
       .then().log().all().statusCode(200)

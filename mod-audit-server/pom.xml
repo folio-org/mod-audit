@@ -22,6 +22,7 @@
     <json.path.version>2.5.0</json.path.version>
     <postgres-testing.version>33.0.0</postgres-testing.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
+    <awaitility.version>4.2.0</awaitility.version>
     <argLine />
   </properties>
 
@@ -89,6 +90,13 @@
       <groupId>org.folio</groupId>
       <artifactId>postgres-testing</artifactId>
       <version>${postgres-testing.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>${awaitility.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
