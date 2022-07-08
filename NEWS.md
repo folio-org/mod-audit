@@ -1,4 +1,18 @@
-## 2.3.0 - Unreleased
+## 2.6.0 - Unreleased
+
+## 2.5.0 - Released
+This release contains bug fixes and other technical improvements for the circulation log
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.4.0...v2.5.0)
+
+### Stories
+* [MODAUD-121](https://issues.folio.org/browse/MODAUD-121) - mod-audit - Remove vertx-completable-future for Morning Glory (2022 R2)
+* [MODAUD-113](https://issues.folio.org/browse/MODAUD-113) - Replace ExtendedAsyncResult by PgUtil in AuditDataImpl
+* [MODAUD-111](https://issues.folio.org/browse/MODAUD-111) - RMB v34 upgrade - Morning Glory 2022 R2 module release
+
+### Bug Fixes
+* [MODAUD-123](https://issues.folio.org/browse/MODAUD-123) - Notice events for users with tags does not appear in circulation log
+* [MODAUD-119](https://issues.folio.org/browse/MODAUD-119) - Spring4Shell Morning Glory R2 2022 (CVE-2022-22965)
 
 ## 2.2.0 - Released
 This release contains bug fixes and other improvements for the circulation log
