@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.isNull;
 import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
+import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           if (reply.succeeded()) {
             var results = reply.result().getResults();
             results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
-              .forEach(logRecord -> logRecord.setUserBarcode("-"));
+              .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
               .respond200WithApplicationJson(new LogRecordCollection()
                 .withLogRecords(results)
