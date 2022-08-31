@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.isNull;
 import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.ErrorUtils.buildError;
 
@@ -28,9 +29,12 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
       .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
           if (reply.succeeded()) {
+            var results = reply.result().getResults();
+            results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
+              .forEach(logRecord -> logRecord.setUserBarcode("-"));
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
               .respond200WithApplicationJson(new LogRecordCollection()
-                .withLogRecords(reply.result().getResults())
+                .withLogRecords(results)
                 .withTotalRecords(reply.result().getResultInfo().getTotalRecords()))));
           } else {
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
