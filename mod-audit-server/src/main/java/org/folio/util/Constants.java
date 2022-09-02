@@ -11,4 +11,5 @@ public class Constants {
   public static final String URL_WITH_ID_PATTERN = "%s/%s";
   public static final String SYSTEM = "System";
   public static final String UUID_PATTERN = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
+  public static final String NO_BARCODE = "-";
 }

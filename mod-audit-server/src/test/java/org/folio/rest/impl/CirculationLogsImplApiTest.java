@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.groupingBy;
 import static org.awaitility.Awaitility.await;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CREATED_THROUGH_OVERRIDE;
+import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.utils.TenantApiTestUtil.LOAN_ANONYMIZE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.SAMPLES;
 import static org.folio.utils.TenantApiTestUtil.getFile;
@@ -100,17 +101,17 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .then().log().all().statusCode(200)
       .assertThat()
       .body("totalRecords", equalTo(6))
-      .body("logRecords[0].userBarcode", is(emptyOrNullString()))
+      .body("logRecords[0].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[0].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[1].userBarcode", is(emptyOrNullString()))
+      .and().body("logRecords[1].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[1].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[2].userBarcode", is(emptyOrNullString()))
+      .and().body("logRecords[2].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[2].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[3].userBarcode", is(emptyOrNullString()))
+      .and().body("logRecords[3].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[3].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[4].userBarcode", is(emptyOrNullString()))
+      .and().body("logRecords[4].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[4].linkToIds.userId", is(emptyOrNullString()))
-      .and().body("logRecords[5].userBarcode", is(emptyOrNullString()))
+      .and().body("logRecords[5].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[5].linkToIds.userId", is(emptyOrNullString()));
   }
 
