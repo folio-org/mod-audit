@@ -1,5 +1,7 @@
 ## 2.6.0 - Unreleased
 
+* [MODAUD-128] (https://issues.folio.org/browse/MODAUD-128) - Supports interface 'users' version 16.0
+
 ## 2.5.0 - Released
 This release contains bug fixes and other technical improvements for the circulation log
 
