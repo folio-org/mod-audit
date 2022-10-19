@@ -1,6 +1,13 @@
-## 2.6.0 - Unreleased
+## 2.7.0 - Unreleased
 
-* [MODAUD-128] (https://issues.folio.org/browse/MODAUD-128) - Supports interface 'users' version 16.0
+## 2.6.0 - Released
+This release contains interface and module upgrades
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.5.0...v2.6.0)
+
+### Technical tasks
+* [MODAUD-133](https://issues.folio.org/browse/MODAUD-133) - mod-audit: Upgrade RAML Module Builder
+* [MODAUD-128](https://issues.folio.org/browse/MODAUD-128) - Supports interface 'users' version 16.0
 
 ## 2.5.0 - Released
 This release contains bug fixes and other technical improvements for the circulation log
