@@ -9,4 +9,3 @@ CREATE TABLE IF NOT EXISTS acquisition_order_log (
 );
 
 CREATE INDEX IF NOT EXISTS order_id_index ON acquisition_order_log USING BTREE (order_id);
-
