@@ -2,7 +2,6 @@ package org.folio.verticle.acquisition;
 
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.KafkaConfig;
-import org.folio.kafka.ProcessRecordErrorHandler;
 import org.folio.util.AcquisitionEventType;
 import org.folio.verticle.AbstractConsumersVerticle;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,6 @@ public class OrderEventConsumersVerticle extends AbstractConsumersVerticle {
   private KafkaConfig kafkaConfig;
   @Autowired
   private AsyncRecordHandler<String, String> orderEventsHandler;
-  @Autowired
-  private ProcessRecordErrorHandler<String, String> orderEventsErrorHandler;
 
   public List<String> getEvents() {
     return List.of(AcquisitionEventType.ACQ_ORDER_CHANGED.getTopicName());
@@ -26,9 +23,5 @@ public class OrderEventConsumersVerticle extends AbstractConsumersVerticle {
 
   public AsyncRecordHandler<String, String> getHandler() {
     return orderEventsHandler;
-  }
-
-  public ProcessRecordErrorHandler<String, String> getErrorHandler() {
-    return orderEventsErrorHandler;
   }
 }

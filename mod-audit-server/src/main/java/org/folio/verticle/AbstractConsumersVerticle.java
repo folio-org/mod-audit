@@ -38,7 +38,6 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
         .loadLimit(loadLimit)
         .globalLoadSensor(globalLoadSensor)
         .subscriptionDefinition(subscriptionDefinition)
-        .processRecordErrorHandler(getErrorHandler())
         .build();
 
       futures.add(consumerWrapper.start(getHandler(),
@@ -66,15 +65,4 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
    * @return handler to porcess kafka message
    */
   public abstract AsyncRecordHandler<String, String> getHandler();
-
-  /**
-   * By default, error handler is null and so not invoked by folio-kafka-wrapper for failure cases.
-   * If you need to add error handling logic and send ERROR events - override this method with own error handler
-   * implementation for  particular consumer instance.
-   *
-   * @return error handler
-   */
-  public ProcessRecordErrorHandler<String, String> getErrorHandler() {
-    return null;
-  }
 }
