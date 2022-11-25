@@ -27,7 +27,7 @@ public class SpringVerticleFactory implements VerticleFactory, ApplicationContex
 
   @Override
   public String prefix() {
-    return "orders";
+    return "audit";
   }
 
   @Override

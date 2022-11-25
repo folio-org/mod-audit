@@ -27,8 +27,8 @@ public class ApplicationConfig {
   @Value("${ENV:folio}")
   private String envId;
 
-  @Bean(name = "newKafkaConfig")
-  public KafkaConfig kafkaConfigBean() {
+  @Bean
+  public KafkaConfig kafkaConfig() {
     KafkaConfig kafkaConfig = KafkaConfig.builder()
       .envId(envId)
       .kafkaHost(kafkaHost)
@@ -38,7 +38,7 @@ public class ApplicationConfig {
       .maxRequestSize(maxRequestSize)
       .build();
 
-    LOGGER.info("kafkaConfig: {}", kafkaConfig);
+    LOGGER.info("KafkaConfig: {}", kafkaConfig);
     return kafkaConfig;
   }
 

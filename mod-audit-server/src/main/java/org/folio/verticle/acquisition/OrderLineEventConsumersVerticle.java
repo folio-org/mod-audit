@@ -11,24 +11,21 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class OrderEventConsumersVerticle extends AbstractConsumersVerticle {
-
+public class OrderLineEventConsumersVerticle extends AbstractConsumersVerticle {
   @Autowired
   private KafkaConfig kafkaConfig;
   @Autowired
-  private AsyncRecordHandler<String, String> orderEventsHandler;
+  private AsyncRecordHandler<String, String> orderLineEventsHandler;
   @Autowired
-  private ProcessRecordErrorHandler<String, String> orderEventsErrorHandler;
+  private ProcessRecordErrorHandler<String, String> orderLineEventsErrorHandler;
 
+  @Override
   public List<String> getEvents() {
-    return List.of(AcquisitionEventType.ACQ_ORDER_CHANGED.getTopicName());
+    return List.of(AcquisitionEventType.ACQ_ORDER_LINE_CHANGED.getTopicName());
   }
 
+  @Override
   public AsyncRecordHandler<String, String> getHandler() {
-    return orderEventsHandler;
-  }
-
-  public ProcessRecordErrorHandler<String, String> getErrorHandler() {
-    return orderEventsErrorHandler;
+    return orderLineEventsHandler;
   }
 }

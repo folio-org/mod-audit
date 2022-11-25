@@ -8,7 +8,6 @@ import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.processing.events.utils.PomReaderUtil;
 import org.folio.rest.tools.utils.ModuleName;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
   private static final GlobalLoadSensor globalLoadSensor = new GlobalLoadSensor();
 
   @Autowired
-  @Qualifier("newKafkaConfig")
   private KafkaConfig kafkaConfig;
 
   @Value("${srm.kafka.DataImportConsumer.loadLimit:5}")
