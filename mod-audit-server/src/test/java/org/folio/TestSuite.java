@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
@@ -30,9 +31,13 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
+
 public class TestSuite {
   public static boolean isInitialized = false;
   public static final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  public static EmbeddedKafkaCluster kafkaCluster;
 
   private static Vertx vertx;
 
@@ -49,10 +54,29 @@ public class TestSuite {
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
     options.setWorker(true);
 
+    startKafkaMockServer();
     startVerticle(options);
 
     RestAssured.port = port;
     isInitialized = true;
+  }
+
+  @AfterAll
+  public static void globalTearDown() {
+    closeKafkaMockServer();
+    if (Objects.nonNull(vertx)) {
+      vertx.close();
+    }
+    isInitialized = false;
+  }
+
+  private static void startKafkaMockServer() {
+    kafkaCluster = provisionWith(defaultClusterConfig());
+    kafkaCluster.start();
+  }
+
+  private static void closeKafkaMockServer() {
+    kafkaCluster.stop();
   }
 
   private static void startVerticle(DeploymentOptions options)
@@ -73,14 +97,6 @@ public class TestSuite {
 
   public static Vertx getVertx() {
     return vertx;
-  }
-
-  @AfterAll
-  public static void globalTearDown() {
-    if (Objects.nonNull(vertx)) {
-      vertx.close();
-    }
-    isInitialized = false;
   }
 
   @Nested
