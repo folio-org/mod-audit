@@ -1,60 +1,31 @@
-package org.folio.verticle.acquisition;
+package org.folio.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.kafka.*;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.processing.events.utils.PomReaderUtil;
 import org.folio.rest.tools.utils.ModuleName;
-import org.folio.util.OrderEventTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
-
-@Component
-@Scope(SCOPE_PROTOTYPE)
-public class OrderEventConsumerVerticle extends AbstractVerticle {
-
+public abstract class AbstractConsumersVerticle extends AbstractVerticle {
   private static final GlobalLoadSensor globalLoadSensor = new GlobalLoadSensor();
-
-  private static final Logger LOGGER = LogManager.getLogger();
 
   @Autowired
   @Qualifier("newKafkaConfig")
   private KafkaConfig kafkaConfig;
 
-  @Value("${orders.kafka.OrderConsumer.loadLimit:5}")
+  @Value("${srm.kafka.DataImportConsumer.loadLimit:5}")
   private int loadLimit;
-
-  @Autowired
-  @Qualifier("OrderEventHandler")
-  private AsyncRecordHandler<String, String> OrderEventHandler;
-
-  @Autowired
-  @Qualifier("OrderEventErrorHandler")
-  private ProcessRecordErrorHandler<String, String> OrderEventErrorHandler;
-
-
-  //TODO: should be changed to the real value
-  public List<String> getEvents() {
-    return List.of(OrderEventTypes.ORDER_TYPE_CHANGED.value());
-  }
 
   @Override
   public void start(Promise<Void> startPromise) {
-
-    LOGGER.debug("OrderEventConsumerVerticle :: start");
-
     List<Future<Void>> futures = new ArrayList<>();
 
     getEvents().forEach(event -> {
@@ -79,16 +50,33 @@ public class OrderEventConsumerVerticle extends AbstractVerticle {
     GenericCompositeFuture.all(futures).onComplete(ar -> startPromise.complete());
   }
 
-  public static String constructModuleName() {
+  private String constructModuleName() {
     return PomReaderUtil.INSTANCE.constructModuleVersionAndVersion(ModuleName.getModuleName(),
       ModuleName.getModuleVersion());
   }
 
-  public AsyncRecordHandler<String, String> getHandler() {
-    return this.OrderEventHandler;
-  }
+  /**
+   * Events that consumer subscribed to.
+   *
+   * @return list of events
+   */
+  public abstract List<String> getEvents();
 
+  /**
+   * Handler that will be invoked when kafka messages comes to processing.
+   *
+   * @return handler to porcess kafka message
+   */
+  public abstract AsyncRecordHandler<String, String> getHandler();
+
+  /**
+   * By default, error handler is null and so not invoked by folio-kafka-wrapper for failure cases.
+   * If you need to add error handling logic and send ERROR events - override this method with own error handler
+   * implementation for  particular consumer instance.
+   *
+   * @return error handler
+   */
   public ProcessRecordErrorHandler<String, String> getErrorHandler() {
-    return this.OrderEventErrorHandler;
+    return null;
   }
 }

@@ -1,0 +1,18 @@
+package org.folio.util;
+
+public enum AcquisitionEventType {
+
+  ACQ_ERROR("ACQ_ERROR"),
+  ACQ_ORDER_CHANGED("ACQ_ORDER_CHANGED"),
+  ACQ_ORDER_LINE_CHANGED("ACQ_ORDER_LINE_CHANGED");
+
+  private final String topicName;
+
+  AcquisitionEventType(String value) {
+    this.topicName = value;
+  }
+
+  public String getTopicName() {
+    return topicName;
+  }
+}
