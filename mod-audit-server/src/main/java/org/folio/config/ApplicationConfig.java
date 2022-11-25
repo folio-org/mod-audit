@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan({ "org.folio" })
 public class ApplicationConfig {
-
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Value("${KAFKA_HOST:kafka}")

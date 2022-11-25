@@ -11,7 +11,6 @@ import java.util.List;
 
 @Component
 public class OrderEventConsumersVerticle extends AbstractConsumersVerticle {
-
   @Autowired
   private KafkaConfig kafkaConfig;
   @Autowired

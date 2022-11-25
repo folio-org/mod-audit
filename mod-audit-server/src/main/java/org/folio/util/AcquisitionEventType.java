@@ -1,7 +1,6 @@
 package org.folio.util;
 
 public enum AcquisitionEventType {
-
   ACQ_ORDER_CHANGED("ACQ_ORDER_CHANGED"),
   ACQ_ORDER_LINE_CHANGED("ACQ_ORDER_LINE_CHANGED");
 
