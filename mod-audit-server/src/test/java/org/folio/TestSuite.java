@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
@@ -30,9 +31,18 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
+
 public class TestSuite {
+  private static final String KAFKA_HOST = "KAFKA_HOST";
+  private static final String KAFKA_PORT = "KAFKA_PORT";
+  private static final String KAFKA_ENV = "ENV";
+  private static final String KAFKA_ENV_VALUE = "test-env";
+
   public static boolean isInitialized = false;
   public static final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  public static EmbeddedKafkaCluster kafkaCluster;
 
   private static Vertx vertx;
 
@@ -49,10 +59,34 @@ public class TestSuite {
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
     options.setWorker(true);
 
+    startKafkaMockServer();
+    String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
+    System.setProperty(KAFKA_HOST, hostAndPort[0]);
+    System.setProperty(KAFKA_PORT, hostAndPort[1]);
+    System.setProperty(KAFKA_ENV, KAFKA_ENV_VALUE);
+
     startVerticle(options);
 
     RestAssured.port = port;
     isInitialized = true;
+  }
+
+  @AfterAll
+  public static void globalTearDown() {
+    closeKafkaMockServer();
+    if (Objects.nonNull(vertx)) {
+      vertx.close();
+    }
+    isInitialized = false;
+  }
+
+  private static void startKafkaMockServer() {
+    kafkaCluster = provisionWith(defaultClusterConfig());
+    kafkaCluster.start();
+  }
+
+  private static void closeKafkaMockServer() {
+    kafkaCluster.stop();
   }
 
   private static void startVerticle(DeploymentOptions options)
@@ -73,14 +107,6 @@ public class TestSuite {
 
   public static Vertx getVertx() {
     return vertx;
-  }
-
-  @AfterAll
-  public static void globalTearDown() {
-    if (Objects.nonNull(vertx)) {
-      vertx.close();
-    }
-    isInitialized = false;
   }
 
   @Nested
