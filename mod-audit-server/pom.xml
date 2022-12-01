@@ -20,7 +20,6 @@
 
   <properties>
     <json.path.version>2.7.0</json.path.version>
-    <postgres-testing.version>33.0.0</postgres-testing.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <awaitility.version>4.2.0</awaitility.version>
     <argLine />
@@ -41,12 +40,16 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-kafka-wrapper</artifactId>
-      <version>2.6.0</version>
+      <version>2.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
       <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-kafka-client</artifactId>
     </dependency>
     <dependency>
       <groupId>net.mguenther.kafka</groupId>
@@ -120,7 +123,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>postgres-testing</artifactId>
-      <version>${postgres-testing.version}</version>
+      <version>${raml-module-builder.version}</version>
     </dependency>
 
     <dependency>
