@@ -1,5 +1,6 @@
 package org.folio.builder.description;
 
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,6 +30,6 @@ public class DescriptionHelper {
       return LocalDateTime.ofInstant(date.toInstant(), ZoneId.of("GMT"))
         .atZone(ZoneId.systemDefault()).format(DATE_FORMATTER);
     }
-    return "not set";
+    return StringUtils.EMPTY;
   }
 }
