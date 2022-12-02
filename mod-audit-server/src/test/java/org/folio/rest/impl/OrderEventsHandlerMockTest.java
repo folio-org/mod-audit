@@ -67,17 +67,12 @@ public class OrderEventsHandlerMockTest {
 
   @Test
   public void shouldProcessEvent() {
-
-
-    // given
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent().withId(UUID.randomUUID().toString()).
       withEventDate(new Date()).withOrderId(UUID.randomUUID().toString()).withActionDate(new Date()).
       withAction(OrderAuditEvent.Action.CREATE).withOrderSnapshot("").withUserId(UUID.randomUUID().toString());
-    // given
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
     Future<String> future = orderEventsHandler.handle(kafkaConsumerRecord);
 
-    // then
     verify(orderEvenDao, never()).save(eq(UUID.randomUUID().toString()), anyString(), eq(UUID.randomUUID().toString()),
       eq(UUID.randomUUID().toString()), eq(new Date()), eq(new Date()), anyString(), eq(TENANT_ID));
     assertFalse(future.failed());
