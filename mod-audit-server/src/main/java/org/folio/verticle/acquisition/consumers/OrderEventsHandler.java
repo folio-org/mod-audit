@@ -47,10 +47,7 @@ public class OrderEventsHandler implements AsyncRecordHandler<String, String> {
 
     orderAuditEventService.collectData(orderAuditEvent.getId(), OrderAuditEvent.Action.CREATE.value(), orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(), orderAuditEvent.getEventDate(), orderAuditEvent.getActionDate(),
-        orderAuditEvent.getOrderSnapshot().toString(), okapiConnectionParams.getTenantId())
-      .onSuccess(res -> LOGGER.info("Precesses successfully", result, record, orderAuditEvent, okapiConnectionParams.getTenantId()))
-      .onFailure(e -> LOGGER.error("Error during processing event", e));
-
+        orderAuditEvent.getOrderSnapshot().toString(), okapiConnectionParams.getTenantId());
     return result.future();
   }
 }
