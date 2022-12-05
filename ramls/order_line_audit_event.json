@@ -5,7 +5,7 @@
   "properties": {
     "id": {
       "description": "UUID of the event",
-      "$ref": "../common/uuid.json"
+      "$ref": "common/uuid.json"
     },
     "action": {
       "description": "Action for order line (Create, Edit or Delete)",
@@ -14,15 +14,15 @@
     },
     "orderId": {
       "description": "UUID of the order",
-      "$ref": "../common/uuid.json"
+      "$ref": "common/uuid.json"
     },
     "orderLineId": {
       "description": "UUID of the order line",
-      "$ref": "../common/uuid.json"
+      "$ref": "common/uuid.json"
     },
     "userId": {
       "description": "UUID of the user who performed the action",
-      "$ref": "../common/uuid.json"
+      "$ref": "common/uuid.json"
     },
     "eventDate": {
       "description": "Date time when event triggered",

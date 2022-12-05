@@ -1,0 +1,20 @@
+#%RAML 1.0
+
+title: Acquisition Audit events API
+baseUri: https://github.com/folio-org/mod-audit
+version: v1
+
+documentation:
+  - title: Acquisition Audit events API
+    content: API for retrieving events for acquisition changes
+
+
+types:
+  order-line-audit-event: !include order_line_audit_event.json
+  order-audit-event: !include order_audit_event.json
+
+
+/audit-data/acquisition/order/{id}:
+
+/audit-data/acquisition/order-line/{id}:
+
