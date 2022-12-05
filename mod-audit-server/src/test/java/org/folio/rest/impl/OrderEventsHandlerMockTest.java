@@ -78,6 +78,7 @@ public class OrderEventsHandlerMockTest {
     assertFalse(future.failed());
 
   }
+
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {
     String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent().withId(UUID.randomUUID().toString()).
@@ -86,6 +87,7 @@ public class OrderEventsHandlerMockTest {
     ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, orderAuditEvent);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
+
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, OrderAuditEvent event) {
     ConsumerRecord<java.lang.String, java.lang.String> consumerRecord = new ConsumerRecord("folio", 0, 0, topic, Json.encode(event));
     consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
