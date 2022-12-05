@@ -7,7 +7,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.OrderEvenDao;
+import org.folio.dao.OrderEventDao;
 import org.folio.util.PostgresClientFactory;
 
 import java.util.Date;
@@ -15,7 +15,7 @@ import java.util.Date;
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
 
-public class OrderEventDaoImpl implements OrderEvenDao {
+public class OrderEventDaoImpl implements OrderEventDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
 

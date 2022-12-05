@@ -7,7 +7,7 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.folio.dao.OrderEvenDao;
+import org.folio.dao.OrderEventDao;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
@@ -47,7 +47,7 @@ public class OrderEventsHandlerMockTest {
   private OrderAuditEventService orderAuditEventService;
 
   @Mock
-  private OrderEvenDao orderEvenDao;
+  private OrderEventDao orderEvenDao;
 
   @Spy
   private final PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());

@@ -4,7 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import org.folio.dao.OrderEvenDao;
+import org.folio.dao.OrderEventDao;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.services.OrderAuditEventService;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ public class OrderAuditEventServiceImpl implements OrderAuditEventService {
 
   public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 
-  private OrderEvenDao orderEvenDao;
+  private OrderEventDao orderEvenDao;
   @Override
   public Future<RowSet<Row>> collectData(String id, String action, String orderId, String userId,
                                          Date eventDate, Date action_date, String modifiedContent, String tenantId) {
