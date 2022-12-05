@@ -1,0 +1,73 @@
+{
+  "logEventType":"REQUEST_UPDATED_EVENT",
+  "payload":{
+    "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+    "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+    "itemBarcode":"765475420716",
+    "itemStatusName":"Awaiting pickup",
+    "source":"folio",
+    "requests":{
+      "original":{
+        "id":"f232d715-7bfa-42e4-978c-8e8943560b04",
+        "requestLevel":"Item",
+        "requestType":"Hold",
+        "requestDate":"2020-10-11T18:58:13.000+0000",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
+        "instanceId":"a89eccf0-57a6-495e-898d-32b9b2210f2f",
+        "holdingsRecordId":"67cd0046-e4f1-4e4f-9024-adf0b0039d09",
+        "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
+        "status":"Open - Awaiting pickup",
+        "position":1,
+        "instance":{
+          "title":"Interesting Times",
+          "identifiers":[
+            {
+              "value":"B01LO7PJOE",
+              "identifierTypeId":"7f907515-a1bf-4513-8a38-92e1a07c539d"
+            }
+          ]
+        },
+        "item":{
+          "barcode":"765475420716"
+        },
+        "requester":{
+          "firstName":"Doug",
+          "lastName":"Denesik",
+          "middleName":"Alf",
+          "barcode":"693787594998493"
+        },
+        "fulfilmentPreference":"Hold Shelf",
+        "requestExpirationDate":"2022-12-22T23:59:59.000+00:00",
+        "holdShelfExpirationDate":"2022-12-26T23:59:00.000+00:00",
+        "pickupServicePointId":"3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+        "metadata":{
+          "createdDate":"2022-12-05T08:51:09.636+00:00",
+          "createdByUserId":"630bc134-e5ca-5ee1-a0a2-fe0d344b304d",
+          "updatedDate":"2022-12-05T10:51:39.848+00:00",
+          "updatedByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc"        }
+      },
+      "updated":{
+        "requestExpirationDate":"2022-12-29T23:59:59.000Z",
+        "holdShelfExpirationDate":"2022-12-26T23:59:00Z",
+        "id":"f232d715-7bfa-42e4-978c-8e8943560b04",
+        "requestLevel":"Item",
+        "requestType":"Hold",
+        "requestDate":"2022-12-05T08:51:08.000+00:00",
+        "requesterId":"6f36265e-722a-490a-b436-806e63af2ea7",
+        "instanceId":"a89eccf0-57a6-495e-898d-32b9b2210f2f",
+        "holdingsRecordId":"67cd0046-e4f1-4e4f-9024-adf0b0039d09",
+        "itemId":"bb5a6689-c008-4c96-8f8f-b666850ee12d",
+        "status":"Open - Awaiting pickup",
+        "position":1,
+        "fulfilmentPreference":"Hold Shelf",
+        "pickupServicePointId":"c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+        "metadata":{
+          "createdDate":"2022-12-05T08:51:09.636+00:00",
+          "createdByUserId":"630bc134-e5ca-5ee1-a0a2-fe0d344b304d",
+          "updatedDate":"2022-12-05T10:51:39.848+00:00",
+          "updatedByUserId":"0c8fb6eb-fb2b-58fa-8386-e4bc9e670fcc"
+        }
+      }
+    }
+  }
+}
