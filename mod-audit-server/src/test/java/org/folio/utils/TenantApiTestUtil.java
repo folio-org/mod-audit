@@ -56,6 +56,8 @@ public class TenantApiTestUtil {
 
   public static final String REQUEST_CREATED_PAYLOAD_JSON = "payloads/request_created.json";
   public static final String REQUEST_EDITED_PAYLOAD_JSON = "payloads/request_edited.json";
+
+  public static final String REQUEST_EDITED_PAYLOAD_WITH_NON_EMPTY_DATE_JSON = "payloads/request_edited_with_non_empty_date.json";
   public static final String REQUEST_MOVED_PAYLOAD_JSON = "payloads/request_moved.json";
   public static final String REQUEST_REORDERED_PAYLOAD_JSON = "payloads/request_reordered.json";
   public static final String REQUEST_CANCELLED_PAYLOAD_JSON = "payloads/request_cancelled.json";

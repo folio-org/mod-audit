@@ -2,8 +2,12 @@ package org.folio.util;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -43,7 +47,7 @@ public class JsonPropertyFetcher {
 
   public static LocalDateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field, LocalDateTime defaultValue) {
     if (representation != null && isNotBlank(representation.getString(field.value()))) {
-      return LocalDateTime.parse(representation.getString(field.value()), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"));
+      return LocalDateTime.parse(representation.getString(field.value()), DateTimeFormatter.ofPattern("u-M-d'T'H:m:s[.[SSSS]][XXX][XX]"));
     } else {
       return defaultValue;
     }

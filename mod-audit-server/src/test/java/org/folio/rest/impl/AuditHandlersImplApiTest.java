@@ -10,6 +10,8 @@ import static org.folio.utils.TenantApiTestUtil.CHECK_OUT_THROUGH_OVERRIDE_PAYLO
 import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_FULL_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_WITH_NON_EMPTY_DATE_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
@@ -64,8 +66,9 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
 
-  @Test
-  void postLogRecordEventForRequestOverride() {
+  @ParameterizedTest
+  @ValueSource(strings = {REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_WITH_NON_EMPTY_DATE_JSON})
+  void postLogRecordEventForRequestOverride(String sample) {
     logger.info("post valid log event for request creation through override: success");
 
     int initialNumberOfRequestRecords = getNumberOfExistingLogRecords(REQUEST);
