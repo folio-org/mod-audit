@@ -30,7 +30,7 @@ public class RequestRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LogManager.getLogger();
 
   private static final String EXPECTED_CREATE_DESCRIPTION = "Type: Recall.";
-  private static final String EXPECTED_EDITED_DESCRIPTION = "Type: Recall. New expiration date: 2020-10-23 00:00:00 (from: 2020-10-19 00:00:00). New fulfilment preference: Hold Shelf (from: Hold).";
+  private static final String EXPECTED_EDITED_DESCRIPTION = "Type: Recall. New expiration date: 2020-10-23 00:00:00 (from: not set). New fulfilment preference: Hold Shelf (from: Hold).";
   private static final String EXPECTED_MOVED_DESCRIPTION = "Type: Hold. New item barcode: 645398607547 (from: 653285216743).";
   private static final String EXPECTED_CANCELLED_DESCRIPTION = "Type: Hold. Reason for cancellation: Cancelled at patron’s request.";
   private static final String EXPECTED_REORDERED_DESCRIPTION = "Type: Recall. New queue position: 2 (from: 3).";

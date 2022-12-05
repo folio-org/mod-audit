@@ -19,7 +19,10 @@ public class DescriptionHelper {
   private static final java.time.format.DateTimeFormatter DATE_FORMATTER = java.time.format.DateTimeFormatter.ofPattern(DATE_PATTERN);
 
   public static String getFormattedDateTime(LocalDateTime dateTime) {
-    return dateTime.format(DATE_TIME_FORMATTER);
+    if (Objects.nonNull(dateTime)) {
+      return dateTime.format(DATE_TIME_FORMATTER);
+    }
+    return "not set";
   }
 
   public static String getFormattedDateTime(Date date) {
