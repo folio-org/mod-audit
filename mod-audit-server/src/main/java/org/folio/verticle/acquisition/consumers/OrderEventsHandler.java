@@ -45,9 +45,7 @@ public class OrderEventsHandler implements AsyncRecordHandler<String, String> {
     OrderAuditEvent orderAuditEvent = new JsonObject(record.value()).mapTo(OrderAuditEvent.class);
     LOGGER.debug("Event was received with recordId: {} event type: {}", recordId, orderAuditEvent.getAction());
 
-    orderAuditEventService.collectData(orderAuditEvent.getId(), OrderAuditEvent.Action.CREATE.value(), orderAuditEvent.getOrderId(),
-        orderAuditEvent.getUserId(), orderAuditEvent.getEventDate(), orderAuditEvent.getActionDate(),
-        orderAuditEvent.getOrderSnapshot().toString(), okapiConnectionParams.getTenantId());
+    orderAuditEventService.collectData(orderAuditEvent, okapiConnectionParams.getTenantId());
     return result.future();
   }
 }

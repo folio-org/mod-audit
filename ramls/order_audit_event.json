@@ -23,16 +23,18 @@
     "eventDate": {
       "description": "Date time when event triggered",
       "format": "date-time",
-      "type": "string"
+      "type": "object",
+      "javaType": "java.time.LocalDateTime"
     },
     "actionDate": {
       "description": "Date time when order action occurred",
       "format": "date-time",
-      "type": "string"
+      "type": "object",
+      "javaType": "java.time.LocalDateTime"
     },
     "orderSnapshot": {
       "description": "Full snapshot of the order",
-      "type": "string"
+      "type": "JsonObject"
     }
   },
   "additionalProperties": false
