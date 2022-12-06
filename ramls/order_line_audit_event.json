@@ -24,6 +24,10 @@
       "description": "UUID of the user who performed the action",
       "$ref": "common/uuid.json"
     },
+    "userName": {
+      "description": "Username of the user who performed the action",
+      "type": "string"
+    },
     "eventDate": {
       "description": "Date time when event triggered",
       "format": "date-time",

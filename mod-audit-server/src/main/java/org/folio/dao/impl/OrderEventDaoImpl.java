@@ -24,7 +24,7 @@ public class OrderEventDaoImpl implements OrderEventDao {
 
   public static final String TABLE_NAME = "acquisition_order_log";
 
-  private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7)";
+  private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
   @Autowired
   private final PostgresClientFactory pgClientFactory;
@@ -51,6 +51,7 @@ public class OrderEventDaoImpl implements OrderEventDao {
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
+        orderAuditEvent.getUserName(),
         orderAuditEvent.getEventDate(),
         orderAuditEvent.getActionDate(),
         new JsonObject(orderAuditEvent.getOrderSnapshot())), promise);

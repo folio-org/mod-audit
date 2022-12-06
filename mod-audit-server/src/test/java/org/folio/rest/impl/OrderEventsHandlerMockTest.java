@@ -16,12 +16,14 @@ import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.OrderAuditEventService;
+import org.folio.services.impl.OrderAuditEventServiceImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.verticle.acquisition.consumers.OrderEventsHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +31,9 @@ import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
 public class OrderEventsHandlerMockTest {
@@ -47,44 +52,66 @@ public class OrderEventsHandlerMockTest {
   private OrderAuditEventService orderAuditEventService;
 
   @Mock
-  private OrderEventDao orderEvenDao;
+  private OrderEventDao orderEventDao;
+
 
   @Spy
   private final PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
+//  @InjectMocks
+//  private OrderEventDaoImpl orderEventDaoImpl = new OrderEventDaoImpl(postgresClientFactory);
 
-  @Mock
+  @InjectMocks
+  OrderAuditEventServiceImpl orderAuditEventServiceImpl;
+
+  @InjectMocks
   private OrderEventsHandler orderEventsHandler;
 
 
   @Before
   public void setUp(TestContext context) throws IOException {
     MockitoAnnotations.initMocks(this);
-    orderEventsHandler = new OrderEventsHandler(vertx, orderAuditEventService);
-    orderEvenDao = new OrderEventDaoImpl(postgresClientFactory);
+    orderEventsHandler = Mockito.spy(new OrderEventsHandler(vertx, orderAuditEventService));
+    orderAuditEventService = Mockito.spy(new OrderAuditEventServiceImpl(orderEventDao));
+   // orderEventDaoImpl = new OrderEventDaoImpl(postgresClientFactory);
   }
 
   @Test
-  public void shouldProcessEvent() {
+  public void shouldProcessEvent(TestContext context) {
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withEventDate(null)
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(null)
-      .withAction(OrderAuditEvent.Action.CREATE).
-      withOrderSnapshot("{\"name\":\"New Product\"")
+      .withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderSnapshot("{\"name\":\"New Product\"")
       .withUserId(UUID.randomUUID().toString());
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
-    Future<String> future = orderEventsHandler.handle(kafkaConsumerRecord);
 
-    assertFalse(future.failed());
+    when(orderEventDao.save(orderAuditEvent, TENANT_ID))
+      .thenReturn(Future.succeededFuture());
+
+    when(orderAuditEventService.collectData(orderAuditEvent, TENANT_ID))
+      .thenReturn(Future.succeededFuture());
+
+    orderEventsHandler.handle(kafkaConsumerRecord);
+    verify(orderAuditEventService).collectData(anyObject(), anyString());
+
+
   }
 
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {
     String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent().withId(UUID.randomUUID().toString()).
-      withEventDate(null).withOrderId(UUID.randomUUID().toString()).withActionDate(null).
-      withAction(OrderAuditEvent.Action.CREATE).withOrderSnapshot("").withUserId(UUID.randomUUID().toString());
+    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withEventDate(null)
+      .withOrderId(UUID.randomUUID().toString())
+      .withActionDate(null).
+      withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderSnapshot("")
+      .withUserId(UUID.randomUUID().toString())
+      .withUserName("Test");
+
     ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, orderAuditEvent);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
