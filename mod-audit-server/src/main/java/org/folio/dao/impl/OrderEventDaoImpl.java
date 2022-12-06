@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import static java.lang.String.format;
+import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
 
 @Repository
 public class OrderEventDaoImpl implements OrderEventDao {
@@ -52,7 +53,7 @@ public class OrderEventDaoImpl implements OrderEventDao {
         orderAuditEvent.getUserId(),
         orderAuditEvent.getEventDate(),
         orderAuditEvent.getActionDate(),
-        new JsonObject(orderAuditEvent.getOrderSnapshot()), promise));
+        new JsonObject(orderAuditEvent.getOrderSnapshot())), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
       promise.fail(e);

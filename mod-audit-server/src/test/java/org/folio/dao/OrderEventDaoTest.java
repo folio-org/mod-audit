@@ -2,6 +2,7 @@ package org.folio.dao;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -10,9 +11,12 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.OrderEventDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.services.impl.OrderAuditEventServiceImpl;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
 
@@ -27,7 +31,13 @@ public class OrderEventDaoTest {
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @InjectMocks
-  OrderEventDaoImpl orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+  OrderEventDaoImpl orderEventDao;
+
+  @Before
+  public void setUp() {
+    MockitoAnnotations.openMocks(this);
+    orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+  }
 
   @Test
   public void shouldCreateEventProcessed(TestContext context) {

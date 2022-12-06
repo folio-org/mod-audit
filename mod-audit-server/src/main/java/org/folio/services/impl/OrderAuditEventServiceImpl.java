@@ -30,7 +30,7 @@ public class OrderAuditEventServiceImpl implements OrderAuditEventService {
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {
     return (throwable instanceof PgException && ((PgException) throwable).getCode().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
-      Future.failedFuture(new DuplicateEventException(String.format("Event with eventId=%s is already processed.", id))) :
+      Future.failedFuture(new DuplicateEventException(String.format("Event with Id=%s is already processed.", id))) :
       Future.failedFuture(throwable);
   }
 
