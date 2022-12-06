@@ -2,7 +2,6 @@ package org.folio.dao;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -32,8 +31,6 @@ public class OrderEventDaoTest {
 
   @Test
   public void shouldCreateEventProcessed(TestContext context) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","jsonTest");
     Async async = context.async();
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -42,7 +39,7 @@ public class OrderEventDaoTest {
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(LocalDateTime.now())
       .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot(jsonObject);
+      .withOrderSnapshot("{\"name\":\"New Product\"}");
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -61,7 +58,7 @@ public class OrderEventDaoTest {
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(LocalDateTime.now())
       .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot("");
+      .withOrderSnapshot("{\"name\":\"New Product\"}");
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {

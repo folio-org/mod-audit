@@ -2,6 +2,7 @@ package org.folio.dao.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -51,11 +52,10 @@ public class OrderEventDaoImpl implements OrderEventDao {
         orderAuditEvent.getUserId(),
         orderAuditEvent.getEventDate(),
         orderAuditEvent.getActionDate(),
-        orderAuditEvent.getOrderSnapshot()), promise);
+        new JsonObject(orderAuditEvent.getOrderSnapshot()), promise));
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
       promise.fail(e);
     }
   }
-
 }

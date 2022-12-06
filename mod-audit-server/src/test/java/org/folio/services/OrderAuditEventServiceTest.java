@@ -47,7 +47,7 @@ public class OrderAuditEventServiceTest {
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(LocalDateTime.now())
       .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot(jsonObject);
+      .withOrderSnapshot("{\"name\":\"New Product\"");
 
     when(orderEventDao.save(orderAuditEvent, TENANT_ID)).thenReturn(Future.succeededFuture());
 

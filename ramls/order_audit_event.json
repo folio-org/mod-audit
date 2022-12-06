@@ -34,7 +34,7 @@
     },
     "orderSnapshot": {
       "description": "Full snapshot of the order",
-      "type": "JsonObject"
+      "type": "string"
     }
   },
   "additionalProperties": false
