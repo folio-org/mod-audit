@@ -16,12 +16,15 @@ import org.folio.builder.service.LogRecordBuilderResolverTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
+import org.folio.dao.OrderEventDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.OrderAuditEventServiceTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -151,5 +154,17 @@ public class TestSuite {
 
   @Nested
   class LogRecordBuilderResolverNestedTest extends LogRecordBuilderResolverTest {
+  }
+
+  @Nested
+  class OrderEventsHandlerMockNestedTest extends OrderEventsHandlerMockTest {
+  }
+
+  @Nested
+  class OrderAuditEventServiceNestedTest extends OrderAuditEventServiceTest {
+  }
+
+  @Nested
+  class OrderEventDaoNestedTest extends OrderEventDaoTest {
   }
 }
