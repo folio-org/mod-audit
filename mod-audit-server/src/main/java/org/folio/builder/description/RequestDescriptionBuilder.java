@@ -1,6 +1,5 @@
 package org.folio.builder.description;
 
-import static java.util.Objects.isNull;
 import static org.folio.builder.description.DescriptionHelper.getFormattedDateTime;
 import static org.folio.util.JsonPropertyFetcher.getDateTimeProperty;
 import static org.folio.util.JsonPropertyFetcher.getIntegerProperty;
@@ -58,7 +57,7 @@ public class RequestDescriptionBuilder {
     LocalDateTime oldRequestExpDate = getDateTimeProperty(original, REQUEST_EXPIRATION_DATE);
     LocalDateTime newRequestExpDate = getDateTimeProperty(updated, REQUEST_EXPIRATION_DATE);
 
-    if (isNeedToBeDescribed(newRequestExpDate, oldRequestExpDate)) {
+    if (nonEquals(newRequestExpDate, oldRequestExpDate)) {
       description.append("New expiration date: ")
         .append(getFormattedDateTime(newRequestExpDate))
         .append(" ")
@@ -70,7 +69,7 @@ public class RequestDescriptionBuilder {
     String oldFulfilmentPreference = getProperty(original, REQUEST_FULFILMENT_PREFERENCE);
     String newFulfilmentPreference = getProperty(updated, REQUEST_FULFILMENT_PREFERENCE);
 
-    if (isNeedToBeDescribed(oldFulfilmentPreference, newFulfilmentPreference)) {
+    if (nonEquals(oldFulfilmentPreference, newFulfilmentPreference)) {
       description.append("New fulfilment preference: ")
         .append(newFulfilmentPreference)
         .append(" ")
@@ -82,7 +81,7 @@ public class RequestDescriptionBuilder {
     String oldPickUpServicePoint = getProperty(original, REQUEST_PICKUP_SERVICE_POINT);
     String newPickUpServicePoint = getProperty(updated, REQUEST_PICKUP_SERVICE_POINT);
 
-    if (isNeedToBeDescribed(oldPickUpServicePoint, newPickUpServicePoint)) {
+    if (nonEquals(oldPickUpServicePoint, newPickUpServicePoint)) {
       description.append("New pickup service point: ")
         .append(newPickUpServicePoint)
         .append(" ")
@@ -94,7 +93,7 @@ public class RequestDescriptionBuilder {
     String oldAddressType = getProperty(original, REQUEST_ADDRESS_TYPE);
     String newAddressType = getProperty(updated, REQUEST_ADDRESS_TYPE);
 
-    if (isNeedToBeDescribed(newAddressType, oldAddressType)) {
+    if (nonEquals(newAddressType, oldAddressType)) {
       description.append("New address type: ")
         .append(newAddressType)
         .append(" ")
@@ -194,11 +193,7 @@ public class RequestDescriptionBuilder {
     return description;
   }
 
-  private boolean isNeedToBeDescribed(String str1, String str2) {
-    return !(isNull(str1) & isNull(str2)) && !str1.equals(str2);
-  }
-
-  private boolean isNeedToBeDescribed(LocalDateTime dateTime1, LocalDateTime dateTime2) {
-    return !(isNull(dateTime1) & isNull(dateTime2)) && !dateTime1.isEqual(dateTime2);
+  private boolean nonEquals(Object newObject, Object oldObject) {
+    return !Objects.equals(newObject, oldObject);
   }
 }

@@ -1,5 +1,13 @@
 ## 2.7.0 - Unreleased
 
+## 2.6.1 - Released
+This release contains fix for request expiration date/time
+
+[Full Changelog](https://github.com/folio-org/mod-audit/compare/v2.6.0...v2.6.1)
+
+### Bug Fixes
+* [MODAUD-150](https://issues.folio.org/browse/MODAUD-150) - Edited request record is not correctly stored in the Circulation log
+
 ## 2.6.0 - Released
 This release contains interface and module upgrades
 
