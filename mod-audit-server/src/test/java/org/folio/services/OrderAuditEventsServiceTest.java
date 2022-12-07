@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 public class OrderAuditEventsServiceTest {
 
@@ -46,16 +45,10 @@ public class OrderAuditEventsServiceTest {
       .withActionDate(LocalDateTime.now())
       .withOrderSnapshot("{\"name\":\"New Product\"}");
 
-    Future<RowSet<Row>> saveFuture = orderAuditEventService.collectData(orderAuditEvent, TENANT_ID);
+    Future<RowSet<Row>> saveFuture = orderAuditEventService.saveOrderAuditEvent(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
       assertTrue(ar.succeeded());
     });
-
-//    when(orderEventDao.save(orderAuditEvent, TENANT_ID)).thenReturn(Future.succeededFuture());
-//
-//    orderAuditEventService.collectData(orderAuditEvent, TENANT_ID);
-//
-//    verify(orderEventDao).save(orderAuditEvent, TENANT_ID);
   }
 
 }

@@ -24,7 +24,7 @@ public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
   }
 
   @Override
-  public Future<RowSet<Row>> collectData(OrderAuditEvent orderAuditEvent, String tenantId) {
+  public Future<RowSet<Row>> saveOrderAuditEvent(OrderAuditEvent orderAuditEvent, String tenantId) {
     return orderEvenDao.save(orderAuditEvent, tenantId).recover(throwable -> handleFailures(throwable, orderAuditEvent.getId()));
   }
 
