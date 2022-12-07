@@ -11,6 +11,8 @@ import static org.folio.utils.TenantApiTestUtil.NOTICE_ERROR_FULL_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.REQUEST_EDITED_PAYLOAD_WITH_NON_EMPTY_DATE_JSON;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
