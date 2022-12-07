@@ -2,28 +2,27 @@ package org.folio.dao;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.OrderEventDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.services.impl.OrderAuditEventServiceImpl;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@RunWith(VertxUnitRunner.class)
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class OrderEventDaoTest {
 
   private static final String TENANT_ID = "diku";
@@ -31,7 +30,7 @@ public class OrderEventDaoTest {
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @InjectMocks
-  OrderEventDaoImpl orderEventDao;
+  OrderEventDaoImpl orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
 
   @Before
   public void setUp() {
@@ -40,8 +39,7 @@ public class OrderEventDaoTest {
   }
 
   @Test
-  public void shouldCreateEventProcessed(TestContext context) {
-    Async async = context.async();
+  public void shouldCreateEventProcessed() {
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
@@ -54,14 +52,12 @@ public class OrderEventDaoTest {
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
-        context.assertTrue(ar.succeeded());
-        async.complete();
+        assertTrue(ar.succeeded());
       });
   }
 
   @Test
-  public void shouldThrowConstraintViolation(TestContext context) {
-    Async async = context.async();
+  public  void shouldThrowConstraintViolation() {
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
@@ -76,10 +72,9 @@ public class OrderEventDaoTest {
     saveFuture.onComplete(ar -> {
       Future<RowSet<Row>> reSaveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
       reSaveFuture.onComplete(re -> {
-        context.assertTrue(re.failed());
-        context.assertTrue(re.cause() instanceof  PgException);
-        context.assertEquals("ERROR: duplicate key value violates unique constraint \"acquisition_order_log_pkey\" (23505)", re.cause().getMessage());
-        async.complete();
+        assertTrue(re.failed());
+        assertTrue(re.cause() instanceof  PgException);
+        assertEquals("ERROR: duplicate key value violates unique constraint \"acquisition_order_log_pkey\" (23505)", re.cause().getMessage());
       });
     });
     };
