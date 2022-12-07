@@ -1,25 +1,25 @@
-package org.folio.services.impl;
+package org.folio.services.acquisition.impl;
 
 import io.vertx.core.Future;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import org.folio.dao.OrderEventDao;
+import org.folio.dao.acquisition.OrderEventsDao;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.services.OrderAuditEventService;
+import org.folio.services.acquisition.OrderAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("orderAuditEventService")
-public class OrderAuditEventServiceImpl implements OrderAuditEventService {
+@Service
+public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
 
   public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 
-  private OrderEventDao orderEvenDao;
+  private OrderEventsDao orderEvenDao;
 
   @Autowired
-  public OrderAuditEventServiceImpl(OrderEventDao orderEvenDao) {
+  public OrderAuditEventsServiceImpl(OrderEventsDao orderEvenDao) {
     this.orderEvenDao = orderEvenDao;
   }
 

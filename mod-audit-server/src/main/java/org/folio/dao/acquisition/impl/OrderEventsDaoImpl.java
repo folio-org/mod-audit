@@ -1,4 +1,4 @@
-package org.folio.dao.impl;
+package org.folio.dao.acquisition.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -8,17 +8,16 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.OrderEventDao;
+import org.folio.dao.acquisition.OrderEventsDao;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import static java.lang.String.format;
-import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
 
 @Repository
-public class OrderEventDaoImpl implements OrderEventDao {
+public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
@@ -30,7 +29,7 @@ public class OrderEventDaoImpl implements OrderEventDao {
   private final PostgresClientFactory pgClientFactory;
 
   @Autowired
-  public OrderEventDaoImpl(PostgresClientFactory pgClientFactory) {
+  public OrderEventsDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }
 

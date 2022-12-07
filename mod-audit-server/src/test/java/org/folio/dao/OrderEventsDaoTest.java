@@ -2,20 +2,17 @@ package org.folio.dao;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import org.folio.dao.impl.OrderEventDaoImpl;
+import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,19 +20,19 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class OrderEventDaoTest {
+public class OrderEventsDaoTest {
 
   private static final String TENANT_ID = "diku";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @InjectMocks
-  OrderEventDaoImpl orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+  OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
 
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+    orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
   }
 
   @Test

@@ -10,10 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.KafkaHeaderUtils;
-import org.folio.rest.jaxrs.model.Event;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
-import org.folio.services.OrderAuditEventService;
+import org.folio.services.acquisition.OrderAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,15 +23,14 @@ public class OrderEventsHandler implements AsyncRecordHandler<String, String> {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  public static final String RECORD_ID_HEADER = "recordId";
-  private OrderAuditEventService orderAuditEventService;
+  private OrderAuditEventsService orderAuditEventsService;
 
   private Vertx vertx;
 
   public OrderEventsHandler(@Autowired Vertx vertx,
-                            @Autowired OrderAuditEventService orderAuditEventService) {
+                            @Autowired OrderAuditEventsService orderAuditEventsService) {
     this.vertx = vertx;
-    this.orderAuditEventService = orderAuditEventService;
+    this.orderAuditEventsService = orderAuditEventsService;
   }
 
   @Override
@@ -41,11 +39,10 @@ public class OrderEventsHandler implements AsyncRecordHandler<String, String> {
     Promise<String> result = Promise.promise();
     List<KafkaHeader> kafkaHeaders = record.headers();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
-    String recordId = okapiConnectionParams.getHeaders().get(RECORD_ID_HEADER);
     OrderAuditEvent orderAuditEvent = new JsonObject(record.value()).mapTo(OrderAuditEvent.class);
-    LOGGER.debug("Event was received with recordId: {} event type: {}", recordId, orderAuditEvent.getAction());
+    LOGGER.debug("Event was received with event type: {}", orderAuditEvent.getAction());
 
-    orderAuditEventService.collectData(orderAuditEvent, okapiConnectionParams.getTenantId());
+    orderAuditEventsService.collectData(orderAuditEvent, okapiConnectionParams.getTenantId());
     return result.future();
   }
 }

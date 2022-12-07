@@ -6,32 +6,24 @@ import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.folio.dao.OrderEventDao;
-import org.folio.dao.impl.OrderEventDaoImpl;
+import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
-import org.folio.services.OrderAuditEventService;
-import org.folio.services.impl.OrderAuditEventServiceImpl;
+import org.folio.services.acquisition.impl.OrderAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.verticle.acquisition.consumers.OrderEventsHandler;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class OrderEventsHandlerMockTest {
 
@@ -50,10 +42,10 @@ public class OrderEventsHandlerMockTest {
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @InjectMocks
-  OrderEventDaoImpl orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+  OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
 
   @InjectMocks
-  OrderAuditEventServiceImpl orderAuditEventServiceImpl = new OrderAuditEventServiceImpl(orderEventDao);
+  OrderAuditEventsServiceImpl orderAuditEventServiceImpl = new OrderAuditEventsServiceImpl(orderEventDao);
 
   @InjectMocks
   private OrderEventsHandler orderEventsHandler = new OrderEventsHandler(vertx, orderAuditEventServiceImpl);

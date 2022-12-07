@@ -5,16 +5,14 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import org.folio.dao.OrderEventDao;
-import org.folio.dao.impl.OrderEventDaoImpl;
+import org.folio.dao.acquisition.OrderEventsDao;
+import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.services.impl.OrderAuditEventServiceImpl;
+import org.folio.services.acquisition.impl.OrderAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.time.LocalDateTime;
@@ -22,19 +20,18 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-public class OrderAuditEventServiceTest {
+public class OrderAuditEventsServiceTest {
 
   private static final String TENANT_ID = "diku";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @Mock
-  OrderEventDao orderEventDao = new OrderEventDaoImpl(postgresClientFactory);
+  OrderEventsDao orderEventsDao = new OrderEventsDaoImpl(postgresClientFactory);
 
   @InjectMocks
-  OrderAuditEventServiceImpl orderAuditEventService = new OrderAuditEventServiceImpl(orderEventDao);
+  OrderAuditEventsServiceImpl orderAuditEventService = new OrderAuditEventsServiceImpl(orderEventsDao);
 
   @Test
   public void shouldCallDaoForSuccessfulCase() {
