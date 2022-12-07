@@ -8,7 +8,7 @@ import org.folio.rest.jaxrs.model.OrderAuditEvent;
 public interface OrderEventsDao {
 
   /**
-   * Saves JournalRecord entity to DB
+   * Saves orderAuditEvent entity to DB
    *
    * @param orderAuditEvent OrderAuditEvent entity to save
    * @param tenantId tenant id

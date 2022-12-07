@@ -5,10 +5,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import org.folio.dao.acquisition.OrderEventsDao;
-import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
-import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.services.acquisition.impl.OrderAuditEventsServiceImpl;
+import org.folio.dao.acquisition.OrderLineEventsDao;
+import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.services.acquisition.impl.OrderLineAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,30 +20,30 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 
-public class OrderAuditEventsServiceTest {
+public class OrderLineAuditEventsServiceTest {
 
   private static final String TENANT_ID = "diku";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @Mock
-  OrderEventsDao orderEventsDao = new OrderEventsDaoImpl(postgresClientFactory);
+  OrderLineEventsDao orderLineEventsDao = new OrderLineEventsDaoImpl(postgresClientFactory);
 
   @InjectMocks
-  OrderAuditEventsServiceImpl orderAuditEventService = new OrderAuditEventsServiceImpl(orderEventsDao);
+  OrderLineAuditEventsServiceImpl orderLineAuditEventService = new OrderLineAuditEventsServiceImpl(orderLineEventsDao);
 
   @Test
   public void shouldCallDaoForSuccessfulCase() {
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
+    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
-      .withAction(OrderAuditEvent.Action.CREATE)
+      .withAction(OrderLineAuditEvent.Action.CREATE)
       .withOrderId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(LocalDateTime.now())
       .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot("{\"name\":\"New Product\"}");
+      .withOrderLineSnapshot("{\"name\":\"New OrderLine Product\"}");
 
-    Future<RowSet<Row>> saveFuture = orderAuditEventService.saveOrderAuditEvent(orderAuditEvent, TENANT_ID);
+    Future<RowSet<Row>> saveFuture = orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
       assertTrue(ar.succeeded());
     });
