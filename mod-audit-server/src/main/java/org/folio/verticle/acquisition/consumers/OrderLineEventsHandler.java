@@ -42,11 +42,7 @@ public class OrderLineEventsHandler implements AsyncRecordHandler<String, String
     LOGGER.debug("Event was received with event type: {}", orderLineAuditEvent.getAction());
 
     orderLineAuditEventsService.saveOrderLineAuditEvent(orderLineAuditEvent, okapiConnectionParams.getTenantId())
-      .onSuccess(ar-> result.complete())
-      .onFailure(ar->{
-        LOGGER.error("Error during processing", ar.getCause());
-        result.fail(ar.getCause());
-      });
+      .onSuccess(ar-> result.complete());
 
     return result.future();
   }
