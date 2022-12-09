@@ -20,6 +20,7 @@
 
   <properties>
     <json.path.version>2.7.0</json.path.version>
+    <mockito-inline.version>4.9.0</mockito-inline.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <awaitility.version>4.2.0</awaitility.version>
     <argLine />
@@ -77,6 +78,12 @@
       <version>${raml-module-builder.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>${mockito-inline.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-api-interfaces</artifactId>
       <version>${raml-module-builder.version}</version>
@@ -124,8 +131,8 @@
       <groupId>org.folio</groupId>
       <artifactId>postgres-testing</artifactId>
       <version>${raml-module-builder.version}</version>
+      <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
