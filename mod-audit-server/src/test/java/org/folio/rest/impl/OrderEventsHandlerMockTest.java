@@ -62,7 +62,7 @@ public class OrderEventsHandlerMockTest {
       .withUserId(UUID.randomUUID().toString());
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
-    Future<String> saveFuture = orderEventsHandler.handle(kafkaConsumerRecord);;
+    Future<String> saveFuture = orderEventsHandler.handle(kafkaConsumerRecord);
     saveFuture.onComplete(ar -> {
       assertTrue(ar.succeeded());
     });

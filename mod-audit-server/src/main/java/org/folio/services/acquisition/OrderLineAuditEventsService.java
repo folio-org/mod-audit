@@ -8,7 +8,7 @@ import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 public interface OrderLineAuditEventsService {
 
   /**
-   * saves OrderLineAuditEvent
+   * Saves OrderLineAuditEvent
    *
    * @param orderLineAuditEvent
    * @param tenantId id of tenant
