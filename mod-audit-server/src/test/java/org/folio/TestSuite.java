@@ -21,6 +21,7 @@ import org.folio.dao.OrderLineEventsDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.*;
+import org.folio.rest.impl.acquisitions.AuditDataAcquisitionAPITest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
@@ -177,5 +178,9 @@ public class TestSuite {
 
   @Nested
   class OrderLineEventsDaoNestedTest extends OrderLineEventsDaoTest {
+  }
+
+  @Nested
+  class AuditDataAcquisitionAPINestedTest extends AuditDataAcquisitionAPITest {
   }
 }

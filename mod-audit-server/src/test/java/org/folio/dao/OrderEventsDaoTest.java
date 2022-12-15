@@ -7,6 +7,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderAuditEventDto;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +76,28 @@ public class OrderEventsDaoTest {
         assertEquals("ERROR: duplicate key value violates unique constraint \"acquisition_order_log_pkey\" (23505)", re.cause().getMessage());
       });
     });
-    };
+    }
+
+  @Test
+  public void shouldGetCreatedEvent() {
+    String id = UUID.randomUUID().toString();
+    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
+      .withId(id)
+      .withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderId(UUID.randomUUID().toString())
+      .withUserId(UUID.randomUUID().toString())
+      .withUserName("Test")
+      .withEventDate(LocalDateTime.now())
+      .withActionDate(LocalDateTime.now())
+      .withOrderSnapshot("{\"name\":\"New Product\"}");
+
+    orderEventDao.save(orderAuditEvent, TENANT_ID);
+
+    Future<Optional<OrderAuditEventDto>> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id, TENANT_ID);
+    getFuture.onComplete(ar->{
+      assertTrue(ar.succeeded());
+    });
+  }
 
 }
 

@@ -11,10 +11,22 @@ documentation:
 
 types:
   order-line-audit-event: !include order_line_audit_event.json
+  order-audit-event-dto: !include order_audit_event_dto.json
   order-audit-event: !include order_audit_event.json
 
+traits:
+  searchable: !include raml-util/traits/searchable.raml
 
-/audit-data/acquisition/order/{id}:
+/audit-data/acquisition:
+  /order/{id}:
+    get:
+      description: Get JobExecution by id
+      responses:
+        200:
+          body:
+            application/json:
+              type: order-audit-event-dto
+
 
 /audit-data/acquisition/order-line/{id}:
 
