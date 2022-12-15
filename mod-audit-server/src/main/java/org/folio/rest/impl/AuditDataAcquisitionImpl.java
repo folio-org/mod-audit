@@ -8,7 +8,6 @@ import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.ExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.NotFoundException;
@@ -20,6 +19,8 @@ import static java.lang.String.format;
 public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
+
+  private static final String TYPE = "text/plain";
 
   @Autowired
   private OrderAuditEventsService orderAuditEventsService;
@@ -39,15 +40,28 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
             new NotFoundException(format("OrderAuditEvent with id '%s' was not found", id))))
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
-          .otherwise(ExceptionHelper::mapExceptionToResponse)
+          .otherwise(e -> mapExceptionToResponse(e))
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
         LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, id));
-        asyncResultHandler.handle(Future.succeededFuture(ExceptionHelper.mapExceptionToResponse(e)));
+        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
   }
+
   private ParameterizedMessage getMessage(String pattern, Exception e, String... params) {
     return new ParameterizedMessage(pattern, new Object[] {params}, e);
   }
+
+  private Response mapExceptionToResponse(Throwable throwable) {
+     if (throwable instanceof NotFoundException) {
+       LOGGER.error(throwable.getMessage(), throwable);
+       return Response.status(Response.Status.NOT_FOUND.getStatusCode()).type(TYPE).entity(throwable.getMessage()).build();
+     }
+     else {
+        LOGGER.error(throwable.getMessage(), throwable);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).type("text/plain").entity(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).build();
+     }
+  }
 }
+

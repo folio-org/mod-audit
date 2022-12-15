@@ -52,7 +52,7 @@ public class OrderAuditEventsServiceTest {
   }
 
   @Test
-  public void shouldGetDto() {
+  void shouldGetDto() {
     String id = UUID.randomUUID().toString();
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(id)
@@ -71,7 +71,7 @@ public class OrderAuditEventsServiceTest {
       OrderAuditEventDto orderAuditEventDto = orderAuditEventDtoOptional.get();
 
       assertEquals(orderAuditEventDto.getId(), id);
-      assertEquals(orderAuditEventDto.getAction(), OrderAuditEventDto.Action.CREATE);
+      assertEquals(OrderAuditEventDto.Action.CREATE, orderAuditEventDto.getAction());
 
     });
   }

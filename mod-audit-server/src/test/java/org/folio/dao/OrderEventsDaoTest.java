@@ -79,7 +79,7 @@ public class OrderEventsDaoTest {
     }
 
   @Test
-  public void shouldGetCreatedEvent() {
+  void shouldGetCreatedEvent() {
     String id = UUID.randomUUID().toString();
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(id)

@@ -2,6 +2,8 @@ package org.folio.util;
 
 public class OrderAuditEventDBConstants {
 
+  private OrderAuditEventDBConstants() {}
+
   public static final String ID_FIELD = "id";
 
   public static final String ACTION_FIELD = "action";
