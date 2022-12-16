@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OrderEventsDaoTest {
 
-  private static final String TENANT_ID = "modaudittest";
+  private static final String TENANT_ID = "diku";
   public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
 
   @Spy

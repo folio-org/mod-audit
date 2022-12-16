@@ -36,7 +36,8 @@
     },
     "orderSnapshot": {
       "description": "Full snapshot of the order",
-      "type": "json"
+      "type": "object",
+      "javaType": "java.lang.Object"
     }
   },
   "additionalProperties": false
