@@ -36,7 +36,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     vertxContext.runOnContext(c -> {
       try {
         orderAuditEventsService.getAcquisitionOrderEventById(id, tenantId)
-          .map(optionalOrderAuditEventDto -> optionalOrderAuditEventDto.orElseThrow(() ->
+          .map(optionalOrderAuditEvent -> optionalOrderAuditEvent.orElseThrow(() ->
             new NotFoundException(format("OrderAuditEvent with id '%s' was not found", id))))
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)

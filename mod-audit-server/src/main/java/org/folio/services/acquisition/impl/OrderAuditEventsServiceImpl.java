@@ -7,7 +7,7 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.OrderEventsDao;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.rest.jaxrs.model.OrderAuditEventDto;
+import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
   }
 
   @Override
-  public Future<Optional<OrderAuditEventDto>> getAcquisitionOrderEventById(String id, String tenantId) {
+  public Future<Optional<OrderAuditEventCollection>> getAcquisitionOrderEventById(String id, String tenantId) {
     return orderEventsDao.getAcquisitionOrderAuditEventById(id, tenantId);
   }
 

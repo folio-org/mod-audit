@@ -2,12 +2,13 @@ package org.folio.dao;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.rest.jaxrs.model.OrderAuditEventDto;
+import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,7 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,15 +40,18 @@ public class OrderEventsDaoTest {
 
   @Test
   public void shouldCreateEventProcessed() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name","Test Product");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
-      .withEventDate(LocalDateTime.now())
-      .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot("{\"name\":\"New Product\"}");
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrderSnapshot(jsonObject);
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -57,15 +61,18 @@ public class OrderEventsDaoTest {
 
   @Test
   public  void shouldThrowConstraintViolation() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name","Test Product");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
-      .withEventDate(LocalDateTime.now())
-      .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot("{\"name\":\"New Product\"}");
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrderSnapshot(jsonObject);
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -80,21 +87,24 @@ public class OrderEventsDaoTest {
 
   @Test
   void shouldGetCreatedEvent() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name","Test Product");
     String id = UUID.randomUUID().toString();
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(id)
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
-      .withEventDate(LocalDateTime.now())
-      .withActionDate(LocalDateTime.now())
-      .withOrderSnapshot("{\"name\":\"New Product\"}");
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrderSnapshot(jsonObject);
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    Future<Optional<OrderAuditEventDto>> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id, TENANT_ID);
-    getFuture.onComplete(ar->{
+    Future<Optional<OrderAuditEventCollection>> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id, TENANT_ID);
+    getFuture.onComplete(ar-> {
       assertTrue(ar.succeeded());
     });
   }

@@ -11,8 +11,8 @@ documentation:
 
 types:
   order-line-audit-event: !include order_line_audit_event.json
-  order-audit-event-dto: !include order_audit_event_dto.json
   order-audit-event: !include order_audit_event.json
+  order-audit-event-collection: !include order_audit_event_collection.json
 
 traits:
   searchable: !include raml-util/traits/searchable.raml
@@ -20,12 +20,12 @@ traits:
 /audit-data/acquisition:
   /order/{id}:
     get:
-      description: Get JobExecution by id
+      description: Get list of order events by order_id
       responses:
         200:
           body:
             application/json:
-              type: order-audit-event-dto
+              type: order-audit-event-collection
 
 
 /audit-data/acquisition/order-line/{id}:

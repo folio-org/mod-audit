@@ -10,12 +10,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.acquisition.OrderEventsDao;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.rest.jaxrs.model.OrderAuditEventDto;
-import org.folio.rest.jaxrs.model.OrderSnapshot;
+import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -30,7 +31,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   public static final String TABLE_NAME = "acquisition_order_log";
 
-  public static final String GET_BY_ID_SQL = "SELECT * FROM %s WHERE id = $1";
+  public static final String GET_BY_ID_SQL = "SELECT * FROM %s WHERE order_id = $1";
 
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
@@ -54,7 +55,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<Optional<OrderAuditEventDto>> getAcquisitionOrderAuditEventById(String id, String tenantId) {
+  public Future<Optional<OrderAuditEventCollection>> getAcquisitionOrderAuditEventById(String id, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String jobTable = formatDBTableName(tenantId, TABLE_NAME);
@@ -64,8 +65,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       LOGGER.error("Error getting OrderAuditEvent by id", e);
       promise.fail(e);
     }
-    return promise.future().map(rowSet ->  rowSet.rowCount() == 0 ? Optional.empty()
-      : Optional.of(mapRowToOrderEvent(rowSet.iterator().next())));
+    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? Optional.empty()
+      : Optional.of(mapRowToListOfOrderEvent(rowSet)));
 
   }
 
@@ -76,36 +77,37 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
         orderAuditEvent.getUserName(),
-        orderAuditEvent.getEventDate(),
-        orderAuditEvent.getActionDate(),
-        new JsonObject(orderAuditEvent.getOrderSnapshot())), promise);
+        LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(),ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(),ZoneId.systemDefault()),
+        orderAuditEvent.getOrderSnapshot()), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
       promise.fail(e);
     }
   }
 
-  private OrderAuditEventDto mapRowToOrderEvent(Row row) {
-    return new OrderAuditEventDto()
+  private OrderAuditEventCollection mapRowToListOfOrderEvent(RowSet<Row> rowSet) {
+    OrderAuditEventCollection orderAuditEventCollection = new OrderAuditEventCollection();
+    rowSet.iterator().forEachRemaining(row -> {
+      orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
+    });
+    return orderAuditEventCollection;
+ }
+
+  private OrderAuditEvent mapRowToOrderEvent(Row row) {
+
+    return new OrderAuditEvent()
       .withId(row.getValue(ID_FIELD).toString())
-      .withAction(row.get(OrderAuditEventDto.Action.class,ACTION_FIELD))
+      .withAction(row.get(OrderAuditEvent.Action.class,ACTION_FIELD))
       .withOrderId(row.getValue(ORDER_ID_FIELD).toString())
       .withUserId(row.getValue(USER_ID_FIELD).toString())
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
-      .withOrderSnapshot(mapToOrderSnapshot(row));
- }
+      .withOrderSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
+  }
 
   private String formatDBTableName(String tenantId, String table) {
     return format("%s.%s", convertToPsqlStandard(tenantId), table);
-  }
-
-  private OrderSnapshot mapToOrderSnapshot(Row row) {
-    OrderSnapshot orderSnapshot = new OrderSnapshot();
-    JsonObject jsonObject = JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD));
-    jsonObject.stream().iterator().forEachRemaining(ar->orderSnapshot.withAdditionalProperty(ar.getKey(),ar.getValue()));
-
-    return orderSnapshot;
   }
 
 }

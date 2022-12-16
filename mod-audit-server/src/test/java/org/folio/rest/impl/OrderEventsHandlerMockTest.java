@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
@@ -23,7 +24,6 @@ import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 public class OrderEventsHandlerMockTest {
 
@@ -52,13 +52,17 @@ public class OrderEventsHandlerMockTest {
 
   @Test
   void shouldProcessEvent() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("Test","TestValue");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withEventDate(null)
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(null)
+      .withUserName("TEST")
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot("{\"name\":\"New Product\"}")
+      .withOrderSnapshot(jsonObject)
       .withUserId(UUID.randomUUID().toString());
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
@@ -70,13 +74,16 @@ public class OrderEventsHandlerMockTest {
 
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {
     String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("Test","TestValue");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withEventDate(null)
       .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null).
-      withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot("")
+      .withActionDate(null)
+      .withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderSnapshot(jsonObject)
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test");
 

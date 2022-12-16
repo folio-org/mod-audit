@@ -92,7 +92,7 @@
       ]
     },
     {
-      "id": "acquisitions-order-events",
+      "id": "acquisition-order-events",
       "version": "1.1",
       "handlers": [
         {

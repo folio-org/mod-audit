@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of orderAuditEvents",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "orderAuditEvents": {
+      "description": "List of orderAuditEvents",
+      "type": "array",
+      "id": "orderAuditEventsList",
+      "items": {
+        "type": "object",
+        "$ref": "order_audit_event.json"
+      }
+    }
+  },
+  "required": [
+    "orderAuditEvents"
+  ]
+}

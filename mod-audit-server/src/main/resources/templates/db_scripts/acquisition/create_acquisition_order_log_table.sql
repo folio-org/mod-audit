@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS acquisition_order_log;
+
 CREATE TABLE IF NOT EXISTS acquisition_order_log (
     id uuid PRIMARY KEY,
     action text NOT NULL,
@@ -11,7 +13,7 @@ CREATE TABLE IF NOT EXISTS acquisition_order_log (
 
 --test data--
 INSERT INTO acquisition_order_log (id,action,order_id,user_id,user_name,event_date,action_date,modified_content_snapshot) values (
-'646ea52c-2c65-4d28-9a8f-e7d236fd6b09',
+'607ea52c-2c65-4d28-9a8f-e7d236fd6b09',
 'CREATE',
 '646ea52c-2c65-4d28-9a8f-e7d236fd6b09',
 '646ea52c-2c65-4d28-9a8f-e7d236fd6b09',
