@@ -10,17 +10,27 @@ documentation:
 
 
 types:
+  errors: !include raml-util/schemas/errors.schema
   order-line-audit-event: !include order_line_audit_event.json
   order-audit-event: !include order_audit_event.json
   order-audit-event-collection: !include order_audit_event_collection.json
 
 traits:
   searchable: !include raml-util/traits/searchable.raml
+  pageable: !include raml-util/traits/pageable.raml
+  validate: !include raml-util/traits/validation.raml
 
 /audit-data/acquisition:
   /order/{id}:
     get:
       description: Get list of order events by order_id
+      is: [
+        pageable,
+        validate
+      ]
+      queryParameters:
+       limit:
+         default: 2147483647
       responses:
         200:
           body:

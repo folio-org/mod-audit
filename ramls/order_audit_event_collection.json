@@ -12,9 +12,13 @@
         "type": "object",
         "$ref": "order_audit_event.json"
       }
+    },
+    "totalItems": {
+      "type": "integer"
     }
   },
   "required": [
-    "orderAuditEvents"
+    "orderAuditEvents",
+    "totalItems"
   ]
 }

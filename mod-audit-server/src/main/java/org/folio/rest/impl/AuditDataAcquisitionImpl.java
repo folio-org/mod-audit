@@ -30,14 +30,13 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String id, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderAuditEventsService.getAcquisitionOrderEventById(id, tenantId)
-          .map(optionalOrderAuditEvent -> optionalOrderAuditEvent.orElseThrow(() ->
-            new NotFoundException(format("OrderAuditEvent with id '%s' was not found", id))))
+        orderAuditEventsService.getAcquisitionOrderEventById(id, limit, offset, tenantId)
+          .map(optionalOrderAuditEvent -> optionalOrderAuditEvent)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(e -> mapExceptionToResponse(e))

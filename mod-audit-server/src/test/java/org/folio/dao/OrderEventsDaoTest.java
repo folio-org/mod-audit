@@ -17,7 +17,6 @@ import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
 
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 public class OrderEventsDaoTest {
 
-  private static final String TENANT_ID = "diku";
+  private static final String TENANT_ID = "modaudittest";
+  public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
@@ -41,12 +41,12 @@ public class OrderEventsDaoTest {
   @Test
   public void shouldCreateEventProcessed() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product");
+    jsonObject.put("name","Test Product 123 ");
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
+      .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
       .withEventDate(new Date())
@@ -62,12 +62,12 @@ public class OrderEventsDaoTest {
   @Test
   public  void shouldThrowConstraintViolation() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product");
+    jsonObject.put("name","Test Product1");
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
+      .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
       .withEventDate(new Date())
@@ -88,13 +88,13 @@ public class OrderEventsDaoTest {
   @Test
   void shouldGetCreatedEvent() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product");
+    jsonObject.put("name","Test Product2");
     String id = UUID.randomUUID().toString();
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(id)
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
+      .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test")
       .withEventDate(new Date())
@@ -103,7 +103,7 @@ public class OrderEventsDaoTest {
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    Future<Optional<OrderAuditEventCollection>> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id, TENANT_ID);
+    Future<OrderAuditEventCollection> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id,1,1, TENANT_ID);
     getFuture.onComplete(ar-> {
       assertTrue(ar.succeeded());
     });

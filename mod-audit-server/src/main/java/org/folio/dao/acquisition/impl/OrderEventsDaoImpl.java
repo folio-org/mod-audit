@@ -31,7 +31,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   public static final String TABLE_NAME = "acquisition_order_log";
 
-  public static final String GET_BY_ID_SQL = "SELECT * FROM %s WHERE order_id = $1";
+  public static final String GET_BY_ID_SQL = "SELECT * FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
 
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
@@ -55,18 +55,19 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<Optional<OrderAuditEventCollection>> getAcquisitionOrderAuditEventById(String id, String tenantId) {
+  public Future<OrderAuditEventCollection> getAcquisitionOrderAuditEventById(String orderId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String jobTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ID_SQL, jobTable);
-      pgClientFactory.createInstance(tenantId).selectRead(query, Tuple.of(UUID.fromString(id)), promise);
+      Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.error("Error getting OrderAuditEvent by id", e);
       promise.fail(e);
     }
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? Optional.empty()
-      : Optional.of(mapRowToListOfOrderEvent(rowSet)));
+    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderAuditEventCollection().withTotalItems(0)
+      : mapRowToListOfOrderEvent(rowSet));
 
   }
 
@@ -91,6 +92,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     rowSet.iterator().forEachRemaining(row -> {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
     });
+    orderAuditEventCollection.setTotalItems(orderAuditEventCollection.getOrderAuditEvents().size());
     return orderAuditEventCollection;
  }
 

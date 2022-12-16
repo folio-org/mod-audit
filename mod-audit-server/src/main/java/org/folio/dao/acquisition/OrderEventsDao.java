@@ -25,5 +25,5 @@ public interface OrderEventsDao {
    * @param id OrderAuditEvent id
    * @return future with optional OrderAuditEvent
    */
-  Future<Optional<OrderAuditEventCollection>> getAcquisitionOrderAuditEventById(String id, String tenantId);
+  Future<OrderAuditEventCollection> getAcquisitionOrderAuditEventById(String id, int limit, int offset, String tenantId);
 }

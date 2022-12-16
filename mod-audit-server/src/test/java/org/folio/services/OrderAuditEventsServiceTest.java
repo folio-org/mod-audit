@@ -73,10 +73,10 @@ public class OrderAuditEventsServiceTest {
 
     orderAuditEventService.saveOrderAuditEvent(orderAuditEvent, TENANT_ID);
 
-    Future<Optional<OrderAuditEventCollection>> dto = orderAuditEventService.getAcquisitionOrderEventById(id, TENANT_ID);
+    Future<OrderAuditEventCollection> dto = orderAuditEventService.getAcquisitionOrderEventById(id,1,1, TENANT_ID);
     dto.onComplete(ar -> {
-      Optional<OrderAuditEventCollection> orderAuditEventOptional = ar.result();
-      List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.get().getOrderAuditEvents();
+      OrderAuditEventCollection orderAuditEventOptional = ar.result();
+      List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.getOrderAuditEvents();
 
       assertEquals(orderAuditEventList.get(0).getId(), id);
       assertEquals(OrderAuditEvent.Action.CREATE, orderAuditEventList.get(0).getAction());

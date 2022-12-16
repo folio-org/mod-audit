@@ -26,5 +26,5 @@ public interface OrderAuditEventsService {
    * @param id OrderAuditEvent id
    * @return future with optional OrderAuditEvent
    */
-  Future<Optional<OrderAuditEventCollection>> getAcquisitionOrderEventById(String id, String tenantId);
+  Future<OrderAuditEventCollection> getAcquisitionOrderEventById(String id, int limit, int offset, String tenantId);
 }
