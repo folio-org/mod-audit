@@ -12,8 +12,6 @@ import org.folio.services.acquisition.OrderAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
 
@@ -32,8 +30,8 @@ public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
   }
 
   @Override
-  public Future<OrderAuditEventCollection> getAcquisitionOrderEventById(String id, int limit, int offset, String tenantId) {
-    return orderEventsDao.getAcquisitionOrderAuditEventById(id, limit, offset, tenantId);
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
+    return orderEventsDao.getAuditEventsByOrderId(orderId, limit, offset, tenantId);
   }
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {

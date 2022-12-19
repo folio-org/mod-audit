@@ -20,10 +20,11 @@ public interface OrderEventsDao {
   Future<RowSet<Row>> save(OrderAuditEvent orderAuditEvent, String tenantId);
 
   /**
-   * Searches for OrderAuditEvent by id
+   * Searches for Order Audit Event by id
    *
-   * @param id OrderAuditEvent id
-   * @return future with optional OrderAuditEvent
+   * @param orderId OrderAuditEvent id
+   * @param tenantId tenant id
+   * @return future with OrderAuditEventCollection
    */
-  Future<OrderAuditEventCollection> getAcquisitionOrderAuditEventById(String id, int limit, int offset, String tenantId);
+  Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId);
 }

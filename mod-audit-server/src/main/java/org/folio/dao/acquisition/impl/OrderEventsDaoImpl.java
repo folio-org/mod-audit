@@ -29,12 +29,6 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  public static final String TABLE_NAME = "acquisition_order_log";
-
-  public static final String GET_BY_ID_SQL = "SELECT * FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
-
-  private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
-
   @Autowired
   private final PostgresClientFactory pgClientFactory;
 
@@ -55,11 +49,11 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<OrderAuditEventCollection> getAcquisitionOrderAuditEventById(String orderId, int limit, int offset, String tenantId) {
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String jobTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ID_SQL, jobTable);
+      String query = format(GET_BY_ORDER_ID_SQL, jobTable, jobTable);
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
@@ -78,8 +72,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
         orderAuditEvent.getUserName(),
-        LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(),ZoneId.systemDefault()),
-        LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(),ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
         orderAuditEvent.getOrderSnapshot()), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
@@ -91,8 +85,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     OrderAuditEventCollection orderAuditEventCollection = new OrderAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
+      orderAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
-    orderAuditEventCollection.setTotalItems(orderAuditEventCollection.getOrderAuditEvents().size());
     return orderAuditEventCollection;
  }
 

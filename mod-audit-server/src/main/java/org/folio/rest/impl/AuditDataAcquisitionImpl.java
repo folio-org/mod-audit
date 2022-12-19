@@ -30,19 +30,19 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String id, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String OrderId, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderAuditEventsService.getAcquisitionOrderEventById(id, limit, offset, tenantId)
+        orderAuditEventsService.getAuditEventsByOrderId(OrderId, limit, offset, tenantId)
           .map(optionalOrderAuditEvent -> optionalOrderAuditEvent)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(e -> mapExceptionToResponse(e))
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, id));
+        LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, OrderId));
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });

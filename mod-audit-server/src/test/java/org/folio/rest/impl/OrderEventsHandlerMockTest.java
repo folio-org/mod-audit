@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
@@ -79,9 +80,9 @@ public class OrderEventsHandlerMockTest {
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
-      .withEventDate(null)
+      .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null)
+      .withActionDate(new Date())
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderSnapshot(jsonObject)
       .withUserId(UUID.randomUUID().toString())

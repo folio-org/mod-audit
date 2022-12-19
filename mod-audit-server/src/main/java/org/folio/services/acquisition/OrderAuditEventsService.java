@@ -21,10 +21,10 @@ public interface OrderAuditEventsService {
   Future<RowSet<Row>> saveOrderAuditEvent(OrderAuditEvent orderAuditEvent, String tenantId);
 
   /**
-   * Searches for OrderAuditEvent by id
+   * Searches for order audit events by order id
    *
-   * @param id OrderAuditEvent id
-   * @return future with optional OrderAuditEvent
+   * @param orderId OrderAuditEvent id
+   * @return future with OrderAuditEventCollection
    */
-  Future<OrderAuditEventCollection> getAcquisitionOrderEventById(String id, int limit, int offset, String tenantId);
+  Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId);
 }

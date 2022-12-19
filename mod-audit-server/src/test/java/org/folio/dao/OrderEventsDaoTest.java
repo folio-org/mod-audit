@@ -103,7 +103,7 @@ public class OrderEventsDaoTest {
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    Future<OrderAuditEventCollection> getFuture = orderEventDao.getAcquisitionOrderAuditEventById(id,1,1, TENANT_ID);
+    Future<OrderAuditEventCollection> getFuture = orderEventDao.getAuditEventsByOrderId(id,1,1, TENANT_ID);
     getFuture.onComplete(ar-> {
       assertTrue(ar.succeeded());
     });

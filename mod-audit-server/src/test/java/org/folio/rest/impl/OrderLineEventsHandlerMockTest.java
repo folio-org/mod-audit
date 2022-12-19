@@ -75,7 +75,7 @@ public class OrderLineEventsHandlerMockTest {
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(null).
       withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderLineSnapshot("")
+      .withOrderLineSnapshot("{\"name\":\"New OrderLine Product\"}")
       .withUserId(UUID.randomUUID().toString())
       .withUserName("Test");
 
