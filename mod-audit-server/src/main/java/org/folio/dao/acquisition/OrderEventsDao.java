@@ -6,8 +6,6 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 
-import java.util.Optional;
-
 public interface OrderEventsDao {
 
   /**
@@ -20,7 +18,7 @@ public interface OrderEventsDao {
   Future<RowSet<Row>> save(OrderAuditEvent orderAuditEvent, String tenantId);
 
   /**
-   * Searches for Order Audit Event by id
+   * Searches for order audit events by id
    *
    * @param orderId OrderAuditEvent id
    * @param tenantId tenant id

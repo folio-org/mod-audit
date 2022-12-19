@@ -32,6 +32,13 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   @Autowired
   private final PostgresClientFactory pgClientFactory;
 
+  public static final String TABLE_NAME = "acquisition_order_log";
+
+  public static final String GET_BY_ORDER_ID_SQL = "SELECT *, (SELECT count(*) AS total_records FROM %s WHERE order_id = $1)  FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
+
+  public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
+
+
   @Autowired
   public OrderEventsDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
@@ -67,6 +74,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderAuditEvent orderAuditEvent, String tenantId) {
     try {
+      orderAuditEvent.setUserName("Adesh");
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(orderAuditEvent.getId(),
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
@@ -74,7 +82,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getUserName(),
         LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
         LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
-        orderAuditEvent.getOrderSnapshot()), promise);
+        orderAuditEvent.getOrderSnapshot().toString()), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
       promise.fail(e);

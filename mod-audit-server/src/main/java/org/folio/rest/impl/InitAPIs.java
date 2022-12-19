@@ -15,6 +15,7 @@ import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
+import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -56,6 +57,12 @@ public class InitAPIs implements InitAPI {
       new DeploymentOptions()
         .setWorker(true)
         .setInstances(orderEventConsumerInstancesNumber), deployOrderEventConsumer);
+
+    vertx.deployVerticle(getVerticleName(verticleFactory, OrderLineEventConsumersVerticle.class),
+      new DeploymentOptions()
+        .setWorker(true)
+        .setInstances(orderEventConsumerInstancesNumber), deployOrderEventConsumer);
+
     return deployOrderEventConsumer.future();
   }
 

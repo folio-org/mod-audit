@@ -6,9 +6,6 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface OrderAuditEventsService {
 
   /**

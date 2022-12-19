@@ -17,6 +17,7 @@ import org.mockito.Spy;
 import org.folio.util.PostgresClientFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -103,9 +104,14 @@ public class OrderEventsDaoTest {
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    Future<OrderAuditEventCollection> getFuture = orderEventDao.getAuditEventsByOrderId(id,1,1, TENANT_ID);
-    getFuture.onComplete(ar-> {
-      assertTrue(ar.succeeded());
+    Future<OrderAuditEventCollection> dto = orderEventDao.getAuditEventsByOrderId(id,1,1, TENANT_ID);
+    dto.onComplete(ar -> {
+      OrderAuditEventCollection orderAuditEventOptional = ar.result();
+      List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.getOrderAuditEvents();
+
+      assertEquals(orderAuditEventList.get(0).getId(), id);
+      assertEquals(OrderAuditEvent.Action.CREATE, orderAuditEventList.get(0).getAction());
+
     });
   }
 

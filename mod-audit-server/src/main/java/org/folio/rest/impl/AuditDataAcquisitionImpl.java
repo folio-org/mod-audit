@@ -14,13 +14,11 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
-import static java.lang.String.format;
-
 public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private static final String TYPE = "text/plain";
+  private static final String TYPE = "application/json";
 
   @Autowired
   private OrderAuditEventsService orderAuditEventsService;
@@ -30,19 +28,18 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String OrderId, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String orderId, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderAuditEventsService.getAuditEventsByOrderId(OrderId, limit, offset, tenantId)
-          .map(optionalOrderAuditEvent -> optionalOrderAuditEvent)
+        orderAuditEventsService.getAuditEventsByOrderId(orderId, limit, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
-          .otherwise(e -> mapExceptionToResponse(e))
+          .otherwise(this::mapExceptionToResponse)
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, OrderId));
+        LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, orderId));
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
@@ -59,7 +56,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
      }
      else {
         LOGGER.error(throwable.getMessage(), throwable);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).type("text/plain").entity(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).type(TYPE).entity(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).build();
      }
   }
 }

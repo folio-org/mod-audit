@@ -7,7 +7,7 @@ import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.impl.ApiTestBase;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.util.PostgresClientFactory;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -41,7 +41,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   @InjectMocks
   OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);

@@ -36,6 +36,13 @@ traits:
           body:
             application/json:
               type: order-audit-event-collection
+        500:
+          description: "Internal server error"
+          body:
+            application/json:
+              example:
+                strict: false
+                value: !include raml-util/examples/errors.sample
 
 
 /audit-data/acquisition/order-line/{id}:
