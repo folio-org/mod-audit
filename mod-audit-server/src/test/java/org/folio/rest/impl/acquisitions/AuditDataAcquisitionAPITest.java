@@ -51,7 +51,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   @Test
   void shouldReturnOrderEventsOnGetById() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product 123 ");
+    jsonObject.put("name","Test Product2");
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -75,6 +75,6 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(ORDER_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_ID + 123).then().log().all().statusCode(500)
-      .body(containsString("Internal Server Error"));
+      .body(containsString("UUID string too large"));
   }
 }

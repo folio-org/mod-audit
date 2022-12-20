@@ -8,11 +8,13 @@ import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.util.Map;
+
+import static org.folio.util.ErrorCodes.GENERIC_ERROR_CODE;
 
 public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
@@ -50,14 +52,10 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   private Response mapExceptionToResponse(Throwable throwable) {
-     if (throwable instanceof NotFoundException) {
-       LOGGER.error(throwable.getMessage(), throwable);
-       return Response.status(Response.Status.NOT_FOUND.getStatusCode()).type(TYPE).entity(throwable.getMessage()).build();
-     }
-     else {
-        LOGGER.error(throwable.getMessage(), throwable);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).type(TYPE).entity(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase()).build();
-     }
+    LOGGER.error(throwable.getMessage(), throwable);
+    return AuditDataAcquisitionImpl.GetAuditDataAcquisitionOrderByIdResponse
+         .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
+
 }
 

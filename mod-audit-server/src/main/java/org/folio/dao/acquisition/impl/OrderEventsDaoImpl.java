@@ -2,7 +2,6 @@ package org.folio.dao.acquisition.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -15,6 +14,7 @@ import org.folio.util.PostgresClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.ws.rs.BadRequestException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -66,15 +66,15 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     } catch (Exception e) {
       LOGGER.error("Error getting OrderAuditEvent by id", e);
       promise.fail(e);
+      throw new BadRequestException(e);
     }
+
     return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderAuditEventCollection().withTotalItems(0)
       : mapRowToListOfOrderEvent(rowSet));
-
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderAuditEvent orderAuditEvent, String tenantId) {
     try {
-      orderAuditEvent.setUserName("Adesh");
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(orderAuditEvent.getId(),
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
@@ -96,7 +96,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       orderAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
     return orderAuditEventCollection;
- }
+  }
 
   private OrderAuditEvent mapRowToOrderEvent(Row row) {
 
@@ -107,7 +107,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       .withUserId(row.getValue(USER_ID_FIELD).toString())
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
-      .withOrderSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
+      .withOrderSnapshot(row.getJson(MODIFIED_CONTENT_FIELD));
   }
 
   private String formatDBTableName(String tenantId, String table) {
