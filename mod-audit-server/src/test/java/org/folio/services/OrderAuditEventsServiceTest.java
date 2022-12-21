@@ -36,7 +36,7 @@ public class OrderAuditEventsServiceTest {
   OrderAuditEventsServiceImpl orderAuditEventService = new OrderAuditEventsServiceImpl(orderEventsDao);
 
   @Test
-  public void shouldCallDaoForSuccessfulCase() {
+  void shouldCallDaoForSuccessfulCase() {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name","Test Product");
 
@@ -78,7 +78,7 @@ public class OrderAuditEventsServiceTest {
       List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.getOrderAuditEvents();
 
       assertEquals(orderAuditEventList.get(0).getId(), id);
-      assertEquals(OrderAuditEvent.Action.CREATE, orderAuditEventList.get(0).getAction());
+      assertEquals(OrderAuditEvent.Action.CREATE.value(), orderAuditEventList.get(0).getAction().value());
 
     });
   }

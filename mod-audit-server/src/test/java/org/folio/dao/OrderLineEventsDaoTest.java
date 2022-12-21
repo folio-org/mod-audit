@@ -11,7 +11,7 @@ import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -36,14 +36,14 @@ public class OrderLineEventsDaoTest {
   @InjectMocks
   OrderLineEventsDaoImpl orderLineEventsDao = new OrderLineEventsDaoImpl(postgresClientFactory);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     orderLineEventsDao = new OrderLineEventsDaoImpl(postgresClientFactory);
   }
 
   @Test
-  public void shouldCreateEventProcessed() {
+  void shouldCreateEventProcessed() {
     OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderLineAuditEvent.Action.CREATE)
@@ -61,7 +61,7 @@ public class OrderLineEventsDaoTest {
   }
 
   @Test
-  public  void shouldThrowConstraintViolation() {
+  void shouldThrowConstraintViolation() {
     OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(OrderLineAuditEvent.Action.CREATE)
@@ -107,7 +107,7 @@ public class OrderLineEventsDaoTest {
       List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();
 
       assertEquals(orderLineAuditEventList.get(0).getId(), id);
-      assertEquals(OrderAuditEvent.Action.CREATE, orderLineAuditEventList.get(0).getAction());
+      assertEquals(OrderAuditEvent.Action.CREATE.value(), orderLineAuditEventList.get(0).getAction().value());
 
     });
   }
