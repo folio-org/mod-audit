@@ -66,7 +66,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
-      LOGGER.error("Error getting OrderLineAuditEvent by order id: {}",orderLineId, e);
+      LOGGER.error("Error getting OrderLineAuditEvent by order_line id: {}", orderLineId, e);
       promise.fail(e);
     }
 
