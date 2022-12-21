@@ -72,9 +72,7 @@ public class OrderEventsHandlerMockTest {
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(new Date())
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot(jsonObject)
-      .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test");
+      .withOrderSnapshot(jsonObject);
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
     Future<String> saveFuture = orderEventsHandler.handle(kafkaConsumerRecord);

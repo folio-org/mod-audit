@@ -14,15 +14,22 @@ import org.folio.util.PostgresClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.ws.rs.BadRequestException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Date;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.OrderAuditEventDBConstants.*;
+import static org.folio.util.OrderAuditEventDBConstants.ACTION_DATE_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ACTION_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.EVENT_DATE_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.MODIFIED_CONTENT_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ORDER_ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.TOTAL_RECORDS_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.USER_ID_FIELD;
 
 @Repository
 public class OrderEventsDaoImpl implements OrderEventsDao {
@@ -34,9 +41,11 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   public static final String TABLE_NAME = "acquisition_order_log";
 
-  public static final String GET_BY_ORDER_ID_SQL = "SELECT *, (SELECT count(*) AS total_records FROM %s WHERE order_id = $1)  FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
+  public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
 
-  public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, user_name, event_date, action_date, modified_content_snapshot) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
+  public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
+    " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
 
   @Autowired
@@ -64,9 +73,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
-      LOGGER.error("Error getting OrderAuditEvent by id", e);
+      LOGGER.error("Error getting OrderAuditEvent by order id: {}",orderId, e);
       promise.fail(e);
-      throw new BadRequestException(e);
     }
 
     return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderAuditEventCollection().withTotalItems(0)
@@ -79,12 +87,12 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
-        orderAuditEvent.getUserName(),
         LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
         LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
         orderAuditEvent.getOrderSnapshot().toString()), promise);
     } catch (Exception e) {
-      LOGGER.error("Failed to save record with Id {} in to table {}", orderAuditEvent.getId(), TABLE_NAME, e);
+      LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
+        orderAuditEvent.getId(), orderAuditEvent.getOrderId(), TABLE_NAME, e);
       promise.fail(e);
     }
   }

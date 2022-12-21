@@ -10,6 +10,8 @@ public class OrderAuditEventDBConstants {
 
   public static final String ORDER_ID_FIELD = "order_id";
 
+  public static final String ORDER_LINE_ID_FIELD = "order_line_id";
+
   public static final String USER_ID_FIELD = "user_id";
 
   public static final String EVENT_DATE_FIELD = "event_date";

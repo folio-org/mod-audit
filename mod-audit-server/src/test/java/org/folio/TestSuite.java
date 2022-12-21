@@ -113,17 +113,8 @@ public class TestSuite {
   }
 
   @Nested
-  class AuditDataImplApiTestNested extends AuditDataImplApiTest {
-  }
-
-  @Nested
-  class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
-  }
-
-  @Nested
   class AuditDataAcquisitionAPINestedTest extends AuditDataAcquisitionAPITest {
   }
-
 
   @Nested
   class AuditHandlersImplApiTestNested extends AuditHandlersImplApiTest {
@@ -184,5 +175,14 @@ public class TestSuite {
   @Nested
   class OrderLineEventsDaoNestedTest extends OrderLineEventsDaoTest {
   }
+
+  @Nested
+  class AuditDataImplApiTestNested extends AuditDataImplApiTest {
+  }
+
+  @Nested
+  class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
+  }
+
 
 }

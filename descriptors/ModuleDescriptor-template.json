@@ -107,6 +107,21 @@
       ]
     },
     {
+      "id": "acquisition-order-lines-events",
+      "version": "1.1",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/order-line/{id}",
+          "permissionsRequired": [
+            "acquisition.order-line.events.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "circulation-logs",
       "version": "1.2",
       "handlers": [
@@ -204,6 +219,11 @@
       "description": "Get order change events"
     },
     {
+      "permissionName": "acquisition.order-line.events.get",
+      "displayName": "Acquisition order-line events - get order-line change events",
+      "description": "Get order-line change events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -214,7 +234,8 @@
         "audit.item.put",
         "audit.item.delete",
         "circulation-logs.collection.get",
-        "acquisition.order.events.get"
+        "acquisition.order.events.get",
+        "acquisition.order-line.events.get"
       ]
     }
   ],

@@ -28,6 +28,8 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.concurrent.TimeUnit;
+
 public class AuditHandlersImplApiTest extends ApiTestBase {
 
   private final Logger logger = LogManager.getLogger();
@@ -89,7 +91,7 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
   }
 
   @Test
-  void postLogRecordEventForUserRetrieveError() {
+  void  postLogRecordEventForUserRetrieveError() {
     logger.info("post valid log event for request creation : fail due to user retrieving error");
 
     var dc = JsonPath.parse(getFile(REQUEST_CREATED_PAYLOAD_JSON))

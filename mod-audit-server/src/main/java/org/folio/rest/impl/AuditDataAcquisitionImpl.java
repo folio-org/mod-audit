@@ -7,6 +7,7 @@ import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
+import org.folio.services.acquisition.OrderLineAuditEventsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   @Autowired
   private OrderAuditEventsService orderAuditEventsService;
 
+  @Autowired
+  private OrderLineAuditEventsService orderLineAuditEventsService;
+
   public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
@@ -42,6 +46,24 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
         LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, orderId));
+        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+      }
+    });
+  }
+
+  @Override
+  public void getAuditDataAcquisitionOrderLineById(String orderLineId, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+
+    vertxContext.runOnContext(c -> {
+      try {
+        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, limit, offset, tenantId)
+          .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
+          .map(Response.class::cast)
+          .otherwise(this::mapExceptionToResponse)
+          .onComplete(asyncResultHandler);
+      } catch (Exception e) {
+        LOGGER.error(getMessage("Failed to get OrderLineAuditEvent by id", e, orderLineId));
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });

@@ -16,7 +16,7 @@ public class ErrorUtils {
 
   public static Errors buildErrors(String statusCode, Throwable throwable) {
     return new Errors().withErrors(Collections.singletonList(new Error().withCode(statusCode)
-        .withMessage(throwable.getCause().getLocalizedMessage())))
+        .withMessage(throwable.getMessage())))
         .withTotalRecords(1);
   }
 

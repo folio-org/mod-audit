@@ -52,18 +52,18 @@ public class InitAPIs implements InitAPI {
     VerticleFactory verticleFactory = springContext.getBean(SpringVerticleFactory.class);
     vertx.registerVerticleFactory(verticleFactory);
 
-    Promise<String> deployOrderEventConsumer = Promise.promise();
+    Promise<String> deployOrderAndOrderLineEventConsumer = Promise.promise();
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
       new DeploymentOptions()
         .setWorker(true)
-        .setInstances(orderEventConsumerInstancesNumber), deployOrderEventConsumer);
+        .setInstances(orderEventConsumerInstancesNumber), deployOrderAndOrderLineEventConsumer);
 
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderLineEventConsumersVerticle.class),
       new DeploymentOptions()
         .setWorker(true)
-        .setInstances(orderEventConsumerInstancesNumber), deployOrderEventConsumer);
+        .setInstances(orderEventConsumerInstancesNumber), deployOrderAndOrderLineEventConsumer);
 
-    return deployOrderEventConsumer.future();
+    return deployOrderAndOrderLineEventConsumer.future();
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

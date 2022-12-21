@@ -23,7 +23,7 @@ public class ApplicationConfig {
   private int replicationFactor;
   @Value("${MAX_REQUEST_SIZE:4000000}")
   private int maxRequestSize;
-  @Value("${ENV:FOLIO}")
+  @Value("${ENV:folio}")
   private String envId;
 
   @Bean

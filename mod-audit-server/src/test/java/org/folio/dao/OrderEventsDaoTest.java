@@ -49,7 +49,6 @@ public class OrderEventsDaoTest {
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test")
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withOrderSnapshot(jsonObject);
@@ -70,7 +69,6 @@ public class OrderEventsDaoTest {
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test")
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withOrderSnapshot(jsonObject);
@@ -97,7 +95,6 @@ public class OrderEventsDaoTest {
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test")
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withOrderSnapshot(jsonObject);

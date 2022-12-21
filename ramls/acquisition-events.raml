@@ -14,6 +14,7 @@ types:
   order-line-audit-event: !include order_line_audit_event.json
   order-audit-event: !include order_audit_event.json
   order-audit-event-collection: !include order_audit_event_collection.json
+  order-line-audit-event-collection: !include order_line_audit_event_collection.json
 
 traits:
   searchable: !include raml-util/traits/searchable.raml
@@ -45,6 +46,23 @@ traits:
                 strict: false
                 value: !include raml-util/examples/errors.sample
 
-
-/audit-data/acquisition/order-line/{id}:
-
+  /order-line/{id}:
+    get:
+      description: Get list of order events by order_id
+      is: [
+          pageable,
+          validate
+      ]
+      queryParameters:
+       limit:
+         default: 2147483647
+      responses:
+        200:
+          body:
+            application/json:
+              type: order-line-audit-event-collection
+        500:
+          description: "Internal server error"
+          body:
+            application/json:
+              type: errors
