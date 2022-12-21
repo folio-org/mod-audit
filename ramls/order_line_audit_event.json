@@ -24,25 +24,20 @@
       "description": "UUID of the user who performed the action",
       "$ref": "common/uuid.json"
     },
-    "userName": {
-      "description": "Username of the user who performed the action",
-      "type": "string"
-    },
     "eventDate": {
       "description": "Date time when event triggered",
       "format": "date-time",
-      "type": "object",
-      "javaType": "java.time.LocalDateTime"
+      "type": "string"
     },
     "actionDate": {
       "description": "Date time when order action occurred",
       "format": "date-time",
-      "type": "object",
-      "javaType": "java.time.LocalDateTime"
+      "type": "string"
     },
     "orderLineSnapshot": {
       "description": "Full snapshot of the order line",
-      "type": "string"
+      "type": "object",
+      "javaType": "java.lang.Object"
     }
   },
   "additionalProperties": false

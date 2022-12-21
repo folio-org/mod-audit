@@ -92,6 +92,36 @@
       ]
     },
     {
+      "id": "acquisition-order-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/order/{id}",
+          "permissionsRequired": [
+            "acquisition.order.events.get"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acquisition-order-line-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/order-line/{id}",
+          "permissionsRequired": [
+            "acquisition.order-line.events.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "circulation-logs",
       "version": "1.2",
       "handlers": [
@@ -184,6 +214,16 @@
       "description": "Get circulation audit logs records"
     },
     {
+      "permissionName": "acquisition.order.events.get",
+      "displayName": "Acquisition order events - get order change events",
+      "description": "Get order change events"
+    },
+    {
+      "permissionName": "acquisition.order-line.events.get",
+      "displayName": "Acquisition order-line events - get order-line change events",
+      "description": "Get order-line change events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -193,7 +233,9 @@
         "audit.item.post",
         "audit.item.put",
         "audit.item.delete",
-        "circulation-logs.collection.get"
+        "circulation-logs.collection.get",
+        "acquisition.order.events.get",
+        "acquisition.order-line.events.get"
       ]
     }
   ],

@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS acquisition_order_line_log (
     order_id uuid NOT NULL,
     order_line_id uuid NOT NULL,
     user_id uuid NOT NULL,
-    user_name text NOT NULL,
     event_date timestamp NOT NULL,
     action_date timestamp NOT NULL,
     modified_content_snapshot jsonb

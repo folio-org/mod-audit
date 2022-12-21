@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
@@ -12,18 +13,20 @@ import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.services.acquisition.impl.OrderAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.verticle.acquisition.consumers.OrderEventsHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 public class OrderEventsHandlerMockTest {
 
@@ -34,32 +37,42 @@ public class OrderEventsHandlerMockTest {
   public static final String OKAPI_TOKEN_HEADER = "x-okapi-token";
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
+  private static final String ID = "0f2e22fc-fef3-4f88-a930-56bdca5bab46";
+
   @Spy
   private Vertx vertx = Vertx.vertx();
-
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
-  @InjectMocks
-  OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
+  @Mock
+  OrderEventsDaoImpl orderEventDao;
+  @Mock
+  OrderAuditEventsService orderAuditEventServiceImpl ;
 
-  @InjectMocks
-  OrderAuditEventsServiceImpl orderAuditEventServiceImpl = new OrderAuditEventsServiceImpl(orderEventDao);
+  private OrderEventsHandler orderEventsHandler ;
 
-  @InjectMocks
-  private OrderEventsHandler orderEventsHandler = new OrderEventsHandler(vertx, orderAuditEventServiceImpl);
+  @BeforeEach
+  public void setUp() {
+    MockitoAnnotations.openMocks(this);
+    orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
+    orderAuditEventServiceImpl = new OrderAuditEventsServiceImpl(orderEventDao);
+    orderEventsHandler =new OrderEventsHandler(vertx, orderAuditEventServiceImpl);
+
+  }
 
   @Test
   void shouldProcessEvent() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("Test","TestValue");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withEventDate(null)
+      .withId(ID)
+      .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null)
+      .withActionDate(new Date())
       .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot("{\"name\":\"New Product\"}")
-      .withUserId(UUID.randomUUID().toString());
+      .withOrderSnapshot(jsonObject);
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
     Future<String> saveFuture = orderEventsHandler.handle(kafkaConsumerRecord);
@@ -68,19 +81,28 @@ public class OrderEventsHandlerMockTest {
     });
   }
 
-  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {
-    String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
+  @Test
+  void shouldNotProcessEvent() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("Test","TestValue");
+
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
-      .withEventDate(null)
+      .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null).
-      withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot("")
-      .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test");
+      .withActionDate(new Date())
+      .withAction(OrderAuditEvent.Action.CREATE);
 
-    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, orderAuditEvent);
+    KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
+
+    Future<String> save = orderEventsHandler.handle(kafkaConsumerRecord);
+    assertTrue(save.failed());
+
+  }
+
+  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {
+    String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
+    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, record);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 

@@ -7,6 +7,7 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.OrderEventsDao;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,16 +17,21 @@ public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
 
   public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 
-  private OrderEventsDao orderEvenDao;
+  private OrderEventsDao orderEventsDao;
 
   @Autowired
   public OrderAuditEventsServiceImpl(OrderEventsDao orderEvenDao) {
-    this.orderEvenDao = orderEvenDao;
+    this.orderEventsDao = orderEvenDao;
   }
 
   @Override
   public Future<RowSet<Row>> saveOrderAuditEvent(OrderAuditEvent orderAuditEvent, String tenantId) {
-    return orderEvenDao.save(orderAuditEvent, tenantId).recover(throwable -> handleFailures(throwable, orderAuditEvent.getId()));
+    return orderEventsDao.save(orderAuditEvent, tenantId).recover(throwable -> handleFailures(throwable, orderAuditEvent.getId()));
+  }
+
+  @Override
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
+    return orderEventsDao.getAuditEventsByOrderId(orderId, limit, offset, tenantId);
   }
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {

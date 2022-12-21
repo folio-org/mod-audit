@@ -7,6 +7,7 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.OrderLineEventsDao;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
 import org.folio.services.acquisition.OrderLineAuditEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,11 @@ public class OrderLineAuditEventsServiceImpl implements OrderLineAuditEventsServ
   @Override
   public Future<RowSet<Row>> saveOrderLineAuditEvent(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
     return orderLineEventsDao.save(orderLineAuditEvent, tenantId).recover(throwable -> handleFailures(throwable, orderLineAuditEvent.getId()));
+  }
+
+  @Override
+  public Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, int offset, String tenantId) {
+    return orderLineEventsDao.getAuditEventsByOrderLineId(orderLineId, limit, offset, tenantId);
   }
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {

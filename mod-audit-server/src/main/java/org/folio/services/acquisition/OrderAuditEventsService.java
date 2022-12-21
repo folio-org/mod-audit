@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
 
 public interface OrderAuditEventsService {
 
@@ -15,4 +16,12 @@ public interface OrderAuditEventsService {
    * @return successful future if event has not been processed, or failed future otherwise
    */
   Future<RowSet<Row>> saveOrderAuditEvent(OrderAuditEvent orderAuditEvent, String tenantId);
+
+  /**
+   * Searches for order audit events by order id
+   *
+   * @param orderId order id
+   * @return future with OrderAuditEventCollection
+   */
+  Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId);
 }

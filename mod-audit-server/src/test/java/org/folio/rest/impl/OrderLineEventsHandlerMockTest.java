@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
@@ -51,13 +53,17 @@ public class OrderLineEventsHandlerMockTest {
 
   @Test
   void shouldProcessEvent() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("Test","TestValue");
+
     OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
-      .withEventDate(null)
+      .withOrderLineId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null)
+      .withActionDate(new Date())
       .withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderLineSnapshot("{\"name\":\"New OrderLine Product\"}")
+      .withOrderLineSnapshot(jsonObject)
       .withUserId(UUID.randomUUID().toString());
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderLineAuditEvent);
 
@@ -69,17 +75,7 @@ public class OrderLineEventsHandlerMockTest {
 
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderLineAuditEvent record) {
     String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
-    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withEventDate(null)
-      .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(null).
-      withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderLineSnapshot("")
-      .withUserId(UUID.randomUUID().toString())
-      .withUserName("Test");
-
-    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, orderLineAuditEvent);
+    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, record);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 
