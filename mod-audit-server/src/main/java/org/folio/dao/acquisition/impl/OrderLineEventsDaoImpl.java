@@ -26,6 +26,7 @@ import static org.folio.util.OrderAuditEventDBConstants.MODIFIED_CONTENT_FIELD;
 
 @Repository
 public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
+
   private static final Logger LOGGER = LogManager.getLogger();
 
   public static final String TABLE_NAME = "acquisition_order_line_log";
