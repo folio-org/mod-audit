@@ -40,7 +40,7 @@ public class OrderEventsDaoTest {
   }
 
   @Test
-  public void shouldCreateEventProcessed() {
+  void shouldCreateEventProcessed() {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name","Test Product 123 ");
 
@@ -60,7 +60,7 @@ public class OrderEventsDaoTest {
   }
 
   @Test
-  public  void shouldThrowConstraintViolation() {
+  void shouldThrowConstraintViolation() {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name","Test Product1");
 
@@ -107,7 +107,7 @@ public class OrderEventsDaoTest {
       List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.getOrderAuditEvents();
 
       assertEquals(orderAuditEventList.get(0).getId(), id);
-      assertEquals(OrderAuditEvent.Action.CREATE, orderAuditEventList.get(0).getAction());
+      assertEquals(OrderAuditEvent.Action.CREATE.value(), orderAuditEventList.get(0).getAction().value());
 
     });
   }

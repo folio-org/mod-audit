@@ -1,11 +1,10 @@
-package org.folio.rest.impl.acquisitions;
+package org.folio.rest.impl;
 
 import io.restassured.http.Header;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
-import org.folio.rest.impl.ApiTestBase;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.util.PostgresClientFactory;

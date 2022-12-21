@@ -1,6 +1,10 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.Future;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
@@ -21,8 +25,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private static final String TYPE = "application/json";
-
   @Autowired
   private OrderAuditEventsService orderAuditEventsService;
 
@@ -34,7 +36,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String orderId, int limit, int offset,  Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String orderId, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
@@ -75,7 +77,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.error(throwable.getMessage(), throwable);
-    return AuditDataAcquisitionImpl.GetAuditDataAcquisitionOrderByIdResponse
+    return GetAuditDataAcquisitionOrderByIdResponse
          .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
 
