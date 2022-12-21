@@ -47,7 +47,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
           .otherwise(this::mapExceptionToResponse)
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error(getMessage("Failed to get OrderAuditEvent by id", e, orderId));
+        LOGGER.error("Failed to get order audit events by order id: {}", orderId, e);
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
@@ -65,14 +65,10 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
           .otherwise(this::mapExceptionToResponse)
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error(getMessage("Failed to get OrderLineAuditEvent by id", e, orderLineId));
+        LOGGER.error("Failed to get order line audit events by order line id: {}", orderLineId, e);
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
-  }
-
-  private ParameterizedMessage getMessage(String pattern, Exception e, String... params) {
-    return new ParameterizedMessage(pattern, new Object[] {params}, e);
   }
 
   private Response mapExceptionToResponse(Throwable throwable) {

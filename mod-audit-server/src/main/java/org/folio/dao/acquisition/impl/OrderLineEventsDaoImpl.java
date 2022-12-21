@@ -66,7 +66,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
-      LOGGER.error("Error getting OrderLineAuditEvent by order_line id: {}", orderLineId, e);
+      LOGGER.error("Error getting order line audit events by order line id: {}", orderLineId, e);
       promise.fail(e);
     }
 
@@ -85,7 +85,8 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
         orderLineAuditEvent.getOrderLineSnapshot().toString()), promise);
     } catch (Exception e) {
-      LOGGER.error("Failed to save record with Id {} in to table {}", orderLineAuditEvent.getId(), TABLE_NAME, e);
+      LOGGER.error("Failed to save record with id: {} for order line id: {} in to table {}",
+        orderLineAuditEvent.getId(), orderLineAuditEvent.getOrderLineId(), TABLE_NAME, e);
       promise.fail(e);
     }
   }
@@ -103,7 +104,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
     return new OrderLineAuditEvent()
       .withId(row.getValue(ID_FIELD).toString())
-      .withAction(row.get(OrderLineAuditEvent.Action.class,ACTION_FIELD))
+      .withAction(row.get(OrderLineAuditEvent.Action.class, ACTION_FIELD))
       .withOrderId(row.getValue(ORDER_ID_FIELD).toString())
       .withOrderLineId(row.getValue(ORDER_LINE_ID_FIELD).toString())
       .withUserId(row.getValue(USER_ID_FIELD).toString())

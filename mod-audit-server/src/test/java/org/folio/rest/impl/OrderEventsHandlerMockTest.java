@@ -37,7 +37,7 @@ public class OrderEventsHandlerMockTest {
   public static final String OKAPI_TOKEN_HEADER = "x-okapi-token";
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
-  private static final String id = "0f2e22fc-fef3-4f88-a930-56bdca5bab46";
+  private static final String ID = "0f2e22fc-fef3-4f88-a930-56bdca5bab46";
 
   @Spy
   private Vertx vertx = Vertx.vertx();
@@ -67,7 +67,7 @@ public class OrderEventsHandlerMockTest {
     jsonObject.put("Test","TestValue");
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(id)
+      .withId(ID)
       .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(new Date())
@@ -95,7 +95,7 @@ public class OrderEventsHandlerMockTest {
 
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
-    Future save = orderEventsHandler.handle(kafkaConsumerRecord);
+    Future<String> save = orderEventsHandler.handle(kafkaConsumerRecord);
     assertTrue(save.failed());
 
   }

@@ -91,7 +91,7 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
   }
 
   @Test
-  void  postLogRecordEventForUserRetrieveError() {
+  void postLogRecordEventForUserRetrieveError() {
     logger.info("post valid log event for request creation : fail due to user retrieving error");
 
     var dc = JsonPath.parse(getFile(REQUEST_CREATED_PAYLOAD_JSON))

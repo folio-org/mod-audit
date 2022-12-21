@@ -71,7 +71,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
-      LOGGER.error("Error getting OrderAuditEvent by order id: {}",orderId, e);
+      LOGGER.error("Error getting order audit events by order id: {}", orderId, e);
       promise.fail(e);
     }
 
@@ -108,7 +108,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
     return new OrderAuditEvent()
       .withId(row.getValue(ID_FIELD).toString())
-      .withAction(row.get(OrderAuditEvent.Action.class,ACTION_FIELD))
+      .withAction(row.get(OrderAuditEvent.Action.class, ACTION_FIELD))
       .withOrderId(row.getValue(ORDER_ID_FIELD).toString())
       .withUserId(row.getValue(USER_ID_FIELD).toString())
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
