@@ -32,7 +32,6 @@ import static org.folio.util.OrderAuditEventDBConstants.USER_ID_FIELD;
 
 @Repository
 public class OrderEventsDaoImpl implements OrderEventsDao {
-
   private static final Logger LOGGER = LogManager.getLogger();
 
   public static final String TABLE_NAME = "acquisition_order_log";
