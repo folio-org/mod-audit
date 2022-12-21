@@ -20,7 +20,7 @@ public interface OrderLineEventsDao {
   /**
    * Searches for order_line audit events by id
    *
-   * @param orderLineId OrderAuditEvent id
+   * @param orderLineId order_line id
    * @param tenantId tenant id
    * @return future with OrderLineAuditEventCollection
    */

@@ -20,7 +20,7 @@ public interface OrderAuditEventsService {
   /**
    * Searches for order audit events by order id
    *
-   * @param orderId OrderAuditEvent id
+   * @param orderId order id
    * @return future with OrderAuditEventCollection
    */
   Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId);

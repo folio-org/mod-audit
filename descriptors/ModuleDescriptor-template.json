@@ -93,7 +93,7 @@
     },
     {
       "id": "acquisition-order-events",
-      "version": "1.1",
+      "version": "1.0",
       "handlers": [
         {
           "methods": [
@@ -108,7 +108,7 @@
     },
     {
       "id": "acquisition-order-line-events",
-      "version": "1.1",
+      "version": "1.0",
       "handlers": [
         {
           "methods": [

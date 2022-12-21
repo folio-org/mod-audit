@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
@@ -50,8 +49,9 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   @Override
   public Future<RowSet<Row>> save(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
 
-    String query = format(INSERT_SQL, TABLE_NAME);
+    String query = format(INSERT_SQL, logTable);
 
     makeSaveCall(promise, query, orderLineAuditEvent, tenantId);
 
@@ -62,8 +62,8 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   public Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      String jobTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_LINE_ID_SQL, jobTable, jobTable);
+      String logTable = formatDBTableName(tenantId, TABLE_NAME);
+      String query = format(GET_BY_ORDER_LINE_ID_SQL, logTable, logTable);
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {

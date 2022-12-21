@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
@@ -36,9 +35,6 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  @Autowired
-  private final PostgresClientFactory pgClientFactory;
-
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
@@ -47,6 +43,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
+  @Autowired
+  private final PostgresClientFactory pgClientFactory;
 
   @Autowired
   public OrderEventsDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -56,8 +54,9 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   @Override
   public Future<RowSet<Row>> save(OrderAuditEvent orderAuditEvent, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
 
-    String query = format(INSERT_SQL, TABLE_NAME);
+    String query = format(INSERT_SQL, logTable);
 
     makeSaveCall(promise, query, orderAuditEvent, tenantId);
 
@@ -68,8 +67,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      String jobTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_ID_SQL, jobTable, jobTable);
+      String logTable = formatDBTableName(tenantId, TABLE_NAME);
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable);
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
