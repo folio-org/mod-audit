@@ -82,8 +82,8 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         orderLineAuditEvent.getOrderId(),
         orderLineAuditEvent.getOrderLineId(),
         orderLineAuditEvent.getUserId(),
-        LocalDateTime.ofInstant(orderLineAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
-        LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderLineAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
+        LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
         orderLineAuditEvent.getOrderLineSnapshot().toString()), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with Id {} in to table {}", orderLineAuditEvent.getId(), TABLE_NAME, e);
