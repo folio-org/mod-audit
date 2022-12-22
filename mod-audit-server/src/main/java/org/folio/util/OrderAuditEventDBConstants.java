@@ -35,9 +35,11 @@ public class OrderAuditEventDBConstants {
     if (StringUtils.isNotEmpty(sortBy) && sortBy.equals(SORTABLE_FIELD)) {
       queryBuilder = queryBuilder.append(orderBy);
     }
+
     if (!StringUtils.contains(queryBuilder, limit)) {
       queryBuilder = queryBuilder.append(limit);
     }
+
     return queryBuilder;
   }
 
