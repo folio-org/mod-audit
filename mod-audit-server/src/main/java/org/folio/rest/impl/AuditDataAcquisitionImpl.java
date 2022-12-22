@@ -7,7 +7,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.Future;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
@@ -36,12 +35,12 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String orderId, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String orderId, int limit, String sortBy, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderAuditEventsService.getAuditEventsByOrderId(orderId, limit, offset, tenantId)
+        orderAuditEventsService.getAuditEventsByOrderId(orderId, limit, sortBy, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)
@@ -54,12 +53,12 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderLineById(String orderLineId, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderLineById(String orderLineId, int limit, String sortBy, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, limit, offset, tenantId)
+        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, limit, sortBy, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)

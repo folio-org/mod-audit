@@ -51,9 +51,7 @@ public class OrderLineEventsDaoTest {
       .withOrderLineId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderLineSnapshot("{\"name\":\"New OrderLine Product\"}");
-
+      .withActionDate(new Date());
     Future<RowSet<Row>> saveFuture = orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
         assertTrue(ar.succeeded());
@@ -69,8 +67,7 @@ public class OrderLineEventsDaoTest {
       .withOrderLineId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderLineSnapshot("{\"name\":\"New Product\"}");
+      .withActionDate(new Date());
 
     Future<RowSet<Row>> saveFuture = orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -101,7 +98,7 @@ public class OrderLineEventsDaoTest {
 
     orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
 
-    Future<OrderLineAuditEventCollection> dto = orderLineEventsDao.getAuditEventsByOrderLineId(id,1,1, TENANT_ID);
+    Future<OrderLineAuditEventCollection> dto = orderLineEventsDao.getAuditEventsByOrderLineId(id, 1, null, 1, TENANT_ID);
     dto.onComplete(ar -> {
       OrderLineAuditEventCollection orderLineAuditEventOptional = ar.result();
       List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();

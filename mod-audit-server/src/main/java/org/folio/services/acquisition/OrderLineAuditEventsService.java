@@ -21,7 +21,11 @@ public interface OrderLineAuditEventsService {
    * Searches for order line audit events by order line id
    *
    * @param orderLineId order line id
+   * @param limit limit
+   * @param sortBy action date
+   * @param offset offset
+   *
    * @return future with OrderLineAuditEventCollection
    */
-  Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, int offset, String tenantId);
+  Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, String sortBy, int offset, String tenantId);
 }

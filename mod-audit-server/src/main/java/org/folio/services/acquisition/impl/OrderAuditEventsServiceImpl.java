@@ -30,8 +30,8 @@ public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
   }
 
   @Override
-  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
-    return orderEventsDao.getAuditEventsByOrderId(orderId, limit, offset, tenantId);
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, String sortBy, int offset, String tenantId) {
+    return orderEventsDao.getAuditEventsByOrderId(orderId, limit, sortBy, offset, tenantId);
   }
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {

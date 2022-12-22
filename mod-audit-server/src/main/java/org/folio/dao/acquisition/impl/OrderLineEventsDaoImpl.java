@@ -2,6 +2,7 @@ package org.folio.dao.acquisition.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -33,7 +34,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   public static final String GET_BY_ORDER_LINE_ID_SQL = "SELECT id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot," +
     " (SELECT count(*) AS total_records FROM %s WHERE order_line_id = $1) " +
-    " FROM %s WHERE order_line_id = $1 LIMIT $2 OFFSET $3";
+    " FROM %s WHERE order_line_id = $1";
 
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot) " +
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
@@ -59,11 +60,12 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   }
 
   @Override
-  public Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, int offset, String tenantId) {
+  public Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, int limit, String sortBy, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_LINE_ID_SQL, logTable, logTable);
+      String query = format(String.valueOf(prepareQuery(GET_BY_ORDER_LINE_ID_SQL, ORDER_BY_PATTERN, LIMIT_AND_OFFSET_PATTERN, sortBy)),
+        logTable, logTable);
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
@@ -84,7 +86,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         orderLineAuditEvent.getUserId(),
         LocalDateTime.ofInstant(orderLineAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
         LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
-        orderLineAuditEvent.getOrderLineSnapshot().toString()), promise);
+        JsonObject.mapFrom(orderLineAuditEvent.getOrderLineSnapshot())), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order line id: {} in to table {}",
         orderLineAuditEvent.getId(), orderLineAuditEvent.getOrderLineId(), TABLE_NAME, e);
@@ -111,7 +113,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       .withUserId(row.getValue(USER_ID_FIELD).toString())
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
-      .withOrderLineSnapshot(row.getJson(MODIFIED_CONTENT_FIELD));
+      .withOrderLineSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
   }
 
   private String formatDBTableName(String tenantId, String table) {

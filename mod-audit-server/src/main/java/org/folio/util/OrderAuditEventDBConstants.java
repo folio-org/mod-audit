@@ -1,5 +1,7 @@
 package org.folio.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class OrderAuditEventDBConstants {
 
   private OrderAuditEventDBConstants() {}
@@ -21,5 +23,22 @@ public class OrderAuditEventDBConstants {
   public static final String MODIFIED_CONTENT_FIELD = "modified_content_snapshot";
 
   public static final String TOTAL_RECORDS_FIELD = "total_records";
+
+  public static final String SORTABLE_FIELD = "actionDate";
+
+  public static final String ORDER_BY_PATTERN = " order by action_date";
+
+  public static final String LIMIT_AND_OFFSET_PATTERN = " LIMIT $2 OFFSET $3";
+
+  public static StringBuilder prepareQuery(String query, String orderBy, String limit, String sortBy) {
+    StringBuilder queryBuilder = new StringBuilder(query);
+    if (StringUtils.isNotEmpty(sortBy) && sortBy.equals(SORTABLE_FIELD)) {
+      queryBuilder = queryBuilder.append(orderBy);
+    }
+    if (!StringUtils.contains(queryBuilder, limit)) {
+      queryBuilder = queryBuilder.append(limit);
+    }
+    return queryBuilder;
+  }
 
 }
