@@ -98,7 +98,7 @@ public class OrderLineEventsDaoTest {
 
     orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
 
-    Future<OrderLineAuditEventCollection> dto = orderLineEventsDao.getAuditEventsByOrderLineId(id, 1, null, 1, TENANT_ID);
+    Future<OrderLineAuditEventCollection> dto = orderLineEventsDao.getAuditEventsByOrderLineId(id, "action_date",  "asc", 1, 1, TENANT_ID);
     dto.onComplete(ar -> {
       OrderLineAuditEventCollection orderLineAuditEventOptional = ar.result();
       List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();

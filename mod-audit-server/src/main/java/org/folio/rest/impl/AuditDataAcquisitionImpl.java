@@ -35,12 +35,12 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderById(String orderId, int limit, String sortBy, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderById(String orderId, String sortBy, String sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderAuditEventsService.getAuditEventsByOrderId(orderId, limit, sortBy, offset, tenantId)
+        orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder, limit, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)
@@ -53,12 +53,12 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionOrderLineById(String orderLineId, int limit, String sortBy, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionOrderLineById(String orderLineId, String sortBy, String sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
-        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, limit, sortBy, offset, tenantId)
+        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder, limit, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)

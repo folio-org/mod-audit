@@ -22,7 +22,14 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.OrderAuditEventDBConstants.*;
+import static org.folio.util.OrderAuditEventDBConstants.ACTION_DATE_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ACTION_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.EVENT_DATE_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.MODIFIED_CONTENT_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.ORDER_ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.TOTAL_RECORDS_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.USER_ID_FIELD;
 
 @Repository
 public class OrderEventsDaoImpl implements OrderEventsDao {
@@ -32,7 +39,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1";
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 ORDER BY $2 $3 LIMIT $4 OFFSET $5";
 
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
@@ -58,13 +65,12 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, String sortBy, int offset, String tenantId) {
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(String.valueOf(prepareQuery(GET_BY_ORDER_ID_SQL, ORDER_BY_PATTERN, LIMIT_AND_OFFSET_PATTERN, sortBy)),
-        logTable, logTable);
-      Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable);
+      Tuple queryParams = Tuple.of(UUID.fromString(orderId), sortBy, sortOrder, limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.error("Error getting order audit events by order id: {}", orderId, e);

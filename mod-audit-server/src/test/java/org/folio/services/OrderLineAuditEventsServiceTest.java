@@ -69,7 +69,7 @@ public class OrderLineAuditEventsServiceTest {
 
     orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
 
-    Future<OrderLineAuditEventCollection> dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, 1, null, 1, TENANT_ID);
+    Future<OrderLineAuditEventCollection> dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, "action_date", "desc", 1, 1, TENANT_ID);
     dto.onComplete(ar -> {
       OrderLineAuditEventCollection orderLineAuditEventOptional = ar.result();
       List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();

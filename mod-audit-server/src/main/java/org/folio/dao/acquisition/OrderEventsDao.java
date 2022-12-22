@@ -20,13 +20,13 @@ public interface OrderEventsDao {
   /**
    * Searches for order audit events by id
    *
-   * @param orderId order id
-   * @param limit limit
-   * @param sortBy action date
-   * @param offset offset
-   * @param tenantId tenant id
-   *
+   * @param orderId   order id
+   * @param sortBy    sort by
+   * @param sortOrder sort order
+   * @param limit     limit
+   * @param offset    offset
+   * @param tenantId  tenant id
    * @return future with OrderAuditEventCollection
    */
-  Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, String sortBy, int offset, String tenantId);
+  Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, String sortBy, String sortOrder, int limit, int offset, String tenantId);
 }

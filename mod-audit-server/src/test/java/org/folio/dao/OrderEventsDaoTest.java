@@ -101,7 +101,7 @@ public class OrderEventsDaoTest {
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    Future<OrderAuditEventCollection> dto = orderEventDao.getAuditEventsByOrderId(id, 1, null, 1, TENANT_ID);
+    Future<OrderAuditEventCollection> dto = orderEventDao.getAuditEventsByOrderId(id, "action_date", "desc", 1, 1, TENANT_ID);
     dto.onComplete(ar -> {
       OrderAuditEventCollection orderAuditEventOptional = ar.result();
       List<OrderAuditEvent> orderAuditEventList = orderAuditEventOptional.getOrderAuditEvents();
