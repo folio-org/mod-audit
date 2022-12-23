@@ -2,6 +2,7 @@ package org.folio.dao.acquisition.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -21,14 +22,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.OrderAuditEventDBConstants.ACTION_DATE_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ACTION_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.EVENT_DATE_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ID_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.MODIFIED_CONTENT_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ORDER_ID_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.TOTAL_RECORDS_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.USER_ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.*;
 
 @Repository
 public class OrderEventsDaoImpl implements OrderEventsDao {
@@ -38,7 +32,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 LIMIT $2 OFFSET $3";
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 %s LIMIT $3 OFFSET $4";
 
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
@@ -64,12 +58,12 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, int limit, int offset, String tenantId) {
+  public Future<OrderAuditEventCollection> getAuditEventsByOrderId(String orderId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable);
-      Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      Tuple queryParams = Tuple.of(UUID.fromString(orderId), sortBy, limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.error("Error getting order audit events by order id: {}", orderId, e);
@@ -88,7 +82,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getUserId(),
         LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
         LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
-        orderAuditEvent.getOrderSnapshot().toString()), promise);
+        JsonObject.mapFrom(orderAuditEvent.getOrderSnapshot())), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
         orderAuditEvent.getId(), orderAuditEvent.getOrderId(), TABLE_NAME, e);
@@ -114,11 +108,10 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       .withUserId(row.getValue(USER_ID_FIELD).toString())
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
-      .withOrderSnapshot(row.getJson(MODIFIED_CONTENT_FIELD));
+      .withOrderSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
   }
 
   private String formatDBTableName(String tenantId, String table) {
     return format("%s.%s", convertToPsqlStandard(tenantId), table);
   }
-
 }

@@ -83,21 +83,16 @@ public class OrderEventsHandlerMockTest {
 
   @Test
   void shouldNotProcessEvent() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("Test","TestValue");
-
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withEventDate(new Date())
       .withOrderId(UUID.randomUUID().toString())
       .withActionDate(new Date())
-      .withAction(OrderAuditEvent.Action.CREATE);
-
+      .withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderSnapshot("Test");
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
-
     Future<String> save = orderEventsHandler.handle(kafkaConsumerRecord);
     assertTrue(save.failed());
-
   }
 
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderAuditEvent record) {

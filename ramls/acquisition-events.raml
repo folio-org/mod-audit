@@ -30,8 +30,19 @@ traits:
         validate
       ]
       queryParameters:
-       limit:
-         default: 2147483647
+        sortBy:
+          description: "sorting by field: actionDate"
+          type: string
+          default: action_date
+        sortOrder:
+          description: "sort order: asc or desc"
+          enum: [asc, desc]
+          type: string
+          default: desc
+        limit:
+          default: 2147483647
+        offset:
+          default: 0
       responses:
         200:
           body:
@@ -54,8 +65,19 @@ traits:
           validate
       ]
       queryParameters:
-       limit:
-         default: 2147483647
+        sortBy:
+          description: "sorting by field: actionDate"
+          type: string
+          default: action_date
+        sortOrder:
+          description: "sort order: asc or desc"
+          enum: [asc, desc]
+          type: string
+          default: desc
+        limit:
+          default: 2147483647
+        offset:
+          default: 0
       responses:
         200:
           body:

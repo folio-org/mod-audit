@@ -1,5 +1,7 @@
 package org.folio.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class OrderAuditEventDBConstants {
 
   private OrderAuditEventDBConstants() {}
@@ -21,5 +23,7 @@ public class OrderAuditEventDBConstants {
   public static final String MODIFIED_CONTENT_FIELD = "modified_content_snapshot";
 
   public static final String TOTAL_RECORDS_FIELD = "total_records";
+
+  public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
 
 }

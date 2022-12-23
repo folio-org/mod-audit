@@ -43,10 +43,9 @@ public class OrderLineAuditEventsServiceTest {
       .withOrderId(UUID.randomUUID().toString())
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderLineSnapshot("{\"name\":\"New OrderLine Product\"}");
-
+      .withActionDate(new Date());
     Future<RowSet<Row>> saveFuture = orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
+
     saveFuture.onComplete(ar -> {
       assertTrue(ar.succeeded());
     });
@@ -70,7 +69,7 @@ public class OrderLineAuditEventsServiceTest {
 
     orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
 
-    Future<OrderLineAuditEventCollection> dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, 1, 1, TENANT_ID);
+    Future<OrderLineAuditEventCollection> dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, "action_date", "desc", 1, 1, TENANT_ID);
     dto.onComplete(ar -> {
       OrderLineAuditEventCollection orderLineAuditEventOptional = ar.result();
       List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();
