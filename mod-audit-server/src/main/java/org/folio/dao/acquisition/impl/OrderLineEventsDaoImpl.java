@@ -41,7 +41,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   public static final String GET_BY_ORDER_LINE_ID_SQL = "SELECT id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot," +
     " (SELECT count(*) AS total_records FROM %s WHERE order_line_id = $1) " +
-    " FROM %s WHERE order_line_id = $1 ORDER BY $2 %s LIMIT $4 OFFSET $5";
+    " FROM %s WHERE order_line_id = $1 ORDER BY $2 %s LIMIT $3 OFFSET $4";
 
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot) " +
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
