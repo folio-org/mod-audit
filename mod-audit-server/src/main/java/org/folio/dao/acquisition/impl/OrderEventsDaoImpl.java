@@ -39,7 +39,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 ORDER BY $2 $3 LIMIT $4 OFFSET $5";
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 ORDER BY $2 %s LIMIT $4 OFFSET $5";
 
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
@@ -69,8 +69,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable);
-      Tuple queryParams = Tuple.of(UUID.fromString(orderId), sortBy, sortOrder, limit, offset);
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable, sortOrder);
+      Tuple queryParams = Tuple.of(UUID.fromString(orderId), sortBy, limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.error("Error getting order audit events by order id: {}", orderId, e);
