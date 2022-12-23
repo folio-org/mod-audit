@@ -24,4 +24,6 @@ public class OrderAuditEventDBConstants {
 
   public static final String TOTAL_RECORDS_FIELD = "total_records";
 
+  public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
+
 }

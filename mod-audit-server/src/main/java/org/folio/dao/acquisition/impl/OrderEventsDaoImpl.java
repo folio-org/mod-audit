@@ -22,14 +22,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.OrderAuditEventDBConstants.ACTION_DATE_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ACTION_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.EVENT_DATE_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ID_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.MODIFIED_CONTENT_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.ORDER_ID_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.TOTAL_RECORDS_FIELD;
-import static org.folio.util.OrderAuditEventDBConstants.USER_ID_FIELD;
+import static org.folio.util.OrderAuditEventDBConstants.*;
 
 @Repository
 public class OrderEventsDaoImpl implements OrderEventsDao {
@@ -39,7 +32,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 ORDER BY $2 %s LIMIT $3 OFFSET $4";
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 %s LIMIT $3 OFFSET $4";
 
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
@@ -69,7 +62,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable, sortOrder);
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), sortBy, limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
