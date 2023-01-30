@@ -64,6 +64,7 @@ Before merging this PR, please go through the following list and take appropriat
   - [ ] Were permissions changed, added, or removed?
   - [ ] Are there new interface dependencies?
   - [ ] There are no breaking changes in this PR.
+  - [ ] Check logging
   
 If there are breaking changes, please **STOP** and consider the following:
 
