@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
@@ -21,6 +23,7 @@ import io.vertx.core.Handler;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   public static final String LOGS_TABLE_NAME = "circulation_logs";
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   @Validate
@@ -31,6 +34,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
           if (reply.succeeded()) {
             var results = reply.result().getResults();
+            results.forEach(logData-> LOGGER.info("get record while fetching userBarcode :{} & description is:{}",
+              logData.getUserBarcode(),logData.getDescription()));
             results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
               .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse

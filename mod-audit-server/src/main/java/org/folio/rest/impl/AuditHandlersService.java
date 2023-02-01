@@ -7,6 +7,7 @@ import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
@@ -88,6 +89,10 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
+    if(!logRecords.isEmpty()){
+      logRecords.forEach(recordData-> LOGGER.info("saveLogRecords :: saved record userBarcode :{} & description is :{}",
+        recordData.getUserBarcode(),recordData.getDescription()));
+    }
     CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
