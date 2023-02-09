@@ -34,8 +34,6 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
           if (reply.succeeded()) {
             var results = reply.result().getResults();
-            results.forEach(logData-> LOGGER.info("get record while fetching userBarcode :{} & description is:{}",
-              logData.getUserBarcode(),logData.getDescription()));
             results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
               .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse

@@ -7,7 +7,6 @@ import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
@@ -36,7 +35,6 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       JsonObject payload = new JsonObject(entity);
-      LOGGER.info("input payload :{}",payload);
       LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()), okapiHeaders, vertxContext);
       builder.buildLogRecord(payload)
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
@@ -90,10 +88,6 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
-    if(!logRecords.isEmpty()){
-      logRecords.forEach(recordData-> LOGGER.info("saveLogRecords :: saved record userBarcode :{} & description is :{}",
-        recordData.getUserBarcode(),recordData.getDescription()));
-    }
     CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
