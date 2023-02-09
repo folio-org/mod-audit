@@ -23,7 +23,6 @@ import io.vertx.core.Handler;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   public static final String LOGS_TABLE_NAME = "circulation_logs";
-  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   @Validate
