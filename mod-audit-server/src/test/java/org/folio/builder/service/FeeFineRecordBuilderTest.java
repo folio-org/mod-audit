@@ -46,7 +46,7 @@ public class FeeFineRecordBuilderTest extends BuilderTestBase {
     assertThat(feeFineLogRecord.getServicePointId(), equalTo("7c5abc9f-f3d7-4856-b8d7-6712462ca007"));
     assertThat(feeFineLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
     assertThat(feeFineLogRecord.getDescription(),
-      equalTo("Fee/Fine type: manual charge. Fee/Fine owner: sample owner. Amount: 10.00. manual"));
+      equalTo("Fee/Fine type: manual charge. Fee/Fine owner: sample owner. Amount: 10.00. manual. Additional information to staff: Comments from Staff"));
   }
 
   @ParameterizedTest

@@ -6,6 +6,7 @@
     "itemBarcode":"90000",
     "itemId":"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
     "action":"Billed",
+    "comments": "Comments from Staff",
     "date":"2020-10-15T12:17:38.627Z",
     "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
     "source":"ADMINISTRATOR, DIKU",
