@@ -1,7 +1,6 @@
 package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.BILLED;
-import static org.folio.utils.TenantApiTestUtil.FEE_FINE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -15,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -24,11 +22,12 @@ import io.vertx.core.json.JsonObject;
 public class FeeFineRecordBuilderTest extends BuilderTestBase {
   private static final Logger logger = LogManager.getLogger();
 
-  @Test
-  void testFeeFine() throws Exception {
+  @ParameterizedTest
+  @EnumSource(FeeFineUtil.class)
+  void testFeeFine(FeeFineUtil feeFineUtil) throws Exception {
     logger.info("===== Test fees/fines log records builder =====");
 
-    JsonObject payload = new JsonObject(getFile(FEE_FINE_PAYLOAD_JSON));
+    JsonObject payload = new JsonObject(getFile(feeFineUtil.getFileName()));
     List<LogRecord> records = feeFineRecordBuilder.buildLogRecord(payload).get();
 
     assertThat(records.size(), equalTo(1));
@@ -46,7 +45,7 @@ public class FeeFineRecordBuilderTest extends BuilderTestBase {
     assertThat(feeFineLogRecord.getServicePointId(), equalTo("7c5abc9f-f3d7-4856-b8d7-6712462ca007"));
     assertThat(feeFineLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
     assertThat(feeFineLogRecord.getDescription(),
-      equalTo("Fee/Fine type: manual charge. Fee/Fine owner: sample owner. Amount: 10.00. manual. Additional information to staff: Comments from Staff"));
+      equalTo("Fee/Fine type: manual charge. Fee/Fine owner: sample owner. Amount: 10.00. "+ feeFineUtil.getType() +". Additional information to staff: Comments from Staff"));
   }
 
   @ParameterizedTest
