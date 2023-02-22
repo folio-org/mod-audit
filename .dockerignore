@@ -3,3 +3,4 @@
 !docker
 !target/*.jar
 !mod-audit-server/target/*.jar
+!prometheus-jmx-config.yaml
