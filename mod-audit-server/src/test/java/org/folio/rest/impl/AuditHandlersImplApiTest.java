@@ -28,6 +28,8 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.concurrent.TimeUnit;
+
 public class AuditHandlersImplApiTest extends ApiTestBase {
 
   private final Logger logger = LogManager.getLogger();

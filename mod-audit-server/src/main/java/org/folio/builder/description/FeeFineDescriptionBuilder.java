@@ -47,7 +47,8 @@ public class FeeFineDescriptionBuilder implements DescriptionBuilder {
           getProperty(logEventPayload, TYPE),
           getProperty(logEventPayload, FEE_FINE_OWNER),
           getDoubleProperty(logEventPayload, AMOUNT),
-          getBooleanProperty(logEventPayload, AUTOMATED) ? "automated" : "manual");
+          getBooleanProperty(logEventPayload, AUTOMATED) ? "automated" : "manual",
+          getProperty(logEventPayload, COMMENTS));
       case PAID_FULLY:
       case PAID_PARTIALLY:
         return createDescriptionFor(FEE_FINE_PAID_MSG, logEventPayload);

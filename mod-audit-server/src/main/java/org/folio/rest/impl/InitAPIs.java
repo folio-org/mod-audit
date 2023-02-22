@@ -11,19 +11,25 @@ import io.vertx.core.spi.VerticleFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
+import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
+import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.AbstractApplicationContext;
+
+import java.util.Arrays;
 
 public class InitAPIs implements InitAPI {
   private final Logger LOGGER = LogManager.getLogger();
   private static final String SPRING_CONTEXT_KEY = "springContext";
 
   @Value("${acq.orders.kafka.consumer.instancesNumber:1}")
-  private int orderEventConsumerInstancesNumber;
+  private int acqOrderConsumerInstancesNumber;
+  @Value("${acq.order-lines.kafka.consumer.instancesNumber:1}")
+  private int acqOrderLineConsumerInstancesNumber;
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
@@ -51,12 +57,22 @@ public class InitAPIs implements InitAPI {
     VerticleFactory verticleFactory = springContext.getBean(SpringVerticleFactory.class);
     vertx.registerVerticleFactory(verticleFactory);
 
-    Promise<String> deployOrderEventConsumer = Promise.promise();
+    Promise<String> orderEventsConsumer = Promise.promise();
+    Promise<String> orderLineEventsConsumer = Promise.promise();
+
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
       new DeploymentOptions()
         .setWorker(true)
-        .setInstances(orderEventConsumerInstancesNumber), deployOrderEventConsumer);
-    return deployOrderEventConsumer.future();
+        .setInstances(acqOrderConsumerInstancesNumber), orderEventsConsumer);
+
+    vertx.deployVerticle(getVerticleName(verticleFactory, OrderLineEventConsumersVerticle.class),
+      new DeploymentOptions()
+        .setWorker(true)
+        .setInstances(acqOrderLineConsumerInstancesNumber), orderLineEventsConsumer);
+
+    return GenericCompositeFuture.all(Arrays.asList(
+      orderEventsConsumer.future(),
+      orderLineEventsConsumer.future()));
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

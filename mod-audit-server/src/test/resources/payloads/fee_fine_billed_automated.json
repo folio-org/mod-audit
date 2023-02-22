@@ -13,7 +13,7 @@
     "feeFineId":"7ad9dfa0-6ee9-43ba-8db5-7a034ce05838",
     "feeFineOwner":"sample owner",
     "loanId":"0",
-    "automated":false,
+    "automated":true,
     "type":"manual charge",
     "amount":10.0
   }

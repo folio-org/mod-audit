@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "The action of the audit event",
+  "type": "string",
+  "enum": [
+    "Create",
+    "Edit",
+    "Delete"
+  ]
+}
