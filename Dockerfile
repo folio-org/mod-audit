@@ -18,4 +18,4 @@ COPY ./prometheus-jmx-config.yaml jmx_exporter/
 # Expose this port locally in the container.
 EXPOSE 8081 9991
 
-CMD java -javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml $JAVA_OPTIONS
+CMD -javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml $JAVA_OPTIONS
