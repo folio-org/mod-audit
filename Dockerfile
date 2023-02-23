@@ -13,9 +13,7 @@ RUN mkdir -p jmx_exporter &&\
 
 COPY ./prometheus-jmx-config.yaml jmx_exporter/
 
-# ENV JAVA_OPTIONS="$JAVA_OPTIONS -javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml"
+ENV JAVA_OPTIONS="$JAVA_OPTIONS -javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml"
 
 # Expose this port locally in the container.
 EXPOSE 8081 9991
-
-CMD -javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml $JAVA_OPTIONS
