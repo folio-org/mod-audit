@@ -43,7 +43,7 @@ public class JsonPropertyFetcher {
 
   public static LocalDateTime getDateTimeProperty(JsonObject representation, LogEventPayloadField field, LocalDateTime defaultValue) {
     if (representation != null && isNotBlank(representation.getString(field.value()))) {
-      return LocalDateTime.parse(representation.getString(field.value()), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"));
+      return LocalDateTime.parse(representation.getString(field.value()), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][XX]"));
     } else {
       return defaultValue;
     }
