@@ -18,7 +18,7 @@ COPY ./prometheus-jmx-config.yaml jmx_exporter/
 # Expose this port locally in the container.
 EXPOSE 8081 9991
 
-ENTRYPOINT '-javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml'
+CMD '-javaagent:./jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar=9991:./jmx_exporter/prometheus-jmx-config.yaml'
 
 # exec java -XX:MaxRAMPercentage=66.0 -XX:+ExitOnOutOfMemoryError -cp . -jar /usr/verticles/mod-audit-server-fat.jar
 
