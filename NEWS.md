@@ -1,4 +1,15 @@
-## 2.7.0 - Unreleased
+## 2.7.0 2023-02-23
+
+* [MODAUD-137](https://issues.folio.org/browse/MODAUD-137) - Logging improvement - Configuration
+* [MODAUD-140](https://issues.folio.org/browse/MODAUD-140) - Create tables to store audit logs for orders and order lines
+* [MODAUD-141](https://issues.folio.org/browse/MODAUD-141) - Add Kafka infrastructure code to mod-audit
+* [MODAUD-142](https://issues.folio.org/browse/MODAUD-142) - Implement kafka consumer for Order Change events
+* [MODAUD-143](https://issues.folio.org/browse/MODAUD-143) - Implement kafka consumer for Order Line Change events
+* [MODAUD-144](https://issues.folio.org/browse/MODAUD-144) - Implement endpoint to retrieve Order Change events
+* [MODAUD-145](https://issues.folio.org/browse/MODAUD-145) - Implement endpoint to retrieve Order Line Change events
+* [MODAUD-149](https://issues.folio.org/browse/MODAUD-149) - Upgrades: Jackson 2.14.1, mod-pubsub 2.7.0, RMB 35.0.4
+* [MODAUD-152](https://issues.folio.org/browse/MODAUD-152) - Align the module with API breaking change
+* [MODAUD-154](https://issues.folio.org/browse/MODAUD-154) - Add Additional Info in Description column of Circulation Log
 
 ## 2.6.0 - Released
 This release contains interface and module upgrades
