@@ -6,10 +6,20 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.Future;
+import io.vertx.pgclient.PgConnection;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
@@ -21,11 +31,22 @@ import io.vertx.core.Handler;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   public static final String LOGS_TABLE_NAME = "circulation_logs";
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   @Validate
   public void getAuditDataCirculationLogs(String query, int offset, int limit, String lang,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
+
+    try {
+      this.customQueryBuilder(query,offset,limit,lang,okapiHeaders,asyncResultHandler,vertxContext);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      LOGGER.info("exception is:{}",e.getMessage());
+    }
+
     createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
@@ -47,5 +68,80 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
         return null;
       });
+  }
+
+
+  public void customQueryBuilder(String q, int offset, int limit, String lang,
+                   Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
+
+    getClient(okapiHeaders, vertxContext).getReadConnection((res) -> {
+
+      PgConnection connection = res.result();
+
+      String sql = "select id, jsonb from dikuvolaris_mod_audit.circulation_logs where dikuvolaris_mod_audit.get_tsvector(dikuvolaris_mod_audit.f_unaccent(jsonb ->> 'source'::text))@@ plainto_tsquery('%Svoom%')";
+
+
+      connection
+        .query(sql)
+        .execute()
+        .onComplete(ar -> {
+          if (ar.succeeded()) {
+            RowSet<Row> result = ar.result();
+            System.out.println("Got " + result.size() + " rows ");
+
+            Iterator<Row> iterator = result.iterator();
+            while(iterator.hasNext()) {
+              Row row = iterator.next();
+              LOGGER.info("data is:{}",row.toJson());
+
+              // result.put(row.getValue(0).toString(), function.apply(row.getValue(1).toString()));
+            }
+
+          } else {
+            System.out.println("Failure: " + ar.cause().getMessage());
+          }
+
+          // Now close the pool
+          connection.close();
+        });
+
+
+      });
+
+    /*
+    getClient(okapiHeaders, vertxContext).getReadConnection((res) -> {
+
+        Tuple list = Tuple.tuple();
+
+        PgConnection connection = res.result();
+        String sql = "select id, jsonb from dikuvolaris_mod_audit.circulation_logs where dikuvolaris_mod_audit.get_tsvector(dikuvolaris_mod_audit.f_unaccent(jsonb ->> 'source'::text))@@ plainto_tsquery('%Svoom%')";
+
+
+        connection.preparedQuery(sql.toString()).execute(list, (query) -> {
+          connection.close();
+          if (query.failed()) {
+            replyHandler.handle(Future.failedFuture(query.cause()));
+          } else {
+            try {
+              Map<String, ?> result = new HashMap();
+              Iterator<Row> iterator = ((RowSet)query.result()).iterator();
+
+              while(iterator.hasNext()) {
+                Row row = (Row)iterator.next();
+                System.out.println("data is->"+row.getValue(0).toString());
+               // result.put(row.getValue(0).toString(), function.apply(row.getValue(1).toString()));
+              }
+
+              replyHandler.handle(Future.succeededFuture(result));
+            } catch (Exception e) {
+              replyHandler.handle(Future.failedFuture(e));
+            }
+
+          }
+        });
+    });
+
+     */
   }
 }
