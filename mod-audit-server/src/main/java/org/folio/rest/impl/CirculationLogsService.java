@@ -95,7 +95,7 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
               Row row = iterator.next();
               LOGGER.info("data is:{}",row.toJson());
 
-              LogRecord logRecord = row.toJson().mapTo(LogRecord.class);
+              LogRecord logRecord = row.toJson().getJsonObject("jsonb").mapTo(LogRecord.class);
 
               LOGGER.info("record is:{}",logRecord);
               LOGGER.info("record is:{}",logRecord.getSource());
