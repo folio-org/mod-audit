@@ -39,30 +39,33 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
 
-    try {
-      this.customQueryBuilder(query,offset,limit,lang,okapiHeaders,asyncResultHandler,vertxContext);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      LOGGER.info("exception is:{}",e.getMessage());
-    }
+//    try {
+//      this.customQueryBuilder(query,offset,limit,lang,okapiHeaders,asyncResultHandler,vertxContext);
+//    }
+//    catch (Exception e) {
+//      e.printStackTrace();
+//      LOGGER.info("exception is:{}",e.getMessage());
+//    }
 
     createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
-      .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
-        .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
-          if (reply.succeeded()) {
-            var results = reply.result().getResults();
-            results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
-              .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
-            asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
-              .respond200WithApplicationJson(new LogRecordCollection()
-                .withLogRecords(results)
-                .withTotalRecords(reply.result().getResultInfo().getTotalRecords()))));
-          } else {
-            asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
-              .respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), reply.cause().getLocalizedMessage()))));
-          }
-        }))
+      .thenAccept(cqlWrapper -> {
+        LOGGER.info("sql is:{}",cqlWrapper.getWhereClause());
+        getClient(okapiHeaders, vertxContext)
+          .get(LOGS_TABLE_NAME, LogRecord.class, new String[]{"*"}, cqlWrapper, true, false, reply -> {
+            if (reply.succeeded()) {
+              var results = reply.result().getResults();
+              results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
+                .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
+              asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
+                .respond200WithApplicationJson(new LogRecordCollection()
+                  .withLogRecords(results)
+                  .withTotalRecords(reply.result().getResultInfo().getTotalRecords()))));
+            } else {
+              asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
+                .respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), reply.cause().getLocalizedMessage()))));
+            }
+          });
+      })
       .exceptionally(throwable -> {
         asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse.
           respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
