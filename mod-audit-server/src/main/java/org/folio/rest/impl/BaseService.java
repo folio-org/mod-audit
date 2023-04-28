@@ -31,11 +31,8 @@ public abstract class BaseService {
       if(query!=null &&  query.contains(OPTIMISED_TRUE)){
         System.out.println("replacing with empty");
         tempQuery = query.replace(OPTIMISED_TRUE,"");
-        future.complete(new CQLWrapper(cql2PgJSON, tempQuery));
       }
-      else {
         future.complete(new CQLWrapper(cql2PgJSON, tempQuery).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
-      }
 
     } catch (FieldException e) {
       future.completeExceptionally(e);
