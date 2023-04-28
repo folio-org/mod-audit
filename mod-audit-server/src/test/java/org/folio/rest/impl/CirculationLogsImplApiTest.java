@@ -75,7 +75,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   @Test
   void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=40187925817754 AND items=326547658598)")
+    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=40187925817754 AND items=326547658598*) sortby date/sort.descending")
       .then().log().all().statusCode(200)
       .assertThat()
       .body("logRecords[0].object", anyOf(equalTo("Loan"), equalTo("Request")))

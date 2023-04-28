@@ -6,10 +6,8 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -28,10 +26,12 @@ import org.folio.rest.jaxrs.resource.AuditDataCirculation;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import org.folio.rest.persist.PgUtil;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   public static final String LOGS_TABLE_NAME = "circulation_logs";
   private static final Logger LOGGER = LogManager.getLogger();
+  public static final String OPTIMISED_TRUE = "AND optimised=true";
 
   @Override
   @Validate
@@ -50,12 +50,22 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
     createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenAccept(cqlWrapper -> {
         LOGGER.info("sql is:{}",cqlWrapper.getWhereClause());
+        LOGGER.info("fields: {}",cqlWrapper.getQuery());
+
         getClient(okapiHeaders, vertxContext)
           .get(LOGS_TABLE_NAME, LogRecord.class, new String[]{"*"}, cqlWrapper, true, false, reply -> {
             if (reply.succeeded()) {
               var results = reply.result().getResults();
               results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
                 .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
+              // added to test only for item query considering to sort param passed
+              if (query!=null && query.contains(OPTIMISED_TRUE)) {
+                System.out.println("inside if--");
+                results.sort((res1,res2)-> res2.getDate().compareTo(res1.getDate()));
+
+                results = results.stream().skip(offset).limit(limit).collect(Collectors.toList());
+              }
+              // end
               asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
                 .respond200WithApplicationJson(new LogRecordCollection()
                   .withLogRecords(results)

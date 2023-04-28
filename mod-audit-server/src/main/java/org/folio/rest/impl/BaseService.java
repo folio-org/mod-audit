@@ -14,6 +14,8 @@ import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.Context;
 
+import static org.folio.rest.impl.CirculationLogsService.OPTIMISED_TRUE;
+
 public abstract class BaseService {
 
   PostgresClient getClient(Map<String, String> okapiHeaders, Context vertxContext) {
@@ -23,9 +25,14 @@ public abstract class BaseService {
 
   CompletableFuture<CQLWrapper> createCqlWrapper(String tableName, String query, int limit, int offset) {
     CompletableFuture<CQLWrapper> future = new CompletableFuture<>();
+    String tempQuery = query;
     try {
+      if(query!=null &&  query.contains(OPTIMISED_TRUE)){
+        System.out.println("replacing with empty");
+        tempQuery = query.replace(OPTIMISED_TRUE,"");
+      }
       CQL2PgJSON cql2PgJSON = new CQL2PgJSON(tableName + ".jsonb");
-      future.complete(new CQLWrapper(cql2PgJSON, query).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
+      future.complete(new CQLWrapper(cql2PgJSON, tempQuery).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
     } catch (FieldException e) {
       future.completeExceptionally(e);
     }
