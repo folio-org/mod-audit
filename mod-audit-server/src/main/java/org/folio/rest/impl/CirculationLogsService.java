@@ -66,7 +66,7 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
                 System.out.println("inside if--");
                 results.sort((res1,res2)-> res2.getDate().compareTo(res1.getDate()));
 
-                results = results.stream().skip(offset).limit(limit).collect(Collectors.toList());
+                //results = results.stream().skip(offset).limit(limit).collect(Collectors.toList());
               }
               // end
               asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
