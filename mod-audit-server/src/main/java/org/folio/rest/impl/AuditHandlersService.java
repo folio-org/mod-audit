@@ -42,7 +42,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
-          LOGGER.warn("Error saving log event: {} ", entity, throwable.getLocalizedMessage());
+          LOGGER.warn("Error saving log event : {} due to : {}", entity, throwable.getLocalizedMessage());
           return null;
         });
     } catch (Exception e) {
