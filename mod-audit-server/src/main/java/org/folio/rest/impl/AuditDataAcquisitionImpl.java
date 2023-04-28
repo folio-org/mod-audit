@@ -39,17 +39,19 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   @Override
   public void getAuditDataAcquisitionOrderById(String orderId, String sortBy, AuditDataAcquisitionOrderIdGetSortOrder sortOrder,
                                                int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Order By Id : {}", orderId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
+        LOGGER.warn("Trying to get audit events by order id: {}", orderId);
         orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error("Failed to get order audit events by order id: {}", orderId, e);
+        LOGGER.warn("Failed to get order audit events by order id: {}", orderId, e);
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
@@ -58,24 +60,26 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   @Override
   public void getAuditDataAcquisitionOrderLineById(String orderLineId, String sortBy, AuditDataAcquisitionOrderLineIdGetSortOrder sortOrder,
                                                    int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrderLineById:: Retrieving Audit Data Acquisition Order Line By Id : {}", orderLineId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     vertxContext.runOnContext(c -> {
       try {
+        LOGGER.warn("Trying to get audit events by order line id: {}", orderLineId);
         orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
           .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
           .map(Response.class::cast)
           .otherwise(this::mapExceptionToResponse)
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
-        LOGGER.error("Failed to get order line audit events by order line id: {}", orderLineId, e);
+        LOGGER.warn("Failed to get order line audit events by order line id: {}", orderLineId, e);
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
   }
 
   private Response mapExceptionToResponse(Throwable throwable) {
-    LOGGER.error(throwable.getMessage(), throwable);
+    LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     return GetAuditDataAcquisitionOrderByIdResponse
          .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }

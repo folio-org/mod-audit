@@ -48,6 +48,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   @Override
   public Future<RowSet<Row>> save(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
+    LOGGER.debug("save:: Saving OrderLine AuditEvent with tenant id : {}", tenantId);
     Promise<RowSet<Row>> promise = Promise.promise();
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
 
@@ -55,27 +56,32 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
     makeSaveCall(promise, query, orderLineAuditEvent, tenantId);
 
+    LOGGER.info("save:: Saved OrderLine AuditEvent with tenant id : {}", tenantId);
     return promise.future();
   }
 
   @Override
   public Future<OrderLineAuditEventCollection> getAuditEventsByOrderLineId(String orderLineId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
+    LOGGER.debug("getAuditEventsByOrderLineId:: Retrieving AuditEvent with order line id : {}", orderLineId);
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
+      LOGGER.info("getAuditEventsByOrderLineId:: Trying to Retrieve AuditEvent with order line id : {}", orderLineId);
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ORDER_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
-      LOGGER.error("Error getting order line audit events by order line id: {}", orderLineId, e);
+      LOGGER.warn("Error getting order line audit events by order line id: {}", orderLineId, e);
       promise.fail(e);
     }
 
+    LOGGER.info("getAuditEventsByOrderLineId:: Retrieved AuditEvent with order line id : {}", orderLineId);
     return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderLineAuditEventCollection().withTotalItems(0)
       : mapRowToListOfOrderLineEvent(rowSet));
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
+    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(orderLineAuditEvent.getId(),
         orderLineAuditEvent.getAction(),
@@ -86,23 +92,26 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
         JsonObject.mapFrom(orderLineAuditEvent.getOrderLineSnapshot())), promise);
     } catch (Exception e) {
-      LOGGER.error("Failed to save record with id: {} for order line id: {} in to table {}",
+      LOGGER.warn("Failed to save record with id: {} for order line id: {} in to table {}",
         orderLineAuditEvent.getId(), orderLineAuditEvent.getOrderLineId(), TABLE_NAME, e);
       promise.fail(e);
     }
   }
 
   private OrderLineAuditEventCollection mapRowToListOfOrderLineEvent(RowSet<Row> rowSet) {
+    LOGGER.debug("mapRowToListOfOrderLineEvent:: Mapping row to List of Order Line Events");
     OrderLineAuditEventCollection orderLineAuditEventCollection = new OrderLineAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderLineAuditEventCollection.getOrderLineAuditEvents().add(mapRowToOrderLineEvent(row));
       orderLineAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
+    LOGGER.info("mapRowToListOfOrderLineEvent:: Mapped row to List of Order Line Events");
     return orderLineAuditEventCollection;
   }
 
   private OrderLineAuditEvent mapRowToOrderLineEvent(Row row) {
 
+    LOGGER.debug("mapRowToOrderLineEvent:: Mapping row to Order Line Event");
     return new OrderLineAuditEvent()
       .withId(row.getValue(ID_FIELD).toString())
       .withAction(row.get(OrderLineAuditEvent.Action.class, ACTION_FIELD))
@@ -115,6 +124,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   }
 
   private String formatDBTableName(String tenantId, String table) {
+    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     return format("%s.%s", convertToPsqlStandard(tenantId), table);
   }
 }

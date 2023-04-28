@@ -33,18 +33,20 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
   @Validate
   public void postAuditHandlersLogRecord(String entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("postAuditHandlersLogRecord:: Trying to Save AuditHandlersLogRecord request with entity: {}", entity);
     try {
+      LOGGER.info("postAuditHandlersLogRecord:: Saving AuditHandlersLogRecord request with entity: {}", entity);
       JsonObject payload = new JsonObject(entity);
       LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()), okapiHeaders, vertxContext);
       builder.buildLogRecord(payload)
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
-          LOGGER.error("Error saving log event: " + entity, throwable.getLocalizedMessage());
+          LOGGER.warn("Error saving log event: {} ", entity, throwable.getLocalizedMessage());
           return null;
         });
     } catch (Exception e) {
-      LOGGER.error("Error saving log event for entity {} due to {} ", entity, e.getMessage());
+      LOGGER.warn("Error saving log event for entity {} due to {} ", entity, e.getMessage());
     } finally {
       asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()));
     }
@@ -52,18 +54,21 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<List<LogRecord>> processAnonymize(List<LogRecord> records,
     Map<String, String> okapiHeaders, Context vertxContext) {
+    LOGGER.debug("processAnonymize:: Processing anonymize for records");
     return isAnonymize(records) ?
       anonymizeLoanRelatedRecords(records, okapiHeaders, vertxContext) :
       CompletableFuture.completedFuture(records);
   }
 
   private boolean isAnonymize(List<LogRecord> records) {
+    LOGGER.debug("isAnonymize:: Checking if anonymize is required for records");
     return records.stream()
       .anyMatch(logRecord -> LogRecord.Action.ANONYMIZE == logRecord.getAction());
   }
 
   private CompletableFuture<List<LogRecord>> anonymizeLoanRelatedRecords(List<LogRecord> records,
     Map<String, String> okapiHeaders, Context vertxContext) {
+    LOGGER.debug("anonymizeLoanRelatedRecords:: Anonymize loan-related records for log records");
     CompletableFuture<List<LogRecord>> future = new CompletableFuture<>();
     List<LogRecord> result = new ArrayList<>();
     if (!records.isEmpty() && !records.get(0).getItems().isEmpty()) {
@@ -72,6 +77,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
           .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, false, false, reply -> {
             if (reply.succeeded()) {
+              LOGGER.info("anonymizeLoanRelatedRecords:: Anonymize loan-related records for log records Successfully");
               reply.result().getResults().forEach(record -> {
                 record.setUserBarcode(null);
                 record.setLinkToIds(record.getLinkToIds().withUserId(null));
@@ -79,6 +85,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
               });
               future.complete(result);
             } else {
+              LOGGER.warn("Failed Anonymize loan-related records for log records due to : {}", reply.cause().getMessage());
               future.completeExceptionally(reply.cause());
             }
           }));
@@ -88,9 +95,11 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
+    LOGGER.debug("saveLogRecords:: Saving log records");
     CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
+        LOGGER.warn("Error saving log records: {}", reply.cause().getMessage());
         future.completeExceptionally(reply.cause());
       } else {
         future.complete(null);

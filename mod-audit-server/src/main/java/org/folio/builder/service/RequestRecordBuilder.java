@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.RequestDescriptionBuilder;
 import org.folio.rest.external.CancellationReasonCollection;
 import org.folio.rest.jaxrs.model.Item;
@@ -60,6 +62,8 @@ import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 
 public class RequestRecordBuilder extends LogRecordBuilder {
+
+  private static final Logger LOGGER = LogManager.getLogger();
 
   public static final String CLOSED_CANCELLED_STATUS = "Closed - Cancelled";
   public static final String PICKUP_EXPIRED_STATUS = "Closed - Pickup expired";
@@ -75,13 +79,14 @@ public class RequestRecordBuilder extends LogRecordBuilder {
   }
 
   private CompletableFuture<List<LogRecord>> buildRequestLogRecord(JsonObject event) {
-
+    LOGGER.debug("buildRequestLogRecord:: Building Request Log Record");
     List<LogRecord> records = new ArrayList<>();
     final LogRecord.Action action = resolveLogRecordAction(getProperty(event, LOG_EVENT_TYPE));
 
     var requests = getNestedObjectProperty(event, PAYLOAD, REQUESTS);
 
     if (LogRecord.Action.CREATED == action || LogRecord.Action.CREATED_THROUGH_OVERRIDE == action) {
+      LOGGER.info("buildRequestLogRecord:: Building log record for created action");
       var created = getObjectProperty(requests, CREATED);
 
       return fetchItemDetails(new JsonObject().put(ITEM_ID.value(), getProperty(created, ITEM_ID)))
@@ -93,7 +98,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
             }));
 
     } else if (LogRecord.Action.EDITED == action) {
-
+      LOGGER.info("buildRequestLogRecord:: Building log record for edited action");
       var original = getObjectProperty(requests, ORIGINAL);
       var updated = getObjectProperty(requests, UPDATED);
 
@@ -117,6 +122,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
             }));
 
     } else if (LogRecord.Action.MOVED == action) {
+      LOGGER.info("buildRequestLogRecord:: Building log record for moved action");
 
       var original = getObjectProperty(requests, ORIGINAL);
       var updated = getObjectProperty(requests, UPDATED);
@@ -130,6 +136,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
             }));
 
     } else if (LogRecord.Action.QUEUE_POSITION_REORDERED == action) {
+      LOGGER.info("buildRequestLogRecord:: Building log record for Queue position reordered action");
 
       var reordered = getArrayProperty(requests, REORDERED);
 
@@ -153,6 +160,7 @@ public class RequestRecordBuilder extends LogRecordBuilder {
         .collect(Collectors.toList()));
 
     } else if (LogRecord.Action.EXPIRED == action) {
+      LOGGER.info("buildRequestLogRecord:: Building log record for expired action");
 
       var original = getObjectProperty(requests, ORIGINAL);
       var updated = getObjectProperty(requests, UPDATED);
@@ -168,11 +176,13 @@ public class RequestRecordBuilder extends LogRecordBuilder {
             }));
 
     } else {
+      LOGGER.warn("Action isn't determined or invalid");
       throw new IllegalArgumentException("Action isn't determined or invalid");
     }
   }
 
   private LogRecord buildBaseContent(JsonObject created, JsonObject item, JsonObject user) {
+    LOGGER.debug("buildBaseContent:: Building base content for LogRecord");
     return new LogRecord().withObject(LogRecord.Object.REQUEST)
       .withUserBarcode(getProperty(user, USER_BARCODE))
       .withServicePointId(getProperty(created, REQUEST_PICKUP_SERVICE_POINT_ID))
@@ -183,11 +193,13 @@ public class RequestRecordBuilder extends LogRecordBuilder {
   }
 
   private LinkToIds buildLinkToIds(JsonObject created) {
+    LOGGER.debug("buildLinkToIds:: Building LinkToIds for LogRecord.");
     return new LinkToIds().withUserId(getProperty(created, REQUESTER_ID))
       .withRequestId(getProperty(created, REQUEST_ID));
   }
 
   private List<Item> buildItemData(JsonObject payload) {
+    LOGGER.debug("buildItemData:: Building item data for LogRecord.");
     return Collections.singletonList(new Item().withItemId(getProperty(payload, ITEM_ID))
       .withItemBarcode(isNull(getNestedStringProperty(payload, ITEM, BARCODE)) ? getProperty(payload, ITEM_BARCODE)
           : getNestedStringProperty(payload, ITEM, BARCODE))
@@ -197,21 +209,30 @@ public class RequestRecordBuilder extends LogRecordBuilder {
   }
 
   private LogRecord.Action resolveLogRecordAction(String logEventType) {
+    LOGGER.debug("resolveLogRecordAction:: Resolving LogRecord Action for event type : {}", logEventType);
     if (REQUEST_CREATED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action created");
       return LogRecord.Action.CREATED;
     } else if (REQUEST_CREATED_THROUGH_OVERRIDE.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action created through override");
       return LogRecord.Action.CREATED_THROUGH_OVERRIDE;
     } else if (REQUEST_UPDATED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action updated");
       return LogRecord.Action.EDITED;
     } else if (REQUEST_MOVED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action moved");
       return LogRecord.Action.MOVED;
     } else if (REQUEST_REORDERED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action reordered");
       return LogRecord.Action.QUEUE_POSITION_REORDERED;
     } else if (REQUEST_CANCELLED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action cancelled");
       return LogRecord.Action.CANCELLED;
     } else if (REQUEST_EXPIRED.equals(logEventType)) {
+      LOGGER.info("resolveLogRecordAction::  LogRecord Action expired");
       return LogRecord.Action.EXPIRED;
     } else {
+      LOGGER.warn("Builder isn't implemented yet for: {}", logEventType);
       throw new IllegalArgumentException("Builder isn't implemented yet for: " + logEventType);
     }
   }

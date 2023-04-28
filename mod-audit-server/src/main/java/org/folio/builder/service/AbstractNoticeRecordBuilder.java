@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -41,6 +43,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
+
+  private static final Logger LOGGER = LogManager.getLogger();
   protected static final String UNKNOWN_VALUE = "unknown";
   private final LogRecord.Action action;
 
@@ -53,35 +57,44 @@ public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
+    LOGGER.debug("buildLogRecord:: Building Log Record");
     JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
+    LOGGER.info("buildLogRecord:: Log record created successfully");
     return fetchUserDetails(payload)
       .thenCompose(this::fetchTemplateName)
       .thenCompose(this::createResult);
   }
 
   private CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload) {
+    LOGGER.debug("fetchUserDetails:: Fetching User Details");
     String userBarcode = getProperty(payload, USER_BARCODE);
 
+    LOGGER.info("fetchUserDetails:: Fetched User Details with user barcode : {}", userBarcode);
     return userBarcode != null
       ? fetchUserDetailsByUserBarcode(payload, userBarcode)
       : fetchUserDetails(payload, getProperty(payload, USER_ID));
   }
 
   private JsonObject extractFirstItem(JsonObject payload) {
+    LOGGER.debug("extractFirstItem:: Extracting First Item");
     if (getArrayProperty(payload, ITEMS).isEmpty()) {
+      LOGGER.info("extractFirstItem:: Failed Extarcting First Item because there are no items in payload");
       return new JsonObject();
     }
+    LOGGER.info("extractFirstItem:: Extracted First Item");
     return getArrayProperty(payload, ITEMS).getJsonObject(0);
   }
 
   public List<Item> fetchItems(JsonArray itemsArray) {
+    LOGGER.debug("fetchItems:: Fetching Items");
     return itemsArray.stream()
       .map(itemJson -> createItem((JsonObject) itemJson))
       .collect(Collectors.toList());
   }
 
   private Item createItem(JsonObject itemJson) {
+    LOGGER.debug("createItem:: Creating Item");
     Item item = new Item()
       .withItemBarcode(getProperty(itemJson, ITEM_BARCODE))
       .withItemId(getProperty(itemJson, ITEM_ID))
@@ -93,10 +106,12 @@ public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
         item.setLoanId(id);
       }
     });
+    LOGGER.info("createItem:: Created Item");
     return item;
   }
 
   private CompletableFuture<List<LogRecord>> createResult(JsonObject payload) {
+    LOGGER.debug("createResult:: Creating Result");
     JsonObject itemJson = extractFirstItem(payload);
     LogRecord logRecord = new LogRecord()
       .withObject(NOTICE)
@@ -114,10 +129,12 @@ public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
         .withTemplateId(getProperty(itemJson, TEMPLATE_ID))
         .withNoticePolicyId(getProperty(itemJson, NOTICE_POLICY_ID)));
 
+    LOGGER.info("createResult:: Created Result");
     return CompletableFuture.completedFuture(Collections.singletonList(logRecord));
   }
 
   protected String buildDescription(JsonObject payload, JsonObject itemJson) {
+    LOGGER.debug("buildDescription:: Building Description");
     return String.format(NOTICE_MSG,
       ofNullable(getProperty(payload, TEMPLATE_NAME)).orElse(UNKNOWN_VALUE),
       ofNullable(getProperty(itemJson, TRIGGERING_EVENT)).orElse(UNKNOWN_VALUE));

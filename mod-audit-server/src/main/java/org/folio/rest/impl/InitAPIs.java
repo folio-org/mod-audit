@@ -33,26 +33,27 @@ public class InitAPIs implements InitAPI {
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
-    LOGGER.info("InitAPI starting...");
+    LOGGER.debug("init:: InitAPI starting...");
     try {
       SpringContextUtil.init(vertx, context, ApplicationConfig.class);
       SpringContextUtil.autowireDependencies(this, context);
       deployConsumersVerticles(vertx)
         .onSuccess(car -> {
           handler.handle(Future.succeededFuture());
-          LOGGER.info("Consumer Verticles were successfully started");
+          LOGGER.info("init:: Consumer Verticles were successfully started");
         })
         .onFailure(th -> {
           handler.handle(Future.failedFuture(th));
-          LOGGER.error("Consumer Verticles were not started", th);
+          LOGGER.warn("Consumer Verticles were not started", th);
         });
     } catch (Throwable th) {
-      LOGGER.error("Error during module init", th);
+      LOGGER.warn("Error during module init", th);
       handler.handle(Future.failedFuture(th));
     }
   }
 
   private Future<?> deployConsumersVerticles(Vertx vertx) {
+    LOGGER.debug("deployConsumersVerticles:: Deploying Consumers Verticle");
     AbstractApplicationContext springContext = vertx.getOrCreateContext().get(SPRING_CONTEXT_KEY);
     VerticleFactory verticleFactory = springContext.getBean(SpringVerticleFactory.class);
     vertx.registerVerticleFactory(verticleFactory);
@@ -70,12 +71,14 @@ public class InitAPIs implements InitAPI {
         .setWorker(true)
         .setInstances(acqOrderLineConsumerInstancesNumber), orderLineEventsConsumer);
 
+    LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
       orderEventsConsumer.future(),
       orderLineEventsConsumer.future()));
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {
+    LOGGER.debug("getVerticleName:: Retrieving Verticle name");
     return verticleFactory.prefix() + ":" + clazz.getName();
   }
 }

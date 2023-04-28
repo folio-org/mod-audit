@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.LoanCheckOutDescriptionBuilder;
 import org.folio.builder.description.RequestStatusChangedDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
@@ -35,24 +37,30 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class CheckOutRecordBuilder extends LogRecordBuilder {
+  private static final Logger LOGGER = LogManager.getLogger();
+
   public CheckOutRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext, String logEventType) {
     super(okapiHeaders, vertxContext, logEventType);
   }
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
+    LOGGER.debug("buildLogRecord:: Building Log Record");
     List<LogRecord> logRecords = new ArrayList<>();
     logRecords.add(buildLoanCheckOutRecord(payload));
+    LOGGER.info("buildLogRecord:: Loan check-out record added to log records");
 
     JsonArray requests = getArrayProperty(payload, REQUESTS);
     for (int i = 0; i < requests.size(); i++) {
       logRecords.add(buildCheckOutRequestStatusChangedRecord(payload, requests.getJsonObject(i)));
     }
 
+    LOGGER.info("buildLogRecord:: Built Log Record");
     return CompletableFuture.completedFuture(logRecords);
   }
 
   private LogRecord buildCheckOutRequestStatusChangedRecord(JsonObject payload, JsonObject request) {
+    LOGGER.debug("buildCheckOutRequestStatusChangedRecord:: Building check-out request status changed log record");
     return new LogRecord().withObject(LogRecord.Object.REQUEST)
       .withAction(LogRecord.Action.REQUEST_STATUS_CHANGED)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -66,6 +74,7 @@ public class CheckOutRecordBuilder extends LogRecordBuilder {
   }
 
   private LogRecord buildLoanCheckOutRecord(JsonObject payload) {
+    LOGGER.debug("buildLoanCheckOutRecord:: Building loan check-out log record");
     return new LogRecord().withObject(LogRecord.Object.LOAN)
       .withAction(CHECK_OUT_THROUGH_OVERRIDE_EVENT.equals(logEventType) ? CHECKED_OUT_THROUGH_OVERRIDE : CHECKED_OUT)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -78,6 +87,7 @@ public class CheckOutRecordBuilder extends LogRecordBuilder {
   }
 
   private List<Item> buildItems(JsonObject payload) {
+    LOGGER.debug("buildItems:: Building items");
     return Collections.singletonList(new Item().withItemId(getProperty(payload, ITEM_ID))
       .withItemBarcode(getProperty(payload, ITEM_BARCODE))
       .withHoldingId(getProperty(payload, HOLDINGS_RECORD_ID))
