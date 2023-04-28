@@ -52,6 +52,9 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
         LOGGER.info("sql is:{}",cqlWrapper.getWhereClause());
         LOGGER.info("fields: {}",cqlWrapper.getQuery());
 
+        System.out.println("limit-->"+cqlWrapper.getLimit());
+        System.out.println("without-->"+cqlWrapper.getWithoutLimOff());
+
         getClient(okapiHeaders, vertxContext)
           .get(LOGS_TABLE_NAME, LogRecord.class, new String[]{"*"}, cqlWrapper, true, false, reply -> {
             if (reply.succeeded()) {

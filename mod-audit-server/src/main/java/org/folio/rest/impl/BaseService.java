@@ -27,12 +27,16 @@ public abstract class BaseService {
     CompletableFuture<CQLWrapper> future = new CompletableFuture<>();
     String tempQuery = query;
     try {
+      CQL2PgJSON cql2PgJSON = new CQL2PgJSON(tableName + ".jsonb");
       if(query!=null &&  query.contains(OPTIMISED_TRUE)){
         System.out.println("replacing with empty");
         tempQuery = query.replace(OPTIMISED_TRUE,"");
+        future.complete(new CQLWrapper(cql2PgJSON, tempQuery));
       }
-      CQL2PgJSON cql2PgJSON = new CQL2PgJSON(tableName + ".jsonb");
-      future.complete(new CQLWrapper(cql2PgJSON, tempQuery).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
+      else {
+        future.complete(new CQLWrapper(cql2PgJSON, tempQuery).setLimit(new Limit(limit)).setOffset(new Offset(offset)));
+      }
+
     } catch (FieldException e) {
       future.completeExceptionally(e);
     }
