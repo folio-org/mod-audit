@@ -49,7 +49,7 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           }
         }))
       .exceptionally(throwable -> {
-        LOGGER.warn("Exception occurred while getting audit data circulation logs: {}", throwable.getMessage());
+        LOGGER.warn("Exception occurred while getting audit data circulation logs: {}", throwable.getLocalizedMessage());
         asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse.
           respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
         return null;
