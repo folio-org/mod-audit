@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.DescriptionBuilder;
 import org.folio.builder.description.ItemCheckInDescriptionBuilder;
 import org.folio.builder.description.LoanCheckInDescriptionBuilder;
@@ -37,6 +39,8 @@ import io.vertx.core.json.JsonObject;
 
 public class CheckInRecordBuilder extends LogRecordBuilder {
 
+  private static final Logger LOGGER = LogManager.getLogger();
+
   private final DescriptionBuilder itemCheckInDescriptionBuilder = new ItemCheckInDescriptionBuilder();
 
   public CheckInRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
@@ -45,22 +49,26 @@ public class CheckInRecordBuilder extends LogRecordBuilder {
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject payload) {
+    LOGGER.debug("buildLogRecord:: Building Log Record");
     List<LogRecord> logRecords = new ArrayList<>();
     logRecords.add(buildItemCheckInRecord(payload));
+    LOGGER.info("buildLogRecord:: Item check-in record added to log records");
 
     if (getBooleanProperty(payload, IS_LOAN_CLOSED)) {
       logRecords.add(buildLoanCheckInRecord(payload));
+      LOGGER.info("buildLogRecord:: Loan check-in record added to log records");
     }
 
     JsonArray requests = getArrayProperty(payload, REQUESTS);
     for (int i = 0; i < requests.size(); i++) {
       logRecords.add(buildCheckInRequestStatusChangedRecord(payload, requests.getJsonObject(i)));
     }
-
+    LOGGER.info("buildLogRecord:: Built Log Record");
     return CompletableFuture.completedFuture(logRecords);
   }
 
   private LogRecord buildLoanCheckInRecord(JsonObject payload) {
+    LOGGER.debug("buildLoanCheckInRecord:: Building loan check-in record");
     return new LogRecord().withObject(LogRecord.Object.LOAN)
       .withAction(LogRecord.Action.CLOSED_LOAN)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -73,6 +81,7 @@ public class CheckInRecordBuilder extends LogRecordBuilder {
   }
 
   private LogRecord buildItemCheckInRecord(JsonObject payload) {
+    LOGGER.debug("buildItemCheckInRecord:: Building item check-in record");
     return new LogRecord().withObject(LogRecord.Object.N_A)
       .withAction(LogRecord.Action.CHECKED_IN)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -85,6 +94,7 @@ public class CheckInRecordBuilder extends LogRecordBuilder {
   }
 
   private LogRecord buildCheckInRequestStatusChangedRecord(JsonObject payload, JsonObject request) {
+    LOGGER.debug("buildCheckInRequestStatusChangedRecord:: Building check-in request status changed record");
     return new LogRecord().withObject(LogRecord.Object.REQUEST)
       .withAction(LogRecord.Action.REQUEST_STATUS_CHANGED)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -98,6 +108,7 @@ public class CheckInRecordBuilder extends LogRecordBuilder {
   }
 
   private List<Item> buildItems(JsonObject payload) {
+    LOGGER.debug("buildItems:: Building items");
     return Collections.singletonList(new Item().withItemId(getProperty(payload, ITEM_ID))
       .withItemBarcode(getProperty(payload, ITEM_BARCODE))
       .withHoldingId(getProperty(payload, HOLDINGS_RECORD_ID))

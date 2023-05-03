@@ -84,6 +84,7 @@ public abstract class LogRecordBuilder {
   }
 
   private CompletableFuture<JsonObject> handleGetRequest(String endpoint) {
+    LOGGER.debug("handleGetRequest:: handling Get Request with endpoint : {}", endpoint);
     CompletableFuture<JsonObject> future = new CompletableFuture<>();
 
     final String okapiURL = okapiHeaders.getOrDefault(OKAPI_URL, "");
@@ -91,7 +92,7 @@ public abstract class LogRecordBuilder {
     HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
     try {
-      LOGGER.info("Calling GET {}", endpoint);
+      LOGGER.info("handleGetRequest::Calling GET {}", endpoint);
       httpClient.request(HttpMethod.GET, endpoint, okapiHeaders)
         .whenComplete((response, throwable) -> {
           if (Objects.nonNull(throwable)) {
@@ -103,7 +104,7 @@ public abstract class LogRecordBuilder {
           httpClient.closeClient();
         });
     } catch (Exception e) {
-      LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
+      LOGGER.warn(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
       future.completeExceptionally(e);
       httpClient.closeClient();
     }
@@ -111,7 +112,9 @@ public abstract class LogRecordBuilder {
   }
 
   public <T> CompletableFuture<T> getEntitiesByQuery(String url, Class<T> collection, int limit, int offset, String query) {
+    LOGGER.debug("getEntitiesByQuery:: Getting Entities By Query : {}", query);
     String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
+    LOGGER.info("getEntitiesByQuery:: Entities successfully retrieved from endpoint: {}", endpoint);
     return handleGetRequest(endpoint).thenApply(response -> response.mapTo(collection));
   }
 
@@ -122,41 +125,49 @@ public abstract class LogRecordBuilder {
    * @return future with list of item records
    */
   public <T> CompletableFuture<T> getEntitiesByIds(String url, Class<T> collection, int limit, int offset, String... ids) {
+    LOGGER.debug("getEntitiesByIds:: Getting Entities By Ids");
     return getEntitiesByQuery(url, collection, limit, offset, convertIdsToCqlQuery(ids));
   }
 
   public CompletableFuture<JsonObject> fetchTemplateName(JsonObject payload) {
+    LOGGER.debug("fetchTemplateName:: Fetching Template Name");
     String templateId = getProperty(extractFirstItem(payload), TEMPLATE_ID);
 
     if (templateId == null) {
+      LOGGER.warn("No template ID found in payload, returning payload as is.");
       return completedFuture(payload);
     }
-
+    LOGGER.info("fetchTemplateName:: Fetching template name from URL");
     return handleGetRequest(String.format(URL_WITH_ID_PATTERN, TEMPLATES_URL, templateId))
       .thenCompose(templateJson -> {
         if (nonNull(templateJson)) {
+          LOGGER.info("fetchTemplateName:: Template name successfully retrieved");
           return completedFuture(payload.put(TEMPLATE_NAME.value(),
               isNull(getProperty(templateJson, NAME)) ? EMPTY : getProperty(templateJson, NAME)));
         }
+        LOGGER.warn("No template found with ID: {}", templateId);
         return completedFuture(payload.put(TEMPLATE_NAME.value(), EMPTY));
       });
   }
 
   public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
+    LOGGER.debug("fetchUserDetails:: Fetching user details for user Id : {}", userId);
     return getEntitiesByIds(USERS_URL, UserCollection.class, 1, 0, userId)
       .thenCompose(users -> {
         users.getUsers()
           .stream()
           .findFirst()
           .ifPresent(user -> updatePayload(payload, userId, user));
-
+        LOGGER.info("fetchUserDetails:: Fetched user details for user Id : {}", userId);
         return CompletableFuture.completedFuture(payload);
       });
   }
 
   private void updatePayload(JsonObject payload, String userId, User user) {
+    LOGGER.debug("updatePayload:: Updating payload with details for user ID {}", userId);
     if (nonNull(user)) {
       if (userId.equals(getProperty(payload, USER_ID))) {
+        LOGGER.info("updatePayload:: Updating user id to payload because user id : {} matched with user id from payload", userId);
         payload.put(USER_BARCODE.value(), user.getBarcode());
       }
       fetchUserPersonal(payload, user);
@@ -164,7 +175,7 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchUserAndSourceDetails(JsonObject payload, String userId, String sourceId) {
-
+    LOGGER.debug("fetchUserAndSourceDetails:: Fetching user details for user Id : {} and source ID {}", userId, sourceId);
     return getEntitiesByIds(USERS_URL, UserCollection.class, 2, 0, userId, sourceId)
       .thenCompose(users -> {
       Map<String, User> usersGroupedById = StreamEx.of(users.getUsers()).collect(toMap(User::getId, identity()));
@@ -174,36 +185,44 @@ public abstract class LogRecordBuilder {
         updatePayload(payload, userId, user);
 
         if (nonNull(source)) {
+          LOGGER.info("fetchUserAndSourceDetails:: Adding source to the payload");
           payload.put(SOURCE.value(),
             buildPersonalName(source.getPersonal().getFirstName(), source.getPersonal().getLastName()));
         }
+        LOGGER.info("fetchUserAndSourceDetails:: Fetched user details for user Id : {} and source ID {}", userId, sourceId);
         return completedFuture(payload);
     });
   }
 
   public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
+    LOGGER.debug("fetchUserDetailsByUserBarcode:: Fetching user details by user barcode {}", userBarcode);
     return getEntitiesByQuery(USERS_URL, UserCollection.class, 1, 0, "barcode==" + userBarcode)
       .thenCompose(users -> {
         var user = users.getUsers().get(0);
         if (nonNull(user)) {
           if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
+            LOGGER.info("fetchUserDetailsByUserBarcode:: Adding user id to payload because user barcode : {} matched with user barcode from payload", userBarcode);
             payload.put(USER_ID.value(), user.getId());
           }
           fetchUserPersonal(payload, user);
         }
+        LOGGER.info("fetchUserDetailsByUserBarcode:: Fetched user details by user barcode {}", userBarcode);
         return completedFuture(payload);
       });
   }
 
   private void fetchUserPersonal(JsonObject payload, User user) {
+    LOGGER.debug("fetchUserPersonal:: Fetching User Personal");
     var personal = user.getPersonal();
     if (nonNull(personal) && nonNull(buildPersonalName(personal.getFirstName(), personal.getLastName()))) {
+      LOGGER.info("fetchUserPersonal:: Fetched personal name");
       payload.put(PERSONAL_NAME.value(),
         buildPersonalName(personal.getFirstName(), personal.getLastName()));
     }
   }
 
   public CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
+    LOGGER.debug("fetchItemDetails:: Fetching Item Details");
     return handleGetRequest(String.format(URL_WITH_ID_PATTERN, ITEMS_URL, getProperty(payload, ITEM_ID)))
       .thenCompose(itemJson -> addItemData(payload, itemJson))
       .thenCompose(json ->
@@ -220,10 +239,12 @@ public abstract class LogRecordBuilder {
    * @return URL encoded string
    */
   private String encodeQuery(String query) {
+    LOGGER.debug("encodeQuery:: Encoding Query : {}", query );
     try {
+      LOGGER.info("Encoded query");
       return URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {
-      LOGGER.error("Error happened while attempting to encode '{}'", query);
+      LOGGER.warn("Error happened while attempting to encode '{}'", query);
       throw new CompletionException(e);
     }
   }
@@ -247,69 +268,88 @@ public abstract class LogRecordBuilder {
    * @return String representing CQL query to get records by some property values
    */
   private String convertIdsToCqlQuery(String fieldName, boolean strictMatch, String... values) {
+    LOGGER.debug("convertIdsToCqlQuery:: Converting Ids To CqlQuery with field name : {}", fieldName);
     String prefix = fieldName + (strictMatch ? "==(" : "=(");
+    LOGGER.info("Converted IDs to CQL query");
     return StreamEx.of(values)
       .joining(" or ", prefix, ")");
   }
 
   private CompletableFuture<JsonObject> addItemData(JsonObject payload, JsonObject itemJson) {
+    LOGGER.debug("addItemData:: Adding Item Data");
     if (nonNull(itemJson)) {
       ofNullable(getProperty(itemJson, BARCODE))
         .ifPresent(barcode -> payload.put(ITEM_BARCODE.value(), barcode));
+      LOGGER.info("addItemData:: Added item barcode");
       ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
         .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
+      LOGGER.info("addItemData:: Added holdings record ID");
     }
+    LOGGER.info("addItemData:: Added Item Data");
     return completedFuture(payload);
   }
 
   private CompletableFuture<JsonObject> addHoldingData(JsonObject payload, JsonObject holdingJson) {
+    LOGGER.debug("addHoldingData:: Adding Holding Data");
     if (nonNull(holdingJson)) {
       ofNullable(getProperty(holdingJson, INSTANCE_ID))
         .ifPresent(instanceId -> payload.put(INSTANCE_ID.value(), instanceId));
     }
+    LOGGER.info("addHoldingData:: Added Holding Data");
     return completedFuture(payload);
   }
 
   private JsonObject extractFirstItem(JsonObject payload) {
+    LOGGER.debug("extractFirstItem:: Extracting First Item from payload");
     if (getArrayProperty(payload, ITEMS).isEmpty()) {
+      LOGGER.warn("No items found in payload");
       return new JsonObject();
     }
+    LOGGER.debug("extractFirstItem:: Extracted First Item from payload");
     return getArrayProperty(payload, ITEMS).getJsonObject(0);
   }
 
   private static JsonObject verifyAndExtractBody(Response response) {
+    LOGGER.debug("verifyAndExtractBody:: Verifying and Extracting Body");
     var endpoint = response.getEndpoint();
     var code = response.getCode();
     var body = response.getBody();
     if (!Response.isSuccess(code)) {
-      LOGGER.error("Error calling {} with code {}, response body: {}", endpoint, code, body);
+      LOGGER.warn("Error calling {} with code {}, response body: {}", endpoint, code, body);
       return null;
     }
-    LOGGER.info("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.info("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
     return response.getBody();
   }
 
   protected LogRecord.Action resolveAction(String actionString) {
+    LOGGER.debug("resolveAction:: Resolving Action");
     try {
+      LOGGER.info("resolveAction:: Trying to Resolve Action with action String : {}", actionString);
       return LogRecord.Action.fromValue(actionString);
     } catch (IllegalArgumentException e) {
       String errorMessage = "Builder isn't implemented yet for: " + actionString;
       if (isEmpty(actionString)) {
         errorMessage = "Action is empty";
-        LOGGER.error(errorMessage);
+        LOGGER.warn(errorMessage);
       }
       throw new IllegalArgumentException(errorMessage);
     }
   }
 
   String buildPersonalName(String firstName, String lastName) {
+    LOGGER.debug("buildPersonalName:: Building Personal Name with firstname : {} and lastname : {}", firstName, lastName);
     if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
+      LOGGER.info("buildPersonalName:: Built Personal Name with firstname : {} and lastname : {}", firstName, lastName);
       return lastName + ", " + firstName;
     } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
+      LOGGER.info("buildPersonalName:: Built Personal Name with lastname : {}", lastName);
       return lastName;
     } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
+      LOGGER.info("buildPersonalName:: Built Personal Name with firstname : {}", firstName);
       return firstName;
     } else {
+      LOGGER.info("buildPersonalName:: Error building personal name because there is no firstname and lastname");
       return null;
     }
   }
