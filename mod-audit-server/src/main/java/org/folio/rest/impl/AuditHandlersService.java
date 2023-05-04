@@ -40,7 +40,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
-          LOGGER.error("Error saving log event: " + entity, throwable.getLocalizedMessage());
+          LOGGER.error("Error saving log event: {} {}", entity, throwable.getLocalizedMessage());
           return null;
         });
     } catch (Exception e) {
@@ -52,6 +52,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<List<LogRecord>> processAnonymize(List<LogRecord> records,
     Map<String, String> okapiHeaders, Context vertxContext) {
+    LOGGER.info("Inside processAnonymize");
     return isAnonymize(records) ?
       anonymizeLoanRelatedRecords(records, okapiHeaders, vertxContext) :
       CompletableFuture.completedFuture(records);
@@ -88,9 +89,11 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
 
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
+    LOGGER.info("Inside saveLogRecords");
     CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
+        LOGGER.info("Error cause ", reply.cause());
         future.completeExceptionally(reply.cause());
       } else {
         future.complete(null);
