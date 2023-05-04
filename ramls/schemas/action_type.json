@@ -43,6 +43,7 @@
     "Transferred fully",
     "Transferred partially",
     "Waived fully",
-    "Waived partially"
+    "Waived partially",
+    "Actual Cost Expired"
   ]
 }
