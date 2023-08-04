@@ -53,7 +53,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
       LOGGER.info("buildLogRecord:: Built Log Record for Anonymize Action");
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
-    } else if (isAction(payload, AGE_TO_LOST) || isAction(payload, CHANGED_DUE_DATE)) {
+    } else if (isAction(payload, AGE_TO_LOST)) {
       LOGGER.info("buildLogRecord:: Built Log Record for Age To Lost or Changed Due date Action");
       return fetchUserDetails(payload, getProperty(payload, USER_ID))
         .thenCompose(this::createResult);
