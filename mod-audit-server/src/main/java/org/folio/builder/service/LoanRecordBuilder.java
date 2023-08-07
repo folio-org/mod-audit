@@ -2,7 +2,6 @@ package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
-import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
