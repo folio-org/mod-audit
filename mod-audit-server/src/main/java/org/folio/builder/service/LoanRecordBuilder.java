@@ -2,6 +2,7 @@ package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
@@ -53,7 +54,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
     } else if (isAction(payload, AGE_TO_LOST)) {
-      LOGGER.info("buildLogRecord:: Built Log Record for Age To Lost or Changed Due date Action");
+      LOGGER.info("buildLogRecord:: Built Log Record for Age To Lost");
       return fetchUserDetails(payload, getProperty(payload, USER_ID))
         .thenCompose(this::createResult);
     }
