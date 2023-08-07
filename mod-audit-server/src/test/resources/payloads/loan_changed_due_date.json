@@ -1,6 +1,7 @@
 {
   "logEventType" : "LOAN",
   "payload": {
+    "userBarcode" : "631888472578232",
     "itemBarcode" : "90000",
     "itemId" : "100d10bf-2f06-4aa0-be15-0b95b2d9f9e3",
     "instanceId" : "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
@@ -9,6 +10,7 @@
     "action" : "Changed due date",
     "date" : "2020-10-14T10:10:41.610Z",
     "servicePointId" : "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+    "updatedByUserId" : "fa96fec8-786f-505b-b55e-e0bb1150d548",
     "loanId" : "336ec84c-27ed-483d-92e3-926fafa7ed1c"
   }
 }
