@@ -55,9 +55,6 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
   private CompletableFuture<List<LogRecord>> processAnonymize(List<LogRecord> records,
     Map<String, String> okapiHeaders, Context vertxContext) {
     LOGGER.debug("processAnonymize:: Processing anonymize for records");
-    for (int i = 0; i < records.size(); i++) {
-      LOGGER.info("processAnonymize:: Saving log records source: {} LOG RECORD: {}", records.get(i).getSource(), records.get(i));
-    }
     return isAnonymize(records) ?
       anonymizeLoanRelatedRecords(records, okapiHeaders, vertxContext) :
       CompletableFuture.completedFuture(records);
@@ -99,9 +96,6 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
   private CompletableFuture<Void> saveLogRecords(List<LogRecord> logRecords, Map<String, String> okapiHeaders,
     Context vertxContext) {
     LOGGER.debug("saveLogRecords:: Saving log records");
-    for (int i = 0; i < logRecords.size(); i++) {
-      LOGGER.info("saveLogRecords:: Saving log records source: {}, LOG RECORD: {}", logRecords.get(i).getSource(), logRecords.get(i));
-    }
     CompletableFuture<Void> future = new CompletableFuture<>();
     getClient(okapiHeaders, vertxContext).upsertBatch(LOGS_TABLE_NAME, logRecords, reply -> {
       if (reply.failed()) {
