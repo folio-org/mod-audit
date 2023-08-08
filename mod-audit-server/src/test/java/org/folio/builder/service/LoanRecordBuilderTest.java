@@ -131,7 +131,7 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getAction(), equalTo(CHANGED_DUE_DATE));
     assertThat(loanLogRecord.getDate(), is(not(nullValue())));
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
-    assertThat(loanLogRecord.getSource(), equalTo("Bernhard, Cordell"));
+    assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
   }
 
   @Test
