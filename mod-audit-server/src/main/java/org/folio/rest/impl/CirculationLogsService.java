@@ -31,6 +31,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataCirculationLogs:: Getting audit data circulation logs");
     LOGGER.info("getAuditDataCirculationLogs:: query: {}, offset: {}, limit: {}, lang: {}", query, offset, limit, lang);
+    query  = "((date>=\"2023-08-01T07:00:00\" and date<=\"2023-08-02T06:59:59\"))";
+    LOGGER.info("getAuditDataCirculationLogs:: query: {}, offset: {}, limit: {}, lang: {}", query, offset, limit, lang);
     createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
         .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
