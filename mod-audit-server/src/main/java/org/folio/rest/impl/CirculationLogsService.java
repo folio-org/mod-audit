@@ -6,7 +6,6 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -59,18 +58,5 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
       });
   }
 
-  public String convertQuery(String query){
-
-    String modifiedQuery = "";
-    //convert to utc timezone
-
-    String start = "2023-08-01T00:00:00-07:00";
-    String end = "2023-08-01T23:59:59-07:00";
-
-    OffsetDateTime.parse(start);
-    OffsetDateTime.parse(end);
-
-    return modifiedQuery;
-  }
 
 }
