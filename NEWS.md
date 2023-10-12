@@ -1,3 +1,12 @@
+## 2.8.0 2023-10-11
+
+* [MODAUD-110](https://issues.folio.org/browse/MODAUD-110) - Logging improvement
+* [MODAUD-161](https://issues.folio.org/browse/MODAUD-161) - Use GitHub Workflows api-lint and api-schema-lint and api-doc
+* [MODAUD-164](https://issues.folio.org/browse/MODAUD-164) - Allow action types for loan info
+* [MODAUD-166](https://issues.folio.org/browse/MODAUD-166) - Update to Java 17
+* [MODAUD-167](https://issues.folio.org/browse/MODAUD-167) - Upgrade folio-kafka-wrapper to 3.0.0 version
+* [MODAUD-168](https://issues.folio.org/browse/MODAUD-168) - Incorrect Patron name shown in Circulation log as source for Change Due Date
+
 ## 2.7.0 2023-02-23
 
 * [MODAUD-137](https://issues.folio.org/browse/MODAUD-137) - Logging improvement - Configuration
