@@ -1,8 +1,15 @@
 package org.folio.dao;
 
+import static org.folio.utils.EntityUtils.TENANT_ID;
+import static org.folio.utils.EntityUtils.createOrderLineAuditEvent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.UUID;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -17,18 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class OrderLineEventsDaoTest {
-
-  private static final String TENANT_ID = "diku";
-
-  public static final String ORDER_LINE_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
@@ -44,30 +40,14 @@ public class OrderLineEventsDaoTest {
 
   @Test
   void shouldCreateEventProcessed() {
-    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
-      .withOrderLineId(UUID.randomUUID().toString())
-      .withUserId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withActionDate(new Date());
+    var orderLineAuditEvent = createOrderLineAuditEvent(UUID.randomUUID().toString());
     Future<RowSet<Row>> saveFuture = orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
-    saveFuture.onComplete(ar -> {
-        assertTrue(ar.succeeded());
-      });
+    saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
   }
 
   @Test
   void shouldThrowConstraintViolation() {
-    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
-      .withOrderLineId(UUID.randomUUID().toString())
-      .withUserId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withActionDate(new Date());
+    var orderLineAuditEvent = createOrderLineAuditEvent(UUID.randomUUID().toString());
 
     Future<RowSet<Row>> saveFuture = orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -82,19 +62,8 @@ public class OrderLineEventsDaoTest {
 
   @Test
   void shouldGetCreatedEvent() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product2");
     String id = UUID.randomUUID().toString();
-
-    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
-      .withId(id)
-      .withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
-      .withOrderLineId(ORDER_LINE_ID)
-      .withUserId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderLineSnapshot(jsonObject);
+    var orderLineAuditEvent = createOrderLineAuditEvent(id);
 
     orderLineEventsDao.save(orderLineAuditEvent, TENANT_ID);
 
@@ -105,7 +74,6 @@ public class OrderLineEventsDaoTest {
 
       assertEquals(orderLineAuditEventList.get(0).getId(), id);
       assertEquals(OrderAuditEvent.Action.CREATE.value(), orderLineAuditEventList.get(0).getAction().value());
-
     });
   }
 

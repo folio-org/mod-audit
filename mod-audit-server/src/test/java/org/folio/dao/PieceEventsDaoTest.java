@@ -5,13 +5,11 @@ import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -30,7 +28,7 @@ public class PieceEventsDaoTest {
   @Spy
   PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @InjectMocks
-  PieceEventsDaoImpl pieceEventsDao = new PieceEventsDaoImpl(postgresClientFactory);
+  PieceEventsDaoImpl pieceEventsDao;
 
   @BeforeEach
   public void setUp() {
@@ -40,35 +38,15 @@ public class PieceEventsDaoTest {
 
   @Test
   void shouldCreateEventProcessed() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name", "Test product 123");
-
-    PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withPieceId(UUID.randomUUID().toString())
-      .withActionDate(new Date())
-      .withAction(PieceAuditEvent.Action.CREATE)
-      .withPieceSnapshot(jsonObject);
+    var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
 
     Future<RowSet<Row>> saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
-    saveFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-    });
+    saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
   }
 
   @Test
   void shouldThrowConstrainViolation() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name", "Test product 123");
-
-    PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withPieceId(UUID.randomUUID().toString())
-      .withActionDate(new Date())
-      .withAction(PieceAuditEvent.Action.CREATE)
-      .withPieceSnapshot(jsonObject);
+    var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
 
     Future<RowSet<Row>> saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
