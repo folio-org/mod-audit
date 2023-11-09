@@ -28,14 +28,17 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  @Autowired
-  private OrderAuditEventsService orderAuditEventsService;
-  @Autowired
-  private OrderLineAuditEventsService orderLineAuditEventsService;
-  @Autowired
-  private PieceAuditEventsService pieceAuditEventsService;
+  private final OrderAuditEventsService orderAuditEventsService;
+  private final OrderLineAuditEventsService orderLineAuditEventsService;
+  private final PieceAuditEventsService pieceAuditEventsService;
 
-  public AuditDataAcquisitionImpl() {
+  @Autowired
+  public AuditDataAcquisitionImpl(OrderAuditEventsService orderAuditEventsService,
+                                  OrderLineAuditEventsService orderLineAuditEventsService,
+                                  PieceAuditEventsService pieceAuditEventsService) {
+    this.orderAuditEventsService = orderAuditEventsService;
+    this.orderLineAuditEventsService = orderLineAuditEventsService;
+    this.pieceAuditEventsService = pieceAuditEventsService;
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 

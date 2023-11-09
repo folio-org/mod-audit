@@ -28,17 +28,13 @@ import static org.folio.util.AuditEventDBConstants.*;
 public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
-
   private static final String TABLE_NAME = "acquisition_order_line_log";
-
   private static final String GET_BY_ORDER_LINE_ID_SQL = "SELECT id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot," +
     " (SELECT count(*) AS total_records FROM %s WHERE order_line_id = $1) " +
     " FROM %s WHERE order_line_id = $1 %s LIMIT $2 OFFSET $3";
-
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot) " +
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
-  @Autowired
   private final PostgresClientFactory pgClientFactory;
 
   @Autowired

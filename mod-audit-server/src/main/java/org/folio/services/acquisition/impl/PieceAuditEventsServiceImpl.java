@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class PieceAuditEventsServiceImpl implements PieceAuditEventsService {
   private static final Logger LOGGER = LogManager.getLogger();
   private static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
-  private PieceEventsDao pieceEventsDao;
+  private final PieceEventsDao pieceEventsDao;
 
   @Autowired
   public PieceAuditEventsServiceImpl(PieceEventsDao pieceEventsDao) {
@@ -40,15 +40,9 @@ public class PieceAuditEventsServiceImpl implements PieceAuditEventsService {
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {
     LOGGER.debug("handleFailures:: Handling Failures with id={}", id);
-    return (throwable instanceof PgException && ((PgException) throwable).getCode().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
+    return (throwable instanceof PgException pgException && pgException.getCode().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
       Future.failedFuture(new DuplicateEventException(String.format("Event with id=%s is already processed.", id))) :
       Future.failedFuture(throwable);
   }
 
-  private <T> Future<T> handleFailuress(Throwable throwable, String id) {
-    LOGGER.debug("handleFailures:: Handling Failures with Id : {}", id);
-    return (throwable instanceof PgException && ((PgException) throwable).getCode().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
-      Future.failedFuture(new DuplicateEventException(String.format("Event with Id=%s is already processed.", id))) :
-      Future.failedFuture(throwable);
-  }
 }

@@ -12,10 +12,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PieceEventConsumersVerticle extends AbstractConsumersVerticle {
 
+  private final KafkaConfig kafkaConfig;
+  private final AsyncRecordHandler<String, String> orderLineEventsHandler;
+
   @Autowired
-  private KafkaConfig kafkaConfig;
-  @Autowired
-  private AsyncRecordHandler<String, String> orderLineEventsHandler;
+  public PieceEventConsumersVerticle(KafkaConfig kafkaConfig, AsyncRecordHandler<String, String> orderLineEventsHandler) {
+    this.kafkaConfig = kafkaConfig;
+    this.orderLineEventsHandler = orderLineEventsHandler;
+  }
 
   @Override
   public List<String> getEvents() {
