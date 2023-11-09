@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
@@ -22,10 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
+import static org.folio.utils.EntityUtils.createOrderAuditEvent;
+import static org.folio.utils.EntityUtils.createOrderAuditEventWithoutSnapshot;
 import static org.junit.Assert.assertTrue;
 
 public class OrderEventsHandlerMockTest {
@@ -63,16 +63,7 @@ public class OrderEventsHandlerMockTest {
 
   @Test
   void shouldProcessEvent() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("Test","TestValue");
-
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(ID)
-      .withEventDate(new Date())
-      .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(new Date())
-      .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot(jsonObject);
+    var orderAuditEvent = createOrderAuditEvent(UUID.randomUUID().toString());
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
 
     Future<String> saveFuture = orderEventsHandler.handle(kafkaConsumerRecord);
@@ -83,14 +74,9 @@ public class OrderEventsHandlerMockTest {
 
   @Test
   void shouldNotProcessEvent() {
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withOrderId(UUID.randomUUID().toString())
-      .withActionDate(new Date())
-      .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderSnapshot("Test");
+    var orderAuditEvent = createOrderAuditEventWithoutSnapshot();
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderAuditEvent);
+
     Future<String> save = orderEventsHandler.handle(kafkaConsumerRecord);
     assertTrue(save.failed());
   }

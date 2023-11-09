@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
+import static org.folio.utils.EntityUtils.createPieceAuditEventWithoutSnapshot;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -59,9 +60,7 @@ public class PieceEventsHandlerMockTest {
   @Test
   void shouldProcessEvent() {
     var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
-
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(pieceAuditEvent);
-
     Future<String> saveFuture = pieceEventsHandler.handle(kafkaConsumerRecord);
     saveFuture.onComplete(are -> {
       assertTrue(are.succeeded());
@@ -70,11 +69,10 @@ public class PieceEventsHandlerMockTest {
 
   @Test
   void shouldNotProcessEvent() {
-    var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
-
+    var pieceAuditEvent = createPieceAuditEventWithoutSnapshot();
     KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(pieceAuditEvent);
-    Future<String> save = pieceEventsHandler.handle(kafkaConsumerRecord);
-    assertTrue(save.failed());
+    Future<String> saveFuture = pieceEventsHandler.handle(kafkaConsumerRecord);
+    assertTrue(saveFuture.failed());
   }
 
   private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(PieceAuditEvent event) {

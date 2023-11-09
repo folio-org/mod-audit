@@ -17,7 +17,7 @@ public class EntityUtils {
 
   public static OrderAuditEvent createOrderAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product 123 ");
+    jsonObject.put("name", "Test Product 123 ");
 
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -29,11 +29,22 @@ public class EntityUtils {
       .withOrderSnapshot(jsonObject);
   }
 
+  public static OrderAuditEvent createOrderAuditEventWithoutSnapshot() {
+    return new OrderAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(OrderAuditEvent.Action.CREATE)
+      .withOrderId(ORDER_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrderSnapshot("Test");
+  }
+
   public static OrderLineAuditEvent createOrderLineAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
 
-      return new OrderLineAuditEvent()
+    return new OrderLineAuditEvent()
       .withId(id)
       .withAction(OrderLineAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
@@ -48,7 +59,7 @@ public class EntityUtils {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
 
-      return new PieceAuditEvent()
+    return new PieceAuditEvent()
       .withId(id)
       .withAction(PieceAuditEvent.Action.CREATE)
       .withPieceId(PIECE_ID)
@@ -56,5 +67,16 @@ public class EntityUtils {
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withPieceSnapshot(jsonObject);
+  }
+
+  public static PieceAuditEvent createPieceAuditEventWithoutSnapshot() {
+    return new PieceAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(PieceAuditEvent.Action.CREATE)
+      .withPieceId(PIECE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withPieceSnapshot("Test");
   }
 }
