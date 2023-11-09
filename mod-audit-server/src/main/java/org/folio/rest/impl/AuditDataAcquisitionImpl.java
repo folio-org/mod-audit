@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
-import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
@@ -29,17 +28,16 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private final OrderAuditEventsService orderAuditEventsService;
-  private final OrderLineAuditEventsService orderLineAuditEventsService;
-  private final PieceAuditEventsService pieceAuditEventsService;
+  @Autowired
+  private OrderAuditEventsService orderAuditEventsService;
 
   @Autowired
-  public AuditDataAcquisitionImpl(OrderAuditEventsService orderAuditEventsService,
-                                  OrderLineAuditEventsService orderLineAuditEventsService,
-                                  PieceAuditEventsService pieceAuditEventsService) {
-    this.orderAuditEventsService = orderAuditEventsService;
-    this.orderLineAuditEventsService = orderLineAuditEventsService;
-    this.pieceAuditEventsService = pieceAuditEventsService;
+  private OrderLineAuditEventsService orderLineAuditEventsService;
+
+  @Autowired
+  private PieceAuditEventsService pieceAuditEventsService;
+
+  public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
@@ -105,15 +103,10 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     });
   }
 
-  @Override
-  public void getAuditDataAcquisitionPieceUniqueStatusById(String id, String sortBy, AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-
-  }
-
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     return GetAuditDataAcquisitionOrderByIdResponse
-         .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
+      .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
 }
 
