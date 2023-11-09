@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
@@ -102,6 +103,11 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
+  }
+
+  @Override
+  public void getAuditDataAcquisitionPieceUniqueStatusById(String id, String sortBy, AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
   }
 
   private Response mapExceptionToResponse(Throwable throwable) {
