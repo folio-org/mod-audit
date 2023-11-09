@@ -1,5 +1,8 @@
 package org.folio;
 
+import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
+
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -7,6 +10,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import io.restassured.RestAssured;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
@@ -18,24 +25,23 @@ import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
 import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
+import org.folio.dao.PieceEventsDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
-import org.folio.rest.impl.*;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
+import org.folio.rest.impl.AuditDataImplApiTest;
+import org.folio.rest.impl.AuditHandlersImplApiTest;
+import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.OrderEventsHandlerMockTest;
+import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
+import org.folio.rest.impl.PieceEventsHandlerMockTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
+import org.folio.services.PieceAuditEventsServiceTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
-
-import io.restassured.RestAssured;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-
-import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
-import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
 
 public class TestSuite {
   private static final String KAFKA_HOST = "KAFKA_HOST";
@@ -98,7 +104,7 @@ public class TestSuite {
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if(res.succeeded()) {
+      if (res.succeeded()) {
         deploymentComplete.complete(res.result());
       }
       else {
@@ -177,12 +183,23 @@ public class TestSuite {
   }
 
   @Nested
+  class PieceEventsDaoNestedTest extends PieceEventsDaoTest {
+  }
+
+  @Nested
+  class PieceAuditEventsServiceNestedTest extends PieceAuditEventsServiceTest {
+  }
+
+  @Nested
+  class PieceEventsHandlerMockNestedTest extends PieceEventsHandlerMockTest {
+  }
+
+  @Nested
   class AuditDataImplApiTestNested extends AuditDataImplApiTest {
   }
 
   @Nested
   class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
   }
-
 
 }

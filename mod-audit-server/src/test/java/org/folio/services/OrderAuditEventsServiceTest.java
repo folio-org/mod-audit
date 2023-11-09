@@ -1,8 +1,15 @@
 package org.folio.services;
 
+import static org.folio.utils.EntityUtils.TENANT_ID;
+import static org.folio.utils.EntityUtils.createOrderAuditEvent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.UUID;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.OrderEventsDao;
@@ -16,16 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 public class OrderAuditEventsServiceTest {
-
-  private static final String TENANT_ID = "diku";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
@@ -37,17 +35,7 @@ public class OrderAuditEventsServiceTest {
 
   @Test
   void shouldCallDaoForSuccessfulCase() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product");
-
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(UUID.randomUUID().toString())
-      .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
-      .withUserId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderSnapshot(jsonObject);
+    var orderAuditEvent = createOrderAuditEvent(UUID.randomUUID().toString());
 
     Future<RowSet<Row>> saveFuture = orderAuditEventService.saveOrderAuditEvent(orderAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
@@ -57,18 +45,8 @@ public class OrderAuditEventsServiceTest {
 
   @Test
   void shouldGetDto() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product");
-
     String id = UUID.randomUUID().toString();
-    OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
-      .withId(id)
-      .withAction(OrderAuditEvent.Action.CREATE)
-      .withOrderId(UUID.randomUUID().toString())
-      .withUserId(UUID.randomUUID().toString())
-      .withEventDate(new Date())
-      .withActionDate(new Date())
-      .withOrderSnapshot(jsonObject);
+    var orderAuditEvent = createOrderAuditEvent(id);
 
     orderAuditEventService.saveOrderAuditEvent(orderAuditEvent, TENANT_ID);
 
@@ -79,7 +57,6 @@ public class OrderAuditEventsServiceTest {
 
       assertEquals(orderAuditEventList.get(0).getId(), id);
       assertEquals(OrderAuditEvent.Action.CREATE.value(), orderAuditEventList.get(0).getAction().value());
-
     });
   }
 

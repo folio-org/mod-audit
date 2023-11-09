@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.folio.utils.EntityUtils.ORDER_ID;
+import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
 import static org.hamcrest.Matchers.*;
 
 public class AuditDataAcquisitionAPITest extends ApiTestBase {
@@ -36,10 +38,6 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   protected static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
 
   private static final String TENANT_ID = "modaudittest";
-
-  public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
-
-  public static final String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());

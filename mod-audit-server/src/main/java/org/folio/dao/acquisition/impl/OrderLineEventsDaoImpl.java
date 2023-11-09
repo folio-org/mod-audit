@@ -22,16 +22,16 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.OrderAuditEventDBConstants.*;
+import static org.folio.util.AuditEventDBConstants.*;
 
 @Repository
 public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  public static final String TABLE_NAME = "acquisition_order_line_log";
+  private static final String TABLE_NAME = "acquisition_order_line_log";
 
-  public static final String GET_BY_ORDER_LINE_ID_SQL = "SELECT id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot," +
+  private static final String GET_BY_ORDER_LINE_ID_SQL = "SELECT id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot," +
     " (SELECT count(*) AS total_records FROM %s WHERE order_line_id = $1) " +
     " FROM %s WHERE order_line_id = $1 %s LIMIT $2 OFFSET $3";
 

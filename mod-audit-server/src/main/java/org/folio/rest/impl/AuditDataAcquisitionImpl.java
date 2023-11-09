@@ -9,10 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.services.acquisition.OrderLineAuditEventsService;
+import org.folio.services.acquisition.PieceAuditEventsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +30,10 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   @Autowired
   private OrderAuditEventsService orderAuditEventsService;
-
   @Autowired
   private OrderLineAuditEventsService orderLineAuditEventsService;
+  @Autowired
+  private PieceAuditEventsService pieceAuditEventsService;
 
   public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -78,11 +81,30 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     });
   }
 
+  @Override
+  public void getAuditDataAcquisitionPieceById(String pieceId, String sortBy, AuditDataAcquisitionPieceIdGetSortOrder sortOrder,
+                                               int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece By Id : {}", pieceId);
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+
+    vertxContext.runOnContext(c -> {
+      try {
+        pieceAuditEventsService.getAuditEventsByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+          .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
+          .map(Response.class::cast)
+          .otherwise(this::mapExceptionToResponse)
+          .onComplete(asyncResultHandler);
+      } catch (Exception e) {
+        LOGGER.error("Failed to get piece audit events by piece id: {}", pieceId, e);
+        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+      }
+    });
+  }
+
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     return GetAuditDataAcquisitionOrderByIdResponse
          .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
-
 }
 
