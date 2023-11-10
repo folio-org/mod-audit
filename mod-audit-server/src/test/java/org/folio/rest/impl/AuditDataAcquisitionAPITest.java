@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
+import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.util.PostgresClientFactory;
@@ -21,6 +22,8 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static org.folio.utils.EntityUtils.ORDER_ID;
 import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
+import static org.folio.utils.EntityUtils.PIECE_ID;
+import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.*;
 
 public class AuditDataAcquisitionAPITest extends ApiTestBase {
@@ -37,6 +40,8 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
   protected static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
 
+  protected static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
+
   private static final String TENANT_ID = "modaudittest";
 
   @Spy
@@ -47,6 +52,8 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
   @InjectMocks
   OrderLineEventsDaoImpl orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
+  @InjectMocks
+  PieceEventsDaoImpl pieceEventsDao = new PieceEventsDaoImpl(postgresClientFactory);
 
   @BeforeEach
   public void setUp() {
@@ -115,6 +122,28 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(ORDER_LINE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_LINE_ID + 123).then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  void shouldReturnOrderLineEventsOnGetByPieceId() {
+    var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
+
+    pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + INVALID_ID).then().log().all().statusCode(200)
+      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID).then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1").then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?sortBy=action_date").then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123).then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 }
