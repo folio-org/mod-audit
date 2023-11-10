@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,39 +27,31 @@ import static org.hamcrest.Matchers.*;
 
 public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
-  public static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
-
-  protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
-
-  protected static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
-
-  protected static final String INVALID_ID = "646ea52c-2c65-4d28-9a8f-e0d200fd6b00";
-
-  protected static final String ACQ_AUDIT_ORDER_PATH = "/audit-data/acquisition/order/";
-
-  protected static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
-
-  protected static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
-
+  private static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
+  private static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
+  private static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
+  private static final String INVALID_ID = "646ea52c-2c65-4d28-9a8f-e0d200fd6b00";
+  private static final String ACQ_AUDIT_ORDER_PATH = "/audit-data/acquisition/order/";
+  private static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
+  private static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
   private static final String TENANT_ID = "modaudittest";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @InjectMocks
-  OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
+  OrderEventsDaoImpl orderEventDao;
 
   @InjectMocks
-  OrderLineEventsDaoImpl orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
+  OrderLineEventsDaoImpl orderLineEventDao;
   @InjectMocks
-  PieceEventsDaoImpl pieceEventsDao = new PieceEventsDaoImpl(postgresClientFactory);
+  PieceEventsDaoImpl pieceEventsDao;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
     orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
-
   }
 
   @Test
@@ -126,7 +117,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   }
 
   @Test
-  void shouldReturnOrderLineEventsOnGetByPieceId() {
+  void shouldReturnPieceEventsOnGetByPieceId() {
     var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
 
     pieceEventsDao.save(pieceAuditEvent, TENANT_ID);

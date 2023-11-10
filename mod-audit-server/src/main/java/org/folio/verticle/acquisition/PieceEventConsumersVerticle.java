@@ -19,7 +19,7 @@ public class PieceEventConsumersVerticle extends AbstractConsumersVerticle {
 
   @Override
   public List<String> getEvents() {
-    return List.of(AcquisitionEventType.ACQ_ORDER_CHANGED.getTopicName());
+    return List.of(AcquisitionEventType.ACQ_PIECE_CHANGED.getTopicName());
   }
 
   @Override
