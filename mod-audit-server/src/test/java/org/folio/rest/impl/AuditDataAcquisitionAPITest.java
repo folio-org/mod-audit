@@ -8,6 +8,7 @@ import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
 import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,7 +118,17 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
   @Test
   void shouldReturnPieceEventsOnGetByPieceId() {
-    var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name","Test Product2");
+
+    PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(PieceAuditEvent.Action.CREATE)
+      .withPieceId(PIECE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withPieceSnapshot(jsonObject);
 
     pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
 
