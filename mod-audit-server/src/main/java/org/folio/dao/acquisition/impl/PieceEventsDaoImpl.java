@@ -57,7 +57,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     String query = format(INSERT_SQL, logTable);
 
     makeSaveCall(promise, query, pieceAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Piece AuditEvent with tenant id : {}", tenantId);
+    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", pieceAuditEvent.getPieceId(), tenantId);
     return promise.future();
   }
 
