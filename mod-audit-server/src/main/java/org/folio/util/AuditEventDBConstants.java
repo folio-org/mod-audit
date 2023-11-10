@@ -12,7 +12,7 @@ public class AuditEventDBConstants {
 
   public static final String ORDER_LINE_ID_FIELD = "order_line_id";
 
-  public static final String PIECE_ID_FIELD = "order_id";
+  public static final String PIECE_ID_FIELD = "piece_id";
 
   public static final String USER_ID_FIELD = "user_id";
 

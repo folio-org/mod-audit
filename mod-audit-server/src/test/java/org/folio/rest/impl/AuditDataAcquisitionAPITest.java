@@ -41,7 +41,6 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
   @InjectMocks
   OrderEventsDaoImpl orderEventDao;
-
   @InjectMocks
   OrderLineEventsDaoImpl orderLineEventDao;
   @InjectMocks
