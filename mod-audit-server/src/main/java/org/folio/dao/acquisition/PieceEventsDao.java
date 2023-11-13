@@ -28,6 +28,9 @@ public interface PieceEventsDao {
    * @param tenantId  tenant id
    * @return future with PieceAuditEventCollection
    */
-  Future<PieceAuditEventCollection> getAuditEventsByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId);
+  Future<PieceAuditEventCollection> getAuditEventsByPieceId(String pieceId, String sortBy, String sortOrder,
+                                                            int limit, int offset, String tenantId);
 
+  Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder,
+                                                                            int limit, int offset, String tenantId);
 }

@@ -30,4 +30,15 @@ public interface PieceAuditEventsService {
   Future<PieceAuditEventCollection> getAuditEventsByPieceId(String pieceId, String sortBy, String sortOrder,
                                                             int limit, int offset, String tenantId);
 
+  /**
+   * Searches for piece audit events which has unique status changes by piece id
+   * @param pieceId   piece id
+   * @param sortBy    sort by
+   * @param sortOrder sort order
+   * @param limit     limit
+   * @param offset    offset
+   * @return future with PieceAuditEventCollection
+   */
+  Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder,
+                                                                        int limit, int offset, String tenantId);
 }

@@ -9,7 +9,6 @@ import static org.folio.util.AuditEventDBConstants.ID_FIELD;
 import static org.folio.util.AuditEventDBConstants.MODIFIED_CONTENT_FIELD;
 import static org.folio.util.AuditEventDBConstants.ORDER_BY_PATTERN;
 import static org.folio.util.AuditEventDBConstants.PIECE_ID_FIELD;
-import static org.folio.util.AuditEventDBConstants.TOTAL_RECORDS_FIELD;
 import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 
 import java.time.LocalDateTime;
@@ -36,8 +35,13 @@ import org.springframework.stereotype.Repository;
 public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final Logger LOGGER = LogManager.getLogger();
   private static final String TABLE_NAME = "acquisition_piece_log";
-  private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " (SELECT count(*) AS total_records FROM %s WHERE piece_id = $1) FROM %s WHERE piece_id = $1 %s LIMIT $2 OFFSET $3";
+  private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot" +
+    " FROM %s WHERE piece_id = $1 %s LIMIT $2 OFFSET $3";
+  private static final String GET_UNIQUE_STATUS_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot" +
+    " FROM %s WHERE piece_id = $1 AND" +
+    " action IN" +
+    " (SELECT action FROM %s WHERE piece_id = $1 GROUP BY action HAVING COUNT(action) = 1)" +
+    " %s LIMIT $2 OFFSET $3";
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
@@ -67,9 +71,8 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      String query = format(GET_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
-
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
@@ -81,13 +84,37 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       mapRowToListOfPieceEvent(rowSet));
   }
 
+  @Override
+  public Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
+    LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
+    Promise<RowSet<Row>> promise = Promise.promise();
+    try {
+      LOGGER.info("getAuditEventsByOrderId:: Trying to Retrieve AuditEvent with order id : {}", pieceId);
+      String logTable = formatDBTableName(tenantId, TABLE_NAME);
+      String query = format(GET_UNIQUE_STATUS_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
+    } catch (Exception e) {
+      LOGGER.warn("Error getting order audit events by piece id: {}", pieceId, e);
+      promise.fail(e);
+    }
+    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
+    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new PieceAuditEventCollection().withTotalItems(0)
+      : mapRowToListOfPieceEvent(rowSet));
+  }
+
   private PieceAuditEventCollection mapRowToListOfPieceEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Piece Events");
     PieceAuditEventCollection pieceAuditEventCollection = new PieceAuditEventCollection();
+
+    // set audit piece change record(s) by mapping rowSet one by one
     rowSet.iterator().forEachRemaining(row -> {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));
-      pieceAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
+    // set total records
+    int totalRecords = pieceAuditEventCollection.getPieceAuditEvents().size();
+    pieceAuditEventCollection.setTotalItems(totalRecords);
+
     LOGGER.info("mapRowToListOfOrderEvent:: Mapped row to List of Piece Events");
     return pieceAuditEventCollection;
   }

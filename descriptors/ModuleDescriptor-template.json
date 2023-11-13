@@ -133,6 +133,15 @@
           "permissionsRequired": [
             "acquisition.piece.events.get"
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/piece/{id}/unique-status",
+          "permissionsRequired": [
+            "acquisition.piece.events.get"
+          ]
         }
       ]
     },

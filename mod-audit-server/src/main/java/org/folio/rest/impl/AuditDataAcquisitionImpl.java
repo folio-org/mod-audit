@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
@@ -98,6 +99,26 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
           .onComplete(asyncResultHandler);
       } catch (Exception e) {
         LOGGER.error("Failed to get piece audit events by piece id: {}", pieceId, e);
+        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+      }
+    });
+  }
+
+  @Override
+  public void getAuditDataAcquisitionPieceUniqueStatusById(String pieceId, String sortBy, AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece with unique status By Id : {}", pieceId);
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+
+    vertxContext.runOnContext(c -> {
+      try {
+        LOGGER.warn("Trying to get piece audit events with unique status by piece id: {}", pieceId);
+        pieceAuditEventsService.getAuditEventsWithUniqueStatusByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+          .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
+          .map(Response.class::cast)
+          .otherwise(this::mapExceptionToResponse)
+          .onComplete(asyncResultHandler);
+      } catch (Exception e) {
+        LOGGER.warn("Failed to get piece audit events with unique status change by piece id: {}", pieceId, e);
         asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
       }
     });
