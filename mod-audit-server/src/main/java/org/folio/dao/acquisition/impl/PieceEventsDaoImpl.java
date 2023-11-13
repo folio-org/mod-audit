@@ -70,7 +70,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
 
-      pgClientFactory.createInstance(tenantId).select(query, queryParams, promise);
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
       LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
       promise.fail(e);
