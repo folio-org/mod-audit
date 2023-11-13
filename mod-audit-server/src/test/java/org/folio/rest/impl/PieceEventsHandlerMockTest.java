@@ -54,7 +54,7 @@ public class PieceEventsHandlerMockTest {
     MockitoAnnotations.openMocks(this).close();
     pieceEventsDao = new PieceEventsDaoImpl(postgresClientFactory);
     pieceAuditEventsService = new PieceAuditEventsServiceImpl(pieceEventsDao);
-    pieceEventsHandler = new PieceEventsHandler(pieceAuditEventsService, vertx);
+    pieceEventsHandler = new PieceEventsHandler(vertx, pieceAuditEventsService);
   }
 
   @Test

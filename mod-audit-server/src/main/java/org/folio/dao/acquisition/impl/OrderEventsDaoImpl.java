@@ -28,12 +28,16 @@ import static org.folio.util.AuditEventDBConstants.*;
 public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private static final Logger LOGGER = LogManager.getLogger();
-  private static final String TABLE_NAME = "acquisition_order_log";
-  private static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
+
+  public static final String TABLE_NAME = "acquisition_order_log";
+
+  public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
     " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 %s LIMIT $2 OFFSET $3";
-  private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
+
+  public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
+  @Autowired
   private final PostgresClientFactory pgClientFactory;
 
   @Autowired

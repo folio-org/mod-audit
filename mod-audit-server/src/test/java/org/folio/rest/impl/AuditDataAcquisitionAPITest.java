@@ -1,5 +1,14 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
+import static org.folio.utils.EntityUtils.ORDER_ID;
+import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
+import static org.folio.utils.EntityUtils.PIECE_ID;
+import static org.hamcrest.Matchers.containsString;
+
+import java.util.Date;
+import java.util.UUID;
+
 import io.restassured.http.Header;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -15,16 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-
-import java.util.Date;
-import java.util.UUID;
-
-import static io.restassured.RestAssured.given;
-import static org.folio.utils.EntityUtils.ORDER_ID;
-import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
-import static org.folio.utils.EntityUtils.PIECE_ID;
-import static org.folio.utils.EntityUtils.createPieceAuditEvent;
-import static org.hamcrest.Matchers.*;
 
 public class AuditDataAcquisitionAPITest extends ApiTestBase {
 

@@ -76,7 +76,8 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new PieceAuditEventCollection().withTotalItems(0) :
+    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ?
+      new PieceAuditEventCollection().withTotalItems(0) :
       mapRowToListOfPieceEvent(rowSet));
   }
 
