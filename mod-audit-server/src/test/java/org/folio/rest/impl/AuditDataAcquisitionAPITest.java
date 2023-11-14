@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.folio.utils.EntityUtils.ORDER_ID;
 import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
@@ -101,10 +102,12 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     orderLineEventDao.save(orderLineAuditEvent, TENANT_ID);
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ INVALID_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ INVALID_ID)
+      .then().log().all().statusCode(200)
       .body(containsString("orderLineAuditEvents")).body(containsString("totalItems"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID)
+      .then().log().all().statusCode(200)
       .body(containsString(ORDER_LINE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID +"?limit=1").then().log().all().statusCode(200)
@@ -125,7 +128,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(PieceAuditEvent.Action.CREATE)
-      .withPieceId(PIECE_ID)
+      .withPieceId("123e4567-e89b-12d3-a456-426614174005")
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())
       .withActionDate(new Date())
@@ -133,19 +136,25 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + INVALID_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID)
+      .then().log().all().statusCode(200)
       .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
 
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID).then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID));
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + "123e4567-e89b-12d3-a456-426614174005")
+      .then().log().all().statusCode(200)
+      .body(containsString("123e4567-e89b-12d3-a456-426614174005"));
 
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1").then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID));
-//
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?sortBy=action_date").then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID));
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + "123e4567-e89b-12d3-a456-426614174005" +"?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString("123e4567-e89b-12d3-a456-426614174005"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123).then().log().all().statusCode(500)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + "123e4567-e89b-12d3-a456-426614174005" +"?sortBy=action_date").then().log().all().statusCode(200)
+      .body(containsString("123e4567-e89b-12d3-a456-426614174005"));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + "123e4567-e89b-12d3-a456-426614174005" + 123).then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 
@@ -184,15 +193,15 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(id5));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .get(ACQ_AUDIT_PIECE_PATH + ORDER_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
       .then().log().all().statusCode(200)
-      .body(containsString(PIECE_ID))
+      .body(containsString(ORDER_ID))
       .body(containsString(id1));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .get(ACQ_AUDIT_PIECE_PATH + ORDER_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
       .then().log().all().statusCode(200)
-      .body(containsString(PIECE_ID))
+      .body(containsString(ORDER_ID))
       .body(containsString(id1))
       .body(containsString(id3))
       .body(containsString(id5));

@@ -77,7 +77,7 @@ public class EntityUtils {
     return new PieceAuditEvent()
       .withId(id)
       .withAction(PieceAuditEvent.Action.CREATE)
-      .withPieceId(PIECE_ID)
+      .withPieceId("123e4567-e89b-12d3-a456-426614174005")
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())
       .withActionDate(new Date())
