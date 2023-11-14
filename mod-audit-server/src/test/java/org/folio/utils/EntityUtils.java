@@ -72,7 +72,7 @@ public class EntityUtils {
   public static PieceAuditEvent createPieceAuditEvent(String id, String status) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
-    jsonObject.put("status", status);
+    jsonObject.put("receivingStatus", status);
 
     return new PieceAuditEvent()
       .withId(id)
