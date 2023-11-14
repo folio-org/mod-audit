@@ -48,19 +48,17 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Order By Id : {}", orderId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
-    vertxContext.runOnContext(c -> {
-      try {
-        LOGGER.warn("Trying to get audit events by order id: {}", orderId);
-        orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
-          .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
-          .map(Response.class::cast)
-          .otherwise(this::mapExceptionToResponse)
-          .onComplete(asyncResultHandler);
-      } catch (Exception e) {
-        LOGGER.warn("Failed to get order audit events by order id: {}", orderId, e);
-        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
-      }
-    });
+    try {
+      LOGGER.warn("Trying to get audit events by order id: {}", orderId);
+      orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to get order audit events by order id: {}", orderId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
   }
 
   @Override
@@ -69,19 +67,18 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     LOGGER.debug("getAuditDataAcquisitionOrderLineById:: Retrieving Audit Data Acquisition Order Line By Id : {}", orderLineId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
-    vertxContext.runOnContext(c -> {
-      try {
-        LOGGER.warn("Trying to get audit events by order line id: {}", orderLineId);
-        orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
-          .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
-          .map(Response.class::cast)
-          .otherwise(this::mapExceptionToResponse)
-          .onComplete(asyncResultHandler);
-      } catch (Exception e) {
-        LOGGER.warn("Failed to get order line audit events by order line id: {}", orderLineId, e);
-        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
-      }
-    });
+    try {
+      LOGGER.warn("Trying to get audit events by order line id: {}", orderLineId);
+      orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to get order line audit events by order line id: {}", orderLineId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
+
   }
 
   @Override
@@ -90,18 +87,16 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece By Id : {}", pieceId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
-    vertxContext.runOnContext(c -> {
-      try {
-        pieceAuditEventsService.getAuditEventsByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
-          .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
-          .map(Response.class::cast)
-          .otherwise(this::mapExceptionToResponse)
-          .onComplete(asyncResultHandler);
-      } catch (Exception e) {
-        LOGGER.error("Failed to get piece audit events by piece id: {}", pieceId, e);
-        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
-      }
-    });
+    try {
+      pieceAuditEventsService.getAuditEventsByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error("Failed to get piece audit events by piece id: {}", pieceId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
   }
 
   @Override
@@ -111,19 +106,17 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece with unique status By Id : {}", pieceId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
-    vertxContext.runOnContext(c -> {
-      try {
-        LOGGER.warn("Trying to get piece audit events with unique status by piece id: {}", pieceId);
-        pieceAuditEventsService.getAuditEventsWithUniqueStatusByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
-          .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
-          .map(Response.class::cast)
-          .otherwise(this::mapExceptionToResponse)
-          .onComplete(asyncResultHandler);
-      } catch (Exception e) {
-        LOGGER.warn("Failed to get piece audit events with unique status change by piece id: {}", pieceId, e);
-        asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
-      }
-    });
+    try {
+      LOGGER.warn("Trying to get piece audit events with unique status by piece id: {}", pieceId);
+      pieceAuditEventsService.getAuditEventsWithUniqueStatusByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.warn("Failed to get piece audit events with unique status change by piece id: {}", pieceId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
   }
 
   private Response mapExceptionToResponse(Throwable throwable) {

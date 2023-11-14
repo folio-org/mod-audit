@@ -32,7 +32,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   public static final String TABLE_NAME = "acquisition_order_log";
 
   public static final String GET_BY_ORDER_ID_SQL = "SELECT id, action, order_id, user_id, event_date, action_date, modified_content_snapshot," +
-    " FROM %s WHERE order_id = $1 %s LIMIT $2 OFFSET $3";
+    " (SELECT count(*) AS total_records FROM %s WHERE order_id = $1) FROM %s WHERE order_id = $1 %s LIMIT $2 OFFSET $3";
 
   public static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
@@ -65,7 +65,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     try {
       LOGGER.info("getAuditEventsByOrderId:: Trying to Retrieve AuditEvent with order id : {}", orderId);
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_ORDER_ID_SQL, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
@@ -98,13 +98,10 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   private OrderAuditEventCollection mapRowToListOfOrderEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Order Events");
     OrderAuditEventCollection orderAuditEventCollection = new OrderAuditEventCollection();
-    // set audit piece change record(s) by mapping rowSet one by one
     rowSet.iterator().forEachRemaining(row -> {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
+      orderAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
-    // set total records
-    int totalRecords = orderAuditEventCollection.getOrderAuditEvents().size();
-    orderAuditEventCollection.setTotalItems(totalRecords);
     LOGGER.info("mapRowToListOfOrderEvent:: Mapped row to List of Order Events");
     return orderAuditEventCollection;
   }
