@@ -36,7 +36,7 @@ import org.springframework.stereotype.Repository;
 public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final Logger LOGGER = LogManager.getLogger();
   private static final String TABLE_NAME = "acquisition_piece_log";
-  private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot, " +
+  private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,  " +
     " (SELECT count(*) AS total_records FROM %s WHERE piece_id = $1) FROM %s WHERE piece_id = $1 %s LIMIT $2 OFFSET $3";
   private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL =
     """

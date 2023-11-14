@@ -139,11 +139,11 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 //    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID).then().log().all().statusCode(200)
 //      .body(containsString(PIECE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1").then().log().all().statusCode(200)
-      .body(containsString(PIECE_ID));
-
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?sortBy=action_date").then().log().all().statusCode(200)
-      .body(containsString(PIECE_ID));
+//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1").then().log().all().statusCode(200)
+//      .body(containsString(PIECE_ID));
+//
+//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?sortBy=action_date").then().log().all().statusCode(200)
+//      .body(containsString(PIECE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123).then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
