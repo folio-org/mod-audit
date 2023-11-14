@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
-import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdStatusChangeHistoryGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.acquisition.OrderAuditEventsService;
@@ -105,7 +105,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
-  public void getAuditDataAcquisitionPieceUniqueStatusById(String pieceId, String sortBy, AuditDataAcquisitionPieceIdUniqueStatusGetSortOrder sortOrder, int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAuditDataAcquisitionPieceStatusChangeHistoryById(String pieceId, String sortBy,
+                                                                  AuditDataAcquisitionPieceIdStatusChangeHistoryGetSortOrder sortOrder,
+                                                                  int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece with unique status By Id : {}", pieceId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
 

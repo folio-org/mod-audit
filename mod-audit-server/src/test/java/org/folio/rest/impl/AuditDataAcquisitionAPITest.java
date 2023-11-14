@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.folio.utils.EntityUtils.ORDER_ID;
 import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
 import static org.folio.utils.EntityUtils.PIECE_ID;
+import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.containsString;
 
 import java.util.Date;
@@ -34,6 +35,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   private static final String ACQ_AUDIT_ORDER_PATH = "/audit-data/acquisition/order/";
   private static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
   private static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
+  private static final String ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH = "/status-change-history";
   private static final String TENANT_ID = "modaudittest";
 
   @Spy
@@ -144,6 +146,60 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(PIECE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123).then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  void shouldReturnPieceEventsStatusChangeHistoryGetByPieceId() {
+    String id1 = UUID.randomUUID().toString();
+    String id2 = UUID.randomUUID().toString();
+    String id3 = UUID.randomUUID().toString();
+    String id4 = UUID.randomUUID().toString();
+    String id5 = UUID.randomUUID().toString();
+    var pieceAuditEvent1 = createPieceAuditEvent(id1, "STATUS 1");
+    var pieceAuditEvent2 = createPieceAuditEvent(id2, "STATUS 1");
+    var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
+    var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
+    var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
+
+    pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
+
+    // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
+
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH + 123)
+      .then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 }

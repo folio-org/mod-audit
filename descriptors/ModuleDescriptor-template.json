@@ -138,7 +138,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/audit-data/acquisition/piece/{id}/unique-status",
+          "pathPattern": "/audit-data/acquisition/piece/{id}/status-change-history",
           "permissionsRequired": [
             "acquisition.piece.events.get"
           ]

@@ -69,6 +69,21 @@ public class EntityUtils {
       .withPieceSnapshot(jsonObject);
   }
 
+  public static PieceAuditEvent createPieceAuditEvent(String id, String status) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name", "Test Product");
+    jsonObject.put("status", status);
+
+    return new PieceAuditEvent()
+      .withId(id)
+      .withAction(PieceAuditEvent.Action.CREATE)
+      .withPieceId(PIECE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withPieceSnapshot(jsonObject);
+  }
+
   public static PieceAuditEvent createPieceAuditEventWithoutSnapshot() {
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())

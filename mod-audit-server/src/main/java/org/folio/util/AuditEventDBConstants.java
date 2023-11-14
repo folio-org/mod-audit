@@ -26,4 +26,5 @@ public class AuditEventDBConstants {
 
   public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
 
+  public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 }

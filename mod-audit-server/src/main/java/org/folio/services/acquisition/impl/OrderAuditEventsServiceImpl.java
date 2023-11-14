@@ -1,5 +1,7 @@
 package org.folio.services.acquisition.impl;
 
+import static org.folio.util.AuditEventDBConstants.UNIQUE_CONSTRAINT_VIOLATION_CODE;
+
 import io.vertx.core.Future;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
@@ -18,8 +20,6 @@ import org.springframework.stereotype.Service;
 public class OrderAuditEventsServiceImpl implements OrderAuditEventsService {
 
   private static final Logger LOGGER = LogManager.getLogger();
-
-  public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 
   private OrderEventsDao orderEventsDao;
 

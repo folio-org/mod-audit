@@ -37,11 +37,16 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final String TABLE_NAME = "acquisition_piece_log";
   private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot" +
     " FROM %s WHERE piece_id = $1 %s LIMIT $2 OFFSET $3";
-  private static final String GET_UNIQUE_STATUS_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot" +
-    " FROM %s WHERE piece_id = $1 AND" +
-    " action IN" +
-    " (SELECT action FROM %s WHERE piece_id = $1 GROUP BY action HAVING COUNT(action) = 1)" +
-    " %s LIMIT $2 OFFSET $3";
+  private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL =
+    """
+    WITH StatusChanges AS (SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
+      LAG(modified_content_snapshot ->> 'status') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status FROM %s
+    )
+    SELECT id, action, piece_id, user_id,	event_date,	action_date, modified_content_snapshot FROM StatusChanges
+    WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, '')
+    %s LIMIT $2 OFFSET $3
+    """;
+
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
@@ -89,9 +94,9 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      LOGGER.info("getAuditEventsByOrderId:: Trying to Retrieve AuditEvent with order id : {}", pieceId);
+      LOGGER.info("getAuditEventsByOrderId:: Trying to Retrieve AuditEvent with piece id : {}", pieceId);
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_UNIQUE_STATUS_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
@@ -106,7 +111,6 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private PieceAuditEventCollection mapRowToListOfPieceEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Piece Events");
     PieceAuditEventCollection pieceAuditEventCollection = new PieceAuditEventCollection();
-
     // set audit piece change record(s) by mapping rowSet one by one
     rowSet.iterator().forEachRemaining(row -> {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));
@@ -114,7 +118,6 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     // set total records
     int totalRecords = pieceAuditEventCollection.getPieceAuditEvents().size();
     pieceAuditEventCollection.setTotalItems(totalRecords);
-
     LOGGER.info("mapRowToListOfOrderEvent:: Mapped row to List of Piece Events");
     return pieceAuditEventCollection;
   }
