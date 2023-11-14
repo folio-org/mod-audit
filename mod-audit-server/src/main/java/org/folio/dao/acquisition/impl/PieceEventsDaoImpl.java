@@ -44,8 +44,9 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       LAG(modified_content_snapshot ->> 'status') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status FROM %s
     )
     SELECT id, action, piece_id, user_id,	event_date,	action_date, modified_content_snapshot,
-     (SELECT count(*) AS total_records FROM %s WHERE piece_id = $1) FROM StatusChanges
-    WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, '')
+     (SELECT COUNT(*) AS total_records FROM StatusChanges
+     WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, ''))
+    FROM StatusChanges WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, '')
     %s LIMIT $2 OFFSET $3
     """;
 
@@ -98,7 +99,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     try {
       LOGGER.info("getAuditEventsByOrderId:: Trying to Retrieve AuditEvent with piece id : {}", pieceId);
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+      String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     } catch (Exception e) {
