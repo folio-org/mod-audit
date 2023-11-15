@@ -50,10 +50,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
       orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.warn("Failed to get order audit events by order id: {}", orderId, e);
+      LOGGER.error("Failed to get order audit events by order id: {}", orderId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
@@ -68,10 +67,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
       orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.warn("Failed to get order line audit events by order line id: {}", orderLineId, e);
+      LOGGER.error("Failed to get order line audit events by order line id: {}", orderLineId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
 
@@ -87,7 +85,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
       pieceAuditEventsService.getAuditEventsByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
       LOGGER.error("Failed to get piece audit events by piece id: {}", pieceId, e);
@@ -107,10 +104,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
       pieceAuditEventsService.getAuditEventsWithStatusChangesByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.warn("Failed to get piece audit events with unique status change by piece id: {}", pieceId, e);
+      LOGGER.error("Failed to get piece audit events with unique status change by piece id: {}", pieceId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
