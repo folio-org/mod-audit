@@ -1,5 +1,23 @@
 package org.folio.dao.acquisition.impl;
 
+import static java.lang.String.format;
+import static org.folio.util.AuditEventDBConstants.ACTION_DATE_FIELD;
+import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
+import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
+import static org.folio.util.AuditEventDBConstants.ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.MODIFIED_CONTENT_FIELD;
+import static org.folio.util.AuditEventDBConstants.ORDER_BY_PATTERN;
+import static org.folio.util.AuditEventDBConstants.ORDER_ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.ORDER_LINE_ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.TOTAL_RECORDS_FIELD;
+import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
+import static org.folio.util.DbUtils.formatDBTableName;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.UUID;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -13,15 +31,6 @@ import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
-import static org.folio.util.AuditEventDBConstants.*;
 
 @Repository
 public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
@@ -39,7 +48,6 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   private final PostgresClientFactory pgClientFactory;
 
-
   public OrderLineEventsDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }
@@ -48,12 +56,10 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   public Future<RowSet<Row>> save(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
     LOGGER.debug("save:: Saving OrderLine AuditEvent with tenant id : {}", tenantId);
     Promise<RowSet<Row>> promise = Promise.promise();
+    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
-
     String query = format(INSERT_SQL, logTable);
-
     makeSaveCall(promise, query, orderLineAuditEvent, tenantId);
-
     LOGGER.info("save:: Saved OrderLine AuditEvent with tenant id : {}", tenantId);
     return promise.future();
   }
@@ -63,7 +69,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
     LOGGER.debug("getAuditEventsByOrderLineId:: Retrieving AuditEvent with order line id : {}", orderLineId);
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      LOGGER.info("getAuditEventsByOrderLineId:: Trying to Retrieve AuditEvent with order line id : {}", orderLineId);
+      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ORDER_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
@@ -119,10 +125,5 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       .withEventDate(Date.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withOrderLineSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
-  }
-
-  private String formatDBTableName(String tenantId, String table) {
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-    return format("%s.%s", convertToPsqlStandard(tenantId), table);
   }
 }

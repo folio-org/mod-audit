@@ -1,7 +1,6 @@
 package org.folio.dao.acquisition.impl;
 
 import static java.lang.String.format;
-import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
 import static org.folio.util.AuditEventDBConstants.ACTION_DATE_FIELD;
 import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
 import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
@@ -41,7 +40,8 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL =
     """
     WITH StatusChanges AS (SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
-     LAG(modified_content_snapshot ->> 'receivingStatus') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status FROM %s
+     LAG(modified_content_snapshot ->> 'receivingStatus') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status
+     FROM %s WHERE piece_id=$1
     )
     SELECT id, action, piece_id, user_id, event_date,	action_date, modified_content_snapshot,
      (SELECT COUNT(*) AS total_records FROM StatusChanges
