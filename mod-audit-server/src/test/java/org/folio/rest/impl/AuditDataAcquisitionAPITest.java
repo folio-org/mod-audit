@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.containsString;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
 
@@ -24,7 +23,6 @@ import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -171,27 +169,39 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     String id3 = UUID.randomUUID().toString();
     String id4 = UUID.randomUUID().toString();
     String id5 = UUID.randomUUID().toString();
+    String id6 = UUID.randomUUID().toString();
+    String id7 = UUID.randomUUID().toString();
     var pieceAuditEvent1 = createPieceAuditEvent(id1, "STATUS 1");
     var pieceAuditEvent2 = createPieceAuditEvent(id2, "STATUS 1");
     var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
     var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
     var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
+    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id6, "STATUS 3");
+    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id7, "STATUS 2");
+    pieceAuditEventWithDifferentPiece1.setPieceId(UUID.randomUUID().toString());
+    pieceAuditEventWithDifferentPiece2.setPieceId(UUID.randomUUID().toString());
     var localDateTime1 = LocalDateTime.of(2023, 4, 20, 6, 9, 30);
     var localDateTime2 = LocalDateTime.of(2023, 4, 20, 6, 10, 30);
     var localDateTime3 = LocalDateTime.of(2023, 4, 20, 6, 11, 30);
     var localDateTime4 = LocalDateTime.of(2023, 4, 20, 6, 12, 30);
     var localDateTime5 = LocalDateTime.of(2023, 4, 20, 6, 13, 30);
+    var localDateTime6 = LocalDateTime.of(2023, 4, 20, 6, 9, 25);
+    var localDateTime7 = LocalDateTime.of(2023, 4, 20, 6, 9, 20);
     pieceAuditEvent1.setActionDate(Date.from(localDateTime1.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent2.setActionDate(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent3.setActionDate(Date.from(localDateTime3.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent4.setActionDate(Date.from(localDateTime4.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent5.setActionDate(Date.from(localDateTime5.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece1.setActionDate(Date.from(localDateTime6.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece2.setActionDate(Date.from(localDateTime7.atZone(ZoneId.systemDefault()).toInstant()));
 
     pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEventWithDifferentPiece1, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEventWithDifferentPiece2, TENANT_ID);
 
     // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
