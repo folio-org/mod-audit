@@ -18,6 +18,7 @@ import org.folio.services.acquisition.OrderLineAuditEventsService;
 import org.folio.services.acquisition.PieceAuditEventsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -28,16 +29,20 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private final OrderAuditEventsService orderAuditEventsService;
-  private final OrderLineAuditEventsService orderLineAuditEventsService;
-  private final PieceAuditEventsService pieceAuditEventsService;
+  private OrderAuditEventsService orderAuditEventsService;
+  private OrderLineAuditEventsService orderLineAuditEventsService;
+  private PieceAuditEventsService pieceAuditEventsService;
 
+  @Autowired
   public AuditDataAcquisitionImpl(OrderAuditEventsService orderAuditEventsService,
                                   OrderLineAuditEventsService orderLineAuditEventsService,
                                   PieceAuditEventsService pieceAuditEventsService) {
     this.orderAuditEventsService = orderAuditEventsService;
     this.orderLineAuditEventsService = orderLineAuditEventsService;
     this.pieceAuditEventsService = pieceAuditEventsService;
+  }
+
+  public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
