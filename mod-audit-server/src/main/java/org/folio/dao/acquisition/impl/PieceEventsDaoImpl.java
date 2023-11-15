@@ -45,8 +45,8 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     )
     SELECT id, action, piece_id, user_id, event_date,	action_date, modified_content_snapshot,
      (SELECT COUNT(*) AS total_records FROM StatusChanges
-     WHERE piece_id = $1 and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, ''))
-    FROM StatusChanges WHERE piece_id = $1 and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '')
+     WHERE and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, ''))
+    FROM StatusChanges WHERE and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '')
     %s LIMIT $2 OFFSET $3
     """;
 
