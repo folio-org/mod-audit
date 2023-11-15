@@ -13,6 +13,7 @@ import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
@@ -142,8 +143,8 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
           pieceAuditEvent.getAction(),
           pieceAuditEvent.getPieceId(),
           pieceAuditEvent.getUserId(),
-          LocalDateTime.ofInstant(pieceAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
-          LocalDateTime.ofInstant(pieceAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
+          LocalDateTime.ofInstant(pieceAuditEvent.getEventDate().toInstant(),  ZoneId.systemDefault()),
+          LocalDateTime.ofInstant(pieceAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
           JsonObject.mapFrom(pieceAuditEvent.getPieceSnapshot())),
         promise);
     } catch (Exception e) {

@@ -14,6 +14,7 @@ import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
@@ -92,8 +93,8 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         orderLineAuditEvent.getOrderId(),
         orderLineAuditEvent.getOrderLineId(),
         orderLineAuditEvent.getUserId(),
-        LocalDateTime.ofInstant(orderLineAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
-        LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
+        LocalDateTime.ofInstant(orderLineAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
         JsonObject.mapFrom(orderLineAuditEvent.getOrderLineSnapshot())), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order line id: {} in to table {}",

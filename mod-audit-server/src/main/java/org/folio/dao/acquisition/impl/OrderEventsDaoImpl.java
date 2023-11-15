@@ -13,6 +13,7 @@ import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
@@ -89,8 +90,8 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
-        LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
-        LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
+        LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
         JsonObject.mapFrom(orderAuditEvent.getOrderSnapshot())), promise);
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
