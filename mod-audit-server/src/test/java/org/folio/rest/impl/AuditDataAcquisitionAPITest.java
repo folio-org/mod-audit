@@ -8,6 +8,7 @@ import static org.folio.utils.EntityUtils.PIECE_ID;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.containsString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -173,6 +174,11 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
     var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
     var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
+    pieceAuditEvent1.setActionDate(java.sql.Date.valueOf("2023-04-20T06:09:30"));
+    pieceAuditEvent2.setActionDate(java.sql.Date.valueOf("2023-04-20T06:10:30"));
+    pieceAuditEvent3.setActionDate(java.sql.Date.valueOf("2023-04-20T06:11:30"));
+    pieceAuditEvent4.setActionDate(java.sql.Date.valueOf("2023-04-20T06:12:30"));
+    pieceAuditEvent5.setActionDate(java.sql.Date.valueOf("2023-04-20T06:13:30"));
 
     pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
