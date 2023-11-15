@@ -29,18 +29,12 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private OrderAuditEventsService orderAuditEventsService;
-  private OrderLineAuditEventsService orderLineAuditEventsService;
-  private PieceAuditEventsService pieceAuditEventsService;
-
   @Autowired
-  public AuditDataAcquisitionImpl(OrderAuditEventsService orderAuditEventsService,
-                                  OrderLineAuditEventsService orderLineAuditEventsService,
-                                  PieceAuditEventsService pieceAuditEventsService) {
-    this.orderAuditEventsService = orderAuditEventsService;
-    this.orderLineAuditEventsService = orderLineAuditEventsService;
-    this.pieceAuditEventsService = pieceAuditEventsService;
-  }
+  private OrderAuditEventsService orderAuditEventsService;
+  @Autowired
+  private OrderLineAuditEventsService orderLineAuditEventsService;
+  @Autowired
+  private PieceAuditEventsService pieceAuditEventsService;
 
   public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -53,7 +47,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     try {
-      LOGGER.warn("Trying to get audit events by order id: {}", orderId);
       orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
@@ -72,7 +65,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     try {
-      LOGGER.warn("Trying to get audit events by order line id: {}", orderLineId);
       orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
