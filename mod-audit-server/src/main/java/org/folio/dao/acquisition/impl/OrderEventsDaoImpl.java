@@ -93,7 +93,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
         LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
         JsonObject.mapFrom(orderAuditEvent.getOrderSnapshot())), promise);
     } catch (Exception e) {
-      LOGGER.warn("Failed to save record with id: {} for order id: {} in to table {}",
+      LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
         orderAuditEvent.getId(), orderAuditEvent.getOrderId(), TABLE_NAME, e);
       promise.fail(e);
     }

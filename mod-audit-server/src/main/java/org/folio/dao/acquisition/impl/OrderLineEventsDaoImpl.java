@@ -96,7 +96,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
         LocalDateTime.ofInstant(orderLineAuditEvent.getActionDate().toInstant(), ZoneOffset.UTC),
         JsonObject.mapFrom(orderLineAuditEvent.getOrderLineSnapshot())), promise);
     } catch (Exception e) {
-      LOGGER.warn("Failed to save record with id: {} for order line id: {} in to table {}",
+      LOGGER.error("Failed to save record with id: {} for order line id: {} in to table {}",
         orderLineAuditEvent.getId(), orderLineAuditEvent.getOrderLineId(), TABLE_NAME, e);
       promise.fail(e);
     }
