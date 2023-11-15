@@ -7,6 +7,9 @@ import static org.folio.utils.EntityUtils.PIECE_ID;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.containsString;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
 
@@ -162,7 +165,6 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   }
 
   @Test
-  @Disabled
   void shouldReturnPieceEventsStatusChangeHistoryGetByPieceId() {
     String id1 = UUID.randomUUID().toString();
     String id2 = UUID.randomUUID().toString();
@@ -174,50 +176,55 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
     var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
     var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
-    pieceAuditEvent1.setActionDate(java.sql.Date.valueOf("2023-04-20T06:09:30"));
-    pieceAuditEvent2.setActionDate(java.sql.Date.valueOf("2023-04-20T06:10:30"));
-    pieceAuditEvent3.setActionDate(java.sql.Date.valueOf("2023-04-20T06:11:30"));
-    pieceAuditEvent4.setActionDate(java.sql.Date.valueOf("2023-04-20T06:12:30"));
-    pieceAuditEvent5.setActionDate(java.sql.Date.valueOf("2023-04-20T06:13:30"));
+    var localDateTime1 = LocalDateTime.of(2023, 4, 20, 6, 9, 30);
+    var localDateTime2 = LocalDateTime.of(2023, 4, 20, 6, 10, 30);
+    var localDateTime3 = LocalDateTime.of(2023, 4, 20, 6, 11, 30);
+    var localDateTime4 = LocalDateTime.of(2023, 4, 20, 6, 12, 30);
+    var localDateTime5 = LocalDateTime.of(2023, 4, 20, 6, 13, 30);
+    pieceAuditEvent1.setActionDate(Date.from(localDateTime1.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent2.setActionDate(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent3.setActionDate(Date.from(localDateTime3.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent4.setActionDate(Date.from(localDateTime4.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent5.setActionDate(Date.from(localDateTime5.atZone(ZoneId.systemDefault()).toInstant()));
 
-//    pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
-//    pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
-//    pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
-//    pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
-//    pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
-//
-//    // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-//      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
-//      .then().log().all().statusCode(200)
-//      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
-//
-//
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-//      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
-//      .then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID))
-//      .body(containsString(id1))
-//      .body(containsString(id3))
-//      .body(containsString(id5));
-//
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-//      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
-//      .then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID))
-//      .body(containsString(id1));
-//
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-//      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
-//      .then().log().all().statusCode(200)
-//      .body(containsString(PIECE_ID))
-//      .body(containsString(id1))
-//      .body(containsString(id3))
-//      .body(containsString(id5));
-//
-//    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-//      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH + 123)
-//      .then().log().all().statusCode(500)
-//      .body(containsString("UUID string too large"));
+    pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
+
+    // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
+
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH + 123)
+      .then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
   }
 }
