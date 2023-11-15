@@ -29,7 +29,6 @@ import org.folio.dao.acquisition.PieceEventsDao;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -38,23 +37,22 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final String TABLE_NAME = "acquisition_piece_log";
   private static final String GET_BY_PIECE_ID_SQL = "SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,  " +
     " (SELECT count(*) AS total_records FROM %s WHERE piece_id = $1) FROM %s WHERE piece_id = $1 %s LIMIT $2 OFFSET $3";
-  private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL =
-    "WITH StatusChanges AS (SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot, " +
-      " LAG(modified_content_snapshot ->> 'receivingStatus') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status FROM %s " +
-    ")" +
-    "SELECT id, action, piece_id, user_id,	event_date,	action_date, modified_content_snapshot, " +
-     "(SELECT COUNT(*) AS total_records FROM StatusChanges " +
-      "WHERE piece_id = $1 and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '')) " +
-    "FROM StatusChanges WHERE piece_id = $1 and modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '') " +
-    "%s LIMIT $2 OFFSET $3";
-
+  private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL = """
+    WITH StatusChanges AS (SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
+     LAG(modified_content_snapshot ->> 'status') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status FROM %s
+    )
+    SELECT id, action, piece_id, user_id, event_date,	action_date, modified_content_snapshot,
+     (SELECT COUNT(*) AS total_records FROM StatusChanges
+     WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, ''))
+    FROM StatusChanges WHERE piece_id = $1 and modified_content_snapshot ->> 'status' <> COALESCE(previous_status, '')
+    %s LIMIT $2 OFFSET $3
+    """;
 
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot)" +
     " VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
   private final PostgresClientFactory pgClientFactory;
 
-  @Autowired
   public PieceEventsDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }
@@ -92,7 +90,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   }
 
   @Override
-  public Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
+  public Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
     Promise<RowSet<Row>> promise = Promise.promise();
     try {

@@ -3,19 +3,18 @@ package org.folio.verticle.acquisition;
 import java.util.List;
 
 import org.folio.kafka.AsyncRecordHandler;
-import org.folio.kafka.KafkaConfig;
 import org.folio.util.AcquisitionEventType;
 import org.folio.verticle.AbstractConsumersVerticle;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PieceEventConsumersVerticle extends AbstractConsumersVerticle {
 
-  @Autowired
-  private KafkaConfig kafkaConfig;
-  @Autowired
-  private AsyncRecordHandler<String, String> pieceEventsHandler;
+  private final AsyncRecordHandler<String, String> pieceEventsHandler;
+
+  public PieceEventConsumersVerticle(AsyncRecordHandler<String, String> pieceEventsHandler) {
+    this.pieceEventsHandler = pieceEventsHandler;
+  }
 
   @Override
   public List<String> getEvents() {

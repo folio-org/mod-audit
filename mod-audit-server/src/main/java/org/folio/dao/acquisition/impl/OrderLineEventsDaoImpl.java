@@ -12,7 +12,6 @@ import org.folio.dao.acquisition.OrderLineEventsDao;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -38,10 +37,9 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   private static final String INSERT_SQL = "INSERT INTO %s (id, action, order_id, order_line_id, user_id, event_date, action_date, modified_content_snapshot) " +
     "VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
 
-  @Autowired
   private final PostgresClientFactory pgClientFactory;
 
-  @Autowired
+
   public OrderLineEventsDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }

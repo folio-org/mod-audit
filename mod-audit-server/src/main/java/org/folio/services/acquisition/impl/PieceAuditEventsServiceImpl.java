@@ -41,9 +41,9 @@ public class PieceAuditEventsServiceImpl implements PieceAuditEventsService {
   }
 
   @Override
-  public Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
+  public Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByOrderId:: Retrieving audit events with unique status changes for pieceId={} and tenantId={}", pieceId, tenantId);
-    return pieceEventsDao.getAuditEventsWithUniqueStatusByPieceId(pieceId, sortBy, sortOrder, limit, offset, tenantId);
+    return pieceEventsDao.getAuditEventsWithStatusChangesByPieceId(pieceId, sortBy, sortOrder, limit, offset, tenantId);
   }
 
   private <T> Future<T> handleFailures(Throwable throwable, String id) {

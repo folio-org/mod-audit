@@ -16,7 +16,6 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.acquisition.PieceAuditEventsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,11 +23,11 @@ public class PieceEventsHandler implements AsyncRecordHandler<String, String> {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private PieceAuditEventsService pieceAuditEventsService;
-  private Vertx vertx;
+  private final PieceAuditEventsService pieceAuditEventsService;
+  private final Vertx vertx;
 
-  public PieceEventsHandler(@Autowired Vertx vertx,
-                            @Autowired PieceAuditEventsService pieceAuditEventsService) {
+  public PieceEventsHandler(Vertx vertx,
+                            PieceAuditEventsService pieceAuditEventsService) {
     this.pieceAuditEventsService = pieceAuditEventsService;
     this.vertx = vertx;
   }

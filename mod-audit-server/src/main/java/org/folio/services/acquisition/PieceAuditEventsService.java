@@ -39,6 +39,6 @@ public interface PieceAuditEventsService {
    * @param offset    offset
    * @return future with PieceAuditEventCollection
    */
-  Future<PieceAuditEventCollection> getAuditEventsWithUniqueStatusByPieceId(String pieceId, String sortBy, String sortOrder,
+  Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder,
                                                                         int limit, int offset, String tenantId);
 }

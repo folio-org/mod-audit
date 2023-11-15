@@ -18,7 +18,6 @@ import org.folio.services.acquisition.OrderLineAuditEventsService;
 import org.folio.services.acquisition.PieceAuditEventsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -29,16 +28,16 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  @Autowired
-  private OrderAuditEventsService orderAuditEventsService;
+  private final OrderAuditEventsService orderAuditEventsService;
+  private final OrderLineAuditEventsService orderLineAuditEventsService;
+  private final PieceAuditEventsService pieceAuditEventsService;
 
-  @Autowired
-  private OrderLineAuditEventsService orderLineAuditEventsService;
-
-  @Autowired
-  private PieceAuditEventsService pieceAuditEventsService;
-
-  public AuditDataAcquisitionImpl() {
+  public AuditDataAcquisitionImpl(OrderAuditEventsService orderAuditEventsService,
+                                  OrderLineAuditEventsService orderLineAuditEventsService,
+                                  PieceAuditEventsService pieceAuditEventsService) {
+    this.orderAuditEventsService = orderAuditEventsService;
+    this.orderLineAuditEventsService = orderLineAuditEventsService;
+    this.pieceAuditEventsService = pieceAuditEventsService;
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
@@ -108,7 +107,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
 
     try {
       LOGGER.warn("Trying to get piece audit events with unique status by piece id: {}", pieceId);
-      pieceAuditEventsService.getAuditEventsWithUniqueStatusByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+      pieceAuditEventsService.getAuditEventsWithStatusChangesByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
         .otherwise(this::mapExceptionToResponse)
