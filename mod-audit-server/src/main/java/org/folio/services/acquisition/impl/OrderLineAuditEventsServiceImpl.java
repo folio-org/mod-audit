@@ -26,10 +26,10 @@ public class OrderLineAuditEventsServiceImpl implements OrderLineAuditEventsServ
 
   @Override
   public Future<RowSet<Row>> saveOrderLineAuditEvent(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
-    LOGGER.debug("saveOrderLineAuditEvent:: Saving order line audit event with tenant Id : {}", tenantId);
+    LOGGER.debug("saveOrderLineAuditEvent:: Saving order line audit event with id: {} in tenant Id : {}", orderLineAuditEvent.getId(), tenantId);
     return orderLineEventsDao.save(orderLineAuditEvent, tenantId)
       .recover(throwable -> {
-        LOGGER.error("handleFailures:: Handling Failures with Id : {}", orderLineAuditEvent.getOrderLineId());
+        LOGGER.error("handleFailures:: Could not save order audit event for OrderLine id: {} in tenantId: {}", orderLineAuditEvent.getOrderLineId(), tenantId);
         return handleFailures(throwable, orderLineAuditEvent.getId());
       });
   }

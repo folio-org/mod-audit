@@ -28,7 +28,7 @@ public class PieceAuditEventsServiceImpl implements PieceAuditEventsService {
     LOGGER.debug("savePieceAuditEvent:: Trying to save piece audit event with id={} for tenantId={}", pieceAuditEvent.getPieceId(), tenantId);
     return pieceEventsDao.save(pieceAuditEvent, tenantId)
       .recover(throwable -> {
-        LOGGER.error("handleFailures:: Handling Failures with Id : {}", pieceAuditEvent.getPieceId());
+        LOGGER.error("handleFailures:: Could not save order audit event for Piece id: {} in tenantId: {}", pieceAuditEvent.getPieceId(), tenantId);
         return handleFailures(throwable, pieceAuditEvent.getId());
       });
   }
