@@ -1,6 +1,5 @@
 package org.folio.rest.impl;
 
-import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.folio.utils.EntityUtils.ORDER_ID;
 import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
@@ -8,7 +7,6 @@ import static org.folio.utils.EntityUtils.PIECE_ID;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.containsString;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -202,15 +200,15 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(id5));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + ORDER_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
       .then().log().all().statusCode(200)
-      .body(containsString(ORDER_ID))
+      .body(containsString(PIECE_ID))
       .body(containsString(id1));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + ORDER_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
       .then().log().all().statusCode(200)
-      .body(containsString(ORDER_ID))
+      .body(containsString(PIECE_ID))
       .body(containsString(id1))
       .body(containsString(id3))
       .body(containsString(id5));
