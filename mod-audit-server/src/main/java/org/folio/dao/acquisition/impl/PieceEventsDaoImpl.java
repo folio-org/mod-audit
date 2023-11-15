@@ -138,7 +138,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(pieceAuditEvent.getId(),
-          pieceAuditEvent.getActionDate(),
+          pieceAuditEvent.getAction(),
           pieceAuditEvent.getPieceId(),
           pieceAuditEvent.getUserId(),
           LocalDateTime.ofInstant(pieceAuditEvent.getEventDate().toInstant(), ZoneOffset.UTC),
