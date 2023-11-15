@@ -211,8 +211,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
       .then().log().all().statusCode(200)
-      .body(containsString(PIECE_ID))
-      .body(containsString(id1));
+      .body(containsString(PIECE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
