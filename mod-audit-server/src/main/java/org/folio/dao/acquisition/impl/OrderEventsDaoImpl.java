@@ -107,7 +107,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
       orderAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
-    LOGGER.info("mapRowToListOfOrderEvent:: Mapped row to List of Order Events");
+    LOGGER.debug("mapRowToListOfOrderEvent:: Mapped row to List of Order Events");
     return orderAuditEventCollection;
   }
 

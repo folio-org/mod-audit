@@ -45,7 +45,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
                                                int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Order By Id : {}", orderId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
-
     try {
       orderAuditEventsService.getAuditEventsByOrderId(orderId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderByIdResponse::respond200WithApplicationJson)
@@ -63,7 +62,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
                                                    int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataAcquisitionOrderLineById:: Retrieving Audit Data Acquisition Order Line By Id : {}", orderLineId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
-
     try {
       orderLineAuditEventsService.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionOrderLineByIdResponse::respond200WithApplicationJson)
@@ -82,7 +80,6 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
                                                int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece By Id : {}", pieceId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
-
     try {
       pieceAuditEventsService.getAuditEventsByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
@@ -99,11 +96,9 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   public void getAuditDataAcquisitionPieceStatusChangeHistoryById(String pieceId, String sortBy,
                                                                   AuditDataAcquisitionPieceIdStatusChangeHistoryGetSortOrder sortOrder,
                                                                   int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece with unique status By Id : {}", pieceId);
+    LOGGER.debug("getAuditDataAcquisitionOrderById:: Retrieving Audit Data Acquisition Piece with status changes By Id : {}", pieceId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
-
     try {
-      LOGGER.warn("Trying to get piece audit events with unique status by piece id: {}", pieceId);
       pieceAuditEventsService.getAuditEventsWithStatusChangesByPieceId(pieceId, sortBy, sortOrder.name(), limit, offset, tenantId)
         .map(GetAuditDataAcquisitionPieceByIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)

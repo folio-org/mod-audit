@@ -120,7 +120,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));
       pieceAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
-    LOGGER.info("mapRowToListOfOrderEvent:: Mapped row to List of Piece Events");
+    LOGGER.debug("mapRowToListOfOrderEvent:: Mapped row to List of Piece Events");
     return pieceAuditEventCollection;
   }
 

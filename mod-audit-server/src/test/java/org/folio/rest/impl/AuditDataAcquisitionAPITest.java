@@ -163,7 +163,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   }
 
   @Test
-  void shouldReturnPieceEventsStatusChangeHistoryGetByPieceId() {
+  void shouldReturnPieceEventsStatusChangesHistoryGetByPieceId() {
     String id1 = UUID.randomUUID().toString();
     String id2 = UUID.randomUUID().toString();
     String id3 = UUID.randomUUID().toString();

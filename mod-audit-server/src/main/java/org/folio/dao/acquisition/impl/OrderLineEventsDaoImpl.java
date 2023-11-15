@@ -110,7 +110,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       orderLineAuditEventCollection.getOrderLineAuditEvents().add(mapRowToOrderLineEvent(row));
       orderLineAuditEventCollection.setTotalItems(row.getInteger(TOTAL_RECORDS_FIELD));
     });
-    LOGGER.info("mapRowToListOfOrderLineEvent:: Mapped row to List of Order Line Events");
+    LOGGER.debug("mapRowToListOfOrderLineEvent:: Mapped row to List of Order Line Events");
     return orderLineAuditEventCollection;
   }
 
