@@ -1,10 +1,8 @@
 package org.folio.util;
 
-import org.apache.commons.lang3.StringUtils;
+public class AuditEventDBConstants {
 
-public class OrderAuditEventDBConstants {
-
-  private OrderAuditEventDBConstants() {}
+  private AuditEventDBConstants() {}
 
   public static final String ID_FIELD = "id";
 
@@ -13,6 +11,8 @@ public class OrderAuditEventDBConstants {
   public static final String ORDER_ID_FIELD = "order_id";
 
   public static final String ORDER_LINE_ID_FIELD = "order_line_id";
+
+  public static final String PIECE_ID_FIELD = "piece_id";
 
   public static final String USER_ID_FIELD = "user_id";
 
@@ -26,4 +26,5 @@ public class OrderAuditEventDBConstants {
 
   public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
 
+  public static final String UNIQUE_CONSTRAINT_VIOLATION_CODE = "23505";
 }

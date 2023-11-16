@@ -122,6 +122,30 @@
       ]
     },
     {
+      "id": "acquisition-piece-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/piece/{id}",
+          "permissionsRequired": [
+            "acquisition.piece.events.get"
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/piece/{id}/status-change-history",
+          "permissionsRequired": [
+            "acquisition.piece.events.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "circulation-logs",
       "version": "1.2",
       "handlers": [
@@ -224,6 +248,11 @@
       "description": "Get order-line change events"
     },
     {
+      "permissionName": "acquisition.piece.events.get",
+      "displayName": "Acquisition piece events - get piece change events",
+      "description": "Get piece change events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -235,7 +264,8 @@
         "audit.item.delete",
         "circulation-logs.collection.get",
         "acquisition.order.events.get",
-        "acquisition.order-line.events.get"
+        "acquisition.order-line.events.get",
+        "acquisition.piece.events.get"
       ]
     }
   ],

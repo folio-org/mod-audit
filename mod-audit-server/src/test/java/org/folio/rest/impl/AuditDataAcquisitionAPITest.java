@@ -1,12 +1,26 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
+import static org.folio.utils.EntityUtils.ORDER_ID;
+import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
+import static org.folio.utils.EntityUtils.PIECE_ID;
+import static org.folio.utils.EntityUtils.createPieceAuditEvent;
+import static org.hamcrest.Matchers.containsString;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.UUID;
+
 import io.restassured.http.Header;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
+import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,48 +28,33 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-
-import java.util.Date;
-import java.util.UUID;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
-
 public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
-  public static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
-
-  protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
-
-  protected static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
-
-  protected static final String INVALID_ID = "646ea52c-2c65-4d28-9a8f-e0d200fd6b00";
-
-  protected static final String ACQ_AUDIT_ORDER_PATH = "/audit-data/acquisition/order/";
-
-  protected static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
-
+  private static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
+  private static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
+  private static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
+  private static final String INVALID_ID = "646ea52c-2c65-4d28-9a8f-e0d200fd6b00";
+  private static final String ACQ_AUDIT_ORDER_PATH = "/audit-data/acquisition/order/";
+  private static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
+  private static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
+  private static final String ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH = "/status-change-history";
   private static final String TENANT_ID = "modaudittest";
-
-  public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
-
-  public static final String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
 
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @InjectMocks
-  OrderEventsDaoImpl orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
-
+  OrderEventsDaoImpl orderEventDao;
   @InjectMocks
-  OrderLineEventsDaoImpl orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
+  OrderLineEventsDaoImpl orderLineEventDao;
+  @InjectMocks
+  PieceEventsDaoImpl pieceEventsDao;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
     orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
-
   }
 
   @Test
@@ -104,10 +103,12 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     orderLineEventDao.save(orderLineAuditEvent, TENANT_ID);
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ INVALID_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ INVALID_ID)
+      .then().log().all().statusCode(200)
       .body(containsString("orderLineAuditEvents")).body(containsString("totalItems"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID)
+      .then().log().all().statusCode(200)
       .body(containsString(ORDER_LINE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID +"?limit=1").then().log().all().statusCode(200)
@@ -117,6 +118,121 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(ORDER_LINE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_LINE_ID + 123).then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  void shouldReturnPieceEventsOnGetByPieceId() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name","Test Product2");
+
+    PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(PieceAuditEvent.Action.CREATE)
+      .withPieceId(PIECE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withPieceSnapshot(jsonObject);
+
+    pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID)
+      .then().log().all().statusCode(200)
+      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID)
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + "?sortBy=action_date")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123).then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  void shouldReturnPieceEventsStatusChangesHistoryGetByPieceId() {
+    String id1 = UUID.randomUUID().toString();
+    String id2 = UUID.randomUUID().toString();
+    String id3 = UUID.randomUUID().toString();
+    String id4 = UUID.randomUUID().toString();
+    String id5 = UUID.randomUUID().toString();
+    String id6 = UUID.randomUUID().toString();
+    String id7 = UUID.randomUUID().toString();
+    var pieceAuditEvent1 = createPieceAuditEvent(id1, "STATUS 1");
+    var pieceAuditEvent2 = createPieceAuditEvent(id2, "STATUS 1");
+    var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
+    var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
+    var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
+    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id6, "STATUS 3");
+    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id7, "STATUS 2");
+    pieceAuditEventWithDifferentPiece1.setPieceId(UUID.randomUUID().toString());
+    pieceAuditEventWithDifferentPiece2.setPieceId(UUID.randomUUID().toString());
+    var localDateTime1 = LocalDateTime.of(2023, 4, 20, 6, 9, 30);
+    var localDateTime2 = LocalDateTime.of(2023, 4, 20, 6, 10, 30);
+    var localDateTime3 = LocalDateTime.of(2023, 4, 20, 6, 11, 30);
+    var localDateTime4 = LocalDateTime.of(2023, 4, 20, 6, 12, 30);
+    var localDateTime5 = LocalDateTime.of(2023, 4, 20, 6, 13, 30);
+    var localDateTime6 = LocalDateTime.of(2023, 4, 20, 6, 9, 25);
+    var localDateTime7 = LocalDateTime.of(2023, 4, 20, 6, 9, 20);
+    pieceAuditEvent1.setActionDate(Date.from(localDateTime1.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent2.setActionDate(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent3.setActionDate(Date.from(localDateTime3.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent4.setActionDate(Date.from(localDateTime4.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent5.setActionDate(Date.from(localDateTime5.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece1.setActionDate(Date.from(localDateTime6.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece2.setActionDate(Date.from(localDateTime7.atZone(ZoneId.systemDefault()).toInstant()));
+
+    pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEventWithDifferentPiece1, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEventWithDifferentPiece2, TENANT_ID);
+
+    // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString("pieceAuditEvents")).body(containsString("totalItems"));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .then().log().all().statusCode(200)
+      .body(containsString(PIECE_ID))
+      .body(containsString(id1))
+      .body(containsString(id3))
+      .body(containsString(id5));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123 + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 }

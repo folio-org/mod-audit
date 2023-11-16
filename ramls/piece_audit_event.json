@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Piece audit event",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "UUID of the event",
+      "$ref": "common/uuid.json"
+    },
+    "action": {
+      "description": "Action for piece (Create, Edit or Delete)",
+      "type": "string",
+      "$ref": "event_action.json"
+    },
+    "pieceId": {
+      "description": "UUID of the piece",
+      "$ref": "common/uuid.json"
+    },
+    "userId": {
+      "description": "UUID of the user who performed the action",
+      "$ref": "common/uuid.json"
+    },
+    "eventDate": {
+      "description": "Date time when event triggered",
+      "format": "date-time",
+      "type": "string"
+    },
+    "actionDate": {
+      "description": "Date time when piece action occurred",
+      "format": "date-time",
+      "type": "string"
+    },
+    "pieceSnapshot": {
+      "description": "Full snapshot of the piece",
+      "type": "object",
+      "javaType": "java.lang.Object"
+    }
+  },
+  "additionalProperties": false
+}
