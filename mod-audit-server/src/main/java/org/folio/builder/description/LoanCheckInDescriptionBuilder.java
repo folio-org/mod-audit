@@ -16,12 +16,15 @@ import static org.folio.util.LogEventPayloadField.RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
 
 import java.time.LocalDateTime;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.ItemStatus;
 
 import io.vertx.core.json.JsonObject;
 
 public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
-
+  private static final Logger log = LogManager.getLogger();
   @Override
   public String buildDescription(JsonObject logEventPayload) {
     StringBuilder description = new StringBuilder();
@@ -39,6 +42,8 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     LocalDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE);
     LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
+    log.info("Return Date " + returnDate.toString());
+    log.info("System Return Date " + systemReturnDate.toString());
     if (!returnDate.isEqual(systemReturnDate)) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate))
         .append("system return date ").append(getFormattedDateTime(systemReturnDate));
