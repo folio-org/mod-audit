@@ -40,7 +40,8 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
     if (!returnDate.isEqual(systemReturnDate)) {
-      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate));
+      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate))
+        .append("system return date ").append(getFormattedDateTime(systemReturnDate));
     }
 
     if (dueDate.isAfter(returnDate)) {

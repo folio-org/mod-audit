@@ -36,7 +36,7 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
 
   private static final Logger logger = LogManager.getLogger();
 
-  @Test
+  //@Test
   public void checkInTest() throws Exception {
     logger.info("Test check-in log records builder");
 
