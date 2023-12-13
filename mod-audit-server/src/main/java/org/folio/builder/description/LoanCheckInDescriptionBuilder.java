@@ -17,6 +17,7 @@ import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.ZONE_ID;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -45,7 +46,7 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     log.info("The payload zone ID " + getProperty(logEventPayload, ZONE_ID));
     log.info("The ZoneID created " + zoneId);
 
-    ZonedDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE).atZone(zoneId).withZoneSameInstant(zoneId);
+    ZonedDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE).atZone(ZoneId.of(ZoneOffset.UTC.getId())).withZoneSameInstant(zoneId);
     ZonedDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE).atZone(zoneId).withZoneSameInstant(zoneId);
     ZonedDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE).atZone(zoneId).withZoneSameInstant(zoneId);
 
