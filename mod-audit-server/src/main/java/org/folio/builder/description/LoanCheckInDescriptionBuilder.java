@@ -14,8 +14,11 @@ import static org.folio.util.LogEventPayloadField.DUE_DATE;
 import static org.folio.util.LogEventPayloadField.ITEM_STATUS_NAME;
 import static org.folio.util.LogEventPayloadField.RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
+import static org.folio.util.LogEventPayloadField.ZONE_ID;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,19 +41,20 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
         .append(claimedReturnedResolution);
     }
 
-    LocalDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE);
-    LocalDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE);
-    LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
+    ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID));
+    ZonedDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE).atZone(zoneId);
+    ZonedDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE).atZone(zoneId);
+    ZonedDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE).atZone(zoneId);
 
-    log.info("Return Date " + returnDate.toString());
-    log.info("System Return Date " + systemReturnDate.toString());
-    if (!returnDate.isEqual(systemReturnDate)) {
-      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate))
-        .append("system return date ").append(getFormattedDateTime(systemReturnDate));
+    log.info("Return Date " + returnDate);
+    log.info("System Return Date " + systemReturnDate);
+
+    if (!returnDate.truncatedTo(ChronoUnit.MILLIS).isEqual(systemReturnDate.truncatedTo(ChronoUnit.MILLIS))) {
+      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
-    if (dueDate.isAfter(returnDate)) {
-      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate));
+    if (dueDate.truncatedTo(ChronoUnit.MILLIS).isAfter(returnDate.truncatedTo(ChronoUnit.MILLIS))) {
+      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate.toLocalDateTime()));
     }
 
     description.append(DOT_MSG);
