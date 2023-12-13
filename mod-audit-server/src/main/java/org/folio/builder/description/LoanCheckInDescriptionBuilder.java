@@ -55,10 +55,10 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     log.info("Return Date " + returnDate);
     log.info("System Return Date " + systemReturnDate);
 
-    log.info("Without milliseconds part " + returnDate.truncatedTo(ChronoUnit.MILLIS));
-    log.info("Without milliseconds part systemReturnDate " + systemReturnDate.truncatedTo(ChronoUnit.MILLIS));
+    log.info("Without milliseconds part " + returnDate.truncatedTo(ChronoUnit.NANOS));
+    log.info("Without milliseconds part systemReturnDate " + systemReturnDate.truncatedTo(ChronoUnit.NANOS));
     Comparator<ZonedDateTime> comparator = Comparator.comparing(
-      zdt -> zdt.truncatedTo(ChronoUnit.MILLIS));
+      zdt -> zdt.truncatedTo(ChronoUnit.NANOS));
     log.info("The comparison is " + comparator.compare(returnDate, systemReturnDate));
 
     if (!returnDate.isEqual(systemReturnDate)) {
