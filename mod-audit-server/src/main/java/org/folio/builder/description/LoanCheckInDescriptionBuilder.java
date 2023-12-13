@@ -42,6 +42,9 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     }
 
     ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID));
+    log.info("The payload zone ID " + getProperty(logEventPayload, ZONE_ID));
+    log.info("The ZoneID created " + zoneId);
+
     ZonedDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE).atZone(zoneId);
     ZonedDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE).atZone(zoneId);
     ZonedDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE).atZone(zoneId);
