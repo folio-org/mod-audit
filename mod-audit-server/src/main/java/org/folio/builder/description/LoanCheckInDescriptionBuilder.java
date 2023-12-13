@@ -16,6 +16,7 @@ import static org.folio.util.LogEventPayloadField.RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.ZONE_ID;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -46,14 +47,14 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     log.info("The payload zone ID " + getProperty(logEventPayload, ZONE_ID));
     log.info("The ZoneID created " + zoneId);
 
-    ZonedDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE).atZone(ZoneId.of(ZoneOffset.UTC.getId())).withZoneSameInstant(zoneId);
-    ZonedDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE).atZone(zoneId).withZoneSameInstant(zoneId);
-    ZonedDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE).atZone(zoneId).withZoneSameInstant(zoneId);
+    ZonedDateTime returnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, RETURN_DATE), zoneId);
+    ZonedDateTime systemReturnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE), zoneId);
+    ZonedDateTime dueDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, DUE_DATE), zoneId);
 
     log.info("Return Date " + returnDate);
     log.info("System Return Date " + systemReturnDate);
 
-    if (!returnDate.truncatedTo(ChronoUnit.MILLIS).isEqual(systemReturnDate.truncatedTo(ChronoUnit.MILLIS))) {
+    if (returnDate.truncatedTo(ChronoUnit.MILLIS).compareTo(systemReturnDate.truncatedTo(ChronoUnit.MILLIS)) != 0) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
@@ -64,5 +65,9 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     description.append(DOT_MSG);
 
     return description.toString();
+  }
+
+  private ZonedDateTime getDateInTenantTimeZone(LocalDateTime localDateTime, ZoneId zoneId) {
+    return  localDateTime.atZone(ZoneId.of(ZoneOffset.UTC.getId())).withZoneSameInstant(zoneId);
   }
 }
