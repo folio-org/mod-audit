@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +57,11 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
 
     log.info("Without milliseconds part " + returnDate.truncatedTo(ChronoUnit.MILLIS));
     log.info("Without milliseconds part systemReturnDate " + systemReturnDate.truncatedTo(ChronoUnit.MILLIS));
-    if (returnDate.truncatedTo(ChronoUnit.MILLIS).compareTo(systemReturnDate.truncatedTo(ChronoUnit.MILLIS)) != 0) {
+    Comparator<ZonedDateTime> comparator = Comparator.comparing(
+      zdt -> zdt.truncatedTo(ChronoUnit.MILLIS));
+    log.info("The comparison is " + comparator.compare(returnDate, systemReturnDate));
+
+    if (!returnDate.isEqual(systemReturnDate)) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
