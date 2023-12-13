@@ -30,7 +30,6 @@ import org.folio.builder.ItemStatus;
 import io.vertx.core.json.JsonObject;
 
 public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
-  private static final Logger log = LogManager.getLogger();
   @Override
   public String buildDescription(JsonObject logEventPayload) {
     StringBuilder description = new StringBuilder();
@@ -44,24 +43,15 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
         .append(claimedReturnedResolution);
     }
 
-    ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID));
-    log.info("The payload zone ID " + getProperty(logEventPayload, ZONE_ID));
-    log.info("The ZoneID created " + zoneId);
-
+    ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID) != null ? getProperty(logEventPayload, ZONE_ID) : ZoneOffset.UTC.getId());
     ZonedDateTime returnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, RETURN_DATE), zoneId);
     ZonedDateTime systemReturnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE), zoneId);
     ZonedDateTime dueDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, DUE_DATE), zoneId);
 
-    log.info("Return Date " + returnDate);
-    log.info("System Return Date " + systemReturnDate);
-
-    log.info("Without milliseconds part " + returnDate.truncatedTo(ChronoUnit.NANOS));
-    log.info("Without milliseconds part systemReturnDate " + systemReturnDate.truncatedTo(ChronoUnit.NANOS));
     Comparator<ZonedDateTime> comparator = Comparator.comparing(
-      zdt -> zdt.truncatedTo(ChronoUnit.NANOS));
-    log.info("The comparison is " + comparator.compare(returnDate, systemReturnDate));
+      zdt -> zdt.withNano(0));
 
-    if (!returnDate.isEqual(systemReturnDate)) {
+    if (comparator.compare(returnDate, systemReturnDate) != 0 ) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
