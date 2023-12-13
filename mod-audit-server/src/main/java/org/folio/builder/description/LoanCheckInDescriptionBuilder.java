@@ -54,6 +54,8 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     log.info("Return Date " + returnDate);
     log.info("System Return Date " + systemReturnDate);
 
+    log.info("Without milliseconds part " + returnDate.truncatedTo(ChronoUnit.MILLIS));
+    log.info("Without milliseconds part systemReturnDate " + systemReturnDate.truncatedTo(ChronoUnit.MILLIS));
     if (returnDate.truncatedTo(ChronoUnit.MILLIS).compareTo(systemReturnDate.truncatedTo(ChronoUnit.MILLIS)) != 0) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
