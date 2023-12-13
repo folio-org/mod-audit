@@ -71,7 +71,7 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
 
-  //@ParameterizedTest
+  @ParameterizedTest
   @ValueSource(strings = {REQUEST_CREATED_THROUGH_OVERRIDE_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_JSON, REQUEST_EDITED_PAYLOAD_WITH_NON_EMPTY_DATE_JSON})
   void postLogRecordEventForRequestOverride(String sample) {
     logger.info("post valid log event for request creation through override: success");

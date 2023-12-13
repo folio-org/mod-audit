@@ -1,0 +1,28 @@
+{
+  "logEventType":"CHECK_IN_EVENT",
+  "servicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+  "loanId":"6ccebb4d-3ef8-489e-907e-a85bca372ca2",
+  "isLoanClosed":true,
+  "systemReturnDate":"2023-12-13T07:05:38.545Z",
+  "returnDate":"2023-12-13T07:05:38.269Z",
+  "dueDate":"2020-09-26T08:42:05.004Z",
+  "holdingsRecordId": "2e96afd4-7027-4cb8-bc40-efc5d1bf155b",
+  "instanceId":"c361cda5-ee48-43b4-88eb-1d5c32c165cf",
+  "userId":"2a424823-588a-45ee-9441-a6384b6614b2",
+  "userBarcode":"236964750970123",
+  "itemId":"bb5a6689-c008-4c96-8f8f-b666850ee12d",
+  "itemBarcode":"326547658598",
+  "itemStatusName":"In transit",
+  "claimedReturnedResolution": "Returned by patron",
+  "destinationServicePoint":"Circ Desk 2",
+  "source":"folio",
+  "zoneId": "America/New_York",
+  "requests":[
+    {
+      "id":"03279209-a273-4fff-8d96-8aa43f013df4",
+      "oldRequestStatus":"Open - Not yet filled",
+      "newRequestStatus":"Open - In transit",
+      "requestType":"Recall"
+    }
+  ]
+}

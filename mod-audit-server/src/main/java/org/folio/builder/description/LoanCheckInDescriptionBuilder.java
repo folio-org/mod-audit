@@ -20,11 +20,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.builder.ItemStatus;
 
 import io.vertx.core.json.JsonObject;
@@ -46,7 +43,7 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID) != null ? getProperty(logEventPayload, ZONE_ID) : ZoneOffset.UTC.getId());
     ZonedDateTime returnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, RETURN_DATE), zoneId);
     ZonedDateTime systemReturnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE), zoneId);
-    ZonedDateTime dueDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, DUE_DATE), zoneId);
+    LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
     Comparator<ZonedDateTime> comparator = Comparator.comparing(
       zdt -> zdt.withNano(0));
@@ -55,8 +52,8 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
-    if (dueDate.truncatedTo(ChronoUnit.MILLIS).isAfter(returnDate.truncatedTo(ChronoUnit.MILLIS))) {
-      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate.toLocalDateTime()));
+    if (dueDate.isAfter(returnDate.toLocalDateTime())) {
+      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate));
     }
 
     description.append(DOT_MSG);

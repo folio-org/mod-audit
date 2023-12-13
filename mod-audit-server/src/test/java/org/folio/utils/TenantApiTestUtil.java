@@ -34,6 +34,8 @@ public class TenantApiTestUtil {
   public static final Header X_OKAPI_URL_TO = new Header("X-Okapi-Url-To", "http://localhost:" + port);
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
+  public static final String CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON = "payloads/check_in_with_timezone.json";
+  public static final String CHECK_IN_WITH_BACKDATE_TIMEZONE_PAYLOAD_JSON = "payloads/check_in_with_backdate_timezone.json";
   public static final String CHECK_OUT_PAYLOAD_JSON = "payloads/check_out.json";
   public static final String CHECK_OUT_THROUGH_OVERRIDE_PAYLOAD_JSON = "payloads/check_out_through_override.json";
 
