@@ -17,6 +17,7 @@ import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
+import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -30,35 +31,39 @@ public class InitAPIs implements InitAPI {
   private int acqOrderConsumerInstancesNumber;
   @Value("${acq.order-lines.kafka.consumer.instancesNumber:1}")
   private int acqOrderLineConsumerInstancesNumber;
+  @Value("${acq.pieces.kafka.consumer.instancesNumber:1}")
+  private int acqPieceConsumerInstancesNumber;
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
-    LOGGER.info("InitAPI starting...");
+    LOGGER.debug("init:: InitAPI starting...");
     try {
       SpringContextUtil.init(vertx, context, ApplicationConfig.class);
       SpringContextUtil.autowireDependencies(this, context);
       deployConsumersVerticles(vertx)
         .onSuccess(car -> {
           handler.handle(Future.succeededFuture());
-          LOGGER.info("Consumer Verticles were successfully started");
+          LOGGER.info("init:: Consumer Verticles were successfully started");
         })
         .onFailure(th -> {
           handler.handle(Future.failedFuture(th));
-          LOGGER.error("Consumer Verticles were not started", th);
+          LOGGER.warn("Consumer Verticles were not started", th);
         });
     } catch (Throwable th) {
-      LOGGER.error("Error during module init", th);
+      LOGGER.warn("Error during module init", th);
       handler.handle(Future.failedFuture(th));
     }
   }
 
   private Future<?> deployConsumersVerticles(Vertx vertx) {
+    LOGGER.debug("deployConsumersVerticles:: Deploying Consumers Verticle");
     AbstractApplicationContext springContext = vertx.getOrCreateContext().get(SPRING_CONTEXT_KEY);
     VerticleFactory verticleFactory = springContext.getBean(SpringVerticleFactory.class);
     vertx.registerVerticleFactory(verticleFactory);
 
     Promise<String> orderEventsConsumer = Promise.promise();
     Promise<String> orderLineEventsConsumer = Promise.promise();
+    Promise<String> pieceEventsConsumer = Promise.promise();
 
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
       new DeploymentOptions()
@@ -70,12 +75,20 @@ public class InitAPIs implements InitAPI {
         .setWorker(true)
         .setInstances(acqOrderLineConsumerInstancesNumber), orderLineEventsConsumer);
 
+    vertx.deployVerticle(getVerticleName(verticleFactory, PieceEventConsumersVerticle.class),
+      new DeploymentOptions()
+        .setWorker(true)
+        .setInstances(acqPieceConsumerInstancesNumber), pieceEventsConsumer);
+
+    LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
       orderEventsConsumer.future(),
-      orderLineEventsConsumer.future()));
+      orderLineEventsConsumer.future(),
+      pieceEventsConsumer.future()));
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {
+    LOGGER.debug("getVerticleName:: Retrieving Verticle name");
     return verticleFactory.prefix() + ":" + clazz.getName();
   }
 }

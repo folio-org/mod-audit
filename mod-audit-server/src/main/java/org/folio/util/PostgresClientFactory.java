@@ -3,15 +3,14 @@ package org.folio.util;
 
 import io.vertx.core.Vertx;
 import org.folio.rest.persist.PostgresClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostgresClientFactory {
 
-  private Vertx vertx;
+  private final Vertx vertx;
 
-  public PostgresClientFactory(@Autowired Vertx vertx) {
+  public PostgresClientFactory(Vertx vertx) {
     this.vertx = vertx;
   }
 

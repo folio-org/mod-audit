@@ -2,7 +2,6 @@ package org.folio.builder.service;
 
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
-import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.JsonPropertyFetcher.getObjectProperty;
@@ -27,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -36,26 +37,33 @@ import io.vertx.core.json.JsonObject;
 
 public class LoanRecordBuilder extends LogRecordBuilder {
 
+  private static final Logger LOGGER = LogManager.getLogger();
+
   public LoanRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
+    LOGGER.debug("buildLogRecord:: Building Log Record");
     JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
     if (isAction(payload, ANONYMIZE)) {
+      LOGGER.info("buildLogRecord:: Built Log Record for Anonymize Action");
       return fetchItemDetails(payload)
         .thenCompose(this::createResult);
-    } else if (isAction(payload, AGE_TO_LOST) || isAction(payload, CHANGED_DUE_DATE)) {
+    } else if (isAction(payload, AGE_TO_LOST)) {
+      LOGGER.info("buildLogRecord:: Built Log Record for Age To Lost");
       return fetchUserDetails(payload, getProperty(payload, USER_ID))
         .thenCompose(this::createResult);
     }
+    LOGGER.info("buildLogRecord:: Built Log Record");
     return fetchUserDetails(payload, getProperty(payload, UPDATED_BY_USER_ID))
       .thenCompose(this::createResult);
   }
 
   private CompletableFuture<List<LogRecord>> createResult(JsonObject payload) {
+    LOGGER.debug("createResult:: Creating log record result");
     return CompletableFuture.completedFuture(Collections.singletonList(new LogRecord()
       .withObject(LOAN)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
@@ -74,6 +82,7 @@ public class LoanRecordBuilder extends LogRecordBuilder {
   }
 
   private boolean isAction(JsonObject payload, LogRecord.Action action) {
+    LOGGER.debug("isAction:: Checking action");
     return action.equals(resolveAction(getProperty(payload, ACTION)));
   }
 }

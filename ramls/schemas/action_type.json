@@ -39,6 +39,8 @@
     "Request status changed",
     "Send",
     "Send error",
+    "Patron info added",
+    "Staff info added",
     "Staff information only added",
     "Transferred fully",
     "Transferred partially",

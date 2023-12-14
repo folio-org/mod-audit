@@ -41,16 +41,16 @@ public class OrderEventsHandler implements AsyncRecordHandler<String, String> {
     List<KafkaHeader> kafkaHeaders = record.headers();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
     OrderAuditEvent event = new JsonObject(record.value()).mapTo(OrderAuditEvent.class);
-    LOGGER.info("Starting processing of Order audit event with id: {} for order id: {}", event.getId(), event.getOrderId());
+    LOGGER.info("handle:: Starting processing of Order audit event with id: {} for order id: {}", event.getId(), event.getOrderId());
 
     orderAuditEventsService.saveOrderAuditEvent(event, okapiConnectionParams.getTenantId())
       .onSuccess(ar -> {
-        LOGGER.info("Order audit event with id: {} has been processed for order id: {}", event.getId(), event.getOrderId());
+        LOGGER.info("handle:: Order audit event with id: {} has been processed for order id: {}", event.getId(), event.getOrderId());
         result.complete(event.getId());
       })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
-          LOGGER.info("Duplicate Order audit event with id: {} for order id: {} received, skipped processing", event.getId(), event.getOrderId());
+          LOGGER.info("handle:: Duplicate Order audit event with id: {} for order id: {} received, skipped processing", event.getId(), event.getOrderId());
           result.complete(event.getId());
         } else {
           LOGGER.error("Processing of Order audit event with id: {} for order id: {} has been failed", event.getId(), event.getOrderId(), e);

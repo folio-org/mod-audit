@@ -14,14 +14,19 @@ import static org.folio.util.LogEventPayloadField.DUE_DATE;
 import static org.folio.util.LogEventPayloadField.ITEM_STATUS_NAME;
 import static org.folio.util.LogEventPayloadField.RETURN_DATE;
 import static org.folio.util.LogEventPayloadField.SYSTEM_RETURN_DATE;
+import static org.folio.util.LogEventPayloadField.ZONE_ID;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
+
 import org.folio.builder.ItemStatus;
 
 import io.vertx.core.json.JsonObject;
 
 public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
-
   @Override
   public String buildDescription(JsonObject logEventPayload) {
     StringBuilder description = new StringBuilder();
@@ -35,20 +40,28 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
         .append(claimedReturnedResolution);
     }
 
-    LocalDateTime returnDate = getDateTimeProperty(logEventPayload, RETURN_DATE);
-    LocalDateTime systemReturnDate = getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE);
+    ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID) != null ? getProperty(logEventPayload, ZONE_ID) : ZoneOffset.UTC.getId());
+    ZonedDateTime returnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, RETURN_DATE), zoneId);
+    ZonedDateTime systemReturnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE), zoneId);
     LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
-    if (!returnDate.isEqual(systemReturnDate)) {
-      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate));
+    Comparator<ZonedDateTime> comparator = Comparator.comparing(
+      zdt -> zdt.withSecond(0).withNano(0));
+
+    if (comparator.compare(returnDate, systemReturnDate) != 0 ) {
+      description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
-    if (dueDate.isAfter(returnDate)) {
+    if (dueDate.isAfter(returnDate.toLocalDateTime())) {
       description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate));
     }
 
     description.append(DOT_MSG);
 
     return description.toString();
+  }
+
+  private ZonedDateTime getDateInTenantTimeZone(LocalDateTime localDateTime, ZoneId zoneId) {
+    return  localDateTime.atZone(ZoneId.of(ZoneOffset.UTC.getId())).withZoneSameInstant(zoneId);
   }
 }

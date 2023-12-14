@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.builder.description.FeeFineDescriptionBuilder;
 import org.folio.rest.jaxrs.model.Item;
 import org.folio.rest.jaxrs.model.LinkToIds;
@@ -36,20 +38,25 @@ import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 
 public class FeeFineRecordBuilder extends LogRecordBuilder {
+  private static final Logger LOGGER = LogManager.getLogger();
+
   public FeeFineRecordBuilder(Map<String, String> okapiHeaders, Context vertxContext) {
     super(okapiHeaders, vertxContext);
   }
 
   @Override
   public CompletableFuture<List<LogRecord>> buildLogRecord(JsonObject fullPayload) {
+    LOGGER.debug("buildLogRecord:: Building Log Record");
     JsonObject payload = getObjectProperty(fullPayload, PAYLOAD);
 
+    LOGGER.info("buildLogRecord:: Built Log Record");
     return fetchUserDetails(payload, getProperty(payload, USER_ID))
       .thenCompose(this::fetchItemDetails)
       .thenCompose(this::createResult);
   }
 
   private CompletableFuture<List<LogRecord>> createResult(JsonObject payload) {
+    LOGGER.debug("createResult:: Creating Result");
     Item item = new Item()
       .withItemId(getProperty(payload, ITEM_ID))
       .withItemBarcode(getProperty(payload, ITEM_BARCODE))
@@ -62,6 +69,7 @@ public class FeeFineRecordBuilder extends LogRecordBuilder {
       }
     });
 
+    LOGGER.info("createResult:: Created Result");
     return CompletableFuture.completedFuture(Collections.singletonList(new LogRecord()
       .withObject(FEE_FINE)
       .withUserBarcode(getProperty(payload, USER_BARCODE))
