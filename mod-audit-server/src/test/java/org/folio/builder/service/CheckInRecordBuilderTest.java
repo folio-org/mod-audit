@@ -46,7 +46,7 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
 
   @ParameterizedTest
   @ValueSource(strings = {CHECK_IN_PAYLOAD_JSON, CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON, CHECK_IN_WITH_BACKDATE_TIMEZONE_PAYLOAD_JSON })
-  public void checkInTest(String sample) throws Exception {
+  void checkInTest(String sample) throws Exception {
     logger.info("Test check-in log records builder");
 
     JsonObject payload = new JsonObject(getFile(sample));
