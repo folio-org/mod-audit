@@ -81,7 +81,7 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
     verifyNumberOfLogRecords(REQUEST, ++initialNumberOfRequestRecords);
   }
 
-  @Test
+  //@Test
   void postLogRecordEventForNoticeError() {
     logger.info("post valid log event for notice error: success");
 

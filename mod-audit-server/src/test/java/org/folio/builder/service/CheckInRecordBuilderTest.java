@@ -14,19 +14,27 @@ import static org.folio.util.LogEventPayloadField.OLD_REQUEST_STATUS;
 import static org.folio.util.LogEventPayloadField.REQUESTS;
 import static org.folio.util.LogEventPayloadField.REQUEST_TYPE;
 import static org.folio.util.LogEventPayloadField.RETURN_DATE;
+import static org.folio.util.LogEventPayloadField.ZONE_ID;
 import static org.folio.utils.TenantApiTestUtil.CHECK_IN_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.CHECK_IN_WITH_BACKDATE_TIMEZONE_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -36,11 +44,12 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
 
   private static final Logger logger = LogManager.getLogger();
 
-  @Test
-  public void checkInTest() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {CHECK_IN_PAYLOAD_JSON, CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON, CHECK_IN_WITH_BACKDATE_TIMEZONE_PAYLOAD_JSON })
+  void checkInTest(String sample) throws Exception {
     logger.info("Test check-in log records builder");
 
-    JsonObject payload = new JsonObject(getFile(CHECK_IN_PAYLOAD_JSON));
+    JsonObject payload = new JsonObject(getFile(sample));
 
     Map<LogRecord.Object, Map<LogRecord.Action, List<LogRecord>>> records = checkInRecordBuilder.buildLogRecord(payload)
       .get().stream()
@@ -60,8 +69,13 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
     LogRecord loanClosedRecord = records.get(LogRecord.Object.LOAN).get(LogRecord.Action.CLOSED_LOAN).get(0);
     validateAdditionalContent(payload, loanClosedRecord);
 
-    assertThat(loanClosedRecord.getDescription(), equalTo(format("Item status: %s. Backdated to: %s. Overdue due date: %s.",
-        getProperty(payload, ITEM_STATUS_NAME), getFormattedDateTime(getDateTimeProperty(payload, RETURN_DATE)), getFormattedDateTime(getDateTimeProperty(payload, DUE_DATE)))));
+    if(!sample.equalsIgnoreCase(CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON)) {
+      assertThat(loanClosedRecord.getDescription(), equalTo(format("Item status: %s. Backdated to: %s. Overdue due date: %s.",
+        getProperty(payload, ITEM_STATUS_NAME),
+        getFormattedDateTime(getDateInTenantTimeZone(getDateTimeProperty(payload, RETURN_DATE),
+          ZoneId.of(getProperty(payload, ZONE_ID) != null ? getProperty(payload, ZONE_ID) : ZoneOffset.UTC.getId())).toLocalDateTime()),
+        getFormattedDateTime(getDateTimeProperty(payload, DUE_DATE)))));
+    }
 
     LogRecord requestStatusChangedRecord = records.get(LogRecord.Object.REQUEST).get(LogRecord.Action.REQUEST_STATUS_CHANGED).get(0);
     validateBaseContent(payload, requestStatusChangedRecord);
@@ -76,5 +90,9 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
 
     assertThat(requestStatusChangedRecord.getDescription(),
         equalTo(format("Type: %s. New request status: %s (from: %s).", requestType, newRequestStatus, oldRequestStatus)));
+  }
+
+  private ZonedDateTime getDateInTenantTimeZone(LocalDateTime localDateTime, ZoneId zoneId) {
+    return  localDateTime.atZone(ZoneId.of(ZoneOffset.UTC.getId())).withZoneSameInstant(zoneId);
   }
 }

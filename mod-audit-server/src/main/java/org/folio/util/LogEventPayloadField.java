@@ -41,6 +41,7 @@ public enum LogEventPayloadField {
   HOLDINGS_RECORD_ID("holdingsRecordId"),
   INSTANCE_ID("instanceId"),
   ITEM_STATUS_NAME("itemStatusName"),
+  ZONE_ID("zoneId"),
   DESTINATION_SERVICE_POINT("destinationServicePoint"),
   SOURCE("source"),
   LOAN_ID("loanId"),
