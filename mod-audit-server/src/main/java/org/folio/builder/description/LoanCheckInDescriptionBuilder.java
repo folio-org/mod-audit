@@ -46,7 +46,7 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
 
     Comparator<ZonedDateTime> comparator = Comparator.comparing(
-      zdt -> zdt.withNano(0));
+      zdt -> zdt.withSecond(0).withNano(0));
 
     if (comparator.compare(returnDate, systemReturnDate) != 0 ) {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
