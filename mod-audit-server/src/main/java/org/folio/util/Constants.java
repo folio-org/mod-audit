@@ -4,6 +4,7 @@ public class Constants {
   private Constants(){}
 
   public static final String ITEMS_URL = "/inventory/items";
+  public static final String CIRCULATION_ITEM_URL = "/circulation-item";
   public static final String HOLDINGS_URL = "/holdings-storage/holdings";
   public static final String TEMPLATES_URL = "/templates";
   public static final String USERS_URL = "/users";
