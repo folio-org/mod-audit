@@ -89,6 +89,17 @@
       "status": 200
     },
     {
+      "url": "/inventory/items/100d10bf-2f06-4aa0-be15-0b95b2d9f9e4",
+      "method": "GET",
+      "status": 404
+    },
+    {
+      "url": "/circulation-item/100d10bf-2f06-4aa0-be15-0b95b2d9f9e4",
+      "method": "GET",
+      "receivedPath": "mocks/circulation-item.json",
+      "status": 200
+    },
+    {
       "url": "/inventory/items/e038e283-4104-455d-80b7-e6d05ca4e5a7",
       "method": "GET",
       "receivedPath": "mocks/anonymize_item.json",

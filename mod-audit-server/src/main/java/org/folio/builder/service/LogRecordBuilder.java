@@ -206,7 +206,7 @@ public abstract class LogRecordBuilder {
 
   public CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
     return handleGetRequest(String.format(URL_WITH_ID_PATTERN, ITEMS_URL, getProperty(payload, ITEM_ID)))
-      .thenCompose(itemJson -> itemJson != null ? CompletableFuture.completedFuture(itemJson) :
+      .thenCompose(itemJson -> nonNull(itemJson) ? CompletableFuture.completedFuture(itemJson) :
         handleGetRequest(String.format(URL_WITH_ID_PATTERN, CIRCULATION_ITEM_URL, getProperty(payload, ITEM_ID))))
       .thenCompose(itemJson -> addItemData(payload, itemJson))
       .thenCompose(json ->
