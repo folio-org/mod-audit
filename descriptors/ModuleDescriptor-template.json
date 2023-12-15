@@ -39,6 +39,12 @@
       "version": "1.2"
     }
   ],
+  "optional": [
+    {
+      "id": "circulation-item",
+      "version": "1.0"
+    }
+  ],
   "provides": [
     {
       "id": "audit",
@@ -152,7 +158,8 @@
             "templates.item.get",
             "inventory.items.item.get",
             "inventory-storage.holdings.item.get",
-            "circulation-storage.cancellation-reasons.collection.get"
+            "circulation-storage.cancellation-reasons.collection.get",
+            "circulation-item.item.get"
           ]
         }
       ]

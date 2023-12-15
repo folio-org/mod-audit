@@ -10,6 +10,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.util.Constants.CIRCULATION_ITEM_URL;
 import static org.folio.util.Constants.HOLDINGS_URL;
 import static org.folio.util.Constants.ITEMS_URL;
 import static org.folio.util.Constants.TEMPLATES_URL;
@@ -224,6 +225,8 @@ public abstract class LogRecordBuilder {
   public CompletableFuture<JsonObject> fetchItemDetails(JsonObject payload) {
     LOGGER.debug("fetchItemDetails:: Fetching Item Details");
     return handleGetRequest(String.format(URL_WITH_ID_PATTERN, ITEMS_URL, getProperty(payload, ITEM_ID)))
+      .thenCompose(itemJson -> nonNull(itemJson) ? CompletableFuture.completedFuture(itemJson) :
+        handleGetRequest(String.format(URL_WITH_ID_PATTERN, CIRCULATION_ITEM_URL, getProperty(payload, ITEM_ID))))
       .thenCompose(itemJson -> addItemData(payload, itemJson))
       .thenCompose(json ->
         handleGetRequest(String.format(URL_WITH_ID_PATTERN, HOLDINGS_URL, getProperty(json, HOLDINGS_RECORD_ID))))
