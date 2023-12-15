@@ -48,7 +48,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     logger.info("Get circulation audit log records: no filter");
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(25));
+      .assertThat().body("totalRecords", equalTo(26));
   }
 
   @Test
@@ -113,6 +113,20 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .and().body("logRecords[4].linkToIds.userId", is(emptyOrNullString()))
       .and().body("logRecords[5].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[5].linkToIds.userId", is(emptyOrNullString()));
+  }
+
+  @Test
+  void getFeeFineRelatedRecordOfVirtualItem() {
+    // For virtual item, holdingsId and instanceId needs to be present, then only FE validation will work.
+    // This record is already posted in beforeAll method so directly assert it using get endpoint with virtual item ID.
+    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=100d10bf-2f06-4aa0-be15-0b95b2d9f9e4)")
+      .then().log().all().statusCode(200)
+      .assertThat()
+      .body("totalRecords", equalTo(1))
+      .body("logRecords[0].items[0].itemBarcode", is("virtualItem"))
+      .and().body("logRecords[0].items[0].itemId", is("100d10bf-2f06-4aa0-be15-0b95b2d9f9e4"))
+      .and().body("logRecords[0].items[0].instanceId", is("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"))
+      .and().body("logRecords[0].items[0].holdingId", is("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
   }
 
   @Test
