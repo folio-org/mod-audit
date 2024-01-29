@@ -41,13 +41,13 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL = """
     WITH StatusChanges AS (
       SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
-        LAG(modified_content_snapshot ->> 'receivingStatus') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status
+        LAG(modified_content_snapshot ->> 'claimingInterval') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status
       FROM %s WHERE piece_id=$1
     )
     SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
       (SELECT COUNT(*) AS total_records FROM StatusChanges
-        WHERE modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, ''))
-    FROM StatusChanges WHERE modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '')
+        WHERE modified_content_snapshot ->> 'claimingInterval' <> COALESCE(previous_status, ''))
+    FROM StatusChanges WHERE modified_content_snapshot ->> 'claimingInterval' <> COALESCE(previous_status, '')
     %s LIMIT $2 OFFSET $3
     """;
 
