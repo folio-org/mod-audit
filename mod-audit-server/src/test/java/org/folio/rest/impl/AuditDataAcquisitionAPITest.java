@@ -171,13 +171,13 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     String id5 = UUID.randomUUID().toString();
     String id6 = UUID.randomUUID().toString();
     String id7 = UUID.randomUUID().toString();
-    var pieceAuditEvent1 = createPieceAuditEvent(id1, "STATUS 1");
-    var pieceAuditEvent2 = createPieceAuditEvent(id2, "STATUS 1");
-    var pieceAuditEvent3 = createPieceAuditEvent(id3, "STATUS 2");
-    var pieceAuditEvent4 = createPieceAuditEvent(id4, "STATUS 2");
-    var pieceAuditEvent5 = createPieceAuditEvent(id5, "STATUS 1");
-    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id6, "STATUS 3");
-    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id7, "STATUS 2");
+    var pieceAuditEvent1 = createPieceAuditEvent(id1);
+    var pieceAuditEvent2 = createPieceAuditEvent(id2, 3); // claiming interval has changed
+    var pieceAuditEvent3 = createPieceAuditEvent(id3, 44); // claiming interval has changed
+    var pieceAuditEvent4 = createPieceAuditEvent(id4, 44);
+    var pieceAuditEvent5 = createPieceAuditEvent(id5, 16); // claiming interval has changed
+    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id6, 55);
+    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id7, 9);
     pieceAuditEventWithDifferentPiece1.setPieceId(UUID.randomUUID().toString());
     pieceAuditEventWithDifferentPiece2.setPieceId(UUID.randomUUID().toString());
     var localDateTime1 = LocalDateTime.of(2023, 4, 20, 6, 9, 30);
@@ -213,7 +213,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID))
-      .body(containsString(id1))
+      .body(containsString(id2))
       .body(containsString(id3))
       .body(containsString(id5));
 
@@ -226,7 +226,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID))
-      .body(containsString(id1))
+      .body(containsString(id2))
       .body(containsString(id3))
       .body(containsString(id5));
 

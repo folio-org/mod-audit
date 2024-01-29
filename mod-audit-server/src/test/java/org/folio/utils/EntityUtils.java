@@ -20,7 +20,7 @@ public class EntityUtils {
     jsonObject.put("name", "Test Product 123 ");
 
     return new OrderAuditEvent()
-      .withId(UUID.randomUUID().toString())
+      .withId(id)
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
@@ -69,10 +69,10 @@ public class EntityUtils {
       .withPieceSnapshot(jsonObject);
   }
 
-  public static PieceAuditEvent createPieceAuditEvent(String id, String status) {
+  public static PieceAuditEvent createPieceAuditEvent(String id, int claimingInterval) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
-    jsonObject.put("receivingStatus", status);
+    jsonObject.put("claimingInterval", claimingInterval);
 
     return new PieceAuditEvent()
       .withId(id)
