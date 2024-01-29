@@ -20,7 +20,7 @@ public class EntityUtils {
     jsonObject.put("name", "Test Product 123 ");
 
     return new OrderAuditEvent()
-      .withId(UUID.randomUUID().toString())
+      .withId(id)
       .withAction(OrderAuditEvent.Action.CREATE)
       .withOrderId(ORDER_ID)
       .withUserId(UUID.randomUUID().toString())
