@@ -58,6 +58,7 @@ public class EntityUtils {
   public static PieceAuditEvent createPieceAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
+    jsonObject.put("receivingStatus", "Expected");
 
     return new PieceAuditEvent()
       .withId(id)
@@ -69,14 +70,15 @@ public class EntityUtils {
       .withPieceSnapshot(jsonObject);
   }
 
-  public static PieceAuditEvent createPieceAuditEvent(String id, int claimingInterval) {
+  public static PieceAuditEvent createPieceAuditEvent(String id, int claimingInterval, String receivingStatus) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Product");
     jsonObject.put("claimingInterval", claimingInterval);
+    jsonObject.put("receivingStatus", receivingStatus);
 
     return new PieceAuditEvent()
       .withId(id)
-      .withAction(PieceAuditEvent.Action.CREATE)
+      .withAction(PieceAuditEvent.Action.EDIT)
       .withPieceId(PIECE_ID)
       .withUserId(UUID.randomUUID().toString())
       .withEventDate(new Date())

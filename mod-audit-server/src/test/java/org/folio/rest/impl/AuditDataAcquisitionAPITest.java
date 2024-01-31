@@ -60,7 +60,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   @Test
   void shouldReturnOrderEventsOnGetByOrderId() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product2");
+    jsonObject.put("name", "Test Product2");
 
     OrderAuditEvent orderAuditEvent = new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -73,23 +73,23 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     orderEventDao.save(orderAuditEvent, TENANT_ID);
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ INVALID_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + INVALID_ID).then().log().all().statusCode(200)
       .body(containsString("orderAuditEvents")).body(containsString("totalItems"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_ID).then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_ID).then().log().all().statusCode(200)
       .body(containsString(ORDER_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_ID +"?limit=1").then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_ID + "?limit=1").then().log().all().statusCode(200)
       .body(containsString(ORDER_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_ID + 123).then().log().all().statusCode(500)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_ID + 123).then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 
   @Test
   void shouldReturnOrderLineEventsOnGetByOrderLineId() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product2");
+    jsonObject.put("name", "Test Product2");
 
     OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -103,28 +103,28 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     orderLineEventDao.save(orderLineAuditEvent, TENANT_ID);
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ INVALID_ID)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + INVALID_ID)
       .then().log().all().statusCode(200)
       .body(containsString("orderLineAuditEvents")).body(containsString("totalItems"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID)
       .then().log().all().statusCode(200)
       .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID +"?limit=1").then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?limit=1").then().log().all().statusCode(200)
       .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH+ ORDER_LINE_ID +"?sortBy=action_date").then().log().all().statusCode(200)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?sortBy=action_date").then().log().all().statusCode(200)
       .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH+ ORDER_LINE_ID + 123).then().log().all().statusCode(500)
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_LINE_ID + 123).then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }
 
   @Test
   void shouldReturnPieceEventsOnGetByPieceId() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("name","Test Product2");
+    jsonObject.put("name", "Test Product2");
 
     PieceAuditEvent pieceAuditEvent = new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
@@ -148,7 +148,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .body(containsString(PIECE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID +"?limit=1")
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + "?limit=1")
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID));
 
@@ -171,13 +171,17 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     String id5 = UUID.randomUUID().toString();
     String id6 = UUID.randomUUID().toString();
     String id7 = UUID.randomUUID().toString();
+    String id8 = UUID.randomUUID().toString();
+    String id9 = UUID.randomUUID().toString();
     var pieceAuditEvent1 = createPieceAuditEvent(id1);
-    var pieceAuditEvent2 = createPieceAuditEvent(id2, 3); // claiming interval has changed
-    var pieceAuditEvent3 = createPieceAuditEvent(id3, 44); // claiming interval has changed
-    var pieceAuditEvent4 = createPieceAuditEvent(id4, 44);
-    var pieceAuditEvent5 = createPieceAuditEvent(id5, 16); // claiming interval has changed
-    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id6, 55);
-    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id7, 9);
+    var pieceAuditEvent2 = createPieceAuditEvent(id2, 3, "Claim sent"); // claiming interval has changed
+    var pieceAuditEvent3 = createPieceAuditEvent(id3, 44, "Claim sent"); // claiming interval has changed
+    var pieceAuditEvent4 = createPieceAuditEvent(id4, 44, "Claim sent");
+    var pieceAuditEvent5 = createPieceAuditEvent(id5, 16, "Claim sent"); // claiming interval has changed
+    var pieceAuditEvent6 = createPieceAuditEvent(id6, 16, "Received"); // receivingStatus has changed
+    var pieceAuditEvent7 = createPieceAuditEvent(id7, 16, "Received");
+    var pieceAuditEventWithDifferentPiece1 = createPieceAuditEvent(id8, 55, "Claim sent");
+    var pieceAuditEventWithDifferentPiece2 = createPieceAuditEvent(id9, 9, "Claim sent");
     pieceAuditEventWithDifferentPiece1.setPieceId(UUID.randomUUID().toString());
     pieceAuditEventWithDifferentPiece2.setPieceId(UUID.randomUUID().toString());
     var localDateTime1 = LocalDateTime.of(2023, 4, 20, 6, 9, 30);
@@ -185,24 +189,30 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     var localDateTime3 = LocalDateTime.of(2023, 4, 20, 6, 11, 30);
     var localDateTime4 = LocalDateTime.of(2023, 4, 20, 6, 12, 30);
     var localDateTime5 = LocalDateTime.of(2023, 4, 20, 6, 13, 30);
-    var localDateTime6 = LocalDateTime.of(2023, 4, 20, 6, 9, 25);
-    var localDateTime7 = LocalDateTime.of(2023, 4, 20, 6, 9, 20);
+    var localDateTime6 = LocalDateTime.of(2023, 4, 20, 6, 14, 30);
+    var localDateTime7 = LocalDateTime.of(2023, 4, 20, 6, 15, 30);
+    var localDateTime8 = LocalDateTime.of(2023, 4, 20, 6, 9, 20);
+    var localDateTime9 = LocalDateTime.of(2023, 4, 20, 6, 10, 20);
     pieceAuditEvent1.setActionDate(Date.from(localDateTime1.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent2.setActionDate(Date.from(localDateTime2.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent3.setActionDate(Date.from(localDateTime3.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent4.setActionDate(Date.from(localDateTime4.atZone(ZoneId.systemDefault()).toInstant()));
     pieceAuditEvent5.setActionDate(Date.from(localDateTime5.atZone(ZoneId.systemDefault()).toInstant()));
-    pieceAuditEventWithDifferentPiece1.setActionDate(Date.from(localDateTime6.atZone(ZoneId.systemDefault()).toInstant()));
-    pieceAuditEventWithDifferentPiece2.setActionDate(Date.from(localDateTime7.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent6.setActionDate(Date.from(localDateTime6.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEvent7.setActionDate(Date.from(localDateTime7.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece1.setActionDate(Date.from(localDateTime8.atZone(ZoneId.systemDefault()).toInstant()));
+    pieceAuditEventWithDifferentPiece2.setActionDate(Date.from(localDateTime9.atZone(ZoneId.systemDefault()).toInstant()));
 
     pieceEventsDao.save(pieceAuditEvent1, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent2, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent3, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent4, TENANT_ID);
     pieceEventsDao.save(pieceAuditEvent5, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent6, TENANT_ID);
+    pieceEventsDao.save(pieceAuditEvent7, TENANT_ID);
+
     pieceEventsDao.save(pieceAuditEventWithDifferentPiece1, TENANT_ID);
     pieceEventsDao.save(pieceAuditEventWithDifferentPiece2, TENANT_ID);
-
     // based on our business logic, it returns pieceAuditEvent1, pieceAuditEvent3, pieceAuditEvent5
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
       .get(ACQ_AUDIT_PIECE_PATH + INVALID_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
@@ -213,22 +223,25 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID))
+      .body(containsString(id1))
       .body(containsString(id2))
       .body(containsString(id3))
-      .body(containsString(id5));
+      .body(containsString(id5))
+      .body(containsString(id6));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?limit=1")
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH + "?limit=1")
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
-      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH +"?sortBy=action_date")
+      .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH + "?sortBy=action_date")
       .then().log().all().statusCode(200)
       .body(containsString(PIECE_ID))
       .body(containsString(id2))
       .body(containsString(id3))
-      .body(containsString(id5));
+      .body(containsString(id5))
+      .body(containsString(id6));
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123 + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
