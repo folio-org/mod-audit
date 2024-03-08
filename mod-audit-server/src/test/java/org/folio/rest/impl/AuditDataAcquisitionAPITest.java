@@ -101,24 +101,24 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .withActionDate(new Date())
       .withOrderLineSnapshot(jsonObject);
 
-    orderLineEventDao.save(orderLineAuditEvent, TENANT_ID);
+    orderLineEventDao.save(orderLineAuditEvent, TENANT_ID).onComplete(v -> {
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + INVALID_ID)
+        .then().log().all().statusCode(200)
+        .body(containsString("orderLineAuditEvents")).body(containsString("totalItems"));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + INVALID_ID)
-      .then().log().all().statusCode(200)
-      .body(containsString("orderLineAuditEvents")).body(containsString("totalItems"));
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID)
+        .then().log().all().statusCode(200)
+        .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID)
-      .then().log().all().statusCode(200)
-      .body(containsString(ORDER_LINE_ID));
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?limit=1").then().log().all().statusCode(200)
+        .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?limit=1").then().log().all().statusCode(200)
-      .body(containsString(ORDER_LINE_ID));
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?sortBy=action_date").then().log().all().statusCode(200)
+        .body(containsString(ORDER_LINE_ID));
 
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_LINE_PATH + ORDER_LINE_ID + "?sortBy=action_date").then().log().all().statusCode(200)
-      .body(containsString(ORDER_LINE_ID));
-
-    given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_LINE_ID + 123).then().log().all().statusCode(500)
-      .body(containsString("UUID string too large"));
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_ORDER_PATH + ORDER_LINE_ID + 123).then().log().all().statusCode(500)
+        .body(containsString("UUID string too large"));
+    });
   }
 
   @Test
