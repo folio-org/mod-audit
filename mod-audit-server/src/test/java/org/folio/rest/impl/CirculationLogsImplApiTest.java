@@ -100,6 +100,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=845687423)")
       .then().log().all().statusCode(200)
       .assertThat()
+      .body("totalRecords", equalTo(6))
       .body("logRecords[0].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[0].linkToIds.userId", is(emptyOrNullString()))
       .and().body("logRecords[1].userBarcode", is(NO_BARCODE))
@@ -109,7 +110,9 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .and().body("logRecords[3].userBarcode", is(NO_BARCODE))
       .and().body("logRecords[3].linkToIds.userId", is(emptyOrNullString()))
       .and().body("logRecords[4].userBarcode", is(NO_BARCODE))
-      .and().body("logRecords[4].linkToIds.userId", is(emptyOrNullString()));
+      .and().body("logRecords[4].linkToIds.userId", is(emptyOrNullString()))
+      .and().body("logRecords[5].userBarcode", is(NO_BARCODE))
+      .and().body("logRecords[5].linkToIds.userId", is(emptyOrNullString()));
   }
 
   @Test

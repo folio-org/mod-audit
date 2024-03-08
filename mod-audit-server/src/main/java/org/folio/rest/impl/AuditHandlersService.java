@@ -32,7 +32,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
   @Override
   @Validate
   public void postAuditHandlersLogRecord(String entity, Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+                                         Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("postAuditHandlersLogRecord:: Trying to Save AuditHandlersLogRecord request with entity: {}", entity);
     try {
       LOGGER.info("postAuditHandlersLogRecord:: Saving AuditHandlersLogRecord request with entity: {}", entity);
@@ -44,14 +44,14 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .exceptionally(throwable -> {
           LOGGER.warn("Error saving log event : {} due to : {}", entity, throwable.getLocalizedMessage());
           return null;
-        });
+        }).thenAccept(v ->
+          asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()))
+        );
     } catch (Exception e) {
       LOGGER.warn("Error saving log event for entity {} due to {} ", entity, e.getMessage());
-    } finally {
       asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()));
     }
   }
-
   private CompletableFuture<List<LogRecord>> processAnonymize(List<LogRecord> records,
     Map<String, String> okapiHeaders, Context vertxContext) {
     LOGGER.debug("processAnonymize:: Processing anonymize for records");
@@ -78,10 +78,10 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
           .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, false, false, reply -> {
             if (reply.succeeded()) {
               LOGGER.info("anonymizeLoanRelatedRecords:: Anonymize loan-related records for log records Successfully");
-              reply.result().getResults().forEach(record -> {
-                record.setUserBarcode(null);
-                record.setLinkToIds(record.getLinkToIds().withUserId(null));
-                result.add(record);
+              reply.result().getResults().forEach(logRecord -> {
+                logRecord.setUserBarcode(null);
+                logRecord.setLinkToIds(logRecord.getLinkToIds().withUserId(null));
+                result.add(logRecord);
               });
               future.complete(result);
             } else {
