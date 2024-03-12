@@ -95,7 +95,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .log().all()
       .statusCode(204);
 
-    await().atLeast(1, TimeUnit.SECONDS);
+    await().pollDelay(1, TimeUnit.SECONDS).until(() -> true);
 
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=845687423)")
       .then().log().all().statusCode(200)
