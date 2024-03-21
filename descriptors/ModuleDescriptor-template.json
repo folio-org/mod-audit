@@ -20,7 +20,7 @@
     },
     {
       "id": "users",
-      "version": "16.0"
+      "version": "16.1"
     },
     {
       "id": "template-engine",
@@ -28,7 +28,7 @@
     },
     {
       "id": "inventory",
-      "version": "13.0"
+      "version": "13.1"
     },
     {
       "id": "holdings-storage",
