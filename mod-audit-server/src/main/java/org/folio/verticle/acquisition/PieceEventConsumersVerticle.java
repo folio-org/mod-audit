@@ -5,6 +5,7 @@ import java.util.List;
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.util.AcquisitionEventType;
 import org.folio.verticle.AbstractConsumersVerticle;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +13,7 @@ public class PieceEventConsumersVerticle extends AbstractConsumersVerticle {
 
   private final AsyncRecordHandler<String, String> pieceEventsHandler;
 
-  public PieceEventConsumersVerticle(AsyncRecordHandler<String, String> pieceEventsHandler) {
+  public PieceEventConsumersVerticle(@Qualifier("pieceEventsHandler") AsyncRecordHandler<String, String> pieceEventsHandler) {
     this.pieceEventsHandler = pieceEventsHandler;
   }
 
