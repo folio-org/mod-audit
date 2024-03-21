@@ -1,3 +1,13 @@
+## 2.9.0 2024-03-21
+
+* [MODAUD-174](https://issues.folio.org/browse/MODAUD-174) - Consume piece change events and implement endpoints
+* [MODAUD-176](https://issues.folio.org/browse/MODAUD-176) - Check-ins are automatically backdated to 5 hours later (DUNY/Dominican)
+* [MODAUD-177](https://issues.folio.org/browse/MODAUD-177) - Link on a virtual item is available in circ log if fees/fines is applied
+* [MODAUD-180](https://issues.folio.org/browse/MODAUD-180) - Modify SQL query for /status-change-history to return records if claimingInterval changed
+* [MODAUD-181](https://issues.folio.org/browse/MODAUD-181) - Make additional properties to true in user.json
+* [MODAUD-183](https://issues.folio.org/browse/MODAUD-183) - mod-audit Quesnelia 2024 R1 - RMB v35.2.x update
+* [FOLIO-3944](https://issues.folio.org/browse/FOLIO-3944) - Upgrade the Actions used by API-related GitHub Workflows
+
 ## 2.8.0 2023-10-11
 
 * [MODAUD-110](https://issues.folio.org/browse/MODAUD-110) - Logging improvement
