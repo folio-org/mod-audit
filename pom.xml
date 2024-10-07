@@ -193,10 +193,14 @@
             <goals>
               <goal>validate</goal>
             </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/mod-audit-server/**</exclude>
+              </excludes>
+            </configuration>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
