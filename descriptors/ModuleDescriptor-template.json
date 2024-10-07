@@ -146,7 +146,7 @@
           ],
           "pathPattern": "/audit-data/acquisition/piece/{id}/status-change-history",
           "permissionsRequired": [
-            "acquisition.piece.events.get"
+            "acquisition.piece.events.history.get"
           ]
         }
       ]
@@ -260,6 +260,16 @@
       "description": "Get piece change events"
     },
     {
+      "permissionName": "acquisition.piece.events.history.get",
+      "displayName": "Acquisition piece status change history events - get piece status change events",
+      "description": "Get piece status change events"
+    },
+    {
+      "permissionName": "pubsub.events.post",
+      "displayName": "PubSub - post event",
+      "description": "Post pubsub events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -272,7 +282,8 @@
         "circulation-logs.collection.get",
         "acquisition.order.events.get",
         "acquisition.order-line.events.get",
-        "acquisition.piece.events.get"
+        "acquisition.piece.events.get",
+        "acquisition.piece.events.history.get"
       ]
     }
   ],
