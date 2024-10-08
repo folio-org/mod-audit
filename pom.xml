@@ -188,19 +188,16 @@
         <groupId>org.folio</groupId>
         <artifactId>folio-module-descriptor-validator</artifactId>
         <version>${folio-module-descriptor-validator.version}</version>
+        <inherited>false</inherited>
         <executions>
           <execution>
             <goals>
               <goal>validate</goal>
             </goals>
-            <configuration>
-              <excludes>
-                <exclude>**/mod-audit-server/**</exclude>
-              </excludes>
-            </configuration>
           </execution>
         </executions>
       </plugin>
+
     </plugins>
   </build>
 
