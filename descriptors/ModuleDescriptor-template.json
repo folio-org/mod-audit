@@ -174,7 +174,7 @@
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
-            "pubsub.events.post"
+            "audit.pub-sub-handlers.log-record-event.post"
           ],
           "modulePermissions": [
             "users.item.get",
@@ -265,9 +265,10 @@
       "description": "Get piece status change events"
     },
     {
-      "permissionName": "pubsub.events.post",
-      "displayName": "PubSub - post event",
-      "description": "Post pubsub events"
+      "permissionName": "audit.pub-sub-handlers.log-record-event.post",
+      "displayName" : "log record events from pub-sub",
+      "description" : "log record events received from pub-sub",
+      "replaces": [ "pubsub.events.post" ]
     },
     {
       "permissionName": "audit.all",
