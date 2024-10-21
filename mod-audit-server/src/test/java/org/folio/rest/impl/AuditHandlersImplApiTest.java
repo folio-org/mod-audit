@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
+import static org.awaitility.Awaitility.await;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.LOAN;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.NOTICE;
 import static org.folio.rest.jaxrs.model.LogRecord.Object.N_A;
@@ -28,7 +29,7 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 public class AuditHandlersImplApiTest extends ApiTestBase {
 
@@ -128,7 +129,8 @@ public class AuditHandlersImplApiTest extends ApiTestBase {
   }
 
   private void verifyNumberOfLogRecords(LogRecord.Object object, int expectedNumberOfRecords) {
-    assertEquals(expectedNumberOfRecords, getNumberOfExistingLogRecords(object));
+    await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
+      assertEquals(expectedNumberOfRecords, getNumberOfExistingLogRecords(object)));
   }
 
   private int getNumberOfExistingLogRecords(LogRecord.Object object) {
