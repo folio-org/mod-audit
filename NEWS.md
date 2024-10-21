@@ -1,3 +1,7 @@
+## 2.9.1
+
+* [MODAUD-190](https://folio-org.atlassian.net/browse/MODAUD-190) - Upgrade `holdings-storage` to 8.0
+
 ## 2.9.0 2024-03-21
 
 * [MODAUD-174](https://issues.folio.org/browse/MODAUD-174) - Consume piece change events and implement endpoints
