@@ -1,6 +1,12 @@
-## 2.9.1
+## 2.10.0 2024-10-30
 
+* [MODAUD-185](https://folio-org.atlassian.net/browse/MODAUD-185) - Unpin jackson fixing Number Parse DoS (PRISMA-2023-0067)
+* [MODAUD-186](https://folio-org.atlassian.net/browse/MODAUD-186) - Upgrade `holdings-storage` to 7.0
+* [MODAUD-187](https://folio-org.atlassian.net/browse/MODAUD-187) - Review and cleanup Module Descriptors for mod-audit
+* [MODAUD-189](https://folio-org.atlassian.net/browse/MODAUD-189) - Upgrade `inventory` to 14.0
 * [MODAUD-190](https://folio-org.atlassian.net/browse/MODAUD-190) - Upgrade `holdings-storage` to 8.0
+* [MODAUD-192](https://folio-org.atlassian.net/browse/MODAUD-192) - Upgrade RMB version to V.35.3.0
+* [MODPUBSUB-301](https://folio-org.atlassian.net/browse/MODPUBSUB-301) - Revert permission changes for MODPUBSUB-301
 
 ## 2.9.0 2024-03-21
 
