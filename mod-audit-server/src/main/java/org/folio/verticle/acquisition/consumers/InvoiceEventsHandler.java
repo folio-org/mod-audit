@@ -34,11 +34,11 @@ public class InvoiceEventsHandler implements AsyncRecordHandler<String, String> 
   }
 
   @Override
-  public Future<String> handle(KafkaConsumerRecord<String, String> record) {
+  public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     Promise<String> result = Promise.promise();
-    List<KafkaHeader> kafkaHeaders = record.headers();
+    List<KafkaHeader> kafkaHeaders = kafkaConsumerRecord.headers();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
-    InvoiceAuditEvent event = new JsonObject(record.value()).mapTo(InvoiceAuditEvent.class);
+    InvoiceAuditEvent event = new JsonObject(kafkaConsumerRecord.value()).mapTo(InvoiceAuditEvent.class);
     LOGGER.info("handle:: Starting processing of Invoice audit event with id: {} for invoice id: {}", event.getId(), event.getInvoiceId());
 
     invoiceAuditEventsService.saveInvoiceAuditEvent(event, okapiConnectionParams.getTenantId())

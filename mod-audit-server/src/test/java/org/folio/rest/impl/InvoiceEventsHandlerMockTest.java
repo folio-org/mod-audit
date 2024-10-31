@@ -78,9 +78,9 @@ public class InvoiceEventsHandlerMockTest {
     Assertions.assertTrue(save.failed());
   }
 
-  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(InvoiceAuditEvent record) {
-    String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, record.getAction().toString());
-    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, record);
+  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(InvoiceAuditEvent kafkaConsumerRecord) {
+    String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, kafkaConsumerRecord.getAction().toString());
+    ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, kafkaConsumerRecord);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 
