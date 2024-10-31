@@ -17,6 +17,8 @@ types:
   order-line-audit-event-collection: !include order_line_audit_event_collection.json
   piece-audit-event: !include piece_audit_event.json
   piece-audit-event-collection: !include piece_audit_event_collection.json
+  invoice-audit-event: !include invoice_audit_event.json
+  invoice-audit-event-collection: !include invoice_audit_event_collection.json
 
 traits:
   searchable: !include raml-util/traits/searchable.raml
@@ -151,6 +153,41 @@ traits:
           body:
             application/json:
               type: piece-audit-event-collection
+        500:
+          description: "Internal server error"
+          body:
+            application/json:
+              type: errors
+              example:
+                strict: false
+                value: !include raml-util/examples/errors.sample
+
+  /invoice/{id}:
+    get:
+      description: Get list of invoice events by invoice_id
+      is: [
+        pageable,
+        validate
+      ]
+      queryParameters:
+        sortBy:
+          description: "sorting by field: actionDate"
+          type: string
+          default: action_date
+        sortOrder:
+          description: "sort order: asc or desc"
+          enum: [asc, desc]
+          type: string
+          default: desc
+        limit:
+          default: 2147483647
+        offset:
+          default: 0
+      responses:
+        200:
+          body:
+            application/json:
+              type: invoice-audit-event-collection
         500:
           description: "Internal server error"
           body:

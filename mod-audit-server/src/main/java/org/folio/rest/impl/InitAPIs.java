@@ -6,6 +6,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.Vertx;
 import io.vertx.core.spi.VerticleFactory;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,7 @@ import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
+import org.folio.verticle.acquisition.InvoiceEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
 import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
@@ -33,6 +35,8 @@ public class InitAPIs implements InitAPI {
   private int acqOrderLineConsumerInstancesNumber;
   @Value("${acq.pieces.kafka.consumer.instancesNumber:1}")
   private int acqPieceConsumerInstancesNumber;
+  @Value("${acq.invoices.kafka.consumer.instancesNumber:1}")
+  private int acqInvoiceConsumerInstancesNumber;
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
@@ -64,27 +68,30 @@ public class InitAPIs implements InitAPI {
     Promise<String> orderEventsConsumer = Promise.promise();
     Promise<String> orderLineEventsConsumer = Promise.promise();
     Promise<String> pieceEventsConsumer = Promise.promise();
+    Promise<String> invoiceEventsConsumer = Promise.promise();
 
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
+      new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
         .setInstances(acqOrderConsumerInstancesNumber), orderEventsConsumer);
 
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderLineEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
+      new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
         .setInstances(acqOrderLineConsumerInstancesNumber), orderLineEventsConsumer);
 
     vertx.deployVerticle(getVerticleName(verticleFactory, PieceEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
+      new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
         .setInstances(acqPieceConsumerInstancesNumber), pieceEventsConsumer);
+
+    vertx.deployVerticle(getVerticleName(verticleFactory, InvoiceEventConsumersVerticle.class),
+      new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
+        .setInstances(acqInvoiceConsumerInstancesNumber), invoiceEventsConsumer);
 
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
       orderEventsConsumer.future(),
       orderLineEventsConsumer.future(),
-      pieceEventsConsumer.future()));
+      pieceEventsConsumer.future(),
+      invoiceEventsConsumer.future()));
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

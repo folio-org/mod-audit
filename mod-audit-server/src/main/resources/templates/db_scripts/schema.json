@@ -79,6 +79,11 @@
       "run": "after",
       "snippetPath": "acquisition/create_acquisition_piece_log_table.sql",
       "fromModuleVersion": "mod-audit-2.9.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "acquisition/create_acquisition_invoice_log_table.sql",
+      "fromModuleVersion": "mod-audit-2.10.1"
     }
   ]
 }
