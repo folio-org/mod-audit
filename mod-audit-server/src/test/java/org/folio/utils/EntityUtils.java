@@ -11,11 +11,11 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 
 public class EntityUtils {
 
-  public static String TENANT_ID = "diku";
-  public static String PIECE_ID = "2cd4adc4-f287-49b6-a9c6-9eacdc4868e7";
-  public static String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
-  public static String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
-  public static String INVOICE_ID = "3f29b1a4-8c2b-4d3a-9b1e-5f2a1b4c8d3a";
+  public static final String TENANT_ID = "diku";
+  public static final String PIECE_ID = "2cd4adc4-f287-49b6-a9c6-9eacdc4868e7";
+  public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
+  public static final String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
+  public static final String INVOICE_ID = "3f29b1a4-8c2b-4d3a-9b1e-5f2a1b4c8d3a";
 
   public static OrderAuditEvent createOrderAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
