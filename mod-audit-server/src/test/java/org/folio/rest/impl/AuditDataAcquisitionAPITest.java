@@ -15,9 +15,11 @@ import java.util.UUID;
 import io.restassured.http.Header;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.folio.dao.acquisition.impl.InvoiceLineEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
 import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
+import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
@@ -38,6 +40,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   private static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
   private static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
   private static final String ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH = "/status-change-history";
+  private static final String ACQ_AUDIT_INVOICE_LINE_PATH = "/audit-data/acquisition/invoice-line/";
   private static final String TENANT_ID = "modaudittest";
 
   @Spy
@@ -49,6 +52,8 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   OrderLineEventsDaoImpl orderLineEventDao;
   @InjectMocks
   PieceEventsDaoImpl pieceEventsDao;
+  @InjectMocks
+  InvoiceLineEventsDaoImpl invoiceLineEventsDao;
 
   @BeforeEach
   public void setUp() {
@@ -247,5 +252,43 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123 + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
       .then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  void shouldReturnInvoiceLineEventsOnGetByInvoiceLineId() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name", "Test Product2");
+
+    InvoiceLineAuditEvent invoiceLineAuditEvent = new InvoiceLineAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(InvoiceLineAuditEvent.Action.CREATE)
+      .withInvoiceId(UUID.randomUUID().toString())
+      .withInvoiceLineId(UUID.randomUUID().toString())
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withInvoiceLineSnapshot(jsonObject);
+
+    invoiceLineEventsDao.save(invoiceLineAuditEvent, TENANT_ID).onComplete(v -> {
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_INVOICE_LINE_PATH + INVALID_ID)
+        .then().log().all().statusCode(200)
+        .body(containsString("invoiceLineAuditEvents")).body(containsString("totalItems"));
+
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_INVOICE_LINE_PATH + invoiceLineAuditEvent.getInvoiceLineId())
+        .then().log().all().statusCode(200)
+        .body(containsString(invoiceLineAuditEvent.getInvoiceLineId()));
+
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_INVOICE_LINE_PATH + invoiceLineAuditEvent.getInvoiceLineId() + "?limit=1")
+        .then().log().all().statusCode(200)
+        .body(containsString(invoiceLineAuditEvent.getInvoiceLineId()));
+
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_INVOICE_LINE_PATH + invoiceLineAuditEvent.getInvoiceLineId() + "?sortBy=action_date")
+        .then().log().all().statusCode(200)
+        .body(containsString(invoiceLineAuditEvent.getInvoiceLineId()));
+
+      given().header(CONTENT_TYPE).header(TENANT).header(PERMS).get(ACQ_AUDIT_INVOICE_LINE_PATH + invoiceLineAuditEvent.getInvoiceLineId() + 123)
+        .then().log().all().statusCode(500)
+        .body(containsString("UUID string too large"));
+    });
   }
 }

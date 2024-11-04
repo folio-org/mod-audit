@@ -15,6 +15,7 @@ import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
+import org.folio.verticle.acquisition.InvoiceLineEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
 import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
@@ -64,6 +65,7 @@ public class InitAPIs implements InitAPI {
     Promise<String> orderEventsConsumer = Promise.promise();
     Promise<String> orderLineEventsConsumer = Promise.promise();
     Promise<String> pieceEventsConsumer = Promise.promise();
+    Promise<String> invoiceLineEventsConsumer = Promise.promise();
 
     vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
       new DeploymentOptions()
@@ -80,11 +82,17 @@ public class InitAPIs implements InitAPI {
         .setWorker(true)
         .setInstances(acqPieceConsumerInstancesNumber), pieceEventsConsumer);
 
+    vertx.deployVerticle(getVerticleName(verticleFactory, InvoiceLineEventConsumersVerticle.class),
+      new DeploymentOptions()
+        .setWorker(true)
+        .setInstances(acqPieceConsumerInstancesNumber), invoiceLineEventsConsumer);
+
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
       orderEventsConsumer.future(),
       orderLineEventsConsumer.future(),
-      pieceEventsConsumer.future()));
+      pieceEventsConsumer.future(),
+      invoiceLineEventsConsumer.future()));
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

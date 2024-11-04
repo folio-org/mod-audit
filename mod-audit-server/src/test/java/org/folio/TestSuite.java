@@ -23,6 +23,7 @@ import org.folio.builder.service.LogRecordBuilderResolverTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
+import org.folio.dao.InvoiceLineEventsDaoTest;
 import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
 import org.folio.dao.PieceEventsDaoTest;
@@ -32,10 +33,12 @@ import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
 import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
 import org.folio.rest.impl.PieceEventsHandlerMockTest;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.InvoiceLineAuditEventsServiceTest;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
@@ -192,6 +195,18 @@ public class TestSuite {
 
   @Nested
   class PieceEventsHandlerMockNestedTest extends PieceEventsHandlerMockTest {
+  }
+
+  @Nested
+  class InvoiceLineEventsHandlerMockNestedTest extends InvoiceLineEventsHandlerMockTest {
+  }
+
+  @Nested
+  class InvoiceLineAuditEventsServiceNestedTest extends InvoiceLineAuditEventsServiceTest {
+  }
+
+  @Nested
+  class InvoiceLineEventsDaoNestedTest extends InvoiceLineEventsDaoTest {
   }
 
   @Nested

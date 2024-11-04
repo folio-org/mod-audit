@@ -167,6 +167,21 @@
       ]
     },
     {
+      "id": "acquisition-invoice-line-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/invoice-line/{id}",
+          "permissionsRequired": [
+            "acquisition.invoice-line.events.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "audit-data-event-handlers",
       "version": "1.1",
       "handlers": [
@@ -265,6 +280,11 @@
       "description": "Get piece status change events"
     },
     {
+      "permissionName": "acquisition.invoice-line.events.get",
+      "displayName": "Acquisition invoice-line events - get invoice-line change events",
+      "description": "Get invoice-line change events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -278,7 +298,8 @@
         "acquisition.order.events.get",
         "acquisition.order-line.events.get",
         "acquisition.piece.events.get",
-        "acquisition.piece.events.history.get"
+        "acquisition.piece.events.history.get",
+        "acquisition.invoice-line.events.get"
       ]
     }
   ],

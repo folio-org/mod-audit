@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import io.vertx.core.json.JsonObject;
+import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
@@ -14,6 +15,8 @@ public class EntityUtils {
   public static String PIECE_ID = "2cd4adc4-f287-49b6-a9c6-9eacdc4868e7";
   public static String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
   public static String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
+  public static String INVOICE_ID = "550e8400-e29b-41d4-a716-446655440001";
+  public static String INVOICE_LINE_ID = "550e8400-e29b-41d4-a716-446655440001";
 
   public static OrderAuditEvent createOrderAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
@@ -95,5 +98,20 @@ public class EntityUtils {
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withPieceSnapshot("Test");
+  }
+
+  public static InvoiceLineAuditEvent createInvoiceLineAuditEvent(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name", "Test Product");
+
+    return new InvoiceLineAuditEvent()
+      .withId(id)
+      .withAction(InvoiceLineAuditEvent.Action.CREATE)
+      .withInvoiceId(INVOICE_ID)
+      .withInvoiceLineId(INVOICE_LINE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withInvoiceLineSnapshot(jsonObject);
   }
 }
