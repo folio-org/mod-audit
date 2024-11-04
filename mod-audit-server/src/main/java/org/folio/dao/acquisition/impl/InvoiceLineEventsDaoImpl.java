@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -56,50 +55,37 @@ public class InvoiceLineEventsDaoImpl implements InvoiceLineEventsDao {
   @Override
   public Future<RowSet<Row>> save(InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
     LOGGER.debug("save:: Saving InvoiceLine AuditEvent with tenant id : {}", tenantId);
-    Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, invoiceLineAuditEvent, tenantId);
-    LOGGER.info("save:: Saved InvoiceLine AuditEvent with tenant id : {}", tenantId);
-    return promise.future();
+    return makeSaveCall(query, invoiceLineAuditEvent, tenantId)
+      .onSuccess(rows -> LOGGER.info("save:: Saved InvoiceLine AuditEvent with tenant id : {}", tenantId))
+      .onFailure(e -> LOGGER.error("Failed to save record with id: {} for invoice line id: {} in to table {}",
+        invoiceLineAuditEvent.getId(), invoiceLineAuditEvent.getInvoiceLineId(), TABLE_NAME, e));
   }
 
   @Override
   public Future<InvoiceLineAuditEventCollection> getAuditEventsByInvoiceLineId(String invoiceLineId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByInvoiceLineId:: Retrieving AuditEvent with invoice line id : {}", invoiceLineId);
-    Promise<RowSet<Row>> promise = Promise.promise();
-    try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_INVOICE_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
-      Tuple queryParams = Tuple.of(UUID.fromString(invoiceLineId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
-    } catch (Exception e) {
-      LOGGER.warn("Error getting invoice line audit events by invoice line id: {}", invoiceLineId, e);
-      promise.fail(e);
-    }
-
-    LOGGER.info("getAuditEventsByInvoiceLineId:: Retrieved AuditEvent with invoice line id : {}", invoiceLineId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceLineAuditEventCollection().withTotalItems(0)
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_BY_INVOICE_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(UUID.fromString(invoiceLineId), limit, offset))
+      .map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceLineAuditEventCollection().withTotalItems(0)
       : mapRowToListOfInvoiceLineEvent(rowSet));
   }
 
-  private void makeSaveCall(Promise<RowSet<Row>> promise, String query, InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
+  private Future<RowSet<Row>> makeSaveCall(String query, InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
     LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
-      pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(invoiceLineAuditEvent.getId(),
+      return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(invoiceLineAuditEvent.getId(),
         invoiceLineAuditEvent.getAction(),
         invoiceLineAuditEvent.getInvoiceId(),
         invoiceLineAuditEvent.getInvoiceLineId(),
         invoiceLineAuditEvent.getUserId(),
         LocalDateTime.ofInstant(invoiceLineAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
         LocalDateTime.ofInstant(invoiceLineAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
-        JsonObject.mapFrom(invoiceLineAuditEvent.getInvoiceLineSnapshot())), promise);
+        JsonObject.mapFrom(invoiceLineAuditEvent.getInvoiceLineSnapshot())));
     } catch (Exception e) {
-      LOGGER.error("Failed to save record with id: {} for invoice line id: {} in to table {}",
-        invoiceLineAuditEvent.getId(), invoiceLineAuditEvent.getInvoiceLineId(), TABLE_NAME, e);
-      promise.fail(e);
+      return Future.failedFuture(e);
     }
   }
 

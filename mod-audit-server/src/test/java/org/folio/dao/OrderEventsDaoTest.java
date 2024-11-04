@@ -4,6 +4,10 @@ import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createOrderAuditEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +17,7 @@ import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEventCollection;
@@ -41,7 +46,10 @@ public class OrderEventsDaoTest {
     var orderAuditEvent = createOrderAuditEvent(UUID.randomUUID().toString());
 
     Future<RowSet<Row>> saveFuture = orderEventDao.save(orderAuditEvent, TENANT_ID);
-    saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
+    saveFuture.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      verify(postgresClientFactory, times(1)).createInstance(TENANT_ID).execute(anyString(), any(Tuple.class));
+    });
   }
 
   @Test
@@ -55,6 +63,7 @@ public class OrderEventsDaoTest {
         assertTrue(re.failed());
         assertTrue(re.cause() instanceof PgException);
         assertEquals("ERROR: duplicate key value violates unique constraint \"acquisition_order_log_pkey\" (23505)", re.cause().getMessage());
+        verify(postgresClientFactory, times(1)).createInstance(TENANT_ID).execute(anyString(), any(Tuple.class));
       });
     });
   }
@@ -73,9 +82,9 @@ public class OrderEventsDaoTest {
 
       assertEquals(orderAuditEventList.get(0).getId(), id);
       assertEquals(OrderAuditEvent.Action.CREATE.value(), orderAuditEventList.get(0).getAction().value());
+      verify(postgresClientFactory, times(1)).createInstance(TENANT_ID).selectRead(anyString(), any(Tuple.class), any());
     });
   }
-
 }
 
 
