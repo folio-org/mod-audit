@@ -1,7 +1,6 @@
 package org.folio.dao.acquisition.impl;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -54,7 +53,6 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
   @Override
   public Future<RowSet<Row>> save(InvoiceAuditEvent invoiceAuditEvent, String tenantId) {
     LOGGER.debug("save:: Saving Invoice AuditEvent with tenant id : {}", tenantId);
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
     return makeSaveCall(query, invoiceAuditEvent, tenantId)
@@ -66,14 +64,10 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
   @Override
   public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortInvoice, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByInvoiceId:: Retrieving AuditEvent with invoice id : {}", invoiceId);
-    Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(GET_BY_INVOICE_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortInvoice));
-    Tuple queryParams = Tuple.of(UUID.fromString(invoiceId), limit, offset);
-    pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
-    LOGGER.info("getAuditEventsByInvoiceId:: Retrieved AuditEvent with invoice id : {}", invoiceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceAuditEventCollection().withTotalItems(0)
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(UUID.fromString(invoiceId), limit, offset))
+      .map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceAuditEventCollection().withTotalItems(0)
       : mapRowToListOfInvoiceEvent(rowSet));
   }
 
