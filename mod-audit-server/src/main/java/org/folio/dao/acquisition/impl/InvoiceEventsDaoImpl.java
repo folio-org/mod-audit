@@ -54,7 +54,6 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
   @Override
   public Future<RowSet<Row>> save(InvoiceAuditEvent invoiceAuditEvent, String tenantId) {
     LOGGER.debug("save:: Saving Invoice AuditEvent with tenant id : {}", tenantId);
-    Promise<RowSet<Row>> promise = Promise.promise();
     LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
