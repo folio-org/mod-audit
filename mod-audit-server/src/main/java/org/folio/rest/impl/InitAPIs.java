@@ -6,6 +6,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.Vertx;
 import io.vertx.core.spi.VerticleFactory;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,7 @@ import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
+import org.folio.verticle.acquisition.InvoiceEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderEventConsumersVerticle;
 import org.folio.verticle.acquisition.OrderLineEventConsumersVerticle;
 import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
@@ -29,10 +31,23 @@ public class InitAPIs implements InitAPI {
 
   @Value("${acq.orders.kafka.consumer.instancesNumber:1}")
   private int acqOrderConsumerInstancesNumber;
+  @Value("${acq.orders.kafka.consumer.pool.size:5}")
+  private int acqOrderConsumerPoolSize;
+
   @Value("${acq.order-lines.kafka.consumer.instancesNumber:1}")
   private int acqOrderLineConsumerInstancesNumber;
+  @Value("${acq.order-lines.kafka.consumer.pool.size:5}")
+  private int acqOrderLineConsumerPoolSize;
+
   @Value("${acq.pieces.kafka.consumer.instancesNumber:1}")
   private int acqPieceConsumerInstancesNumber;
+  @Value("${acq.orders.kafka.consumer.pool.size:5}")
+  private int acqPieceConsumerPoolSize;
+
+  @Value("${acq.invoices.kafka.consumer.instancesNumber:1}")
+  private int acqInvoiceConsumerInstancesNumber;
+  @Value("${acq.orders.kafka.consumer.pool.size:5}")
+  private int acqInvoiceConsumerPoolSize;
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
@@ -64,27 +79,26 @@ public class InitAPIs implements InitAPI {
     Promise<String> orderEventsConsumer = Promise.promise();
     Promise<String> orderLineEventsConsumer = Promise.promise();
     Promise<String> pieceEventsConsumer = Promise.promise();
+    Promise<String> invoiceEventsConsumer = Promise.promise();
 
-    vertx.deployVerticle(getVerticleName(verticleFactory, OrderEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
-        .setInstances(acqOrderConsumerInstancesNumber), orderEventsConsumer);
-
-    vertx.deployVerticle(getVerticleName(verticleFactory, OrderLineEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
-        .setInstances(acqOrderLineConsumerInstancesNumber), orderLineEventsConsumer);
-
-    vertx.deployVerticle(getVerticleName(verticleFactory, PieceEventConsumersVerticle.class),
-      new DeploymentOptions()
-        .setWorker(true)
-        .setInstances(acqPieceConsumerInstancesNumber), pieceEventsConsumer);
+    deployVerticle(vertx, verticleFactory, OrderEventConsumersVerticle.class, acqOrderConsumerInstancesNumber, acqOrderConsumerPoolSize, orderEventsConsumer);
+    deployVerticle(vertx, verticleFactory, OrderLineEventConsumersVerticle.class, acqOrderLineConsumerInstancesNumber, acqOrderLineConsumerPoolSize, orderLineEventsConsumer);
+    deployVerticle(vertx, verticleFactory, PieceEventConsumersVerticle.class, acqPieceConsumerInstancesNumber, acqPieceConsumerPoolSize, pieceEventsConsumer);
+    deployVerticle(vertx, verticleFactory, InvoiceEventConsumersVerticle.class, acqInvoiceConsumerInstancesNumber, acqInvoiceConsumerPoolSize, invoiceEventsConsumer);
 
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
       orderEventsConsumer.future(),
       orderLineEventsConsumer.future(),
-      pieceEventsConsumer.future()));
+      pieceEventsConsumer.future(),
+      invoiceEventsConsumer.future()));
+  }
+
+  private <T> void deployVerticle(Vertx vertx, VerticleFactory verticleFactory, Class<T> consumerClass,
+                                  int acqOrderConsumerInstancesNumber, int acqOrderConsumerPoolSize, Promise<String> orderEventsConsumer) {
+    DeploymentOptions deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
+      .setInstances(acqOrderConsumerInstancesNumber).setWorkerPoolSize(acqOrderConsumerPoolSize);
+    vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions, orderEventsConsumer);
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

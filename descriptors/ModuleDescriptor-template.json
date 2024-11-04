@@ -152,6 +152,21 @@
       ]
     },
     {
+      "id": "acquisition-invoice-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/invoice/{id}",
+          "permissionsRequired": [
+            "acquisition.invoice.events.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "circulation-logs",
       "version": "1.2",
       "handlers": [
@@ -265,6 +280,11 @@
       "description": "Get piece status change events"
     },
     {
+      "permissionName": "acquisition.invoice.events.get",
+      "displayName": "Acquisition invoice events - get invoice change events",
+      "description": "Get invoice change events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -278,7 +298,8 @@
         "acquisition.order.events.get",
         "acquisition.order-line.events.get",
         "acquisition.piece.events.get",
-        "acquisition.piece.events.history.get"
+        "acquisition.piece.events.history.get",
+        "acquisition.invoice.events.get"
       ]
     }
   ],
