@@ -58,45 +58,40 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
     LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, invoiceAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Invoice AuditEvent with tenant id : {}", tenantId);
-    return promise.future();
+    return makeSaveCall(query, invoiceAuditEvent, tenantId)
+      .onSuccess(rows -> LOGGER.info("save:: Saved Invoice AuditEvent with tenant id : {}", tenantId))
+      .onFailure(e -> LOGGER.error("Failed to save record with id: {} for invoice id: {} in to table {}",
+        invoiceAuditEvent.getId(), invoiceAuditEvent.getInvoiceId(), TABLE_NAME, e));
   }
 
   @Override
   public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortInvoice, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByInvoiceId:: Retrieving AuditEvent with invoice id : {}", invoiceId);
     Promise<RowSet<Row>> promise = Promise.promise();
-    try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_INVOICE_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortInvoice));
-      Tuple queryParams = Tuple.of(UUID.fromString(invoiceId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
-    } catch (Exception e) {
-      LOGGER.warn("Error getting invoice audit events by invoice id: {}", invoiceId, e);
-      promise.fail(e);
-    }
+    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_BY_INVOICE_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortInvoice));
+    Tuple queryParams = Tuple.of(UUID.fromString(invoiceId), limit, offset);
+    pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
     LOGGER.info("getAuditEventsByInvoiceId:: Retrieved AuditEvent with invoice id : {}", invoiceId);
     return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceAuditEventCollection().withTotalItems(0)
       : mapRowToListOfInvoiceEvent(rowSet));
   }
 
-  private void makeSaveCall(Promise<RowSet<Row>> promise, String query, InvoiceAuditEvent invoiceAuditEvent, String tenantId) {
+  private Future<RowSet<Row>> makeSaveCall(String query, InvoiceAuditEvent invoiceAuditEvent, String tenantId) {
     LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
-      LOGGER.info("makeSaveCall:: Trying to make save call with query : {} and tenant id : {}", query, tenantId);
-      pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(invoiceAuditEvent.getId(),
+      return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(invoiceAuditEvent.getId(),
         invoiceAuditEvent.getAction(),
         invoiceAuditEvent.getInvoiceId(),
         invoiceAuditEvent.getUserId(),
         LocalDateTime.ofInstant(invoiceAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
         LocalDateTime.ofInstant(invoiceAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
-        JsonObject.mapFrom(invoiceAuditEvent.getInvoiceSnapshot())), promise);
+        JsonObject.mapFrom(invoiceAuditEvent.getInvoiceSnapshot())));
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for invoice id: {} in to table {}",
         invoiceAuditEvent.getId(), invoiceAuditEvent.getInvoiceId(), TABLE_NAME, e);
-      promise.fail(e);
+      return Future.failedFuture(e);
     }
   }
 
