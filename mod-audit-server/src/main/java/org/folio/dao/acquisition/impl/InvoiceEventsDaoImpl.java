@@ -82,8 +82,6 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
         LocalDateTime.ofInstant(invoiceAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
         JsonObject.mapFrom(invoiceAuditEvent.getInvoiceSnapshot())));
     } catch (Exception e) {
-      LOGGER.error("Failed to save record with id: {} for invoice id: {} in to table {}",
-        invoiceAuditEvent.getId(), invoiceAuditEvent.getInvoiceId(), TABLE_NAME, e);
       return Future.failedFuture(e);
     }
   }
