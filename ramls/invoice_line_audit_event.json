@@ -40,5 +40,5 @@
       "javaType": "java.lang.Object"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
