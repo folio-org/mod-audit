@@ -188,9 +188,6 @@
         {
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
-          "permissionsRequired": [
-            "pubsub.events.post"
-          ],
           "modulePermissions": [
             "users.item.get",
             "users.collection.get",
@@ -198,7 +195,8 @@
             "inventory.items.item.get",
             "inventory-storage.holdings.item.get",
             "circulation-storage.cancellation-reasons.collection.get",
-            "circulation-item.item.get"
+            "circulation-item.item.get",
+            "audit.pub-sub-handlers.log-record-event.post"
           ]
         }
       ]
