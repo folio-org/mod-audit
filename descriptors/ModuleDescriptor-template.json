@@ -189,6 +189,7 @@
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
+            "audit.pub-sub-handlers.log-record-event.post"
           ],
           "modulePermissions": [
             "users.item.get",
@@ -197,8 +198,7 @@
             "inventory.items.item.get",
             "inventory-storage.holdings.item.get",
             "circulation-storage.cancellation-reasons.collection.get",
-            "circulation-item.item.get",
-            "audit.pub-sub-handlers.log-record-event.post"
+            "circulation-item.item.get"
           ]
         }
       ]
@@ -283,6 +283,11 @@
       "permissionName": "acquisition.invoice.events.get",
       "displayName": "Acquisition invoice events - get invoice change events",
       "description": "Get invoice change events"
+    },
+    {
+      "permissionName": "audit.pub-sub-handlers.log-record-event.post",
+      "displayName" : "log record events from pub-sub",
+      "description" : "log record events received from pub-sub"
     },
     {
       "permissionName": "audit.all",
