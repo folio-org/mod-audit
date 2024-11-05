@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.folio.utils.EntityUtils.ORDER_ID;
 import static org.folio.utils.EntityUtils.ORDER_LINE_ID;
 import static org.folio.utils.EntityUtils.PIECE_ID;
+import static org.folio.utils.EntityUtils.INVOICE_ID;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.hamcrest.Matchers.containsString;
 
@@ -15,10 +16,13 @@ import java.util.UUID;
 import io.restassured.http.Header;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.folio.CopilotGenerated;
+import org.folio.dao.acquisition.impl.InvoiceEventsDaoImpl;
 import org.folio.dao.acquisition.impl.InvoiceLineEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
 import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
+import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -40,6 +44,7 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   private static final String ACQ_AUDIT_ORDER_LINE_PATH = "/audit-data/acquisition/order-line/";
   private static final String ACQ_AUDIT_PIECE_PATH = "/audit-data/acquisition/piece/";
   private static final String ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH = "/status-change-history";
+  private static final String ACQ_AUDIT_INVOICE_PATH = "/audit-data/acquisition/invoice/";
   private static final String ACQ_AUDIT_INVOICE_LINE_PATH = "/audit-data/acquisition/invoice-line/";
   private static final String TENANT_ID = "modaudittest";
 
@@ -53,6 +58,8 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
   @InjectMocks
   PieceEventsDaoImpl pieceEventsDao;
   @InjectMocks
+  InvoiceEventsDaoImpl invoiceEventsDao;
+  @InjectMocks
   InvoiceLineEventsDaoImpl invoiceLineEventsDao;
 
   @BeforeEach
@@ -60,6 +67,8 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
     MockitoAnnotations.openMocks(this);
     orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
     orderLineEventDao = new OrderLineEventsDaoImpl(postgresClientFactory);
+    invoiceEventsDao = new InvoiceEventsDaoImpl(postgresClientFactory);
+    invoiceLineEventsDao = new InvoiceLineEventsDaoImpl(postgresClientFactory);
   }
 
   @Test
@@ -250,6 +259,49 @@ public class AuditDataAcquisitionAPITest extends ApiTestBase {
 
     given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
       .get(ACQ_AUDIT_PIECE_PATH + PIECE_ID + 123 + ACQ_AUDIT_PIECE_STATUS_CHANGE_HISTORY_PATH)
+      .then().log().all().statusCode(500)
+      .body(containsString("UUID string too large"));
+  }
+
+  @Test
+  @CopilotGenerated
+  void shouldReturnInvoiceEventsOnGetByInvoiceId() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name", "Test Product2");
+
+    InvoiceAuditEvent invoiceAuditEvent = new InvoiceAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(InvoiceAuditEvent.Action.CREATE)
+      .withInvoiceId(INVOICE_ID)
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withInvoiceSnapshot(jsonObject);
+
+    invoiceEventsDao.save(invoiceAuditEvent, TENANT_ID);
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_INVOICE_PATH + INVALID_ID)
+      .then().log().all().statusCode(200)
+      .body(containsString("invoiceAuditEvents")).body(containsString("totalItems"));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_INVOICE_PATH + INVOICE_ID)
+      .then().log().all().statusCode(200)
+      .body(containsString(INVOICE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_INVOICE_PATH + INVOICE_ID + "?limit=1")
+      .then().log().all().statusCode(200)
+      .body(containsString(INVOICE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_INVOICE_PATH + INVOICE_ID + "?sortBy=action_date")
+      .then().log().all().statusCode(200)
+      .body(containsString(INVOICE_ID));
+
+    given().header(CONTENT_TYPE).header(TENANT).header(PERMS)
+      .get(ACQ_AUDIT_INVOICE_PATH + INVOICE_ID + 123)
       .then().log().all().statusCode(500)
       .body(containsString("UUID string too large"));
   }

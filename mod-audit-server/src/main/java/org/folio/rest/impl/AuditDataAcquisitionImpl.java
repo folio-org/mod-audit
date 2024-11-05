@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.Future;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionInvoiceIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionInvoiceLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
@@ -14,6 +15,7 @@ import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdStatusChangeHistoryGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.acquisition.InvoiceAuditEventsService;
 import org.folio.services.acquisition.InvoiceLineAuditEventsService;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.services.acquisition.OrderLineAuditEventsService;
@@ -37,6 +39,8 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   private OrderLineAuditEventsService orderLineAuditEventsService;
   @Autowired
   private PieceAuditEventsService pieceAuditEventsService;
+  @Autowired
+  private InvoiceAuditEventsService invoiceAuditEventsService;
   @Autowired
   private InvoiceLineAuditEventsService invoiceLineAuditEventsService;
 
@@ -115,6 +119,24 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   }
 
   @Override
+  public void getAuditDataAcquisitionInvoiceById(String invoiceId, String sortBy,
+                                                 AuditDataAcquisitionInvoiceIdGetSortOrder sortOrder,
+                                                 int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrderLineById:: Retrieving Audit Data Acquisition Invoice By Id : {}", invoiceId);
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+    try {
+      invoiceAuditEventsService.getAuditEventsByInvoiceId(invoiceId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionInvoiceByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error("Failed to get invoice audit events by piece id: {}", invoiceId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
+  }
+
+  @Override
   public void getAuditDataAcquisitionInvoiceLineById(String invoiceLineId, String sortBy, AuditDataAcquisitionInvoiceLineIdGetSortOrder sortOrder,
                                                      int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("getAuditDataAcquisitionInvoiceLineById:: Retrieving Audit Data Acquisition Invoice Line By Id : {}", invoiceLineId);
@@ -126,7 +148,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
         .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.error("Failed to get order line audit events by order line id: {}", invoiceLineId, e);
+      LOGGER.error("Failed to get invoice line audit events by order line id: {}", invoiceLineId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }

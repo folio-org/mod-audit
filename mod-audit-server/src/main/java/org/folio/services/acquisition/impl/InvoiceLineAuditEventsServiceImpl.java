@@ -26,7 +26,7 @@ public class InvoiceLineAuditEventsServiceImpl implements InvoiceLineAuditEvents
 
   @Override
   public Future<RowSet<Row>> saveInvoiceLineAuditEvent(InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
-    LOGGER.debug("saveInvoiceLineAuditEvent:: Saving invoice line audit event with id: {} in tenant Id : {}", invoiceLineAuditEvent.getId(), tenantId);
+    LOGGER.debug("saveInvoiceLineAuditEvent:: Saving invoice line audit event with invoiceLineId={} in tenant Id={}", invoiceLineAuditEvent.getId(), tenantId);
     return invoiceLineEventsDao.save(invoiceLineAuditEvent, tenantId)
       .recover(throwable -> {
         LOGGER.error("handleFailures:: Could not save invoice audit event for InvoiceLine id: {} in tenantId: {}", invoiceLineAuditEvent.getInvoiceLineId(), tenantId);
@@ -36,7 +36,7 @@ public class InvoiceLineAuditEventsServiceImpl implements InvoiceLineAuditEvents
 
   @Override
   public Future<InvoiceLineAuditEventCollection> getAuditEventsByInvoiceLineId(String invoiceLineId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
-    LOGGER.debug("getAuditEventsByInvoiceLineId:: Retrieving audit events for invoice line Id : {} and tenant Id : {}", invoiceLineId, tenantId);
+    LOGGER.debug("getAuditEventsByInvoiceLineId:: Retrieving audit events for invoiceLineId={} and tenantId={}", invoiceLineId, tenantId);
     return invoiceLineEventsDao.getAuditEventsByInvoiceLineId(invoiceLineId, sortBy, sortOrder, limit, offset, tenantId);
   }
 }

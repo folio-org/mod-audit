@@ -5,7 +5,6 @@ import static org.folio.TestSuite.port;
 import static org.folio.utils.TenantApiTestUtil.deleteTenantAndPurgeTables;
 import static org.folio.utils.TenantApiTestUtil.prepareTenant;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -30,7 +29,7 @@ public class ApiTestBase {
   private static TenantJob tenantJob;
 
   @BeforeAll
-  public static void globalSetup() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public static void globalSetup() throws InterruptedException, ExecutionException, TimeoutException {
     Locale.setDefault(Locale.US);
 
     if (!isInitialized) {

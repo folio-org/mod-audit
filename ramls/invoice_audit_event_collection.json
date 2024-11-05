@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of invoiceAuditEvents",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "invoiceAuditEvents": {
+      "description": "List of invoiceAuditEvents",
+      "type": "array",
+      "id": "invoiceAuditEventsList",
+      "items": {
+        "type": "object",
+        "$ref": "invoice_audit_event.json"
+      }
+    },
+    "totalItems": {
+      "description": "total records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "invoiceAuditEvents",
+    "totalItems"
+  ]
+}
