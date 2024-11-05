@@ -285,11 +285,6 @@
       "description": "Get invoice change events"
     },
     {
-      "permissionName": "audit.pub-sub-handlers.log-record-event.post",
-      "displayName" : "log record events from pub-sub",
-      "description" : "log record events received from pub-sub"
-    },
-    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
