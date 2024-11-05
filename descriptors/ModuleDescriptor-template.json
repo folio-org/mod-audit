@@ -188,6 +188,8 @@
         {
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
+          "permissionsRequired": [
+          ],
           "modulePermissions": [
             "users.item.get",
             "users.collection.get",
