@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -56,7 +55,7 @@ public class InvoiceAuditEventsServiceTest {
       invoiceEventsDao = spy(new InvoiceEventsDaoImpl(postgresClientFactory));
       invoiceAuditEventService = new InvoiceAuditEventsServiceImpl(invoiceEventsDao);
 
-      doReturn(postgresClient).when(postgresClientFactory).createInstance(eq(TENANT_ID));
+      doReturn(postgresClient).when(postgresClientFactory).createInstance(TENANT_ID);
     }
   }
 
