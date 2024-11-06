@@ -8,13 +8,15 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
+import org.folio.CopilotGenerated;
+import org.folio.dao.acquisition.impl.InvoiceLineEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
-import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
-import org.folio.services.acquisition.impl.OrderLineAuditEventsServiceImpl;
+import org.folio.services.acquisition.impl.InvoiceLineAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
-import org.folio.verticle.acquisition.consumers.OrderLineEventsHandler;
+import org.folio.verticle.acquisition.consumers.InvoiceLineEventsHandler;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
@@ -24,9 +26,9 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
-import static org.junit.Assert.assertTrue;
 
-public class OrderLineEventsHandlerMockTest {
+@CopilotGenerated(partiallyGenerated = true)
+public class InvoiceLineEventsHandlerMockTest {
 
   private static final String TENANT_ID = "diku";
   protected static final String TOKEN = "token";
@@ -38,54 +40,49 @@ public class OrderLineEventsHandlerMockTest {
   @Spy
   private Vertx vertx = Vertx.vertx();
 
-
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @InjectMocks
-  OrderLineEventsDaoImpl orderLineEventsDao = new OrderLineEventsDaoImpl(postgresClientFactory);
+  InvoiceLineEventsDaoImpl invoiceLineEventsDao = new InvoiceLineEventsDaoImpl(postgresClientFactory);
 
   @InjectMocks
-  OrderLineAuditEventsServiceImpl orderLineAuditEventServiceImpl = new OrderLineAuditEventsServiceImpl(orderLineEventsDao);
+  InvoiceLineAuditEventsServiceImpl invoiceLineAuditEventServiceImpl = new InvoiceLineAuditEventsServiceImpl(invoiceLineEventsDao);
 
   @InjectMocks
-  private OrderLineEventsHandler orderLineEventsHandler = new OrderLineEventsHandler(vertx, orderLineAuditEventServiceImpl);
+  private InvoiceLineEventsHandler invoiceLineEventsHandler = new InvoiceLineEventsHandler(vertx, invoiceLineAuditEventServiceImpl);
 
   @Test
   void shouldProcessEvent() {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.put("Test","TestValue");
+    jsonObject.put("Test", "TestValue");
 
-    OrderLineAuditEvent orderLineAuditEvent = new OrderLineAuditEvent()
+    InvoiceLineAuditEvent invoiceLineAuditEvent = new InvoiceLineAuditEvent()
       .withId(UUID.randomUUID().toString())
-      .withOrderLineId(UUID.randomUUID().toString())
+      .withInvoiceLineId(UUID.randomUUID().toString())
       .withEventDate(new Date())
-      .withOrderId(UUID.randomUUID().toString())
+      .withInvoiceId(UUID.randomUUID().toString())
       .withActionDate(new Date())
-      .withAction(OrderLineAuditEvent.Action.CREATE)
-      .withOrderLineSnapshot(jsonObject)
+      .withAction(InvoiceLineAuditEvent.Action.CREATE)
+      .withInvoiceLineSnapshot(jsonObject)
       .withUserId(UUID.randomUUID().toString());
-    KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(orderLineAuditEvent);
+    KafkaConsumerRecord<String, String> kafkaConsumerRecord = buildKafkaConsumerRecord(invoiceLineAuditEvent);
 
-    Future<String> saveFuture = orderLineEventsHandler.handle(kafkaConsumerRecord);;
-    saveFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-    });
+    Future<String> saveFuture = invoiceLineEventsHandler.handle(kafkaConsumerRecord);
+    saveFuture.onComplete(ar -> Assertions.assertTrue(ar.succeeded()));
   }
 
-  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(OrderLineAuditEvent kafkaConsumerRecord) {
+  private KafkaConsumerRecord<String, String> buildKafkaConsumerRecord(InvoiceLineAuditEvent kafkaConsumerRecord) {
     String topic = KafkaTopicNameHelper.formatTopicName(KAFKA_ENV, getDefaultNameSpace(), TENANT_ID, kafkaConsumerRecord.getAction().toString());
     ConsumerRecord<String, String> consumerRecord = buildConsumerRecord(topic, kafkaConsumerRecord);
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 
-  protected ConsumerRecord<String, String> buildConsumerRecord(String topic, OrderLineAuditEvent event) {
-    ConsumerRecord<String, String> consumerRecord = new ConsumerRecord("folio", 0, 0, topic, Json.encode(event));
+  protected ConsumerRecord<String, String> buildConsumerRecord(String topic, InvoiceLineAuditEvent event) {
+    ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>(topic, 0, 0, topic, Json.encode(event));
     consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
-    consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, (TOKEN).getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, TOKEN.getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;
   }
-
-
 }

@@ -1,5 +1,23 @@
 package org.folio.dao.acquisition.impl;
 
+import static java.lang.String.format;
+import static org.folio.util.AuditEventDBConstants.ACTION_DATE_FIELD;
+import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
+import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
+import static org.folio.util.AuditEventDBConstants.ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.INVOICE_ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.MODIFIED_CONTENT_FIELD;
+import static org.folio.util.AuditEventDBConstants.ORDER_BY_PATTERN;
+import static org.folio.util.AuditEventDBConstants.TOTAL_RECORDS_FIELD;
+import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
+import static org.folio.util.DbUtils.formatDBTableName;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.UUID;
+
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
@@ -12,24 +30,6 @@ import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.folio.util.AuditEventDBConstants.ACTION_DATE_FIELD;
-import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
-import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
-import static org.folio.util.AuditEventDBConstants.ID_FIELD;
-import static org.folio.util.AuditEventDBConstants.INVOICE_ID_FIELD;
-import static org.folio.util.AuditEventDBConstants.MODIFIED_CONTENT_FIELD;
-import static org.folio.util.AuditEventDBConstants.ORDER_BY_PATTERN;
-import static org.folio.util.AuditEventDBConstants.TOTAL_RECORDS_FIELD;
-import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
-import static org.folio.util.DbUtils.formatDBTableName;
 
 @Repository
 public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
@@ -62,10 +62,10 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
   }
 
   @Override
-  public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortInvoice, int limit, int offset, String tenantId) {
+  public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByInvoiceId:: Retrieving AuditEvent with invoice id : {}", invoiceId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
-    String query = format(GET_BY_INVOICE_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortInvoice));
+    String query = format(GET_BY_INVOICE_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
     return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(UUID.fromString(invoiceId), limit, offset))
       .map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceAuditEventCollection().withTotalItems(0)
       : mapRowToListOfInvoiceEvent(rowSet));
