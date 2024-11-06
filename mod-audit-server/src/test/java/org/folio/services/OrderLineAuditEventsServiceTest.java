@@ -1,64 +1,91 @@
 package org.folio.services;
 
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
-import org.folio.dao.acquisition.OrderLineEventsDao;
-import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
-import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
-import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
-import org.folio.services.acquisition.impl.OrderLineAuditEventsServiceImpl;
-import org.folio.util.PostgresClientFactory;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-
-import java.util.List;
-import java.util.UUID;
-
+import static org.folio.utils.EntityUtils.ACTION_DATE_SORT_BY;
+import static org.folio.utils.EntityUtils.DESC_ORDER;
+import static org.folio.utils.EntityUtils.LIMIT;
+import static org.folio.utils.EntityUtils.OFFSET;
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createOrderLineAuditEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+import java.util.UUID;
+
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
+import org.folio.dao.acquisition.OrderLineEventsDao;
+import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEventCollection;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.services.acquisition.impl.OrderLineAuditEventsServiceImpl;
+import org.folio.util.PostgresClientFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class OrderLineAuditEventsServiceTest {
 
-  @Spy
-  private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
   @Mock
-  OrderLineEventsDao orderLineEventsDao = new OrderLineEventsDaoImpl(postgresClientFactory);
-  @InjectMocks
-  OrderLineAuditEventsServiceImpl orderLineAuditEventService = new OrderLineAuditEventsServiceImpl(orderLineEventsDao);
+  private RowSet<Row> rowSet;
+  @Mock
+  private PostgresClient postgresClient;
+
+  private OrderLineEventsDao orderLineEventsDao;
+  private OrderLineAuditEventsServiceImpl orderLineAuditEventService;
+
+  @BeforeEach
+  public void setUp() throws Exception {
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var postgresClientFactory =  spy(new PostgresClientFactory(Vertx.vertx()));
+      orderLineEventsDao = spy(new OrderLineEventsDaoImpl(postgresClientFactory));
+      orderLineAuditEventService = new OrderLineAuditEventsServiceImpl(orderLineEventsDao);
+
+      doReturn(postgresClient).when(postgresClientFactory).createInstance(eq(TENANT_ID));
+    }
+  }
 
   @Test
   public void shouldCallDaoForSuccessfulCase() {
     var orderLineAuditEvent = createOrderLineAuditEvent(UUID.randomUUID().toString());
+    doReturn(Future.succeededFuture(rowSet)).when(postgresClient).execute(anyString(), any(Tuple.class));
 
-    Future<RowSet<Row>> saveFuture = orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
+    var saveFuture = orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
+    saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
-    saveFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-    });
+    verify(orderLineEventsDao, times(1)).save(orderLineAuditEvent, TENANT_ID);
   }
 
   @Test
   void shouldGetOrderLineDto() {
-    String id = UUID.randomUUID().toString();
+    var id = UUID.randomUUID().toString();
     var orderLineAuditEvent = createOrderLineAuditEvent(id);
+    var orderLineAuditEventCollection = new OrderLineAuditEventCollection().withOrderLineAuditEvents(List.of(orderLineAuditEvent)).withTotalItems(1);
 
-    orderLineAuditEventService.saveOrderLineAuditEvent(orderLineAuditEvent, TENANT_ID);
+    doReturn(Future.succeededFuture(orderLineAuditEventCollection)).when(orderLineEventsDao).getAuditEventsByOrderLineId(anyString(), anyString(), anyString(), anyInt(), anyInt(), anyString());
 
-    Future<OrderLineAuditEventCollection> dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, "action_date", "desc", 1, 1, TENANT_ID);
-    dto.onComplete(ar -> {
-      OrderLineAuditEventCollection orderLineAuditEventOptional = ar.result();
-      List<OrderLineAuditEvent> orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();
+    var dto = orderLineAuditEventService.getAuditEventsByOrderLineId(id, ACTION_DATE_SORT_BY, DESC_ORDER, LIMIT, OFFSET, TENANT_ID);
+    dto.onComplete(asyncResult -> {
+      var orderLineAuditEventOptional = asyncResult.result();
+      var orderLineAuditEventList = orderLineAuditEventOptional.getOrderLineAuditEvents();
 
       assertEquals(orderLineAuditEventList.get(0).getId(), id);
       assertEquals(OrderLineAuditEvent.Action.CREATE, orderLineAuditEventList.get(0).getAction());
-
     });
-  }
 
+    verify(orderLineEventsDao, times(1)).getAuditEventsByOrderLineId(id, ACTION_DATE_SORT_BY, DESC_ORDER, LIMIT, OFFSET, TENANT_ID);
+  }
 }

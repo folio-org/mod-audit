@@ -12,6 +12,10 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 
 public class EntityUtils {
 
+  public static final String ACTION_DATE_SORT_BY = "action_date";
+  public static final String DESC_ORDER = "desc";
+  public static final int LIMIT = 1;
+  public static final int OFFSET = 1;
   public static final String TENANT_ID = "diku";
   public static final String PIECE_ID = "2cd4adc4-f287-49b6-a9c6-9eacdc4868e7";
   public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
