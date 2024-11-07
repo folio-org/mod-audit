@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Invoice line audit event",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "UUID of the event",
+      "$ref": "common/uuid.json"
+    },
+    "action": {
+      "description": "Action for invoice line (Create, Edit or Delete)",
+      "type": "string",
+      "$ref": "event_action.json"
+    },
+    "invoiceId": {
+      "description": "UUID of the invoice",
+      "$ref": "common/uuid.json"
+    },
+    "invoiceLineId": {
+      "description": "UUID of the invoice line",
+      "$ref": "common/uuid.json"
+    },
+    "userId": {
+      "description": "UUID of the user who performed the action",
+      "$ref": "common/uuid.json"
+    },
+    "eventDate": {
+      "description": "Date time when event triggered",
+      "format": "date-time",
+      "type": "string"
+    },
+    "actionDate": {
+      "description": "Date time when invoice action occurred",
+      "format": "date-time",
+      "type": "string"
+    },
+    "invoiceLineSnapshot": {
+      "description": "Full snapshot of the invoice line",
+      "type": "object",
+      "javaType": "java.lang.Object"
+    }
+  },
+  "additionalProperties": true
+}

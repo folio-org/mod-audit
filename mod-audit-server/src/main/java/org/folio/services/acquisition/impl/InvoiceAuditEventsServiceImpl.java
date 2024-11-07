@@ -35,8 +35,8 @@ public class InvoiceAuditEventsServiceImpl implements InvoiceAuditEventsService 
   }
 
   @Override
-  public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortInvoice, int limit, int offset, String tenantId) {
+  public Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByInvoiceId:: Retrieving audit events for invoiceId={} and tenantId={}", invoiceId, tenantId);
-    return invoiceEventsDao.getAuditEventsByInvoiceId(invoiceId, sortBy, sortInvoice, limit, offset, tenantId);
+    return invoiceEventsDao.getAuditEventsByInvoiceId(invoiceId, sortBy, sortOrder, limit, offset, tenantId);
   }
 }
