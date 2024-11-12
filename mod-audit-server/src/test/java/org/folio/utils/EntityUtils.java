@@ -8,6 +8,7 @@ import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.OrganizationAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 
 public class EntityUtils {
@@ -19,9 +20,10 @@ public class EntityUtils {
   public static final String TENANT_ID = "diku";
   public static final String PIECE_ID = "2cd4adc4-f287-49b6-a9c6-9eacdc4868e7";
   public static final String ORDER_ID = "a21fc51c-d46b-439b-8c79-9b2be41b79a6";
-  public static final String ORDER_LINE_ID = "a22fc51c-d46b-439b-8c79-9b2be41b79a6";
+  public static final String ORDER_LINE_ID = "3448efa3-ef4b-4518-a924-d1b36255cc20";
   public static final String INVOICE_ID = "3f29b1a4-8c2b-4d3a-9b1e-5f2a1b4c8d3a";
   public static final String INVOICE_LINE_ID = "550e8400-e29b-41d4-a716-446655440001";
+  public static final String ORGANIZATION_ID = "39e7362e-b487-4d51-8bdb-cbd6bf29d1c7";
 
   public static OrderAuditEvent createOrderAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
@@ -143,5 +145,32 @@ public class EntityUtils {
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withInvoiceLineSnapshot(jsonObject);
+  }
+
+
+
+  public static OrganizationAuditEvent createOrganizationAuditEvent(String id) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.put("name", "Test Organization 123");
+
+    return new OrganizationAuditEvent()
+      .withId(id)
+      .withAction(OrganizationAuditEvent.Action.CREATE)
+      .withOrganizationId(UUID.randomUUID().toString())
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrganizationSnapshot(jsonObject);
+  }
+
+  public static OrganizationAuditEvent createOrganizationAuditEventWithoutSnapshot() {
+    return new OrganizationAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(OrganizationAuditEvent.Action.CREATE)
+      .withOrganizationId(UUID.randomUUID().toString())
+      .withUserId(UUID.randomUUID().toString())
+      .withEventDate(new Date())
+      .withActionDate(new Date())
+      .withOrganizationSnapshot("Test");
   }
 }

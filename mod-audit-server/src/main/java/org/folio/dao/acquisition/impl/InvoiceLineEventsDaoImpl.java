@@ -69,8 +69,7 @@ public class InvoiceLineEventsDaoImpl implements InvoiceLineEventsDao {
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(GET_BY_INVOICE_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
     return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(UUID.fromString(invoiceLineId), limit, offset))
-      .map(rowSet -> rowSet.rowCount() == 0 ? new InvoiceLineAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfInvoiceLineEvent(rowSet));
+      .map(this::mapRowToListOfInvoiceLineEvent);
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
@@ -91,6 +90,9 @@ public class InvoiceLineEventsDaoImpl implements InvoiceLineEventsDao {
 
   private InvoiceLineAuditEventCollection mapRowToListOfInvoiceLineEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfInvoiceLineEvent:: Mapping row to List of Invoice Line Events");
+    if (rowSet.rowCount() == 0) {
+      return new InvoiceLineAuditEventCollection().withTotalItems(0);
+    }
     InvoiceLineAuditEventCollection invoiceLineAuditEventCollection = new InvoiceLineAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       invoiceLineAuditEventCollection.getInvoiceLineAuditEvents().add(mapRowToInvoiceLineEvent(row));

@@ -11,6 +11,7 @@ import org.folio.rest.jaxrs.model.AuditDataAcquisitionInvoiceIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionInvoiceLineIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrderLineIdGetSortOrder;
+import org.folio.rest.jaxrs.model.AuditDataAcquisitionOrganizationIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdGetSortOrder;
 import org.folio.rest.jaxrs.model.AuditDataAcquisitionPieceIdStatusChangeHistoryGetSortOrder;
 import org.folio.rest.jaxrs.resource.AuditDataAcquisition;
@@ -19,6 +20,7 @@ import org.folio.services.acquisition.InvoiceAuditEventsService;
 import org.folio.services.acquisition.InvoiceLineAuditEventsService;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.services.acquisition.OrderLineAuditEventsService;
+import org.folio.services.acquisition.OrganizationAuditEventsService;
 import org.folio.services.acquisition.PieceAuditEventsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorUtils;
@@ -43,6 +45,8 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
   private InvoiceAuditEventsService invoiceAuditEventsService;
   @Autowired
   private InvoiceLineAuditEventsService invoiceLineAuditEventsService;
+  @Autowired
+  private OrganizationAuditEventsService organizationAuditEventsService;
 
   public AuditDataAcquisitionImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -131,7 +135,7 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
         .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.error("Failed to get invoice audit events by piece id: {}", invoiceId, e);
+      LOGGER.error("Failed to get invoice audit events by invoice id: {}", invoiceId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
@@ -148,7 +152,25 @@ public class AuditDataAcquisitionImpl implements AuditDataAcquisition {
         .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
-      LOGGER.error("Failed to get invoice line audit events by order line id: {}", invoiceLineId, e);
+      LOGGER.error("Failed to get invoice line audit events by invoice line id: {}", invoiceLineId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
+  }
+
+  @Override
+  public void getAuditDataAcquisitionOrganizationById(String organizationId, String sortBy,
+                                                      AuditDataAcquisitionOrganizationIdGetSortOrder sortOrder,
+                                                      int limit, int offset, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.debug("getAuditDataAcquisitionOrganizationById:: Retrieving Audit Data Acquisition Organization By Id : {}", organizationId);
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+    try {
+      organizationAuditEventsService.getAuditEventsByOrganizationId(organizationId, sortBy, sortOrder.name(), limit, offset, tenantId)
+        .map(GetAuditDataAcquisitionOrganizationByIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error("Failed to get organization audit events by organization id: {}", organizationId, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }

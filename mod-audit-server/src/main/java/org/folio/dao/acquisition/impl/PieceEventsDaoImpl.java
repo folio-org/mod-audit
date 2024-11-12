@@ -94,9 +94,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ?
-      new PieceAuditEventCollection().withTotalItems(0) :
-      mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   @Override
@@ -114,12 +112,14 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new PieceAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   private PieceAuditEventCollection mapRowToListOfPieceEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Piece Events");
+    if (rowSet.rowCount() == 0) {
+      return new PieceAuditEventCollection().withTotalItems(0);
+    }
     PieceAuditEventCollection pieceAuditEventCollection = new PieceAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));

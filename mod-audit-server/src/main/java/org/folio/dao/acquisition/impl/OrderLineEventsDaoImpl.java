@@ -81,8 +81,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
     }
 
     LOGGER.info("getAuditEventsByOrderLineId:: Retrieved AuditEvent with order line id : {}", orderLineId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderLineAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfOrderLineEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfOrderLineEvent);
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
@@ -105,6 +104,9 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   private OrderLineAuditEventCollection mapRowToListOfOrderLineEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderLineEvent:: Mapping row to List of Order Line Events");
+    if (rowSet.rowCount() == 0) {
+      return new OrderLineAuditEventCollection().withTotalItems(0);
+    }
     OrderLineAuditEventCollection orderLineAuditEventCollection = new OrderLineAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderLineAuditEventCollection.getOrderLineAuditEvents().add(mapRowToOrderLineEvent(row));

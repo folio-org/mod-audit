@@ -78,8 +78,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with order id : {}", orderId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfOrderEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfOrderEvent);
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderAuditEvent orderAuditEvent, String tenantId) {
@@ -102,6 +101,9 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private OrderAuditEventCollection mapRowToListOfOrderEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Order Events");
+    if (rowSet.rowCount() == 0) {
+      return new OrderAuditEventCollection().withTotalItems(0);
+    }
     OrderAuditEventCollection orderAuditEventCollection = new OrderAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
