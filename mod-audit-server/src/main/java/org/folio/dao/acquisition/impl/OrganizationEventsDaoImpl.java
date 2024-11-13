@@ -56,7 +56,7 @@ public class OrganizationEventsDaoImpl implements OrganizationEventsDao {
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
     return makeSaveCall(query, event, tenantId)
-      .onSuccess(rows -> LOGGER.info("save:: Saved Organization AuditEvent with tenant id : {}", tenantId))
+      .onSuccess(rows -> LOGGER.info("save:: Saved Organization AuditEvent with organization id: {}", event.getOrganizationId()))
       .onFailure(e -> LOGGER.error("Failed to save record with id: {} for organization id: {} in to table {}",
         event.getId(), event.getOrganizationId(), TABLE_NAME, e));
   }

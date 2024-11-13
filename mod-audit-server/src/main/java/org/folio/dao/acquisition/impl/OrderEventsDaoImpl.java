@@ -58,7 +58,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
     makeSaveCall(promise, query, event, tenantId);
-    LOGGER.info("save:: Saved Order AuditEvent with tenant id : {}", tenantId);
+    LOGGER.info("save:: Saved Order AuditEvent with order id : {}", event.getOrderId());
     return promise.future();
   }
 

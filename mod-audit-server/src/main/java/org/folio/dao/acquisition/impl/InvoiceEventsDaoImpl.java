@@ -56,7 +56,7 @@ public class InvoiceEventsDaoImpl implements InvoiceEventsDao {
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
     return makeSaveCall(query, event, tenantId)
-      .onSuccess(rows -> LOGGER.info("save:: Saved Invoice AuditEvent with tenant id : {}", tenantId))
+      .onSuccess(rows -> LOGGER.info("save:: Saved Invoice AuditEvent with invoice id : {}", event.getInvoiceId()))
       .onFailure(e -> LOGGER.error("Failed to save record with id: {} for invoice id: {} in to table {}",
         event.getId(), event.getInvoiceId(), TABLE_NAME, e));
   }
