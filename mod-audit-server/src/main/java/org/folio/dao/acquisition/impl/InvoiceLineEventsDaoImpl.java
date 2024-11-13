@@ -53,14 +53,14 @@ public class InvoiceLineEventsDaoImpl implements InvoiceLineEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving InvoiceLine AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(InvoiceLineAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving InvoiceLine AuditEvent with invoice line id: {}", event.getInvoiceLineId());
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    return makeSaveCall(query, invoiceLineAuditEvent, tenantId)
+    return makeSaveCall(query, event, tenantId)
       .onSuccess(rows -> LOGGER.info("save:: Saved InvoiceLine AuditEvent with tenant id : {}", tenantId))
       .onFailure(e -> LOGGER.error("Failed to save record with id: {} for invoice line id: {} in to table {}",
-        invoiceLineAuditEvent.getId(), invoiceLineAuditEvent.getInvoiceLineId(), TABLE_NAME, e));
+        event.getId(), event.getInvoiceLineId(), TABLE_NAME, e));
   }
 
   @Override

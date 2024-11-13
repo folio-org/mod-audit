@@ -1,6 +1,7 @@
 package org.folio.verticle.acquisition.consumers;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
@@ -30,20 +31,25 @@ public class OrganizationEventsHandler implements AsyncRecordHandler<String, Str
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
+    var result = Promise.<String>promise();
     var kafkaHeaders = kafkaConsumerRecord.headers();
     var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
     var event = new JsonObject(kafkaConsumerRecord.value()).mapTo(OrganizationAuditEvent.class);
     LOGGER.info("handle:: Starting processing of Organization audit event with id: {} for organization id: {}", event.getId(), event.getOrganizationId());
-
-    return organizationAuditEventsService.saveOrganizationAuditEvent(event, okapiConnectionParams.getTenantId())
-      .onSuccess(ar -> LOGGER.info("handle:: Organization audit event with id: {} has been processed for organization id: {}", event.getId(), event.getOrganizationId()))
+    organizationAuditEventsService.saveOrganizationAuditEvent(event, okapiConnectionParams.getTenantId())
+      .onSuccess(ar -> {
+        LOGGER.info("handle:: Organization audit event with id: {} has been processed for organization id: {}", event.getId(), event.getOrganizationId());
+        result.complete(event.getId());
+      })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
           LOGGER.info("handle:: Duplicate Organization audit event with id: {} for organization id: {} received, skipped processing", event.getId(), event.getOrganizationId());
+          result.complete(event.getId());
         } else {
           LOGGER.error("Processing of Organization audit event with id: {} for organization id: {} has been failed", event.getId(), event.getOrganizationId(), e);
+          result.fail(e);
         }
-      })
-      .map(event.getId());
+      });
+    return result.future();
   }
 }

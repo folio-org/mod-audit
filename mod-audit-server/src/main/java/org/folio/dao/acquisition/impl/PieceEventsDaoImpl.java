@@ -66,16 +66,13 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(PieceAuditEvent pieceAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Trying to save Piece AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(PieceAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Trying to save Piece AuditEvent with piece id : {}", event.getPieceId());
     Promise<RowSet<Row>> promise = Promise.promise();
-
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-
-    makeSaveCall(promise, query, pieceAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", pieceAuditEvent.getPieceId(), tenantId);
+    makeSaveCall(promise, query, event, tenantId);
+    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", event.getPieceId(), tenantId);
     return promise.future();
   }
 
@@ -158,5 +155,4 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
   }
-
 }

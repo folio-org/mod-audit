@@ -54,13 +54,12 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving OrderLine AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(OrderLineAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving OrderLine AuditEvent with order line id : {}", event.getOrderLineId());
     Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, orderLineAuditEvent, tenantId);
+    makeSaveCall(promise, query, event, tenantId);
     LOGGER.info("save:: Saved OrderLine AuditEvent with tenant id : {}", tenantId);
     return promise.future();
   }

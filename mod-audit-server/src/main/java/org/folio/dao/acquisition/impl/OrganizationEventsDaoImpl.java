@@ -51,14 +51,14 @@ public class OrganizationEventsDaoImpl implements OrganizationEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(OrganizationAuditEvent organizationAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving Organization AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(OrganizationAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving Organization AuditEvent with organization id : {}", event.getOrganizationId());
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    return makeSaveCall(query, organizationAuditEvent, tenantId)
+    return makeSaveCall(query, event, tenantId)
       .onSuccess(rows -> LOGGER.info("save:: Saved Organization AuditEvent with tenant id : {}", tenantId))
       .onFailure(e -> LOGGER.error("Failed to save record with id: {} for organization id: {} in to table {}",
-        organizationAuditEvent.getId(), organizationAuditEvent.getOrganizationId(), TABLE_NAME, e));
+        event.getId(), event.getOrganizationId(), TABLE_NAME, e));
   }
 
   @Override

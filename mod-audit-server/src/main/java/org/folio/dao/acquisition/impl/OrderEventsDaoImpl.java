@@ -52,13 +52,12 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(OrderAuditEvent orderAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving Order AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(OrderAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving Order AuditEvent with order id: {}", event.getOrderId());
     Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, orderAuditEvent, tenantId);
+    makeSaveCall(promise, query, event, tenantId);
     LOGGER.info("save:: Saved Order AuditEvent with tenant id : {}", tenantId);
     return promise.future();
   }
@@ -125,5 +124,4 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withOrderSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
   }
-
 }

@@ -1,6 +1,7 @@
 package org.folio.verticle.acquisition.consumers;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
@@ -30,20 +31,25 @@ public class PieceEventsHandler implements AsyncRecordHandler<String, String> {
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
+    var result = Promise.<String>promise();
     var kafkaHeaders = kafkaConsumerRecord.headers();
     var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
     var event = new JsonObject(kafkaConsumerRecord.value()).mapTo(PieceAuditEvent.class);
     LOGGER.info("handle:: Starting processing of Piece audit event with id: {} for piece id: {}", event.getId(), event.getPieceId());
-
-    return pieceAuditEventsService.savePieceAuditEvent(event, okapiConnectionParams.getTenantId())
-      .onSuccess(ar -> LOGGER.info("handle:: Piece audit event with id: {} has been processed for piece id: {}", event.getId(), event.getPieceId()))
+    pieceAuditEventsService.savePieceAuditEvent(event, okapiConnectionParams.getTenantId())
+      .onSuccess(ar -> {
+        LOGGER.info("handle:: Piece audit event with id: {} has been processed for piece id: {}", event.getId(), event.getPieceId());
+        result.complete(event.getId());
+      })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
           LOGGER.info("handle:: Duplicate Piece audit event with id: {} for piece id: {} received, skipped processing", event.getId(), event.getPieceId());
+          result.complete(event.getId());
         } else {
           LOGGER.error("Processing of Piece audit event with id: {} for piece id: {} has been failed", event.getId(), event.getPieceId(), e);
+          result.fail(e);
         }
-      })
-      .map(event.getId());
+      });
+    return result.future();
   }
 }
