@@ -22,10 +22,10 @@ public interface InvoiceAuditEventsService {
    *
    * @param invoiceId   invoice id
    * @param sortBy    sort by
-   * @param sortInvoice sort invoice
+   * @param sortOrder sort order
    * @param limit     limit
    * @param offset    offset
    * @return future with InvoiceAuditEventCollection
    */
-  Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortInvoice, int limit, int offset, String tenantId);
+  Future<InvoiceAuditEventCollection> getAuditEventsByInvoiceId(String invoiceId, String sortBy, String sortOrder, int limit, int offset, String tenantId);
 }

@@ -18,6 +18,8 @@ public class AuditEventDBConstants {
 
   public static final String INVOICE_LINE_ID_FIELD = "invoice_line_id";
 
+  public static final String ORGANIZATION_ID_FIELD = "organization_id";
+
   public static final String USER_ID_FIELD = "user_id";
 
   public static final String EVENT_DATE_FIELD = "event_date";
