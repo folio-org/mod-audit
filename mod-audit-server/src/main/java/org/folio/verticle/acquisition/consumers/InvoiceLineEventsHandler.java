@@ -5,7 +5,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
-import io.vertx.kafka.client.producer.KafkaHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
@@ -15,8 +14,6 @@ import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.acquisition.InvoiceLineAuditEventsService;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class InvoiceLineEventsHandler implements AsyncRecordHandler<String, String> {
@@ -34,13 +31,11 @@ public class InvoiceLineEventsHandler implements AsyncRecordHandler<String, Stri
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    Promise<String> result = Promise.promise();
-    List<KafkaHeader> kafkaHeaders = kafkaConsumerRecord.headers();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
-    InvoiceLineAuditEvent event = new JsonObject(kafkaConsumerRecord.value()).mapTo(InvoiceLineAuditEvent.class);
-    LOGGER.info("handle:: Starting processing of Invoice Line audit event with id: {} for invoice line id: {}",
-      event.getId(), event.getInvoiceLineId());
-
+    var result = Promise.<String>promise();
+    var kafkaHeaders = kafkaConsumerRecord.headers();
+    var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
+    var event = new JsonObject(kafkaConsumerRecord.value()).mapTo(InvoiceLineAuditEvent.class);
+    LOGGER.info("handle:: Starting processing of Invoice Line audit event with id: {} for invoice line id: {}", event.getId(), event.getInvoiceLineId());
     invoiceLineAuditEventsService.saveInvoiceLineAuditEvent(event, okapiConnectionParams.getTenantId())
       .onSuccess(ar -> {
         LOGGER.info("handle:: Invoice Line audit event with id: {} has been processed for invoice line id: {}",
@@ -56,7 +51,6 @@ public class InvoiceLineEventsHandler implements AsyncRecordHandler<String, Stri
           result.fail(e);
         }
       });
-
     return result.future();
   }
 }

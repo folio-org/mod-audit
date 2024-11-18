@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class OrderEventConsumersVerticle extends AbstractConsumersVerticle {
+public class OrganizationEventConsumersVerticle extends AbstractConsumersVerticle {
 
   @Autowired
-  private AsyncRecordHandler<String, String> orderEventsHandler;
+  private AsyncRecordHandler<String, String> organizationEventsHandler;
 
   @Override
   public List<String> getEvents() {
-    return List.of(AcquisitionEventType.ACQ_ORDER_CHANGED.getTopicName());
+    return List.of(AcquisitionEventType.ACQ_ORGANIZATION_CHANGED.getTopicName());
   }
 
   @Override
   public AsyncRecordHandler<String, String> getHandler() {
-    return orderEventsHandler;
+    return organizationEventsHandler;
   }
 }

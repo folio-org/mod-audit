@@ -5,7 +5,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
-import io.vertx.kafka.client.producer.KafkaHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
@@ -14,35 +13,30 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.acquisition.OrderLineAuditEventsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class OrderLineEventsHandler implements AsyncRecordHandler<String, String> {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private OrderLineAuditEventsService orderLineAuditEventsService;
+  private final OrderLineAuditEventsService orderLineAuditEventsService;
+  private final Vertx vertx;
 
-  private Vertx vertx;
-
-  public OrderLineEventsHandler(@Autowired Vertx vertx,
-                            @Autowired OrderLineAuditEventsService orderLineAuditEventsService) {
+  public OrderLineEventsHandler(Vertx vertx,
+                                OrderLineAuditEventsService orderLineAuditEventsService) {
     this.vertx = vertx;
     this.orderLineAuditEventsService = orderLineAuditEventsService;
   }
 
   @Override
-  public Future<String> handle(KafkaConsumerRecord<String, String> record) {
-    Promise<String> result = Promise.promise();
-    List<KafkaHeader> kafkaHeaders = record.headers();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
-    OrderLineAuditEvent event = new JsonObject(record.value()).mapTo(OrderLineAuditEvent.class);
+  public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
+    var result = Promise.<String>promise();
+    var kafkaHeaders = kafkaConsumerRecord.headers();
+    var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
+    var event = new JsonObject(kafkaConsumerRecord.value()).mapTo(OrderLineAuditEvent.class);
     LOGGER.info("handle:: Starting processing of Order Line audit event with id: {} for order id: {} and order line id: {}",
       event.getId(), event.getOrderId(), event.getOrderLineId());
-
     orderLineAuditEventsService.saveOrderLineAuditEvent(event, okapiConnectionParams.getTenantId())
       .onSuccess(ar -> {
         LOGGER.info("handle:: Order Line audit event with id: {} has been processed for order id: {} and order line id: {}",
@@ -60,7 +54,6 @@ public class OrderLineEventsHandler implements AsyncRecordHandler<String, String
           result.fail(e);
         }
       });
-
     return result.future();
   }
 }
