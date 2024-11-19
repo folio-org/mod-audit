@@ -52,14 +52,13 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(OrderAuditEvent orderAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving Order AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(OrderAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving Order AuditEvent with order id: {}", event.getOrderId());
     Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, orderAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Order AuditEvent with tenant id : {}", tenantId);
+    makeSaveCall(promise, query, event, tenantId);
+    LOGGER.info("save:: Saved Order AuditEvent with order id : {}", event.getOrderId());
     return promise.future();
   }
 
@@ -78,8 +77,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with order id : {}", orderId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfOrderEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfOrderEvent);
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderAuditEvent orderAuditEvent, String tenantId) {
@@ -102,6 +100,9 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
 
   private OrderAuditEventCollection mapRowToListOfOrderEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Order Events");
+    if (rowSet.rowCount() == 0) {
+      return new OrderAuditEventCollection().withTotalItems(0);
+    }
     OrderAuditEventCollection orderAuditEventCollection = new OrderAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderAuditEventCollection.getOrderAuditEvents().add(mapRowToOrderEvent(row));
@@ -123,5 +124,4 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       .withActionDate(Date.from(row.getLocalDateTime(ACTION_DATE_FIELD).toInstant(ZoneOffset.UTC)))
       .withOrderSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
   }
-
 }
