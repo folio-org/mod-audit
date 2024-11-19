@@ -1,3 +1,8 @@
+## 2.10.1 2024-11-19
+
+* [MODAUD-199](https://folio-org.atlassian.net/browse/MODAUD-199) - Make pubsub permission changes.
+
+
 ## 2.10.0 2024-10-30
 
 * [MODAUD-185](https://folio-org.atlassian.net/browse/MODAUD-185) - Unpin jackson fixing Number Parse DoS (PRISMA-2023-0067)
