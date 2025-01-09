@@ -321,7 +321,8 @@ public abstract class LogRecordBuilder {
       LOGGER.warn("Error calling {} with code {}, response body: {}", endpoint, code, body);
       return null;
     }
-    LOGGER.info("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.debug("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.info("verifyAndExtractBody:: Verifying and Extracting Body completed");
     return response.getBody();
   }
 
