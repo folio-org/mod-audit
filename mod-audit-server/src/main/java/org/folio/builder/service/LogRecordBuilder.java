@@ -93,7 +93,7 @@ public abstract class LogRecordBuilder {
     HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
     try {
-      LOGGER.info("handleGetRequest::Calling GET {}", endpoint);
+      LOGGER.debug("handleGetRequest::Calling GET {}", endpoint);
       httpClient.request(HttpMethod.GET, endpoint, okapiHeaders)
         .whenComplete((response, throwable) -> {
           if (Objects.nonNull(throwable)) {
@@ -115,7 +115,7 @@ public abstract class LogRecordBuilder {
   public <T> CompletableFuture<T> getEntitiesByQuery(String url, Class<T> collection, int limit, int offset, String query) {
     LOGGER.debug("getEntitiesByQuery:: Getting Entities By Query : {}", query);
     String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
-    LOGGER.info("getEntitiesByQuery:: Entities successfully retrieved from endpoint: {}", endpoint);
+    LOGGER.debug("getEntitiesByQuery:: Entities successfully retrieved from endpoint: {}", endpoint);
     return handleGetRequest(endpoint).thenApply(response -> response.mapTo(collection));
   }
 
@@ -159,7 +159,7 @@ public abstract class LogRecordBuilder {
           .stream()
           .findFirst()
           .ifPresent(user -> updatePayload(payload, userId, user));
-        LOGGER.info("fetchUserDetails:: Fetched user details for user Id : {}", userId);
+        LOGGER.debug("fetchUserDetails:: Fetched user details for user Id : {}", userId);
         return CompletableFuture.completedFuture(payload);
       });
   }
@@ -168,7 +168,7 @@ public abstract class LogRecordBuilder {
     LOGGER.debug("updatePayload:: Updating payload with details for user ID {}", userId);
     if (nonNull(user)) {
       if (userId.equals(getProperty(payload, USER_ID))) {
-        LOGGER.info("updatePayload:: Updating user id to payload because user id : {} matched with user id from payload", userId);
+        LOGGER.debug("updatePayload:: Updating user id to payload because user id : {} matched with user id from payload", userId);
         payload.put(USER_BARCODE.value(), user.getBarcode());
       }
       fetchUserPersonal(payload, user);
@@ -244,7 +244,7 @@ public abstract class LogRecordBuilder {
   private String encodeQuery(String query) {
     LOGGER.debug("encodeQuery:: Encoding Query : {}", query );
     try {
-      LOGGER.info("Encoded query");
+      LOGGER.debug("Encoded query");
       return URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {
       LOGGER.warn("Error happened while attempting to encode '{}'", query);
@@ -273,7 +273,7 @@ public abstract class LogRecordBuilder {
   private String convertIdsToCqlQuery(String fieldName, boolean strictMatch, String... values) {
     LOGGER.debug("convertIdsToCqlQuery:: Converting Ids To CqlQuery with field name : {}", fieldName);
     String prefix = fieldName + (strictMatch ? "==(" : "=(");
-    LOGGER.info("Converted IDs to CQL query");
+    LOGGER.debug("Converted IDs to CQL query");
     return StreamEx.of(values)
       .joining(" or ", prefix, ")");
   }
@@ -283,10 +283,10 @@ public abstract class LogRecordBuilder {
     if (nonNull(itemJson)) {
       ofNullable(getProperty(itemJson, BARCODE))
         .ifPresent(barcode -> payload.put(ITEM_BARCODE.value(), barcode));
-      LOGGER.info("addItemData:: Added item barcode");
+      LOGGER.debug("addItemData:: Added item barcode");
       ofNullable(getProperty(itemJson, HOLDINGS_RECORD_ID))
         .ifPresent(holdingsRecordId -> payload.put(HOLDINGS_RECORD_ID.value(), holdingsRecordId));
-      LOGGER.info("addItemData:: Added holdings record ID");
+      LOGGER.debug("addItemData:: Added holdings record ID");
     }
     LOGGER.info("addItemData:: Added Item Data");
     return completedFuture(payload);
@@ -321,14 +321,15 @@ public abstract class LogRecordBuilder {
       LOGGER.warn("Error calling {} with code {}, response body: {}", endpoint, code, body);
       return null;
     }
-    LOGGER.info("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.debug("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.info("verifyAndExtractBody:: Verifying and Extracting Body completed");
     return response.getBody();
   }
 
   protected LogRecord.Action resolveAction(String actionString) {
     LOGGER.debug("resolveAction:: Resolving Action");
     try {
-      LOGGER.info("resolveAction:: Trying to Resolve Action with action String : {}", actionString);
+      LOGGER.debug("resolveAction:: Trying to Resolve Action with action String : {}", actionString);
       return LogRecord.Action.fromValue(actionString);
     } catch (IllegalArgumentException e) {
       String errorMessage = "Builder isn't implemented yet for: " + actionString;
@@ -343,16 +344,16 @@ public abstract class LogRecordBuilder {
   String buildPersonalName(String firstName, String lastName) {
     LOGGER.debug("buildPersonalName:: Building Personal Name with firstname : {} and lastname : {}", firstName, lastName);
     if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
-      LOGGER.info("buildPersonalName:: Built Personal Name with firstname : {} and lastname : {}", firstName, lastName);
+      LOGGER.debug("buildPersonalName:: Built Personal Name with firstname : {} and lastname : {}", firstName, lastName);
       return lastName + ", " + firstName;
     } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
-      LOGGER.info("buildPersonalName:: Built Personal Name with lastname : {}", lastName);
+      LOGGER.debug("buildPersonalName:: Built Personal Name with lastname : {}", lastName);
       return lastName;
     } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
-      LOGGER.info("buildPersonalName:: Built Personal Name with firstname : {}", firstName);
+      LOGGER.debug("buildPersonalName:: Built Personal Name with firstname : {}", firstName);
       return firstName;
     } else {
-      LOGGER.info("buildPersonalName:: Error building personal name because there is no firstname and lastname");
+      LOGGER.debug("buildPersonalName:: Error building personal name because there is no firstname and lastname");
       return null;
     }
   }
