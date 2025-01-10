@@ -44,5 +44,4 @@ public class PieceAuditEventsServiceImpl implements PieceAuditEventsService {
     LOGGER.debug("getAuditEventsByOrderId:: Retrieving audit events with unique status changes for pieceId={} and tenantId={}", pieceId, tenantId);
     return pieceEventsDao.getAuditEventsWithStatusChangesByPieceId(pieceId, sortBy, sortOrder, limit, offset, tenantId);
   }
-
 }

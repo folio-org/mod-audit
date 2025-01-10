@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of organizationAuditEvents",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "organizationAuditEvents": {
+      "description": "List of organizationAuditEvents",
+      "type": "array",
+      "id": "organizationAuditEventsList",
+      "items": {
+        "type": "object",
+        "$ref": "organization_audit_event.json"
+      }
+    },
+    "totalItems": {
+      "description": "total records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "organizationAuditEvents",
+    "totalItems"
+  ]
+}

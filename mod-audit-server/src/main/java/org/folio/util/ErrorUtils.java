@@ -12,6 +12,7 @@ import org.folio.rest.jaxrs.model.Errors;
 import java.util.Collections;
 
 public class ErrorUtils {
+
   private ErrorUtils(){
   }
 
@@ -26,7 +27,7 @@ public class ErrorUtils {
   }
 
   public static <T> Future<T> handleFailures(Throwable throwable, String id) {
-    return (throwable instanceof PgException pgException && pgException.getCode().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
+    return (throwable instanceof PgException pgException && pgException.getSqlState().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
       Future.failedFuture(new DuplicateEventException(String.format("Event with id=%s is already processed.", id))) :
       Future.failedFuture(throwable);
   }

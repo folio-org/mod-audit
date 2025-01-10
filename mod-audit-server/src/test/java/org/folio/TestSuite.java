@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import io.restassured.RestAssured;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
@@ -23,6 +24,8 @@ import org.folio.builder.service.LogRecordBuilderResolverTest;
 import org.folio.builder.service.ManualBlockRecordBuilderTest;
 import org.folio.builder.service.NoticeRecordBuilderTest;
 import org.folio.builder.service.RequestRecordBuilderTest;
+import org.folio.dao.InvoiceEventsDaoTest;
+import org.folio.dao.InvoiceLineEventsDaoTest;
 import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
 import org.folio.dao.PieceEventsDaoTest;
@@ -32,10 +35,14 @@ import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.InvoiceEventsHandlerMockTest;
+import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
 import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
 import org.folio.rest.impl.PieceEventsHandlerMockTest;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.InvoiceAuditEventsServiceTest;
+import org.folio.services.InvoiceLineAuditEventsServiceTest;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
@@ -66,7 +73,7 @@ public class TestSuite {
     DeploymentOptions options = new DeploymentOptions();
 
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
-    options.setWorker(true);
+    options.setThreadingModel(ThreadingModel.WORKER);
 
     startKafkaMockServer();
     String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
@@ -192,6 +199,30 @@ public class TestSuite {
 
   @Nested
   class PieceEventsHandlerMockNestedTest extends PieceEventsHandlerMockTest {
+  }
+
+  @Nested
+  class InvoiceEventsHandlerMockNestedTest extends InvoiceEventsHandlerMockTest {
+  }
+
+  @Nested
+  class InvoiceAuditEventsServiceNestedTest extends InvoiceAuditEventsServiceTest {
+  }
+
+  @Nested
+  class InvoiceEventsDaoNestedTest extends InvoiceEventsDaoTest {
+  }
+
+  @Nested
+  class InvoiceLineEventsHandlerMockNestedTest extends InvoiceLineEventsHandlerMockTest {
+  }
+
+  @Nested
+  class InvoiceLineAuditEventsServiceNestedTest extends InvoiceLineAuditEventsServiceTest {
+  }
+
+  @Nested
+  class InvoiceLineEventsDaoNestedTest extends InvoiceLineEventsDaoTest {
   }
 
   @Nested

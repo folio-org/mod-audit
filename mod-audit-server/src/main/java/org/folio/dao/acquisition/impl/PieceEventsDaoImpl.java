@@ -66,16 +66,13 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(PieceAuditEvent pieceAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Trying to save Piece AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(PieceAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Trying to save Piece AuditEvent with piece id : {}", event.getPieceId());
     Promise<RowSet<Row>> promise = Promise.promise();
-
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-
-    makeSaveCall(promise, query, pieceAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", pieceAuditEvent.getPieceId(), tenantId);
+    makeSaveCall(promise, query, event, tenantId);
+    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", event.getPieceId(), tenantId);
     return promise.future();
   }
 
@@ -94,9 +91,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ?
-      new PieceAuditEventCollection().withTotalItems(0) :
-      mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   @Override
@@ -114,12 +109,14 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new PieceAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   private PieceAuditEventCollection mapRowToListOfPieceEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Piece Events");
+    if (rowSet.rowCount() == 0) {
+      return new PieceAuditEventCollection().withTotalItems(0);
+    }
     PieceAuditEventCollection pieceAuditEventCollection = new PieceAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));
@@ -158,5 +155,4 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
   }
-
 }
