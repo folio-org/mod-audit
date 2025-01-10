@@ -1,3 +1,7 @@
+## 2.10.2 2025-01-10
+
+* [MODAUD-216](https://folio-org.atlassian.net/browse/MODAUD-199) - Remove PII from mod-audit logs
+
 ## 2.10.1 2024-11-19
 
 * [MODAUD-199](https://folio-org.atlassian.net/browse/MODAUD-199) - Make pubsub permission changes.
