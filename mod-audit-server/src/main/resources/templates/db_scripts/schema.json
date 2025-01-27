@@ -94,6 +94,11 @@
       "run": "after",
       "snippetPath": "acquisition/create_acquisition_organization_log_table.sql",
       "fromModuleVersion": "mod-audit-3.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "inventory/create_inventory_instance_log_table.sql",
+      "fromModuleVersion": "mod-audit-3.0.0"
     }
   ]
 }

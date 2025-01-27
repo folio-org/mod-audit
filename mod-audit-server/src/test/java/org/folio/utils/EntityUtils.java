@@ -1,15 +1,21 @@
 package org.folio.utils;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
 import io.vertx.core.json.JsonObject;
+import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OrganizationAuditEvent;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.util.inventory.InventoryEvent;
+import org.folio.util.inventory.InventoryEventType;
+import org.folio.util.inventory.InventoryResourceType;
 
 public class EntityUtils {
 
@@ -172,5 +178,26 @@ public class EntityUtils {
       .withEventDate(new Date())
       .withActionDate(new Date())
       .withOrganizationSnapshot("Test");
+  }
+
+  public static InventoryAuditEntity createInventoryAuditEntity() {
+    var diff = new JsonObject();
+    diff.put("id", "some id");
+
+    return new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(), "origin",
+      "action", UUID.randomUUID(), diff);
+  }
+
+  public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type, InventoryResourceType resourceType) {
+    return InventoryEvent.builder()
+      .entityId(UUID.randomUUID().toString())
+      .eventId(eventId)
+      .tenant(TENANT_ID)
+      .type(type)
+      .resourceType(resourceType)
+      .eventTs(System.currentTimeMillis())
+      .newValue(new JsonObject().put("key", "newValue"))
+      .oldValue(new JsonObject().put("key", "oldValue"))
+      .build();
   }
 }
