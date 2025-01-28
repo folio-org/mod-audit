@@ -60,6 +60,10 @@ public class InventoryUtils {
     return currentValue;
   }
 
+  public static String formatInventoryTopicPattern(String env, InventoryKafkaEvent eventType) {
+    return "(%s\\.)(.*\\.)%s".formatted(env, eventType.getTopicPattern());
+  }
+
   @SuppressWarnings("unchecked")
   private static Object getFieldValueByPath(String pathValue, Object value) {
     if (value instanceof Map) {

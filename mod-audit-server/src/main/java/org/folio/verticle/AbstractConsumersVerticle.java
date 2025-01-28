@@ -32,10 +32,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
     List<Future<Void>> futures = new ArrayList<>();
 
     getEvents().forEach(event -> {
-      SubscriptionDefinition subscriptionDefinition = KafkaTopicNameHelper
-        .createSubscriptionDefinition(kafkaConfig.getEnvId(),
-          KafkaTopicNameHelper.getDefaultNameSpace(),
-          event);
+      SubscriptionDefinition subscriptionDefinition = subscriptionDefinition(event, kafkaConfig);
       KafkaConsumerWrapper<String, String> consumerWrapper = KafkaConsumerWrapper.<String, String>builder()
         .context(context)
         .vertx(vertx)
@@ -50,6 +47,13 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
     });
 
     GenericCompositeFuture.all(futures).onComplete(ar -> startPromise.complete());
+  }
+
+  protected SubscriptionDefinition subscriptionDefinition(String event, KafkaConfig kafkaConfiguration) {
+    return KafkaTopicNameHelper
+      .createSubscriptionDefinition(kafkaConfiguration.getEnvId(),
+        KafkaTopicNameHelper.getDefaultNameSpace(),
+        event);
   }
 
   private String constructModuleName() {

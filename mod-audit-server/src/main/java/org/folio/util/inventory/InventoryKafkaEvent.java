@@ -5,7 +5,7 @@ public enum InventoryKafkaEvent {
   HOLDINGS("holdings-record"),
   ITEM("item");
 
-  private static final String TOPIC_GROUP = "inventory.";
+  private static final String TOPIC_GROUP = "inventory";
   private final String topicName;
 
   InventoryKafkaEvent(String value) {
@@ -13,6 +13,10 @@ public enum InventoryKafkaEvent {
   }
 
   public String getTopicName() {
-    return TOPIC_GROUP + topicName;
+    return TOPIC_GROUP + "." + topicName;
+  }
+
+  public String getTopicPattern() {
+    return TOPIC_GROUP + "\\." + topicName;
   }
 }

@@ -15,12 +15,12 @@ class KafkaUtilsTest {
   void testGetTopicName() {
     // Arrange
     var consumerRecord = mock(KafkaConsumerRecord.class);
-    when(consumerRecord.topic()).thenReturn("prefix1.prefix2.topicName");
+    when(consumerRecord.topic()).thenReturn("env.tenant.inventory.topic");
 
     // Act
     var topicName = KafkaUtils.getTopicName(consumerRecord);
 
     // Assert
-    assertEquals("topicName", topicName);
+    assertEquals("inventory.topic", topicName);
   }
 }
