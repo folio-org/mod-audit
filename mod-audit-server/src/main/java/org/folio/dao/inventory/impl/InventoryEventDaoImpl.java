@@ -37,7 +37,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
     LOGGER.debug("save:: Trying to save InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
       tenantId, event.eventId(), event.entityId());
     var promise = Promise.<RowSet<Row>>promise();
-    var table = formatDBTableName(tenantId, INVENTORY_AUDIT_TABLE.formatted(tableName()));
+    var table = formatDBTableName(tenantId, tableName());
     var query = format(INSERT_SQL, table);
     makeSaveCall(promise, query, event, tenantId);
     LOGGER.info("save:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
