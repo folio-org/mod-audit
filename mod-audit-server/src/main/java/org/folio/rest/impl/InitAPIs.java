@@ -117,7 +117,8 @@ public class InitAPIs implements InitAPI {
       pieceEventsConsumer.future(),
       invoiceEventsConsumer.future(),
       invoiceLineEventsConsumer.future(),
-      organizationsEventsConsumer.future()));
+      organizationsEventsConsumer.future(),
+      inventoryInstanceConsumer.future()));
   }
 
   private <T> void deployVerticle(Vertx vertx, VerticleFactory verticleFactory, Class<T> consumerClass,
