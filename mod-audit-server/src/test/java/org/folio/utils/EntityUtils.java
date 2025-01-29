@@ -1,11 +1,12 @@
 package org.folio.utils;
 
+import io.vertx.core.json.JsonObject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-
-import io.vertx.core.json.JsonObject;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
@@ -181,14 +182,15 @@ public class EntityUtils {
   }
 
   public static InventoryAuditEntity createInventoryAuditEntity() {
-    var diff = new JsonObject();
+    var diff = new HashMap<String, Object>();
     diff.put("id", "some id");
 
-    return new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(), "origin",
-      "action", UUID.randomUUID(), diff);
+    return new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(), "action",
+      UUID.randomUUID(), diff);
   }
 
-  public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type, InventoryResourceType resourceType) {
+  public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type,
+                                                    InventoryResourceType resourceType) {
     return InventoryEvent.builder()
       .entityId(UUID.randomUUID().toString())
       .eventId(eventId)
@@ -196,8 +198,8 @@ public class EntityUtils {
       .type(type)
       .resourceType(resourceType)
       .eventTs(System.currentTimeMillis())
-      .newValue(new JsonObject().put("key", "newValue"))
-      .oldValue(new JsonObject().put("key", "oldValue"))
+      .newValue(Map.of("key", "newValue"))
+      .oldValue(Map.of("key", "oldValue"))
       .build();
   }
 }

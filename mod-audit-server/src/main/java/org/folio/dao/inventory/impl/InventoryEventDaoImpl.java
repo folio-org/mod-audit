@@ -22,8 +22,8 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
   private static final String INVENTORY_AUDIT_TABLE = "%s_audit";
 
   private static final String INSERT_SQL = """
-    INSERT INTO %s (event_id, event_date, entity_id, origin, action, user_id, diff)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO %s (event_id, event_date, entity_id, action, user_id, diff)
+    VALUES ($1, $2, $3, $4, $5, $6)
     """;
 
   private final PostgresClientFactory pgClientFactory;
@@ -40,8 +40,6 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
     var table = formatDBTableName(tenantId, tableName());
     var query = format(INSERT_SQL, table);
     makeSaveCall(promise, query, event, tenantId);
-    LOGGER.info("save:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
-      tenantId, event.eventId(), event.entityId());
     return promise.future();
   }
 
@@ -55,11 +53,12 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(event.eventId(),
           LocalDateTime.ofInstant(event.eventDate().toInstant(),  ZoneId.systemDefault()),
           event.entityId(),
-          event.origin(),
           event.action(),
           event.userId(),
           JsonObject.mapFrom(event.diff())),
         promise);
+      LOGGER.info("save:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
+        tenantId, event.eventId(), event.entityId());
     } catch (Exception e) {
       LOGGER.error("Failed to save record with [eventId:{}, entityId:{}, tableName: {}]",
         event.eventId(), event.entityId(), tableName(), e);

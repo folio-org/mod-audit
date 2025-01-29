@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.HashMap;
 import org.folio.CopilotGenerated;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @CopilotGenerated
 class InventoryUtilsTest {
@@ -28,21 +30,25 @@ class InventoryUtilsTest {
   }
 
   @Test
-  void shouldExtractUserIdFromPayload() {
+  void shouldExtractUserIdFromEvent() {
+    var event = new InventoryEvent();
     var payload = new HashMap<String, Object>();
     var metadata = new HashMap<String, Object>();
     metadata.put("updatedByUserId", "user123");
     payload.put("metadata", metadata);
+    event.setNewValue(payload);
 
-    var userId = InventoryUtils.extractUserId(payload);
+    var userId = InventoryUtils.extractUserId(event);
     assertEquals("user123", userId);
   }
 
   @Test
-  void shouldReturnDefaultIdWhenUserIdNotPresent() {
+  void shouldReturnDefaultIdWhenUserIdNotPresentInEvent() {
+    var event = new InventoryEvent();
     var payload = new HashMap<String, Object>();
+    event.setNewValue(payload);
 
-    var userId = InventoryUtils.extractUserId(payload);
+    var userId = InventoryUtils.extractUserId(event);
     assertEquals(InventoryUtils.DEFAULT_ID, userId);
   }
 
@@ -74,5 +80,12 @@ class InventoryUtilsTest {
 
     var value = InventoryUtils.getMapValueByPath("metadata.createdByUserId", payload);
     assertNull(value);
+  }
+
+  @ParameterizedTest
+  @EnumSource(InventoryKafkaEvent.class)
+  void shouldFormatInventoryTopicPattern(InventoryKafkaEvent eventType) {
+    var pattern = InventoryUtils.formatInventoryTopicPattern("env", eventType);
+    assertEquals("(env\\.)(.*\\.)" + eventType.getTopicPattern(), pattern);
   }
 }

@@ -1,8 +1,6 @@
 package org.folio.verticle.inventory.consumers;
 
-import static org.folio.util.inventory.InventoryEventType.CREATE;
-import static org.folio.util.inventory.InventoryEventType.DELETE;
-import static org.folio.util.inventory.InventoryEventType.UPDATE;
+import static org.folio.util.inventory.InventoryEventType.UNKNOWN;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -47,9 +45,9 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
     var kafkaHeaders = kafkaConsumerRecord.headers();
     var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
     var event = constructInventoryEvent(kafkaConsumerRecord);
-    if (!isSupportedEvent(event)) {
-      LOGGER.debug("handle:: Event not supported [type: {}, eventId: {}, entityId: {}]",
-        event.getType(), event.getEventId(), event.getEntityId());
+    if (UNKNOWN == event.getType()) {
+      LOGGER.debug("handle:: Event type not supported [eventId: {}, entityId: {}]",
+        event.getEventId(), event.getEntityId());
       result.complete(event.getEventId());
       return result.future();
     }
@@ -81,9 +79,5 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
     event.setEntityId(entityId);
     event.setResourceType(resourceType);
     return event;
-  }
-
-  private boolean isSupportedEvent(InventoryEvent event) {
-    return CREATE == event.getType() || UPDATE == event.getType() || DELETE == event.getType();
   }
 }

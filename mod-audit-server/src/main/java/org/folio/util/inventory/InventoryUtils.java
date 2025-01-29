@@ -23,7 +23,8 @@ public class InventoryUtils {
       .orElse(DEFAULT_ID);
   }
 
-  public static String extractUserId(Map<String, Object> payload) {
+  public static String extractUserId(InventoryEvent event) {
+    var payload = getEventPayload(event);
     var value = Optional.ofNullable(getMapValueByPath(UPDATED_BY_USER_ID_PATH, payload))
       .or(() -> Optional.ofNullable(getMapValueByPath(CREATED_BY_USER_ID_PATH, payload)))
       .orElse(DEFAULT_ID);
@@ -33,8 +34,8 @@ public class InventoryUtils {
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getEventPayload(InventoryEvent event) {
     return event.getNewValue() != null
-      ? (Map<String, Object>) event.getNewValue()
-      : (Map<String, Object>) event.getOldValue();
+      ? event.getNewValue()
+      : event.getOldValue();
   }
 
   /**

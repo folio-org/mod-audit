@@ -1,9 +1,7 @@
 package org.folio.services.inventory.impl;
 
 import static org.folio.util.ErrorUtils.handleFailures;
-import static org.folio.util.inventory.InventoryUtils.extractEntityIdFromPayload;
 import static org.folio.util.inventory.InventoryUtils.extractUserId;
-import static org.folio.util.inventory.InventoryUtils.getEventPayload;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
@@ -57,24 +55,14 @@ public class InventoryEventServiceImpl implements InventoryEventService {
   }
 
   private InventoryAuditEntity mapToEntity(InventoryEvent event) {
-    var entityId = event.getEntityId();
-    var payload = getEventPayload(event);
-    if (event.getResourceType().equals(InventoryResourceType.HOLDINGS)
-      || event.getResourceType().equals(InventoryResourceType.ITEM)) {
-      entityId = extractEntityIdFromPayload(payload);
-    }
-    var userId = extractUserId(payload);
-
+    var userId = extractUserId(event);
     return new InventoryAuditEntity(
       UUID.fromString(event.getEventId()),
       new Timestamp(event.getEventTs()),
-      UUID.fromString(entityId),
-      "origin",
+      UUID.fromString(event.getEntityId()),
       event.getType().name(),
       UUID.fromString(userId),
       event.getNewValue() //todo: replace with appropriate diff
     );
   }
-
-
 }

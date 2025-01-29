@@ -91,7 +91,7 @@ public class InventoryEventHandlerMockTest {
 
   @Test
   void shouldHandleUnsupportedEvent() {
-    var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.REINDEX, InventoryResourceType.INSTANCE);
+    var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.UNKNOWN, InventoryResourceType.INSTANCE);
     var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
 
     var result = inventoryEventHandler.handle(kafkaConsumerRecord);

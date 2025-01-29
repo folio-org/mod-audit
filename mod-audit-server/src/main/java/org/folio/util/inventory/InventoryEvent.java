@@ -2,6 +2,7 @@ package org.folio.util.inventory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,7 @@ public class InventoryEvent {
   private Long eventTs;
 
   @JsonProperty("new")
-  private Object newValue;
+  private Map<String, Object> newValue;
   @JsonProperty("old")
-  private Object oldValue;
+  private Map<String, Object> oldValue;
 }

@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS instance_audit (
     event_id   uuid      NOT NULL,
     event_date timestamp NOT NULL,
     entity_id  uuid      NOT NULL,
-    origin     varchar   NOT NULL,
     action     varchar   NOT NULL,
     user_id    uuid      NOT NULL,
     diff       jsonb     NOT NULL,
