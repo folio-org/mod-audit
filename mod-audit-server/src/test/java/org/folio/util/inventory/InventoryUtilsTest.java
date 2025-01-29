@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.folio.CopilotGenerated;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +55,32 @@ class InventoryUtilsTest {
   }
 
   @Test
+  void shouldExtractUserIdWhenBothUpdatedAndCreatedByUserIdPresent() {
+    var event = new InventoryEvent();
+    var payload = new HashMap<String, Object>();
+    var metadata = new HashMap<String, Object>();
+    metadata.put("updatedByUserId", "user123");
+    metadata.put("createdByUserId", "user456");
+    payload.put("metadata", metadata);
+    event.setNewValue(payload);
+
+    var userId = InventoryUtils.extractUserId(event);
+    assertEquals("user123", userId);
+  }
+
+  @Test
+  void shouldReturnDefaultIdWhenNeitherUpdatedNorCreatedByUserIdPresent() {
+    var event = new InventoryEvent();
+    var payload = new HashMap<String, Object>();
+    var metadata = new HashMap<String, Object>();
+    payload.put("metadata", metadata);
+    event.setNewValue(payload);
+
+    var userId = InventoryUtils.extractUserId(event);
+    assertEquals(InventoryUtils.DEFAULT_ID, userId);
+  }
+
+  @Test
   void shouldGetEventPayload() {
     var event = new InventoryEvent();
     var newValue = new HashMap<String, Object>();
@@ -80,6 +108,21 @@ class InventoryUtilsTest {
 
     var value = InventoryUtils.getMapValueByPath("metadata.createdByUserId", payload);
     assertNull(value);
+  }
+
+  @Test
+  void shouldGetMapValueByPathWithNestedMapsAndLists() {
+    var payload = Map.<String, Object>of(
+      "metadata", Map.of(
+        "users", List.of(
+          Map.of("id", "user1"),
+          Map.of("id", "user2")
+        )
+      )
+    );
+
+    var value = InventoryUtils.getMapValueByPath("metadata.users.id", payload);
+    assertEquals(List.of("user1", "user2"), value);
   }
 
   @ParameterizedTest
