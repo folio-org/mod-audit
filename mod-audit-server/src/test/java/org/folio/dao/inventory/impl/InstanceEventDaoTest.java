@@ -18,7 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 @CopilotGenerated
-class InstanceEventDaoTest {
+public class InstanceEventDaoTest {
 
   @Spy
   PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());

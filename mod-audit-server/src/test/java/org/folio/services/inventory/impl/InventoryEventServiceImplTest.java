@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @CopilotGenerated
-class InventoryEventServiceImplTest {
+public class InventoryEventServiceImplTest {
 
   @Mock
   private RowSet<Row> rowSet;

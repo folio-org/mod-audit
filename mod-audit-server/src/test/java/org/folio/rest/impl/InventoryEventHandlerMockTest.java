@@ -35,7 +35,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 @CopilotGenerated
-class InventoryEventHandlerMockTest {
+public class InventoryEventHandlerMockTest {
 
   private static final String TENANT_ID = "diku";
   private static final String TOKEN = "token";

@@ -3,18 +3,17 @@ package org.folio;
 import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
 
+import io.restassured.RestAssured;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import io.restassured.RestAssured;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.ThreadingModel;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
@@ -29,12 +28,14 @@ import org.folio.dao.InvoiceLineEventsDaoTest;
 import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
 import org.folio.dao.PieceEventsDaoTest;
+import org.folio.dao.inventory.impl.InstanceEventDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
+import org.folio.rest.impl.InventoryEventHandlerMockTest;
 import org.folio.rest.impl.InvoiceEventsHandlerMockTest;
 import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
 import org.folio.rest.impl.OrderEventsHandlerMockTest;
@@ -46,6 +47,7 @@ import org.folio.services.InvoiceLineAuditEventsServiceTest;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
+import org.folio.services.inventory.impl.InventoryEventServiceImplTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -231,6 +233,18 @@ public class TestSuite {
 
   @Nested
   class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
+  }
+
+  @Nested
+  class InstanceEventDaoNestedTest extends InstanceEventDaoTest {
+  }
+
+  @Nested
+  class InventoryEventServiceImplNestedTest extends InventoryEventServiceImplTest {
+  }
+
+  @Nested
+  class InventoryEventHandlerMockNestedTest extends InventoryEventHandlerMockTest {
   }
 
 }
