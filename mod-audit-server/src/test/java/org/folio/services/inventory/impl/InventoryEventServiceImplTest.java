@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.folio.CopilotGenerated;
 import org.folio.dao.inventory.impl.HoldingsEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
+import org.folio.mapper.InventoryEventToEntityMapper;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
@@ -34,6 +35,8 @@ public class InventoryEventServiceImplTest {
   private InstanceEventDao instanceEventDao;
   @Mock
   private HoldingsEventDao holdingsEventDao;
+  @Mock
+  private InventoryEventToEntityMapper mapper;
 
   private InventoryEventService inventoryEventService;
 
@@ -43,7 +46,7 @@ public class InventoryEventServiceImplTest {
 
     doCallRealMethod().when(instanceEventDao).resourceType();
     doCallRealMethod().when(holdingsEventDao).resourceType();
-    inventoryEventService = new InventoryEventServiceImpl(List.of(instanceEventDao, holdingsEventDao));
+    inventoryEventService = new InventoryEventServiceImpl(mapper, List.of(instanceEventDao, holdingsEventDao));
   }
 
   @Test

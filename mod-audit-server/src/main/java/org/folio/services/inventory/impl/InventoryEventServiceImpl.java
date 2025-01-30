@@ -1,15 +1,12 @@
 package org.folio.services.inventory.impl;
 
 import static org.folio.util.ErrorUtils.handleFailures;
-import static org.folio.util.inventory.InventoryUtils.extractUserId;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -25,9 +22,12 @@ import org.springframework.stereotype.Service;
 public class InventoryEventServiceImpl implements InventoryEventService {
   private static final Logger LOGGER = LogManager.getLogger();
 
+  private final Function<InventoryEvent, InventoryAuditEntity> mapper;
   private final Map<InventoryResourceType, InventoryEventDao> inventoryEventDaos;
 
-  public InventoryEventServiceImpl(List<InventoryEventDao> inventoryEventDao) {
+  public InventoryEventServiceImpl(Function<InventoryEvent, InventoryAuditEntity> mapper,
+                                   List<InventoryEventDao> inventoryEventDao) {
+    this.mapper = mapper;
     this.inventoryEventDaos = inventoryEventDao.stream()
       .collect(Collectors.toMap(InventoryEventDao::resourceType, Function.identity()));
   }
@@ -45,24 +45,12 @@ public class InventoryEventServiceImpl implements InventoryEventService {
         new IllegalArgumentException("Could not find dao for resource type: " + inventoryEvent.getResourceType()));
     }
 
-    var entity = mapToEntity(inventoryEvent);
+    var entity = mapper.apply(inventoryEvent);
     return inventoryEventDao.save(entity, tenantId)
       .recover(throwable -> {
         LOGGER.error("saveEvent:: Could not save InventoryEvent for [tenantId: {}, eventId: {}, entityId: {}]",
           tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
         return handleFailures(throwable, inventoryEvent.getEventId());
       });
-  }
-
-  private InventoryAuditEntity mapToEntity(InventoryEvent event) {
-    var userId = extractUserId(event);
-    return new InventoryAuditEntity(
-      UUID.fromString(event.getEventId()),
-      new Timestamp(event.getEventTs()),
-      UUID.fromString(event.getEntityId()),
-      event.getType().name(),
-      UUID.fromString(userId),
-      event.getNewValue() //todo: replace with appropriate diff
-    );
   }
 }
