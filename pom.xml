@@ -161,6 +161,7 @@
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
           <includes>
+            <include>org/folio/util/**/*.class</include>
             <include>org/folio/TestSuite.class</include>
           </includes>
           <useSystemClassLoader>false</useSystemClassLoader>
