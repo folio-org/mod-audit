@@ -27,10 +27,11 @@ import org.folio.dao.InvoiceEventsDaoTest;
 import org.folio.dao.InvoiceLineEventsDaoTest;
 import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
+import org.folio.dao.OrganizationEventsDaoTest;
 import org.folio.dao.PieceEventsDaoTest;
-import org.folio.dao.inventory.impl.InstanceEventDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.impl.AuditConfigAPITest;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
@@ -46,6 +47,7 @@ import org.folio.services.InvoiceAuditEventsServiceTest;
 import org.folio.services.InvoiceLineAuditEventsServiceTest;
 import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
+import org.folio.services.OrganizationAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
 import org.folio.services.inventory.impl.InventoryEventServiceImplTest;
 import org.junit.jupiter.api.AfterAll;
@@ -188,7 +190,15 @@ public class TestSuite {
   }
 
   @Nested
+  class OrganizationAuditEventsServiceNestedTest extends OrganizationAuditEventsServiceTest {
+  }
+
+  @Nested
   class OrderLineEventsDaoNestedTest extends OrderLineEventsDaoTest {
+  }
+
+  @Nested
+  class OrganizationEventsDaoNestedTest extends OrganizationEventsDaoTest {
   }
 
   @Nested
@@ -236,15 +246,15 @@ public class TestSuite {
   }
 
   @Nested
-  class InstanceEventDaoNestedTest extends InstanceEventDaoTest {
-  }
-
-  @Nested
   class InventoryEventServiceImplNestedTest extends InventoryEventServiceImplTest {
   }
 
   @Nested
   class InventoryEventHandlerMockNestedTest extends InventoryEventHandlerMockTest {
+  }
+
+  @Nested
+  class AuditConfigAPINestedTest extends AuditConfigAPITest {
   }
 
 }

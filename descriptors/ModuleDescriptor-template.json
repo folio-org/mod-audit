@@ -234,6 +234,39 @@
       ]
     },
     {
+      "id": "audit-config",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit/config/groups",
+          "permissionsRequired": [
+            "audit.config.groups.collection.get"
+          ]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit/config/groups/{groupId}/settings",
+          "permissionsRequired": [
+            "audit.config.groups.settings.collection.get"
+          ],
+          "permissionsDesired": [
+            "audit.config.groups.settings.*.collection.get"
+          ]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/audit/config/groups/{groupId}/settings/{settingId}",
+          "permissionsRequired": [
+            "audit.config.groups.settings.item.put"
+          ],
+          "permissionsDesired": [
+            "audit.config.groups.settings.*.item.put"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -323,6 +356,41 @@
       "permissionName": "acquisition.organization.events.get",
       "displayName": "Acquisition organization events - get organization change events",
       "description": "Get organization change events"
+    },
+    {
+      "permissionName": "audit.config.groups.collection.get",
+      "displayName": "Audit Configuration - get settings groups",
+      "description": "Get settings groups"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.collection.get",
+      "displayName": "Audit Configuration - get settings for a group",
+      "description": "Get settings for a group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.collection.get",
+      "displayName": "Audit Configuration - get settings for a audit inventory group",
+      "description": "Get settings for a audit inventory group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.collection.get",
+      "displayName": "Audit Configuration - get settings for a audit authority group",
+      "description": "Get settings for a audit authority group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.item.put",
+      "displayName": "Audit Configuration - update setting for a group",
+      "description": "Update setting for a group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.item.put",
+      "displayName": "Audit Configuration - update setting for a audit inventory group",
+      "description": "Update setting for a audit inventory group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.item.put",
+      "displayName": "Audit Configuration - update setting for a audit authority group",
+      "description": "Update setting for a audit authority group"
     },
     {
       "permissionName": "audit.all",

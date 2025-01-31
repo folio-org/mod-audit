@@ -10,10 +10,12 @@ import java.util.UUID;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryUtils;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+@UnitTest
 class InventoryEventToEntityMapperTest {
 
   private InventoryEventToEntityMapper mapper;

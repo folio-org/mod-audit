@@ -1,0 +1,22 @@
+INSERT INTO setting (id, key, value, type, description, group_id, created_date, created_by, updated_date, updated_by)
+VALUES ('audit.inventory.records.page.size',
+        'records.page.size',
+        to_jsonb(10::integer),
+        'INTEGER',
+        'Number of records to display per page',
+        'audit.inventory',
+        now(),
+        '00000000-0000-0000-0000-000000000000',
+        now(),
+        '00000000-0000-0000-0000-000000000000'),
+       ('audit.authority.records.page.size',
+        'records.page.size',
+        to_jsonb(10::integer),
+        'INTEGER',
+        'Number of records to display per page',
+        'audit.authority',
+        now(),
+        '00000000-0000-0000-0000-000000000000',
+        now(),
+        '00000000-0000-0000-0000-000000000000')
+ON CONFLICT (id) DO NOTHING;

@@ -15,21 +15,25 @@ import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.acquisition.OrganizationAuditEventsService;
 import org.folio.services.acquisition.impl.OrganizationAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
+import org.folio.utils.UnitTest;
 import org.folio.verticle.acquisition.consumers.OrganizationEventsHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.utils.EntityUtils.createOrganizationAuditEvent;
 import static org.folio.utils.EntityUtils.createOrganizationAuditEventWithoutSnapshot;
 
+@UnitTest
+@ExtendWith(MockitoExtension.class)
 @CopilotGenerated(partiallyGenerated = true)
 public class OrganizationEventsHandlerMockTest {
 
@@ -55,7 +59,6 @@ public class OrganizationEventsHandlerMockTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
     organizationEventDao = new OrganizationEventsDaoImpl(postgresClientFactory);
     organizationAuditEventServiceImpl = new OrganizationAuditEventsServiceImpl(organizationEventDao);
     organizationEventsHandler = new OrganizationEventsHandler(vertx, organizationAuditEventServiceImpl);
