@@ -24,6 +24,7 @@ import org.folio.verticle.acquisition.OrganizationEventConsumersVerticle;
 import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
 import org.folio.verticle.inventory.HoldingsConsumersVerticle;
 import org.folio.verticle.inventory.InstanceConsumersVerticle;
+import org.folio.verticle.inventory.ItemConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -73,6 +74,12 @@ public class InitAPIs implements InitAPI {
   @Value("${inv.holdings.kafka.consumer.pool.size:5}")
   private int invHoldingsConsumerPoolSize;
 
+  @Value("${inv.item.kafka.consumer.instancesNumber:1}")
+  private int invItemConsumerInstancesNumber;
+  @Value("${inv.item.kafka.consumer.pool.size:5}")
+  private int invItemConsumerPoolSize;
+
+
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
     LOGGER.debug("init:: InitAPI starting...");
@@ -108,6 +115,7 @@ public class InitAPIs implements InitAPI {
     Promise<String> organizationsEventsConsumer = Promise.promise();
     Promise<String> inventoryInstanceConsumer = Promise.promise();
     Promise<String> inventoryHoldingsConsumer = Promise.promise();
+    Promise<String> inventoryItemConsumer = Promise.promise();
 
     deployVerticle(vertx, verticleFactory, OrderEventConsumersVerticle.class, acqOrderConsumerInstancesNumber, acqOrderConsumerPoolSize, orderEventsConsumer);
     deployVerticle(vertx, verticleFactory, OrderLineEventConsumersVerticle.class, acqOrderLineConsumerInstancesNumber, acqOrderLineConsumerPoolSize, orderLineEventsConsumer);
@@ -117,6 +125,7 @@ public class InitAPIs implements InitAPI {
     deployVerticle(vertx, verticleFactory, OrganizationEventConsumersVerticle.class, acqOrganizationConsumerInstancesNumber, acqOrganizationConsumerPoolSize, organizationsEventsConsumer);
     deployVerticle(vertx, verticleFactory, InstanceConsumersVerticle.class, invInstanceConsumerInstancesNumber, invInstanceConsumerPoolSize, inventoryInstanceConsumer);
     deployVerticle(vertx, verticleFactory, HoldingsConsumersVerticle.class, invHoldingsConsumerInstancesNumber, invHoldingsConsumerPoolSize, inventoryHoldingsConsumer);
+    deployVerticle(vertx, verticleFactory, ItemConsumersVerticle.class, invItemConsumerInstancesNumber, invItemConsumerPoolSize, inventoryItemConsumer);
 
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
@@ -127,14 +136,16 @@ public class InitAPIs implements InitAPI {
       invoiceLineEventsConsumer.future(),
       organizationsEventsConsumer.future(),
       inventoryInstanceConsumer.future(),
-      inventoryHoldingsConsumer.future()));
+      inventoryHoldingsConsumer.future(),
+      inventoryItemConsumer.future()
+    ));
   }
 
   private <T> void deployVerticle(Vertx vertx, VerticleFactory verticleFactory, Class<T> consumerClass,
-                                  int acqOrderConsumerInstancesNumber, int acqOrderConsumerPoolSize, Promise<String> orderEventsConsumer) {
+                                  int instancesNumber, int poolSize, Promise<String> eventsConsumer) {
     DeploymentOptions deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
-      .setInstances(acqOrderConsumerInstancesNumber).setWorkerPoolSize(acqOrderConsumerPoolSize);
-    vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions, orderEventsConsumer);
+      .setInstances(instancesNumber).setWorkerPoolSize(poolSize);
+    vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions, eventsConsumer);
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {
