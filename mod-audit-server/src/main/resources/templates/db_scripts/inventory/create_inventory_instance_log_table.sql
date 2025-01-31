@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS instance_audit (
     entity_id  uuid      NOT NULL,
     action     varchar   NOT NULL,
     user_id    uuid      NOT NULL,
-    diff       jsonb     NOT NULL,
+    diff       jsonb,
     PRIMARY KEY (event_id, event_date, entity_id)
 ) PARTITION BY HASH (entity_id);
 
