@@ -19,10 +19,7 @@ import static org.folio.util.LogEventPayloadField.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.folio.TestSuite;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -38,10 +35,7 @@ public class BuilderTestBase {
       noticeRecordBuilder, noticeErrorRecordBuilder, loanRecordBuilder, requestLogRecordBuilder;
 
   @BeforeAll
-  public static void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    if (!isInitialized) {
-      TestSuite.globalInitialize();
-    }
+  public static void setUp() {
     checkInRecordBuilder = new CheckInRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext());
     checkOutRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext(), CHECK_OUT_EVENT);
     checkOutThroughOverrideRecordBuilder = new CheckOutRecordBuilder(new HashMap<>(), TestSuite.getVertx().getOrCreateContext(), CHECK_OUT_THROUGH_OVERRIDE_EVENT);

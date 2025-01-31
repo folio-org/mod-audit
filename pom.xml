@@ -22,7 +22,7 @@
     <raml-module-builder.version>35.3.0</raml-module-builder.version>
     <vertx.version>4.5.10</vertx.version>
     <wiremock.version>2.25.1</wiremock.version>
-    <junit.jupiter.version>5.6.2</junit.jupiter.version>
+    <junit.jupiter.version>5.11.4</junit.jupiter.version>
     <rest-assured.version>5.5.0</rest-assured.version>
     <pubsub.client.version>2.13.0</pubsub.client.version>
     <streamx.version>0.7.3</streamx.version>

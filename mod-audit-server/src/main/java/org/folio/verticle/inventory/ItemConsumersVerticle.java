@@ -13,11 +13,11 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InstanceConsumersVerticle extends AbstractConsumersVerticle {
+public class ItemConsumersVerticle extends AbstractConsumersVerticle {
 
   private final ObjectFactory<InventoryEventHandler> recordHandlerProvider;
 
-  public InstanceConsumersVerticle(ObjectFactory<InventoryEventHandler> recordHandlerProvider) {
+  public ItemConsumersVerticle(ObjectFactory<InventoryEventHandler> recordHandlerProvider) {
     this.recordHandlerProvider = recordHandlerProvider;
   }
 
@@ -25,13 +25,13 @@ public class InstanceConsumersVerticle extends AbstractConsumersVerticle {
   protected SubscriptionDefinition subscriptionDefinition(String event, KafkaConfig kafkaConfig) {
     return SubscriptionDefinition.builder()
       .eventType(event)
-      .subscriptionPattern(formatInventoryTopicPattern(kafkaConfig.getEnvId(), InventoryKafkaEvent.INSTANCE))
+      .subscriptionPattern(formatInventoryTopicPattern(kafkaConfig.getEnvId(), InventoryKafkaEvent.ITEM))
       .build();
   }
 
   @Override
   public List<String> getEvents() {
-    return List.of(InventoryKafkaEvent.INSTANCE.getTopicName());
+    return List.of(InventoryKafkaEvent.ITEM.getTopicName());
   }
 
   @Override

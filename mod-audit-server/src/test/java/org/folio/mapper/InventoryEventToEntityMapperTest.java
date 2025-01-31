@@ -1,6 +1,7 @@
 package org.folio.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mockStatic;
 
 import java.sql.Timestamp;
@@ -63,7 +64,7 @@ class InventoryEventToEntityMapperTest {
       assertEquals(UUID.fromString(event.getEntityId()), result.entityId());
       assertEquals(InventoryEventType.DELETE.name(), result.action());
       assertEquals(UUID.fromString(InventoryUtils.extractUserId(event)), result.userId());
-      assertEquals(null, result.diff());
+      assertNull(result.diff());
     }
   }
 }
