@@ -1,0 +1,39 @@
+#%RAML 1.0
+
+title: Inventory Audit API
+baseUri: https://github.com/folio-org/mod-audit
+version: v1
+
+documentation:
+  - title: mod-audit API
+    content: API for retrieving events for inventory changes
+
+types:
+  errors: !include raml-util/schemas/errors.schema
+  inventory-audit-collection: !include inventory_audit_collection.json
+traits:
+  validate: !include raml-util/traits/validation.raml
+  seek: !include inventory/seek-by-date.raml
+
+/audit-data/inventory:
+  /instance/{entityId}:
+    get:
+      description: Get list of instance events
+      is: [
+        validate,
+        seek
+      ]
+      responses:
+        200:
+          body:
+            application/json:
+              type: inventory-audit-collection
+        500:
+          description: "Internal server error"
+          body:
+            application/json:
+              type: errors
+              example:
+                strict: false
+                value: !include raml-util/examples/errors.sample
+

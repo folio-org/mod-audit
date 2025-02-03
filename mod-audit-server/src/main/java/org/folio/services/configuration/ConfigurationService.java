@@ -53,6 +53,11 @@ public class ConfigurationService {
       .mapEmpty();
   }
 
+  public Future<Setting> getSetting(org.folio.services.configuration.Setting setting, String tenantId) {
+    return settingDao.getById(setting.getSettingId(), tenantId)
+      .map(settingMappers.getSettingMapper());
+  }
+
   private Future<Void> checkSettingGroup(String groupId, String tenantId) {
     return settingGroupDao.exists(groupId, tenantId)
       .compose(exists -> failSettingGroupIfNotExist(groupId, exists));
