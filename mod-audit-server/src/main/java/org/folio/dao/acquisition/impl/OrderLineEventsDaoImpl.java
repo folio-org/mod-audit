@@ -54,14 +54,13 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Saving OrderLine AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(OrderLineAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Saving OrderLine AuditEvent with order line id : {}", event.getOrderLineId());
     Promise<RowSet<Row>> promise = Promise.promise();
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, orderLineAuditEvent, tenantId);
-    LOGGER.info("save:: Saved OrderLine AuditEvent with tenant id : {}", tenantId);
+    makeSaveCall(promise, query, event, tenantId);
+    LOGGER.info("save:: Saved OrderLine AuditEvent with order line id : {}", event.getOrderLineId());
     return promise.future();
   }
 
@@ -81,8 +80,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
     }
 
     LOGGER.info("getAuditEventsByOrderLineId:: Retrieved AuditEvent with order line id : {}", orderLineId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new OrderLineAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfOrderLineEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfOrderLineEvent);
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
@@ -105,6 +103,9 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
 
   private OrderLineAuditEventCollection mapRowToListOfOrderLineEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderLineEvent:: Mapping row to List of Order Line Events");
+    if (rowSet.rowCount() == 0) {
+      return new OrderLineAuditEventCollection().withTotalItems(0);
+    }
     OrderLineAuditEventCollection orderLineAuditEventCollection = new OrderLineAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       orderLineAuditEventCollection.getOrderLineAuditEvents().add(mapRowToOrderLineEvent(row));

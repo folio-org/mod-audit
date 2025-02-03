@@ -4,18 +4,15 @@ import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createPieceAuditEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.util.List;
 import java.util.UUID;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgException;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
-import org.folio.rest.jaxrs.model.PieceAuditEventCollection;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,38 +37,42 @@ public class PieceEventsDaoTest {
   void shouldCreateEventProcessed() {
     var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
 
-    Future<RowSet<Row>> saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
+    var saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
   }
 
   @Test
   void shouldThrowConstrainViolation() {
     var pieceAuditEvent = createPieceAuditEvent(UUID.randomUUID().toString());
 
-    Future<RowSet<Row>> saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
+    var saveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
     saveFuture.onComplete(ar -> {
-      Future<RowSet<Row>> reSaveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
+      var reSaveFuture = pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
       reSaveFuture.onComplete(re -> {
         assertTrue(re.failed());
         assertTrue(re.cause() instanceof PgException);
         assertEquals("ERROR: duplicate key value violates unique constraint \"acquisition_piece_log_pkey\" (23505)", re.cause().getMessage());
       });
     });
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
   }
 
   @Test
   void shouldGetCreatedEvent() {
-    String id = UUID.randomUUID().toString();
+    var id = UUID.randomUUID().toString();
     var pieceAuditEvent = createPieceAuditEvent(id);
 
     pieceEventsDao.save(pieceAuditEvent, TENANT_ID);
 
-    Future<PieceAuditEventCollection> saveFuture = pieceEventsDao.getAuditEventsByPieceId(id, "action_date", "desc", 1, 1, TENANT_ID);
+    var saveFuture = pieceEventsDao.getAuditEventsByPieceId(id, "action_date", "desc", 1, 1, TENANT_ID);
     saveFuture.onComplete(ar -> {
-      PieceAuditEventCollection pieceAuditEventCollection = ar.result();
-      List<PieceAuditEvent> pieceAuditEventList = pieceAuditEventCollection.getPieceAuditEvents();
+      var pieceAuditEventCollection = ar.result();
+      var pieceAuditEventList = pieceAuditEventCollection.getPieceAuditEvents();
+
       assertEquals(pieceAuditEventList.get(0).getId(), id);
       assertEquals(PieceAuditEvent.Action.CREATE.value(), pieceAuditEventList.get(0).getAction().value());
     });
+    verify(postgresClientFactory, times(2)).createInstance(TENANT_ID);
   }
 }

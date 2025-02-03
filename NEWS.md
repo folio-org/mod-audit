@@ -1,3 +1,32 @@
+## 2.10.2 2025-01-10
+
+* [MODAUD-216](https://folio-org.atlassian.net/browse/MODAUD-199) - Remove PII from mod-audit logs
+
+## 2.10.1 2024-11-19
+
+* [MODAUD-199](https://folio-org.atlassian.net/browse/MODAUD-199) - Make pubsub permission changes.
+
+
+## 2.10.0 2024-10-30
+
+* [MODAUD-185](https://folio-org.atlassian.net/browse/MODAUD-185) - Unpin jackson fixing Number Parse DoS (PRISMA-2023-0067)
+* [MODAUD-186](https://folio-org.atlassian.net/browse/MODAUD-186) - Upgrade `holdings-storage` to 7.0
+* [MODAUD-187](https://folio-org.atlassian.net/browse/MODAUD-187) - Review and cleanup Module Descriptors for mod-audit
+* [MODAUD-189](https://folio-org.atlassian.net/browse/MODAUD-189) - Upgrade `inventory` to 14.0
+* [MODAUD-190](https://folio-org.atlassian.net/browse/MODAUD-190) - Upgrade `holdings-storage` to 8.0
+* [MODAUD-192](https://folio-org.atlassian.net/browse/MODAUD-192) - Upgrade RMB version to V.35.3.0
+* [MODPUBSUB-301](https://folio-org.atlassian.net/browse/MODPUBSUB-301) - Revert permission changes for MODPUBSUB-301
+
+## 2.9.0 2024-03-21
+
+* [MODAUD-174](https://issues.folio.org/browse/MODAUD-174) - Consume piece change events and implement endpoints
+* [MODAUD-176](https://issues.folio.org/browse/MODAUD-176) - Check-ins are automatically backdated to 5 hours later (DUNY/Dominican)
+* [MODAUD-177](https://issues.folio.org/browse/MODAUD-177) - Link on a virtual item is available in circ log if fees/fines is applied
+* [MODAUD-180](https://issues.folio.org/browse/MODAUD-180) - Modify SQL query for /status-change-history to return records if claimingInterval changed
+* [MODAUD-181](https://issues.folio.org/browse/MODAUD-181) - Make additional properties to true in user.json
+* [MODAUD-183](https://issues.folio.org/browse/MODAUD-183) - mod-audit Quesnelia 2024 R1 - RMB v35.2.x update
+* [FOLIO-3944](https://issues.folio.org/browse/FOLIO-3944) - Upgrade the Actions used by API-related GitHub Workflows
+
 ## 2.8.0 2023-10-11
 
 * [MODAUD-110](https://issues.folio.org/browse/MODAUD-110) - Logging improvement

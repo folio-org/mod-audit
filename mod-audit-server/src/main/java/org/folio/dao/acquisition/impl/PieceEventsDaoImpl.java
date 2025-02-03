@@ -41,13 +41,18 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   private static final String GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL = """
     WITH StatusChanges AS (
       SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
-        LAG(modified_content_snapshot ->> 'receivingStatus') OVER (PARTITION BY piece_id ORDER BY action_date) AS previous_status
+        LAG(modified_content_snapshot ->> 'receivingStatus') OVER w AS previous_status,
+        LAG(modified_content_snapshot ->> 'claimingInterval') OVER w AS previous_claiming_interval
       FROM %s WHERE piece_id=$1
+      WINDOW w AS (PARTITION BY piece_id ORDER BY action_date)
     )
     SELECT id, action, piece_id, user_id, event_date, action_date, modified_content_snapshot,
       (SELECT COUNT(*) AS total_records FROM StatusChanges
-        WHERE modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, ''))
-    FROM StatusChanges WHERE modified_content_snapshot ->> 'receivingStatus' <> COALESCE(previous_status, '')
+        WHERE modified_content_snapshot ->> 'receivingStatus' IS DISTINCT FROM previous_status
+          OR modified_content_snapshot ->> 'claimingInterval' IS DISTINCT FROM previous_claiming_interval)
+    FROM StatusChanges
+    WHERE modified_content_snapshot ->> 'receivingStatus' IS DISTINCT FROM previous_status
+      OR modified_content_snapshot ->> 'claimingInterval' IS DISTINCT FROM previous_claiming_interval
     %s LIMIT $2 OFFSET $3
     """;
 
@@ -61,16 +66,13 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(PieceAuditEvent pieceAuditEvent, String tenantId) {
-    LOGGER.debug("save:: Trying to save Piece AuditEvent with tenant id : {}", tenantId);
+  public Future<RowSet<Row>> save(PieceAuditEvent event, String tenantId) {
+    LOGGER.debug("save:: Trying to save Piece AuditEvent with piece id : {}", event.getPieceId());
     Promise<RowSet<Row>> promise = Promise.promise();
-
-    LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-
-    makeSaveCall(promise, query, pieceAuditEvent, tenantId);
-    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", pieceAuditEvent.getPieceId(), tenantId);
+    makeSaveCall(promise, query, event, tenantId);
+    LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", event.getPieceId(), tenantId);
     return promise.future();
   }
 
@@ -89,9 +91,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ?
-      new PieceAuditEventCollection().withTotalItems(0) :
-      mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   @Override
@@ -109,12 +109,14 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
-    return promise.future().map(rowSet -> rowSet.rowCount() == 0 ? new PieceAuditEventCollection().withTotalItems(0)
-      : mapRowToListOfPieceEvent(rowSet));
+    return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
   private PieceAuditEventCollection mapRowToListOfPieceEvent(RowSet<Row> rowSet) {
     LOGGER.debug("mapRowToListOfOrderEvent:: Mapping row to List of Piece Events");
+    if (rowSet.rowCount() == 0) {
+      return new PieceAuditEventCollection().withTotalItems(0);
+    }
     PieceAuditEventCollection pieceAuditEventCollection = new PieceAuditEventCollection();
     rowSet.iterator().forEachRemaining(row -> {
       pieceAuditEventCollection.getPieceAuditEvents().add(mapRowToPieceEvent(row));
@@ -153,5 +155,4 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       promise.fail(e);
     }
   }
-
 }

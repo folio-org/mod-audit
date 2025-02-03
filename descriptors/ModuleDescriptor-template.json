@@ -20,7 +20,7 @@
     },
     {
       "id": "users",
-      "version": "16.0"
+      "version": "16.1"
     },
     {
       "id": "template-engine",
@@ -28,11 +28,11 @@
     },
     {
       "id": "inventory",
-      "version": "13.0"
+      "version": "14.0"
     },
     {
       "id": "holdings-storage",
-      "version": "6.0"
+      "version": "6.0 7.0 8.0"
     },
     {
       "id": "cancellation-reason-storage",
@@ -146,7 +146,52 @@
           ],
           "pathPattern": "/audit-data/acquisition/piece/{id}/status-change-history",
           "permissionsRequired": [
-            "acquisition.piece.events.get"
+            "acquisition.piece.events.history.get"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acquisition-invoice-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/invoice/{id}",
+          "permissionsRequired": [
+            "acquisition.invoice.events.get"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acquisition-invoice-line-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/invoice-line/{id}",
+          "permissionsRequired": [
+            "acquisition.invoice-line.events.get"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acquisition-organization-events",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/audit-data/acquisition/organization/{id}",
+          "permissionsRequired": [
+            "acquisition.organization.events.get"
           ]
         }
       ]
@@ -174,7 +219,7 @@
           "methods": ["POST"],
           "pathPattern": "/audit/handlers/log-record",
           "permissionsRequired": [
-            "pubsub.events.post"
+            "audit.pub-sub-handlers.log-record-event.post"
           ],
           "modulePermissions": [
             "users.item.get",
@@ -184,6 +229,39 @@
             "inventory-storage.holdings.item.get",
             "circulation-storage.cancellation-reasons.collection.get",
             "circulation-item.item.get"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "audit-config",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit/config/groups",
+          "permissionsRequired": [
+            "audit.config.groups.collection.get"
+          ]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit/config/groups/{groupId}/settings",
+          "permissionsRequired": [
+            "audit.config.groups.settings.collection.get"
+          ],
+          "permissionsDesired": [
+            "audit.config.groups.settings.*.collection.get"
+          ]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/audit/config/groups/{groupId}/settings/{settingId}",
+          "permissionsRequired": [
+            "audit.config.groups.settings.item.put"
+          ],
+          "permissionsDesired": [
+            "audit.config.groups.settings.*.item.put"
           ]
         }
       ]
@@ -260,6 +338,61 @@
       "description": "Get piece change events"
     },
     {
+      "permissionName": "acquisition.piece.events.history.get",
+      "displayName": "Acquisition piece status change history events - get piece status change events",
+      "description": "Get piece status change events"
+    },
+    {
+      "permissionName": "acquisition.invoice.events.get",
+      "displayName": "Acquisition invoice events - get invoice change events",
+      "description": "Get invoice change events"
+    },
+    {
+      "permissionName": "acquisition.invoice-line.events.get",
+      "displayName": "Acquisition invoice-line events - get invoice-line change events",
+      "description": "Get invoice-line change events"
+    },
+    {
+      "permissionName": "acquisition.organization.events.get",
+      "displayName": "Acquisition organization events - get organization change events",
+      "description": "Get organization change events"
+    },
+    {
+      "permissionName": "audit.config.groups.collection.get",
+      "displayName": "Audit Configuration - get settings groups",
+      "description": "Get settings groups"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.collection.get",
+      "displayName": "Audit Configuration - get settings for a group",
+      "description": "Get settings for a group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.collection.get",
+      "displayName": "Audit Configuration - get settings for a audit inventory group",
+      "description": "Get settings for a audit inventory group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.collection.get",
+      "displayName": "Audit Configuration - get settings for a audit authority group",
+      "description": "Get settings for a audit authority group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.item.put",
+      "displayName": "Audit Configuration - update setting for a group",
+      "description": "Update setting for a group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.item.put",
+      "displayName": "Audit Configuration - update setting for a audit inventory group",
+      "description": "Update setting for a audit inventory group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.item.put",
+      "displayName": "Audit Configuration - update setting for a audit authority group",
+      "description": "Update setting for a audit authority group"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -272,7 +405,11 @@
         "circulation-logs.collection.get",
         "acquisition.order.events.get",
         "acquisition.order-line.events.get",
-        "acquisition.piece.events.get"
+        "acquisition.piece.events.get",
+        "acquisition.piece.events.history.get",
+        "acquisition.invoice.events.get",
+        "acquisition.invoice-line.events.get",
+        "acquisition.organization.events.get"
       ]
     }
   ],

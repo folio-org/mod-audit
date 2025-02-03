@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Configuration",
+  "type": "object",
+  "required": ["key", "value", "type"],
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9.]+$",
+      "minLength": 3,
+      "maxLength": 100,
+      "description": "Unique identifier for the setting using lowercase letters, numbers, dots"
+    },
+    "value": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "integer" },
+        { "type": "boolean" }
+      ],
+      "description": "The value of the setting, type must match the specified 'type' field"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["STRING", "INTEGER", "BOOLEAN"],
+      "description": "The data type of the value"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional description of the setting's purpose"
+    },
+    "groupId": {
+      "type": "string",
+      "pattern": "^[a-z0-9.]+$",
+      "description": "Optional reference to a setting group"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "metadata",
+      "$ref": "../../raml-util/schemas/metadata.schema",
+      "readonly": true
+    }
+  },
+  "additionalProperties": false
+}

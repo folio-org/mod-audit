@@ -39,5 +39,4 @@ public class OrderLineAuditEventsServiceImpl implements OrderLineAuditEventsServ
     LOGGER.debug("getAuditEventsByOrderLineId:: Retrieving audit events for order line Id : {} and tenant Id : {}", orderLineId, tenantId);
     return orderLineEventsDao.getAuditEventsByOrderLineId(orderLineId, sortBy, sortOrder, limit, offset, tenantId);
   }
-
 }
