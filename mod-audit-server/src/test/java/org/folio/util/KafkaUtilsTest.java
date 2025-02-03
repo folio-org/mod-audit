@@ -6,8 +6,10 @@ import static org.mockito.Mockito.when;
 
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import org.folio.CopilotGenerated;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 @CopilotGenerated
 class KafkaUtilsTest {
 

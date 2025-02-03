@@ -160,11 +160,8 @@
                https://issues.folio.org/browse/FOLIO-1609
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
-          <includes>
-            <include>org/folio/mapper/**/*.class</include>
-            <include>org/folio/util/**/*.class</include>
-            <include>org/folio/TestSuite.class</include>
-          </includes>
+
+          <groups>unit</groups>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
         <dependencies>
@@ -184,6 +181,24 @@
             <version>${junit.jupiter.version}</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includes>
+            <include>org/folio/TestSuite.class</include>
+          </includes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.folio</groupId>

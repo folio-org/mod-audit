@@ -1,0 +1,93 @@
+#%RAML 1.0
+
+title: Audit Configuration API
+baseUri: https://github.com/folio-org/mod-audit
+version: v1
+
+documentation:
+  - title: mod-audit API
+    content: This documents the API calls that can be made to query and manage audit records
+
+types:
+  setting: !include schemas/configuration/setting.json
+  settingCollection: !include schemas/configuration/setting_collection.json
+  settingGroup: !include schemas/configuration/setting_group.json
+  settingGroupCollection: !include schemas/configuration/setting_group_collection.json
+  errors: !include raml-util/schemas/errors.schema
+
+/audit/config:
+  /groups:
+    displayName: Audit setting groups
+    get:
+      description: Get a list of setting groups.
+      responses:
+        200:
+          description: OK
+          body:
+            application/json:
+              description: List of setting groups.
+              type: settingGroupCollection
+              example:
+                strict: false
+                value: !include examples/configuration/setting_group_collection_sample.json
+        400:
+          description: Bad Request
+          body:
+            application/json:
+              type: errors
+    /{groupId}/settings:
+      displayName: Configuration settings for a group
+      uriParameters:
+        groupId:
+          pattern: ^[a-z0-9.]+$
+      get:
+        description: Retrieve configuration settings for a group
+        responses:
+          200:
+            description: OK
+            body:
+              application/json:
+                type: settingCollection
+                example:
+                  strict: false
+                  value: !include examples/configuration/setting_collection_sample.json
+          400:
+            description: Bad Request
+            body:
+              application/json:
+                type: errors
+          404:
+            description: Not Found
+            body:
+              application/json:
+                type: errors
+      /{settingId}:
+        uriParameters:
+          settingId:
+            pattern: ^[a-z0-9.]+$
+        put:
+          description: Update a configuration setting
+          body:
+            application/json:
+              type: setting
+              example:
+                strict: false
+                value: !include examples/configuration/setting_sample.json
+          responses:
+            204:
+              description: No Content
+            400:
+              description: Bad Request
+              body:
+                application/json:
+                  type: errors
+            404:
+              description: Not Found
+              body:
+                application/json:
+                  type: errors
+            422:
+              description: Unprocessable Entity
+              body:
+                application/json:
+                  type: errors

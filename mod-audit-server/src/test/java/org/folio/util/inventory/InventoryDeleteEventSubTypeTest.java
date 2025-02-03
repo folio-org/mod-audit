@@ -3,8 +3,10 @@ package org.folio.util.inventory;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.folio.CopilotGenerated;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 @CopilotGenerated
 class InventoryDeleteEventSubTypeTest {
 
