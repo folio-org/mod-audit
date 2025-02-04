@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.folio.CopilotGenerated;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+@UnitTest
 @CopilotGenerated
 class InventoryUtilsTest {
 

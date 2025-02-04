@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of Configuration Groups",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "settingGroups": {
+      "description": "List of configuration groups",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "setting_group.json"
+      }
+    },
+    "totalRecords": {
+      "description": "total records",
+      "type": "integer"
+    }
+  }
+}

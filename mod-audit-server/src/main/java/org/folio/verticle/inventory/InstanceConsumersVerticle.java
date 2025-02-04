@@ -8,18 +8,17 @@ import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.SubscriptionDefinition;
 import org.folio.util.inventory.InventoryKafkaEvent;
 import org.folio.verticle.AbstractConsumersVerticle;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.folio.verticle.inventory.consumers.InventoryEventHandler;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class InstanceConsumersVerticle extends AbstractConsumersVerticle {
 
-  @Autowired
-  private AsyncRecordHandler<String, String> inventoryEventHandler;
+  private final ObjectFactory<InventoryEventHandler> recordHandlerProvider;
 
-  @Override
-  public List<String> getEvents() {
-    return List.of(InventoryKafkaEvent.INSTANCE.getTopicName());
+  public InstanceConsumersVerticle(ObjectFactory<InventoryEventHandler> recordHandlerProvider) {
+    this.recordHandlerProvider = recordHandlerProvider;
   }
 
   @Override
@@ -31,7 +30,12 @@ public class InstanceConsumersVerticle extends AbstractConsumersVerticle {
   }
 
   @Override
+  public List<String> getEvents() {
+    return List.of(InventoryKafkaEvent.INSTANCE.getTopicName());
+  }
+
+  @Override
   public AsyncRecordHandler<String, String> getHandler() {
-    return inventoryEventHandler;
+    return recordHandlerProvider.getObject();
   }
 }

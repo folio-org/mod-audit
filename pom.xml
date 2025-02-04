@@ -22,7 +22,7 @@
     <raml-module-builder.version>35.3.0</raml-module-builder.version>
     <vertx.version>4.5.10</vertx.version>
     <wiremock.version>2.25.1</wiremock.version>
-    <junit.jupiter.version>5.6.2</junit.jupiter.version>
+    <junit.jupiter.version>5.11.4</junit.jupiter.version>
     <rest-assured.version>5.5.0</rest-assured.version>
     <pubsub.client.version>2.13.0</pubsub.client.version>
     <streamx.version>0.7.3</streamx.version>
@@ -160,10 +160,8 @@
                https://issues.folio.org/browse/FOLIO-1609
                https://issues.apache.org/jira/browse/SUREFIRE-1588
           -->
-          <includes>
-            <include>org/folio/util/**/*.class</include>
-            <include>org/folio/TestSuite.class</include>
-          </includes>
+
+          <groups>unit</groups>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
         <dependencies>
@@ -183,6 +181,24 @@
             <version>${junit.jupiter.version}</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includes>
+            <include>org/folio/TestSuite.class</include>
+          </includes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.folio</groupId>

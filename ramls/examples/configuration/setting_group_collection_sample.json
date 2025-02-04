@@ -1,0 +1,10 @@
+{
+  "configGroups": [
+    {
+      "id": "audit.inventory",
+      "name": "Inventory Audit Configuration",
+      "description": "Group of configurations for audit of inventory records: instances, holdings, items, etc."
+    }
+  ],
+  "totalRecords": 1
+}

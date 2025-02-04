@@ -57,7 +57,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
           event.userId(),
           JsonObject.mapFrom(event.diff())),
         promise);
-      LOGGER.info("save:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
+      LOGGER.info("makeSaveCall:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
         tenantId, event.eventId(), event.entityId());
     } catch (Exception e) {
       LOGGER.error("Failed to save record with [eventId:{}, entityId:{}, tableName: {}]",
