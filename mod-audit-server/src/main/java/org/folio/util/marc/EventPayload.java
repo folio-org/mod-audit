@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,6 +15,6 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventPayload {
     @JsonProperty("new")
-    private Map<String, Object> newRecord;
-    private Map<String, Object> old;
+    private Record newRecord;
+    private Record old;
 }

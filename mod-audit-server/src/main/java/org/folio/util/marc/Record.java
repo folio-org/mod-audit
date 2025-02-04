@@ -1,4 +1,3 @@
-
 package org.folio.util.marc;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,15 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventMetadata {
-    private String publishedBy;
-    private String tenantId;
-    private LocalDateTime eventDate;
+public class Record {
+  private String id;
+  private SourceRecordType recordType;
+  private Map<String, Object> parsedRecord;
+  private Map<String, Object> metadata;
 }

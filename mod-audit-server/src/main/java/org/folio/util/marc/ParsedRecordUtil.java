@@ -14,53 +14,115 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for mapping and transforming parsed MARC records into entities suitable
+ * for audit and logging purposes. This class provides methods to process and compare parsed
+ * MARC records and extract relevant data for creating audit entities.
+ * <p>
+ * The {@code ParsedRecordUtil} handles operations such as:
+ * - Mapping a source record domain event to a MarcAuditEntity.
+ * - Extracting user IDs from metadata.
+ * - Flattening complex parsed record structures into more manageable formats.
+ * - Calculating differences between old and new parsed records for auditing purposes.
+ * - Formatting and restructuring MARC field data.
+ * </p>
+ *
+ * This class is intended to function as a utility and should not be instantiated directly.
+ */
 @UtilityClass
-@SuppressWarnings("unchecked")
 public class ParsedRecordUtil {
-  private static final String PARSED_RECORD_KEY = "parsedRecord";
   private static final String SUBFIELDS_KEY = "subfields";
   private static final String FIELD_KEY = "field";
   private static final String FIELDS_KEY = "fields";
   private static final String LEADER_KEY = "leader";
   private static final String VALUE_KEY = "value";
+  private static final String CREATED_BY = "createdByUserId";
+  private static final String UPDATED_BY = "updatedByUserId";
 
-  public static MarcAuditEntity mapToEntity(SourceRecordDomainEvent event, String userId) {
-    Map<String, Object> difference = null;
+  /**
+   * Maps a {@link SourceRecordDomainEvent} to a {@link MarcAuditEntity}.
+   *
+   * @param event the source record domain event containing the details for creating the MarcAuditEntity;
+   *              it includes event metadata, event type, payload with new and old records, and event ID.
+   * @return a {@link MarcAuditEntity} instance containing data inferred from the given event, such as event ID,
+   *         event date, record ID, origin, action, user ID, record type, and any differences.
+   */
+  public static MarcAuditEntity mapToEntity(SourceRecordDomainEvent event) {
     var eventPayload = event.getEventPayload();
-    if (event.getEventType().equals(SourceRecordDomainEventType.SOURCE_RECORD_CREATED)) {
-      var newRecord = (Map<String, Object>) eventPayload.getNewRecord().get(PARSED_RECORD_KEY);
-      difference = sourceCreatedDifference(newRecord);
-    } else if (event.getEventType().equals(SourceRecordDomainEventType.SOURCE_RECORD_UPDATED)) {
-      var newRecord = (Map<String, Object>) eventPayload.getNewRecord().get(PARSED_RECORD_KEY);
-      var oldRecord = (Map<String, Object>) eventPayload.getOld().get(PARSED_RECORD_KEY);
-      difference = calculateDifferences(oldRecord, newRecord);
+    String recordId;
+    String userId;
+    SourceRecordType recordType;
+    Map<String, Object> difference;
+
+    switch (event.getEventType()) {
+      case SOURCE_RECORD_CREATED -> {
+        var newRecord = eventPayload.getNewRecord();
+        recordId = newRecord.getId();
+        userId = getUserIdFromMetadata(newRecord.getMetadata(), CREATED_BY);
+        recordType = newRecord.getRecordType();
+        difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
+      }
+      case SOURCE_RECORD_UPDATED -> {
+        var newRecord = eventPayload.getNewRecord();
+        var oldRecord = eventPayload.getOld();
+        recordId = newRecord.getId();
+        userId = getUserIdFromMetadata(newRecord.getMetadata(), UPDATED_BY);
+        recordType = newRecord.getRecordType();
+        difference = calculateDifferences(oldRecord.getParsedRecord(), newRecord.getParsedRecord());
+      }
+      default -> {
+        var oldRecord = eventPayload.getOld();
+        recordId = oldRecord.getId();
+        userId = getUserIdFromMetadata(oldRecord.getMetadata(), UPDATED_BY);
+        recordType = oldRecord.getRecordType();
+        difference = getDifference(oldRecord.getParsedRecord(), event.getEventType());
+      }
     }
+
     return new MarcAuditEntity(
       event.getEventId(),
       event.getEventMetadata().getEventDate(),
-      event.getRecordId(),
+      recordId,
       event.getEventMetadata().getPublishedBy(),
       event.getEventType().getValue(),
       userId,
+      recordType,
       difference
     );
   }
 
+  private static String getUserIdFromMetadata(Map<String, Object> metadata, String key) {
+    return metadata.get(key).toString();
+  }
+
   private static Map<String, Object> calculateDifferences(Map<String, Object> oldParsedRecord, Map<String, Object> newParsedRecord) {
-    var oldFields = convert(oldParsedRecord);
-    var newFields = convert(newParsedRecord);
+    var oldFields = flattenFields(oldParsedRecord);
+    var newFields = flattenFields(newParsedRecord);
     return compareParsedRecords(oldFields, newFields);
   }
 
-  private static Map<String, Object> sourceCreatedDifference(Map<String, Object> parsedRecord) {
-    List<Map<String, Object>> added = new ArrayList<>();
-    convert(parsedRecord).forEach((key, value) ->
-      added.add(Map.of(FIELD_KEY, key, VALUE_KEY, value))
+  private static Map<String, Object> getDifference(Map<String, Object> parsedRecord, SourceRecordDomainEventType type) {
+    List<Map<String, Object>> fields = new ArrayList<>();
+    flattenFields(parsedRecord).forEach((key, value) ->
+      fields.add(Map.of(FIELD_KEY, key, VALUE_KEY, value))
     );
-    return toMap(added, Collections.emptyList(), Collections.emptyList());
+    return type.equals(SourceRecordDomainEventType.SOURCE_RECORD_CREATED)
+      ? toMap(fields, null, null)
+      : toMap(null, fields, null);
   }
 
-  private static Map<String, Object> convert(Map<String, Object> input) {
+  /**
+   * Flattens the fields in the given parsed record map to a single-level map structure.
+   * The method processes the "content" key in the input map, extracts the field data,
+   * and formats it based on specified rules, combining fields with the same tag into lists when necessary.
+   *
+   * @param input a map representing a parsed record, expected to contain a "content" key
+   *              with relevant field data and metadata.
+   * @return a map where field tags are the keys and their corresponding values
+   *         are formatted strings or lists of strings.
+   */
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> flattenFields(Map<String, Object> input) {
     var content = getContent(input);
     var fields = (List<Map<String, Object>>) content.get(FIELDS_KEY);
     var result = new HashMap<String, Object>();
@@ -83,6 +145,16 @@ public class ParsedRecordUtil {
     return result;
   }
 
+  /**
+   * Formats the given field value into a standardized string representation.
+   * If the input value is a map containing subfields, it creates a formatted string
+   * combining indicators and subfields. Otherwise, it converts the value to a string.
+   *
+   * @param value the field value to format, which can be an object or a map with subfields
+   *              and indicators ("ind1", "ind2").
+   * @return a formatted string representation of the field.
+   */
+  @SuppressWarnings("unchecked")
   private static String formatField(Object value) {
     if (value instanceof Map<?, ?> map && map.containsKey(SUBFIELDS_KEY)) {
       var fieldData = (Map<String, Object>) map;
@@ -98,6 +170,18 @@ public class ParsedRecordUtil {
     return value.toString();
   }
 
+  /**
+   * Compares two maps representing parsed records and identifies added, modified,
+   * and removed entries. It determines the differences by comparing the keys
+   * and values of the given maps.
+   *
+   * @param oldMap the original map representing the state of a parsed record before changes
+   * @param newMap the updated map representing the state of a parsed record after changes
+   * @return a map containing three keys ("added", "removed", "modified"), each mapped
+   *         to a list of maps. The "added" key contains entries present only in the new map,
+   *         the "removed" key contains entries present only in the old map,
+   *         and the "modified" key contains entries with mismatched values between the maps.
+   */
   private static Map<String, Object> compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
     List<Map<String, Object>> added = new ArrayList<>();
     List<Map<String, Object>> modified = new ArrayList<>();
@@ -131,6 +215,7 @@ public class ParsedRecordUtil {
     return toMap(added, removed, modified);
   }
 
+  @SuppressWarnings("unchecked")
   private static Map<String, Object> getContent(Map<String, Object> parsedRecord) {
     var contentObj = parsedRecord.get("content");
     Map<String, Object> content;
@@ -145,10 +230,16 @@ public class ParsedRecordUtil {
   }
 
   private static Map<String, Object> toMap(Collection<?> added, Collection<?> removed, Collection<?> modified) {
-    return Map.of(
-      "added", added,
-      "modified", modified,
-      "removed", removed
-    );
+    var result = new HashMap<String, Object>();
+    if (added != null && !added.isEmpty()) {
+      result.put("added", added);
+    }
+    if (removed != null && !removed.isEmpty()) {
+      result.put("removed", removed);
+    }
+    if (modified != null && !modified.isEmpty()) {
+      result.put("modified", modified);
+    }
+    return result;
   }
 }

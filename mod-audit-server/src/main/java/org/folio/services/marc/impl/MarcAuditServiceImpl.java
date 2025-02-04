@@ -5,8 +5,8 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.marc.MarcBibAuditDao;
-import org.folio.services.marc.MarcBibAuditService;
+import org.folio.dao.marc.MarcAuditDao;
+import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.ParsedRecordUtil;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.springframework.stereotype.Service;
@@ -18,25 +18,26 @@ import java.util.Map;
 import static org.folio.util.ErrorUtils.handleFailures;
 
 @Service
-public class MarcBibAuditServiceImpl implements MarcBibAuditService {
+public class MarcAuditServiceImpl implements MarcAuditService {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
-  private final MarcBibAuditDao marcBibAuditDao;
+  private final MarcAuditDao marcAuditDao;
 
-  public MarcBibAuditServiceImpl(MarcBibAuditDao marcBibAuditDao) {
-    this.marcBibAuditDao = marcBibAuditDao;
+  public MarcAuditServiceImpl(MarcAuditDao marcAuditDao) {
+    this.marcAuditDao = marcAuditDao;
   }
 
   @Override
-  public Future<RowSet<Row>> saveMarcBibDomainEvent(SourceRecordDomainEvent sourceRecordDomainEvent, String tenantId, String userId) {
+  public Future<RowSet<Row>> saveMarcDomainEvent(SourceRecordDomainEvent sourceRecordDomainEvent) {
+    var tenantId = sourceRecordDomainEvent.getEventMetadata().getTenantId();
     LOGGER.debug("saveOrderAuditEvent:: Saving marc bib event for tenantId={}", tenantId);
-    var entity = ParsedRecordUtil.mapToEntity(sourceRecordDomainEvent, userId);
+    var entity = ParsedRecordUtil.mapToEntity(sourceRecordDomainEvent);
     if (isEmptyDifference(entity.diff())) {
       LOGGER.debug("saveMarcBibDomainEvent:: No changes detected, skipping save for tenantId={}", tenantId);
       return Future.succeededFuture();
     }
-    return marcBibAuditDao.save(entity, sourceRecordDomainEvent.getRecordType(), tenantId)
+    return marcAuditDao.save(entity, tenantId)
       .recover(throwable -> {
         LOGGER.error("handleFailures:: Could not save order audit event for tenantId: {}", tenantId);
         return handleFailures(throwable, sourceRecordDomainEvent.getEventId());

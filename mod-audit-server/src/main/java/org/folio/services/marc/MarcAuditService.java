@@ -5,7 +5,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.util.marc.SourceRecordDomainEvent;
 
-public interface MarcBibAuditService {
+public interface MarcAuditService {
 
-  Future<RowSet<Row>> saveMarcBibDomainEvent(SourceRecordDomainEvent invoiceAuditEvent, String tenantId, String userId);
+  Future<RowSet<Row>> saveMarcDomainEvent(SourceRecordDomainEvent invoiceAuditEvent);
 }

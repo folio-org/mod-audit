@@ -7,7 +7,7 @@ public enum SourceRecordDomainEventType {
 
   SOURCE_RECORD_CREATED("SOURCE_RECORD_CREATED"),
   SOURCE_RECORD_UPDATED("SOURCE_RECORD_UPDATED"),
-  UNKNOWN("UNKNOWN");
+  SOURCE_RECORD_DELETED("SOURCE_RECORD_DELETED");
 
   private final String value;
 
@@ -32,6 +32,6 @@ public enum SourceRecordDomainEventType {
         return eventType;
       }
     }
-    return UNKNOWN;
+    throw new IllegalArgumentException("No matching SourceRecordDomainEventType for value: " + value);
   }
 }

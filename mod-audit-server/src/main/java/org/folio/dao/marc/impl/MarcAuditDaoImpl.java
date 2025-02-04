@@ -8,7 +8,7 @@ import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditEntity;
-import org.folio.dao.marc.MarcBibAuditDao;
+import org.folio.dao.marc.MarcAuditDao;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Repository;
@@ -17,7 +17,7 @@ import static java.lang.String.format;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 @Repository
-public class MarcBibAuditDaoImpl implements MarcBibAuditDao {
+public class MarcAuditDaoImpl implements MarcAuditDao {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private static final String MARC_BIB_TABLE = "marc_bib_audit";
@@ -27,14 +27,14 @@ public class MarcBibAuditDaoImpl implements MarcBibAuditDao {
 
   private final PostgresClientFactory pgClientFactory;
 
-  public MarcBibAuditDaoImpl(PostgresClientFactory pgClientFactory) {
+  public MarcAuditDaoImpl(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }
 
   @Override
-  public Future<RowSet<Row>> save(MarcAuditEntity entity, SourceRecordType recordType, String tenantId) {
+  public Future<RowSet<Row>> save(MarcAuditEntity entity, String tenantId) {
     LOGGER.debug("save:: Saving Marc domain event with record id: {}", entity.entityId());
-    var tableName = tableName(recordType);
+    var tableName = tableName(entity.recordType());
     var query = format(INSERT_SQL, formatDBTableName(tenantId, tableName));
     return makeSaveCall(query, entity, tenantId)
       .onSuccess(rows -> LOGGER.info("save:: Saved Marc Bib domain event with record id: '{}' in to table '{}'", entity.entityId(), tableName))
