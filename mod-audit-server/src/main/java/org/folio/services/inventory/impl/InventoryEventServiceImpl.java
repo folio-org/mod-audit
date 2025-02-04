@@ -5,9 +5,7 @@ import static org.folio.util.ErrorUtils.handleFailures;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,19 +65,19 @@ public class InventoryEventServiceImpl implements InventoryEventService {
 
   @Override
   public Future<InventoryAuditCollection> getEvents(InventoryResourceType resourceType, String entityId,
-                                                    String eventDate, String tenantId) {
+                                                    String eventTs, String tenantId) {
     LOGGER.debug(
-      "getEvents:: Trying to retrieve inventory events with [tenantId: {}, resourceType: {},entityId: {}, eventDate: {}]",
-      tenantId, resourceType, entityId, eventDate);
+      "getEvents:: Trying to retrieve inventory events with [tenantId: {}, resourceType: {},entityId: {}, eventTs: {}]",
+      tenantId, resourceType, entityId, eventTs);
     UUID entityUUID;
-    LocalDateTime eventDateTime;
+    Timestamp eventTsTimestamp;
     try {
       entityUUID = UUID.fromString(entityId);
-      eventDateTime = eventDate == null ? null : LocalDateTime.ofInstant(Instant.parse(eventDate), ZoneId.systemDefault());
+      eventTsTimestamp = eventTs == null ? null : new Timestamp(Long.parseLong(eventTs));
     } catch (IllegalArgumentException e) {
       LOGGER.error(
-        "getEvents:: Could not parse entityId or eventDate [tenantId: {}, resourceType: {}, entityId: {}, eventDate: {}]",
-        tenantId, resourceType, entityId, eventDate, e);
+        "getEvents:: Could not parse entityId or eventTs [tenantId: {}, resourceType: {}, entityId: {}, eventTs: {}]",
+        tenantId, resourceType, entityId, eventTs, e);
       return Future.failedFuture(e);
     }
 
@@ -87,7 +85,7 @@ public class InventoryEventServiceImpl implements InventoryEventService {
       .compose(inventoryEventDao ->
         configurationService.getSetting(Setting.INVENTORY_RECORDS_PAGE_SIZE, tenantId)
           .compose(setting ->
-            inventoryEventDao.get(tenantId, entityUUID, eventDateTime, (Integer) setting.getValue())))
+            inventoryEventDao.get(entityUUID, eventTsTimestamp, (int) setting.getValue(), tenantId)))
       .map(entitiesToCollectionMapper);
   }
 

@@ -20,7 +20,8 @@ import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
 import org.folio.CopilotGenerated;
 import org.folio.dao.inventory.InventoryAuditEntity;
@@ -87,13 +88,13 @@ public class InstanceEventDaoTest {
   @Test
   void shouldGetInventoryAuditEntities(VertxTestContext ctx) {
     var entityId = UUID.randomUUID();
-    var eventDate = LocalDateTime.now();
+    var eventDate = Timestamp.from(Instant.now());
     var inventoryAuditEntity = createInventoryAuditEntity();
 
     doReturn(Future.succeededFuture(mockRowSet(inventoryAuditEntity)))
       .when(postgresClient).execute(anyString(), any(Tuple.class));
 
-    instanceEventDao.get(TENANT_ID, entityId, eventDate, 10)
+    instanceEventDao.get(entityId, eventDate, 10, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
         assertEquals(1, result.size());
         assertEquals(inventoryAuditEntity.entityId(), result.get(0).entityId());

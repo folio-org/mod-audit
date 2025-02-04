@@ -14,7 +14,7 @@ public interface InventoryEventService {
    *
    * @param inventoryEvent InventoryEvent
    * @param tenantId        id of tenant
-   * @return
+   * @return Future with RowSet
    */
   Future<RowSet<Row>> saveEvent(InventoryEvent inventoryEvent, String tenantId);
 
@@ -23,10 +23,10 @@ public interface InventoryEventService {
    *
    * @param resourceType resource type
    * @param entityId     entity id
-   * @param eventDate    event date to seek from
+   * @param eventTs      event timestamp to seek from
    * @param tenantId     id of tenant
-   * @return
+   * @return Future with InventoryAuditCollection
    */
-  Future<InventoryAuditCollection> getEvents(InventoryResourceType resourceType, String entityId, String eventDate,
+  Future<InventoryAuditCollection> getEvents(InventoryResourceType resourceType, String entityId, String eventTs,
                                              String tenantId);
 }

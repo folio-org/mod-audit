@@ -18,7 +18,7 @@ import io.vertx.sqlclient.Tuple;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       LIMIT $2
     """;
 
-  private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < '%s'";
+  private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
   private final PostgresClientFactory pgClientFactory;
 
@@ -54,7 +54,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
 
   @Override
   public Future<RowSet<Row>> save(InventoryAuditEntity event, String tenantId) {
-    LOGGER.debug("save:: Trying to save InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
+    LOGGER.debug("save:: Trying to save InventoryAuditEntity with [tenantId: {}, eventId: {}, entityId: {}]",
       tenantId, event.eventId(), event.entityId());
     var promise = Promise.<RowSet<Row>>promise();
     var table = formatDBTableName(tenantId, tableName());
@@ -64,13 +64,14 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
   }
 
   @Override
-  public Future<List<InventoryAuditEntity>> get(String tenantId, UUID entityId, LocalDateTime eventDate, int limit) {
-    LOGGER.debug("get:: Retrieve records by [tenantId: {}, eventId:{}, eventDate before:{}, limit: {}]",
-      tenantId, entityId, eventDate, limit);
+  public Future<List<InventoryAuditEntity>> get(UUID entityId, Timestamp eventTs, int limit, String tenantId) {
+    LOGGER.debug("get:: Retrieve records by [tenantId: {}, eventId: {}, eventTs before: {}, limit: {}]",
+      tenantId, entityId, eventTs, limit);
     var table = formatDBTableName(tenantId, tableName());
-    var seekByDateClause = eventDate == null ? "" : SEEK_BY_DATE_CLAUSE.formatted(eventDate);
-    var query = SELECT_SQL.formatted(table, seekByDateClause);
-    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(entityId, limit))
+    var query = SELECT_SQL.formatted(table, eventTs == null ? "" : SEEK_BY_DATE_CLAUSE);
+    return pgClientFactory.createInstance(tenantId).execute(query, eventTs == null
+                                                                   ? Tuple.of(entityId, limit)
+                                                                   : Tuple.of(entityId, limit, LocalDateTime.ofInstant(eventTs.toInstant(), ZoneId.systemDefault())))
       .map(this::mapRowToInventoryAuditEntityList);
   }
 
@@ -114,7 +115,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
     var diffJson = row.getJsonObject(DIFF_FIELD);
     return new InventoryAuditEntity(
       row.getUUID(EVENT_ID_FIELD),
-      Timestamp.from(row.getLocalDateTime(EVENT_DATE_FIELD).toInstant(ZoneOffset.UTC)),
+      new Timestamp(ZonedDateTime.of(row.getLocalDateTime(EVENT_DATE_FIELD), ZoneId.systemDefault()).toInstant().toEpochMilli()),
       row.getUUID(ENTITY_ID_FIELD),
       row.getString(ACTION_FIELD),
       row.getUUID(USER_ID_FIELD),

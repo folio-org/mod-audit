@@ -31,16 +31,15 @@ public class InventoryAuditImpl implements AuditDataInventory {
   }
 
   @Override
-  public void getAuditDataInventoryInstanceByEntityId(String entityId, String eventDate,
-                                                      Map<String, String> okapiHeaders,
+  public void getAuditDataInventoryInstanceByEntityId(String entityId, String eventTs, Map<String, String> okapiHeaders,
                                                       Handler<AsyncResult<Response>> asyncResultHandler,
                                                       Context vertxContext) {
     LOGGER.debug(
-      "getAuditDataInventoryInstanceByEntityId:: Retrieving Audit Data Inventory Instance by [entityId: {}, eventDate: {}]",
-      entityId, eventDate);
+      "getAuditDataInventoryInstanceByEntityId:: Retrieving Audit Data Inventory Instance by [entityId: {}, eventTs: {}]",
+      entityId, eventTs);
     var tenantId = TenantTool.tenantId(okapiHeaders);
     try {
-      service.getEvents(InventoryResourceType.INSTANCE, entityId, eventDate, tenantId)
+      service.getEvents(InventoryResourceType.INSTANCE, entityId, eventTs, tenantId)
         .map(AuditDataInventory.GetAuditDataInventoryInstanceByEntityIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
         .otherwise(this::mapExceptionToResponse)
@@ -48,11 +47,10 @@ public class InventoryAuditImpl implements AuditDataInventory {
     } catch (Exception e) {
       LOGGER.error(
         "getAuditDataInventoryInstanceByEntityId:: Error retrieving Audit Data Inventory Instance by [entityId: {}, eventDate: {}]",
-        entityId, eventDate, e);
+        entityId, eventTs, e);
       asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
-
 
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);

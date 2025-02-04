@@ -5,11 +5,16 @@
   "properties": {
     "eventId": {
       "description": "UUID of the event",
-      "$ref": "common/uuid.json"
+      "$ref": "../../common/uuid.json"
     },
     "entityId": {
       "description": "UUID of the entity",
-      "$ref": "common/uuid.json"
+      "$ref": "../../common/uuid.json"
+    },
+    "eventTs": {
+      "description": "Event timestamp",
+      "type": "string",
+      "format": "utc-millisec"
     },
     "eventDate": {
       "description": "Date time when event triggered",
@@ -22,7 +27,7 @@
     },
     "userId": {
       "description": "UUID of the user who performed the action",
-      "$ref": "common/uuid.json"
+      "$ref": "../../common/uuid.json"
     },
     "diff": {
       "description": "Difference for entity cause by an action",

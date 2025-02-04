@@ -114,11 +114,11 @@ public class InventoryAuditApiTest extends ApiTestBase {
       .extract().response();
 
     // Extract the last date from the first response
-    var lastDate = firstResponse.jsonPath().getString("inventoryAuditItems[2].eventDate");
+    var lastDate = firstResponse.jsonPath().getString("inventoryAuditItems[2].eventTs");
 
     // Query the API again, passing the last date from the previous response
     given().headers(HEADERS)
-      .get(INVENTORY_INSTANCE_AUDIT_PATH + ENTITY_ID + "?eventDate=" + lastDate)
+      .get(INVENTORY_INSTANCE_AUDIT_PATH + ENTITY_ID + "?eventTs=" + lastDate)
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .body("inventoryAuditItems", hasSize(2));

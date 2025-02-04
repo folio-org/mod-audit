@@ -7,15 +7,14 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.sql.Timestamp;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -105,35 +104,35 @@ public class InventoryEventServiceImplTest {
   void shouldRetrieveEventsSuccessfully(InventoryResourceType resourceType) {
     var dao = daos.get(resourceType);
     var entityId = UUID.randomUUID().toString();
-    var eventDate = "2023-01-01 00:00:00";
+    var eventDate = "1672531200000";
     var tenantId = "testTenant";
     var inventoryAuditCollection = new InventoryAuditCollection();
     var entityUUID = UUID.fromString(entityId);
-    var eventDateTime = LocalDateTime.ofInstant(Instant.parse(eventDate), ZoneId.systemDefault());
+    var eventDateTime = new Timestamp(Long.parseLong(eventDate));
     var setting = new Setting().withValue(10);
 
     doReturn(Future.succeededFuture(setting)).when(configurationService).getSetting(
       org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE, tenantId);
-    doReturn(Future.succeededFuture(List.of())).when(dao).get(tenantId, entityUUID, eventDateTime, 10);
+    doReturn(Future.succeededFuture(List.of())).when(dao).get(entityUUID, eventDateTime, 10, tenantId);
     doReturn(inventoryAuditCollection).when(entitiesToAuditCollectionMapper).apply(anyList());
 
     var getFuture = eventService.getEvents(resourceType, entityId, eventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
-    verify(dao, times(1)).get(tenantId, entityUUID, eventDateTime, 10);
+    verify(dao).get(entityUUID, eventDateTime, 10, tenantId);
   }
 
   @Test
   void shouldFailToRetrieveEventsWhenEntityIdIsInvalid() {
     var resourceType = InventoryResourceType.INSTANCE;
     var invalidEntityId = "invalid-uuid";
-    var validEventDate = "2023-01-01 00:00:00";
+    var validEventDate = "1672531200000";
     var tenantId = "testTenant";
 
     var getFuture = eventService.getEvents(resourceType, invalidEntityId, validEventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
-    verify(instanceEventDao, times(0)).get(anyString(), any(UUID.class), any(LocalDateTime.class), anyInt());
+    verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
   }
 
   @Test
@@ -146,20 +145,20 @@ public class InventoryEventServiceImplTest {
     var getFuture = eventService.getEvents(resourceType, validEntityId, invalidEventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
-    verify(instanceEventDao, times(0)).get(anyString(), any(UUID.class), any(LocalDateTime.class), anyInt());
+    verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
   }
 
   @Test
   void shouldFailToRetrieveEventsWhenDaoNotFound() {
     var resourceType = InventoryResourceType.UNKNOWN;
     var entityId = UUID.randomUUID().toString();
-    var eventDate = "2023-01-01 00:00:00";
+    var eventDate = "1672531200000";
     var tenantId = "testTenant";
 
     var getFuture = eventService.getEvents(resourceType, entityId, eventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
-    verify(instanceEventDao, times(0)).get(anyString(), any(UUID.class), any(LocalDateTime.class), anyInt());
+    verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
   }
 
   private InventoryEvent createInventoryEvent(InventoryResourceType resourceType) {

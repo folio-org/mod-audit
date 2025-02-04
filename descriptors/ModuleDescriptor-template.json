@@ -267,7 +267,7 @@
       ]
     },
     {
-      "id": "inventory-audit",
+      "id": "audit-inventory",
       "version": "1.0",
       "handlers": [
         {

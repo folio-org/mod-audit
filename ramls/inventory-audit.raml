@@ -10,10 +10,10 @@ documentation:
 
 types:
   errors: !include raml-util/schemas/errors.schema
-  inventory-audit-collection: !include inventory_audit_collection.json
+  inventory-audit-collection: !include schemas/inventory/inventory_audit_collection.json
 traits:
   validate: !include raml-util/traits/validation.raml
-  seek: !include inventory/seek-by-date.raml
+  seek: !include traits/seek-by-date.raml
 
 /audit-data/inventory:
   /instance/{entityId}:

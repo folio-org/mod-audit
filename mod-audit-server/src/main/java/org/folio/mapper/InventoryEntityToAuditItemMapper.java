@@ -11,6 +11,7 @@ public class InventoryEntityToAuditItemMapper implements Function<InventoryAudit
   public InventoryAuditItem apply(InventoryAuditEntity auditEntity) {
     return new InventoryAuditItem()
       .withEventId(auditEntity.eventId().toString())
+      .withEventTs(auditEntity.eventDate().getTime())
       .withEventDate(auditEntity.eventDate())
       .withEntityId(auditEntity.entityId().toString())
       .withAction(auditEntity.action())
