@@ -40,10 +40,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
     List<Future<Void>> futures = new ArrayList<>();
 
     getEvents().forEach(event -> {
-      SubscriptionDefinition subscriptionDefinition = KafkaTopicNameHelper
-        .createSubscriptionDefinition(kafkaConfig.getEnvId(),
-          KafkaTopicNameHelper.getDefaultNameSpace(),
-          event);
+      SubscriptionDefinition subscriptionDefinition = subscriptionDefinition(event, kafkaConfig);
       KafkaConsumerWrapper<String, String> consumerWrapper = KafkaConsumerWrapper.<String, String>builder()
         .context(context)
         .vertx(vertx)

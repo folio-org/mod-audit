@@ -4,7 +4,8 @@ import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.SubscriptionDefinition;
 import org.folio.verticle.AbstractConsumersVerticle;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.folio.verticle.marc.consumers.MarcRecordEventsHandler;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.List;
 @Component
 public class MarcRecordEventConsumersVerticle extends AbstractConsumersVerticle {
 
+  private final ObjectFactory<MarcRecordEventsHandler> recordHandlerProvider;
   private static final String SOURCE_RECORD_TOPIC = "srs.source_records";
 
-  @Autowired
-  private AsyncRecordHandler<String, String> marcRecordEventsHandler;
+  public MarcRecordEventConsumersVerticle(ObjectFactory<MarcRecordEventsHandler> recordHandlerProvider) {
+    this.recordHandlerProvider = recordHandlerProvider;
+  }
 
   @Override
   public List<String> getEvents() {
@@ -24,7 +27,7 @@ public class MarcRecordEventConsumersVerticle extends AbstractConsumersVerticle 
 
   @Override
   public AsyncRecordHandler<String, String> getHandler() {
-    return marcRecordEventsHandler;
+    return recordHandlerProvider.getObject();
   }
 
   @Override
