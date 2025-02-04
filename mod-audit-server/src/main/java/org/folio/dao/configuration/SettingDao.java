@@ -30,6 +30,7 @@ public class SettingDao {
   private static final String TABLE_NAME = "setting";
   private static final String SELECT_BY_GROUP_ID_SQL = "SELECT * FROM %s WHERE group_id = $1 ORDER BY key";
   private static final String EXIST_BY_ID_SQL = "SELECT 1 FROM %s WHERE id = $1";
+  private static final String SELECT_BY_ID_SQL = "SELECT * FROM %s WHERE id = $1";
   private static final String UPDATE_SQL = """
     UPDATE %s SET
       key = $1,
@@ -44,7 +45,7 @@ public class SettingDao {
 
   private final PostgresClientFactory pgClientFactory;
 
-  protected SettingDao(PostgresClientFactory pgClientFactory) {
+  public SettingDao(PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
   }
 
@@ -60,6 +61,13 @@ public class SettingDao {
     var query = prepareSql(EXIST_BY_ID_SQL, tenantId);
     pgClientFactory.createInstance(tenantId).select(query, Tuple.of(settingId), promise);
     return promise.future().map(rowSet -> rowSet.iterator().hasNext());
+  }
+
+  public Future<SettingEntity> getById(String settingId, String tenantId) {
+    var promise = Promise.<RowSet<Row>>promise();
+    var query = prepareSql(SELECT_BY_ID_SQL, tenantId);
+    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(settingId), promise);
+    return promise.future().map(rowSet -> settingMapper().apply(rowSet.iterator().next()));
   }
 
   public Future<Void> update(String settingId, SettingEntity entity, String tenantId) {

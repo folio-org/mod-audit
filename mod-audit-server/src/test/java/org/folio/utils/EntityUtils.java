@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.folio.dao.configuration.SettingEntity;
+import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
 import org.folio.rest.jaxrs.model.InvoiceLineAuditEvent;
@@ -187,6 +189,13 @@ public class EntityUtils {
 
     return new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(), "action",
       UUID.randomUUID(), diff);
+  }
+
+  public static SettingEntity createSettingEntity() {
+    return SettingEntity.builder()
+      .type(SettingValueType.INTEGER)
+      .value(10)
+      .build();
   }
 
   public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type,
