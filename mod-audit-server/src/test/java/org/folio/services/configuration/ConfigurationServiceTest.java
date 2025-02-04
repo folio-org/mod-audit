@@ -1,5 +1,6 @@
 package org.folio.services.configuration;
 
+import static org.folio.utils.EntityUtils.createSettingEntity;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,6 +118,22 @@ class ConfigurationServiceTest {
     assertEquals(NotFoundException.class, result.cause().getClass());
     verify(validationService).validateSetting(setting, GROUP_ID, SETTING_KEY);
     verify(settingDao).exists(SETTING_ID, TENANT_ID);
+  }
+
+  @Test
+  void getSetting_shouldReturnSetting() {
+    var setting = org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE;
+    var settingEntity = createSettingEntity();
+    var mapper = mock(SettingMapper.class);
+    var expected = getSetting();
+
+    when(settingDao.getById(setting.getSettingId(), TENANT_ID)).thenReturn(Future.succeededFuture(settingEntity));
+    when(settingMappers.getSettingMapper()).thenReturn(mapper);
+    when(mapper.apply(settingEntity)).thenReturn(expected);
+
+    var result = configurationService.getSetting(setting, TENANT_ID);
+
+    assertEquals(expected, result.result());
   }
 
   private Setting getSetting() {

@@ -267,6 +267,19 @@
       ]
     },
     {
+      "id": "audit-inventory",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/inventory/instance/{entityId}",
+          "permissionsRequired": [
+            "audit.inventory.instance.collection.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -393,6 +406,11 @@
       "description": "Update setting for a audit authority group"
     },
     {
+      "permissionName": "audit.inventory.instance.collection.get",
+      "displayName": "Inventory Audit - get events",
+      "description": "Get inventory audit events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -409,7 +427,8 @@
         "acquisition.piece.events.history.get",
         "acquisition.invoice.events.get",
         "acquisition.invoice-line.events.get",
-        "acquisition.organization.events.get"
+        "acquisition.organization.events.get",
+        "audit.inventory.instance.collection.get"
       ]
     }
   ],

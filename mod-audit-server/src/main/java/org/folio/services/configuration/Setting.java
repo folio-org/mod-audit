@@ -15,4 +15,8 @@ public enum Setting {
     this.group = group;
     this.key = key;
   }
+
+  public String getSettingId() {
+    return group.getId() + "." + key;
+  }
 }

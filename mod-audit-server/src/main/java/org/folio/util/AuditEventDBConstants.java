@@ -22,6 +22,8 @@ public class AuditEventDBConstants {
 
   public static final String USER_ID_FIELD = "user_id";
 
+  public static final String EVENT_ID_FIELD = "event_id";
+
   public static final String EVENT_DATE_FIELD = "event_date";
 
   public static final String ACTION_DATE_FIELD = "action_date";
@@ -29,6 +31,8 @@ public class AuditEventDBConstants {
   public static final String MODIFIED_CONTENT_FIELD = "modified_content_snapshot";
 
   public static final String TOTAL_RECORDS_FIELD = "total_records";
+  public static final String ENTITY_ID_FIELD = "entity_id";
+  public static final String DIFF_FIELD = "diff";
 
   public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
 
