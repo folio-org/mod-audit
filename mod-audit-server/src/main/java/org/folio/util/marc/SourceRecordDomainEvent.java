@@ -16,5 +16,4 @@ public class SourceRecordDomainEvent {
   private SourceRecordDomainEventType eventType;
   private EventMetadata eventMetadata;
   private EventPayload eventPayload;
-  private String recordId;
 }

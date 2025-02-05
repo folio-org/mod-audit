@@ -34,8 +34,7 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
     var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp());
-    var recordId = event.getRecordId();
-    LOGGER.info("handle:: Starting processing of Marc Record audit event for action '{}' and id: '{};", event.getEventType(), recordId);
+    LOGGER.info("handle:: Starting processing of Marc Record audit event with id '{}'", event.getEventId());
     marcAuditService.saveMarcDomainEvent(event)
       .onSuccess(ar -> {
         LOGGER.info("handle:: Marc Bib audit event with id: {}", event.getEventId());

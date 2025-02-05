@@ -1,12 +1,6 @@
 package org.folio.utils;
 
 import io.vertx.core.json.JsonObject;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.folio.dao.configuration.SettingEntity;
 import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.inventory.InventoryAuditEntity;
@@ -19,6 +13,20 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
+import org.folio.util.marc.EventMetadata;
+import org.folio.util.marc.EventPayload;
+import org.folio.util.marc.SourceRecordDomainEvent;
+import org.folio.util.marc.SourceRecordDomainEventType;
+import org.folio.util.marc.SourceRecordType;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class EntityUtils {
 
@@ -33,6 +41,16 @@ public class EntityUtils {
   public static final String INVOICE_ID = "3f29b1a4-8c2b-4d3a-9b1e-5f2a1b4c8d3a";
   public static final String INVOICE_LINE_ID = "550e8400-e29b-41d4-a716-446655440001";
   public static final String ORGANIZATION_ID = "39e7362e-b487-4d51-8bdb-cbd6bf29d1c7";
+  public static final String SOURCE_RECORD_ID = UUID.randomUUID().toString();
+  public static final String USER_ID = UUID.randomUUID().toString();
+
+  public static final String LEADER_OLD = "old-leader";
+  public static final String LEADER_NEW = "updated-leader";
+  public static final String FIELD_001 = "001";
+  public static final String FIELD_245 = "245";
+  public static final String TITLE_OLD = "Old Title";
+  public static final String TITLE_NEW = "Updated Title";
+  public static final String VALUE_001 = "in0000000";
 
   public static OrderAuditEvent createOrderAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
@@ -157,7 +175,6 @@ public class EntityUtils {
   }
 
 
-
   public static OrganizationAuditEvent createOrganizationAuditEvent(String id) {
     JsonObject jsonObject = new JsonObject();
     jsonObject.put("name", "Test Organization 123");
@@ -210,5 +227,67 @@ public class EntityUtils {
       .newValue(Map.of("key", "newValue"))
       .oldValue(Map.of("key", "oldValue"))
       .build();
+  }
+
+  public static SourceRecordDomainEvent createSourceRecordDomainEvent() {
+    return new SourceRecordDomainEvent(
+      UUID.randomUUID().toString(),
+      SourceRecordDomainEventType.SOURCE_RECORD_CREATED,
+      new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
+      new EventPayload(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+          "content", Map.of(
+            "leader", LEADER_NEW,
+            "fields", List.of(
+              Map.of(FIELD_001, VALUE_001),
+              Map.of(FIELD_245, Map.of("ind1", "1", "ind2", "0", "subfields", List.of(Map.of("a", TITLE_NEW))))
+            )
+          )
+        ), Map.of("createdByUserId", USER_ID)),
+        null
+      )
+    );
+  }
+
+  public static SourceRecordDomainEvent updateSourceRecordDomainEvent() {
+    return new SourceRecordDomainEvent(
+      UUID.randomUUID().toString(),
+      SourceRecordDomainEventType.SOURCE_RECORD_UPDATED,
+      new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
+      new EventPayload(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+          "content", Map.of(
+            "leader", LEADER_NEW,
+            "fields", List.of(
+              Map.of(FIELD_001, VALUE_001),
+              Map.of(FIELD_245, Map.of("ind1", "1", "ind2", "0", "subfields", List.of(Map.of("a", TITLE_NEW))))
+            )
+          )
+        ), Map.of("updatedByUserId", USER_ID)),
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+          "content", Map.of(
+            "leader", LEADER_OLD,
+            "fields", List.of(
+              Map.of(FIELD_001, VALUE_001),
+              Map.of(FIELD_245, Map.of("ind1", "1", "ind2", "0", "subfields", List.of(Map.of("a", TITLE_OLD))))
+            )
+          )
+        ), Map.of("updatedByUserId", USER_ID))
+      )
+    );
+  }
+
+  public static SourceRecordDomainEvent deleteSourceRecordDomainEvent() {
+    var event = updateSourceRecordDomainEvent();
+    event.getEventPayload().setNewRecord(null);
+    event.setEventType(SourceRecordDomainEventType.SOURCE_RECORD_DELETED);
+    return event;
+  }
+
+  public static SourceRecordDomainEvent sourceRecordDomainEventWithNoDiff() {
+    var event = updateSourceRecordDomainEvent();
+    var newRecord = event.getEventPayload().getNewRecord();
+    event.getEventPayload().setOld(newRecord);
+    return event;
   }
 }

@@ -33,12 +33,12 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<RowSet<Row>> save(MarcAuditEntity entity, String tenantId) {
-    LOGGER.debug("save:: Saving Marc domain event with record id: {}", entity.entityId());
+    LOGGER.debug("save:: Saving Marc domain event with record id: {}", entity.recordId());
     var tableName = tableName(entity.recordType());
     var query = format(INSERT_SQL, formatDBTableName(tenantId, tableName));
     return makeSaveCall(query, entity, tenantId)
-      .onSuccess(rows -> LOGGER.info("save:: Saved Marc Bib domain event with record id: '{}' in to table '{}'", entity.entityId(), tableName))
-      .onFailure(e -> LOGGER.error("Failed to save record with id: '{}' in to table '{}'", entity.entityId(), tableName, e));
+      .onSuccess(rows -> LOGGER.info("save:: Saved Marc Bib domain event with record id: '{}' in to table '{}'", entity.recordId(), tableName))
+      .onFailure(e -> LOGGER.error("Failed to save record with id: '{}' in to table '{}'", entity.recordId(), tableName, e));
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
@@ -47,7 +47,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
       return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(
         entity.eventId(),
         entity.eventDate(),
-        entity.entityId(),
+        entity.recordId(),
         entity.origin(),
         entity.action(),
         entity.userId(),

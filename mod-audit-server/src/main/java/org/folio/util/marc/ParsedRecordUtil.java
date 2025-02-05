@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * - Calculating differences between old and new parsed records for auditing purposes.
  * - Formatting and restructuring MARC field data.
  * </p>
- *
+ * <p>
  * This class is intended to function as a utility and should not be instantiated directly.
  */
 @UtilityClass
@@ -45,33 +45,30 @@ public class ParsedRecordUtil {
    * @param event the source record domain event containing the details for creating the MarcAuditEntity;
    *              it includes event metadata, event type, payload with new and old records, and event ID.
    * @return a {@link MarcAuditEntity} instance containing data inferred from the given event, such as event ID,
-   *         event date, record ID, origin, action, user ID, record type, and any differences.
+   * event date, record ID, origin, action, user ID, record type, and any differences.
    */
   public static MarcAuditEntity mapToEntity(SourceRecordDomainEvent event) {
-    var eventPayload = event.getEventPayload();
-    String recordId;
     String userId;
+    String recordId;
     SourceRecordType recordType;
     Map<String, Object> difference;
+    var oldRecord = event.getEventPayload().getOld();
+    var newRecord = event.getEventPayload().getNewRecord();
 
     switch (event.getEventType()) {
       case SOURCE_RECORD_CREATED -> {
-        var newRecord = eventPayload.getNewRecord();
         recordId = newRecord.getId();
         userId = getUserIdFromMetadata(newRecord.getMetadata(), CREATED_BY);
         recordType = newRecord.getRecordType();
         difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
       }
       case SOURCE_RECORD_UPDATED -> {
-        var newRecord = eventPayload.getNewRecord();
-        var oldRecord = eventPayload.getOld();
         recordId = newRecord.getId();
         userId = getUserIdFromMetadata(newRecord.getMetadata(), UPDATED_BY);
         recordType = newRecord.getRecordType();
         difference = calculateDifferences(oldRecord.getParsedRecord(), newRecord.getParsedRecord());
       }
       default -> {
-        var oldRecord = eventPayload.getOld();
         recordId = oldRecord.getId();
         userId = getUserIdFromMetadata(oldRecord.getMetadata(), UPDATED_BY);
         recordType = oldRecord.getRecordType();
@@ -119,7 +116,7 @@ public class ParsedRecordUtil {
    * @param input a map representing a parsed record, expected to contain a "content" key
    *              with relevant field data and metadata.
    * @return a map where field tags are the keys and their corresponding values
-   *         are formatted strings or lists of strings.
+   * are formatted strings or lists of strings.
    */
   @SuppressWarnings("unchecked")
   private static Map<String, Object> flattenFields(Map<String, Object> input) {
@@ -178,9 +175,9 @@ public class ParsedRecordUtil {
    * @param oldMap the original map representing the state of a parsed record before changes
    * @param newMap the updated map representing the state of a parsed record after changes
    * @return a map containing three keys ("added", "removed", "modified"), each mapped
-   *         to a list of maps. The "added" key contains entries present only in the new map,
-   *         the "removed" key contains entries present only in the old map,
-   *         and the "modified" key contains entries with mismatched values between the maps.
+   * to a list of maps. The "added" key contains entries present only in the new map,
+   * the "removed" key contains entries present only in the old map,
+   * and the "modified" key contains entries with mismatched values between the maps.
    */
   private static Map<String, Object> compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
     List<Map<String, Object>> added = new ArrayList<>();
@@ -230,16 +227,17 @@ public class ParsedRecordUtil {
   }
 
   private static Map<String, Object> toMap(Collection<?> added, Collection<?> removed, Collection<?> modified) {
-    var result = new HashMap<String, Object>();
-    if (added != null && !added.isEmpty()) {
-      result.put("added", added);
-    }
-    if (removed != null && !removed.isEmpty()) {
-      result.put("removed", removed);
-    }
-    if (modified != null && !modified.isEmpty()) {
-      result.put("modified", modified);
-    }
+    Map<String, Object> result = new HashMap<>();
+    addIfNotEmpty(result, "added", added);
+    addIfNotEmpty(result, "removed", removed);
+    addIfNotEmpty(result, "modified", modified);
     return result;
   }
+
+  private static void addIfNotEmpty(Map<String, Object> map, String key, Collection<?> collection) {
+    if (collection != null && !collection.isEmpty()) {
+      map.put(key, collection);
+    }
+  }
+
 }

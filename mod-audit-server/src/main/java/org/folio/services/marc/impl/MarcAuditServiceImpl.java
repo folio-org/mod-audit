@@ -6,14 +6,11 @@ import io.vertx.sqlclient.RowSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
+import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.ParsedRecordUtil;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 import static org.folio.util.ErrorUtils.handleFailures;
 
@@ -29,25 +26,24 @@ public class MarcAuditServiceImpl implements MarcAuditService {
   }
 
   @Override
-  public Future<RowSet<Row>> saveMarcDomainEvent(SourceRecordDomainEvent sourceRecordDomainEvent) {
-    var tenantId = sourceRecordDomainEvent.getEventMetadata().getTenantId();
-    LOGGER.debug("saveOrderAuditEvent:: Saving marc bib event for tenantId={}", tenantId);
-    var entity = ParsedRecordUtil.mapToEntity(sourceRecordDomainEvent);
-    if (isEmptyDifference(entity.diff())) {
-      LOGGER.debug("saveMarcBibDomainEvent:: No changes detected, skipping save for tenantId={}", tenantId);
+  public Future<RowSet<Row>> saveMarcDomainEvent(SourceRecordDomainEvent event) {
+    var tenantId = event.getEventMetadata().getTenantId();
+    LOGGER.debug("saveOrderAuditEvent:: Trying to save SourceRecordDomainEvent tenantId: '{}', eventId: '{};", tenantId, event.getEventId());
+    MarcAuditEntity entity;
+    try {
+      entity = ParsedRecordUtil.mapToEntity(event);
+    } catch (Exception e) {
+      LOGGER.warn("saveMarcBibDomainEvent:: Error during mapping SourceRecordDomainEvent to MarcAuditEntity for event '{}'", event.getEventId());
+      return handleFailures(e, event.getEventId());
+    }
+    if (entity.diff() == null || entity.diff().isEmpty()) {
+      LOGGER.debug("saveMarcBibDomainEvent:: No changes detected, skipping save record '{}' and tenantId='{}'", entity.recordId(), tenantId);
       return Future.succeededFuture();
     }
     return marcAuditDao.save(entity, tenantId)
       .recover(throwable -> {
         LOGGER.error("handleFailures:: Could not save order audit event for tenantId: {}", tenantId);
-        return handleFailures(throwable, sourceRecordDomainEvent.getEventId());
+        return handleFailures(throwable, event.getEventId());
       });
-  }
-
-  private boolean isEmptyDifference(Map<String, Object> difference) {
-    return difference != null &&
-      difference.getOrDefault("added", Collections.emptyList()) instanceof List<?> added && added.isEmpty() &&
-      difference.getOrDefault("removed", Collections.emptyList()) instanceof List<?> removed && removed.isEmpty() &&
-      difference.getOrDefault("modified", Collections.emptyList()) instanceof List<?> modified && modified.isEmpty();
   }
 }
