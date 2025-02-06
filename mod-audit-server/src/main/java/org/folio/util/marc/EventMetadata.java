@@ -9,6 +9,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * The EventMetadata class encapsulates metadata related to an event.
+ * It provides information such as the publisher of the event, the tenant
+ * associated with the event, and the timestamp of the event.
+ */
 @Data
 @Builder
 @AllArgsConstructor

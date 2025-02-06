@@ -96,7 +96,7 @@ public class ParsedRecordUtilTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void mapToEntity_DefaultCaseHandled() {
+  void testMapToEntity_DeleteRecordUpdated_MarcBib() {
     // Arrange
     var event = EntityUtils.deleteSourceRecordDomainEvent();
 

@@ -3,6 +3,7 @@ package org.folio.util.marc;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.UtilityClass;
 import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.exception.ValidationException;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
  */
 @UtilityClass
 public class ParsedRecordUtil {
+  private static final String LDR = "LDR";
+  private static final String FIELD_005 = "005";
   private static final String SUBFIELDS_KEY = "subfields";
   private static final String FIELD_KEY = "field";
   private static final String FIELDS_KEY = "fields";
@@ -38,6 +41,8 @@ public class ParsedRecordUtil {
   private static final String VALUE_KEY = "value";
   private static final String CREATED_BY = "createdByUserId";
   private static final String UPDATED_BY = "updatedByUserId";
+  private static final String OLD_VALUE_KEY = "oldValue";
+  private static final String NEW_VALUE_KEY = "newValue";
 
   /**
    * Maps a {@link SourceRecordDomainEvent} to a {@link MarcAuditEntity}.
@@ -48,43 +53,44 @@ public class ParsedRecordUtil {
    * event date, record ID, origin, action, user ID, record type, and any differences.
    */
   public static MarcAuditEntity mapToEntity(SourceRecordDomainEvent event) {
-    String userId;
-    String recordId;
-    SourceRecordType recordType;
+    RecordData data;
     Map<String, Object> difference;
     var oldRecord = event.getEventPayload().getOld();
     var newRecord = event.getEventPayload().getNewRecord();
 
     switch (event.getEventType()) {
       case SOURCE_RECORD_CREATED -> {
-        recordId = newRecord.getId();
-        userId = getUserIdFromMetadata(newRecord.getMetadata(), CREATED_BY);
-        recordType = newRecord.getRecordType();
+        data = extractRecordData(newRecord, CREATED_BY);
         difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
       }
       case SOURCE_RECORD_UPDATED -> {
-        recordId = newRecord.getId();
-        userId = getUserIdFromMetadata(newRecord.getMetadata(), UPDATED_BY);
-        recordType = newRecord.getRecordType();
+        data = extractRecordData(newRecord, UPDATED_BY);
         difference = calculateDifferences(oldRecord.getParsedRecord(), newRecord.getParsedRecord());
       }
-      default -> {
-        recordId = oldRecord.getId();
-        userId = getUserIdFromMetadata(oldRecord.getMetadata(), UPDATED_BY);
-        recordType = oldRecord.getRecordType();
+      case SOURCE_RECORD_DELETED -> {
+        data = extractRecordData(oldRecord, UPDATED_BY);
         difference = getDifference(oldRecord.getParsedRecord(), event.getEventType());
       }
+      default -> throw new ValidationException("Unsupported event type: " + event.getEventType());
     }
 
     return new MarcAuditEntity(
       event.getEventId(),
       event.getEventMetadata().getEventDate(),
-      recordId,
+      data.recordId,
       event.getEventMetadata().getPublishedBy(),
       event.getEventType().getValue(),
-      userId,
-      recordType,
+      data.userId,
+      data.recordType,
       difference
+    );
+  }
+
+  private static RecordData extractRecordData(Record value, String userKey) {
+    return new RecordData(
+      value.getId(),
+      getUserIdFromMetadata(value.getMetadata(), userKey),
+      value.getRecordType()
     );
   }
 
@@ -124,7 +130,7 @@ public class ParsedRecordUtil {
     var fields = (List<Map<String, Object>>) content.get(FIELDS_KEY);
     var result = new HashMap<String, Object>();
     if (content.containsKey(LEADER_KEY)) {
-      result.put("LDR", content.get(LEADER_KEY));
+      result.put(LDR, content.get(LEADER_KEY));
     }
     if (!content.containsKey(FIELDS_KEY)) {
       return result;
@@ -197,13 +203,13 @@ public class ParsedRecordUtil {
     });
 
     newMap.forEach((key, newValue) -> {
-      if (!"005".equals(key) && oldMap.containsKey(key)) {
+      if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
         var oldValue = oldMap.get(key);
         if (!Objects.equals(oldValue, newValue)) {
           modified.add(Map.of(
             FIELD_KEY, key,
-            "oldValue", oldValue,
-            "newValue", newValue
+            OLD_VALUE_KEY, oldValue,
+            NEW_VALUE_KEY, newValue
           ));
         }
       }
@@ -238,6 +244,9 @@ public class ParsedRecordUtil {
     if (collection != null && !collection.isEmpty()) {
       map.put(key, collection);
     }
+  }
+
+  private record RecordData(String recordId, String userId, SourceRecordType recordType) {
   }
 
 }

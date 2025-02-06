@@ -34,18 +34,18 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
     var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp());
-    LOGGER.info("handle:: Starting processing of Marc Record audit event with id '{}'", event.getEventId());
+    LOGGER.info("saveMarcDomainEvent:: Starting processing of Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
     marcAuditService.saveMarcDomainEvent(event)
       .onSuccess(ar -> {
-        LOGGER.info("handle:: Marc Bib audit event with id: {}", event.getEventId());
+        LOGGER.info("saveMarcDomainEvent:: Saved Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
         result.complete(event.getEventId());
       })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
-          LOGGER.info("handle:: Duplicate Marc bib audit event with id: {} received, skipped processing", event.getEventId());
+          LOGGER.info("saveMarcDomainEvent:: Duplicate Marc bib audit event with id: {} received, skipped processing", event.getEventId());
           result.complete(event.getEventId());
         } else {
-          LOGGER.error("Processing of Marc Bib audit event with id: {} has been failed", event.getEventId(), e);
+          LOGGER.error("saveMarcDomainEvent:: Processing of Marc Bib audit event with id: {} and type '{}' has been failed", event.getEventId(), event.getEventType(), e);
           result.fail(e);
         }
       });
