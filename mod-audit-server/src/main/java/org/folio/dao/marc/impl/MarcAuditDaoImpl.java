@@ -33,12 +33,12 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<RowSet<Row>> save(MarcAuditEntity entity, String tenantId) {
-    LOGGER.debug("save:: Saving Marc domain event with record id: {}", entity.recordId());
+    LOGGER.debug("save:: Saving Marc domain event with id: '{}' and record id: '{}'", entity.recordId(), entity.recordId());
     var tableName = tableName(entity.recordType());
     var query = format(INSERT_SQL, formatDBTableName(tenantId, tableName));
     return makeSaveCall(query, entity, tenantId)
-      .onSuccess(rows -> LOGGER.info("save:: Saved Marc Bib domain event with record id: '{}' in to table '{}'", entity.recordId(), tableName))
-      .onFailure(e -> LOGGER.error("Failed to save record with id: '{}' in to table '{}'", entity.recordId(), tableName, e));
+      .onSuccess(rows -> LOGGER.info("save:: Saved Marc Bib event with id: '{}' and recordId: '{}' in to table '{}'", entity.eventId(), entity.recordId(), tableName))
+      .onFailure(e -> LOGGER.error("save:: Failed to save Marc Bib event with id: '{}' and recordId: '{}' in to table '{}'", entity.recordId(), entity.recordId(), tableName, e));
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
