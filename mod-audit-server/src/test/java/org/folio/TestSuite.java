@@ -259,14 +259,6 @@ public class TestSuite {
   }
 
   @Nested
-  class AuditConfigAPINestedTest extends AuditConfigAPITest {
-  }
-
-  @Nested
-  class InventoryAuditApiNestedTest extends InventoryAuditApiTest {
-  }
-
-  @Nested
   class MarcRecordEventsHandlerMockNestedTest extends MarcRecordEventsHandlerMockTest {
   }
 
@@ -280,5 +272,13 @@ public class TestSuite {
 
   @Nested
   class ParsedRecordUtilNestedTest extends ParsedRecordUtilTest {
+  }
+
+  @Nested
+  class AuditConfigAPINestedTest extends AuditConfigAPITest {
+  }
+
+  @Nested
+  class InventoryAuditApiNestedTest extends InventoryAuditApiTest {
   }
 }
