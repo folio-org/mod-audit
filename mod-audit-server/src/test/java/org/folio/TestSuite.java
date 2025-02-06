@@ -29,6 +29,7 @@ import org.folio.dao.OrderEventsDaoTest;
 import org.folio.dao.OrderLineEventsDaoTest;
 import org.folio.dao.OrganizationEventsDaoTest;
 import org.folio.dao.PieceEventsDaoTest;
+import org.folio.dao.marc.impl.MarcAuditDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditConfigAPITest;
@@ -40,6 +41,7 @@ import org.folio.rest.impl.InventoryAuditApiTest;
 import org.folio.rest.impl.InventoryEventHandlerMockTest;
 import org.folio.rest.impl.InvoiceEventsHandlerMockTest;
 import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
+import org.folio.rest.impl.MarcRecordEventsHandlerMockTest;
 import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
 import org.folio.rest.impl.PieceEventsHandlerMockTest;
@@ -51,6 +53,8 @@ import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.OrganizationAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
 import org.folio.services.inventory.impl.InventoryEventServiceImplTest;
+import org.folio.services.marc.impl.MarcAuditServiceTest;
+import org.folio.util.marc.ParsedRecordUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -262,4 +266,19 @@ public class TestSuite {
   class InventoryAuditApiNestedTest extends InventoryAuditApiTest {
   }
 
+  @Nested
+  class MarcRecordEventsHandlerMockNestedTest extends MarcRecordEventsHandlerMockTest {
+  }
+
+  @Nested
+  class MarcAuditDaoNestedTest extends MarcAuditDaoTest {
+  }
+
+  @Nested
+  class MarcAuditServiceNestedTest extends MarcAuditServiceTest {
+  }
+
+  @Nested
+  class ParsedRecordUtilNestedTest extends ParsedRecordUtilTest {
+  }
 }

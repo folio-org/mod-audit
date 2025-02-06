@@ -1,3 +1,6 @@
+## X.XX.X XXXX-XX-XX
+* [MODAUD-205](https://folio-org.atlassian.net/browse/MODAUD-205) - Consume domain event for MARC_BIB and MARC_AUTHORITY
+
 ## 2.10.2 2025-01-10
 
 * [MODAUD-216](https://folio-org.atlassian.net/browse/MODAUD-199) - Remove PII from mod-audit logs

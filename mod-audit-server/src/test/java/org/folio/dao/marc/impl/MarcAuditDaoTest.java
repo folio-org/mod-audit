@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class MarcAuditDaoTest {
+public class MarcAuditDaoTest {
 
   private static final String TENANT_ID = "diku";
 

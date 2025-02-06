@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ParsedRecordUtilTest {
+public class ParsedRecordUtilTest {
   private static final String FIELD_KEY = "field";
   private static final String OLD_VALUE_KEY = "oldValue";
   private static final String NEW_VALUE_KEY = "newValue";
