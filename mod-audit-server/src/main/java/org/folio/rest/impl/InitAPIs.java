@@ -25,6 +25,7 @@ import org.folio.verticle.acquisition.PieceEventConsumersVerticle;
 import org.folio.verticle.inventory.HoldingsConsumersVerticle;
 import org.folio.verticle.inventory.InstanceConsumersVerticle;
 import org.folio.verticle.inventory.ItemConsumersVerticle;
+import org.folio.verticle.marc.MarcRecordEventConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -79,6 +80,10 @@ public class InitAPIs implements InitAPI {
   @Value("${inv.item.kafka.consumer.pool.size:5}")
   private int invItemConsumerPoolSize;
 
+  @Value("${src.source-records.kafka.consumer.instancesNumber:1}")
+  private int srsSourceRecordsConsumerInstancesNumber;
+  @Value("${src.source-records.kafka.consumer.pool.size:5}")
+  private int srsSourceRecordsConsumerPoolSize;
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
@@ -116,6 +121,7 @@ public class InitAPIs implements InitAPI {
     Promise<String> inventoryInstanceConsumer = Promise.promise();
     Promise<String> inventoryHoldingsConsumer = Promise.promise();
     Promise<String> inventoryItemConsumer = Promise.promise();
+    Promise<String> sourceRecordsConsumer = Promise.promise();
 
     deployVerticle(vertx, verticleFactory, OrderEventConsumersVerticle.class, acqOrderConsumerInstancesNumber, acqOrderConsumerPoolSize, orderEventsConsumer);
     deployVerticle(vertx, verticleFactory, OrderLineEventConsumersVerticle.class, acqOrderLineConsumerInstancesNumber, acqOrderLineConsumerPoolSize, orderLineEventsConsumer);
@@ -126,6 +132,7 @@ public class InitAPIs implements InitAPI {
     deployVerticle(vertx, verticleFactory, InstanceConsumersVerticle.class, invInstanceConsumerInstancesNumber, invInstanceConsumerPoolSize, inventoryInstanceConsumer);
     deployVerticle(vertx, verticleFactory, HoldingsConsumersVerticle.class, invHoldingsConsumerInstancesNumber, invHoldingsConsumerPoolSize, inventoryHoldingsConsumer);
     deployVerticle(vertx, verticleFactory, ItemConsumersVerticle.class, invItemConsumerInstancesNumber, invItemConsumerPoolSize, inventoryItemConsumer);
+    deployVerticle(vertx, verticleFactory, MarcRecordEventConsumersVerticle.class, srsSourceRecordsConsumerInstancesNumber, srsSourceRecordsConsumerPoolSize, sourceRecordsConsumer);
 
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
     return GenericCompositeFuture.all(Arrays.asList(
@@ -137,7 +144,8 @@ public class InitAPIs implements InitAPI {
       organizationsEventsConsumer.future(),
       inventoryInstanceConsumer.future(),
       inventoryHoldingsConsumer.future(),
-      inventoryItemConsumer.future()
+      inventoryItemConsumer.future(),
+      sourceRecordsConsumer.future()
     ));
   }
 
