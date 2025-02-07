@@ -14,7 +14,7 @@ import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.util.marc.EventMetadata;
-import org.folio.util.marc.EventPayload;
+import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordDomainEventType;
 import org.folio.util.marc.SourceRecordType;
@@ -234,7 +234,7 @@ public class EntityUtils {
       UUID.randomUUID().toString(),
       SourceRecordDomainEventType.SOURCE_RECORD_CREATED,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
-      new EventPayload(
+      new MarcEventPayload(
         new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,
@@ -254,7 +254,7 @@ public class EntityUtils {
       UUID.randomUUID().toString(),
       SourceRecordDomainEventType.SOURCE_RECORD_UPDATED,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
-      new EventPayload(
+      new MarcEventPayload(
         new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,

@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventPayload {
+public class MarcEventPayload {
     @JsonProperty("new")
     private Record newRecord;
     private Record old;

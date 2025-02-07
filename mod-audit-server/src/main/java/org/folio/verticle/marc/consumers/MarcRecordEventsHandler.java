@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.services.marc.MarcAuditService;
-import org.folio.util.marc.EventPayload;
+import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +54,7 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
 
   private SourceRecordDomainEvent buildSourceRecordDomainEvent(String eventValue, long eventTime) {
     var eventJson = new JsonObject(eventValue);
-    var payload = new JsonObject(String.valueOf(eventJson.remove("eventPayload"))).mapTo(EventPayload.class);
+    var payload = new JsonObject(String.valueOf(eventJson.remove("eventPayload"))).mapTo(MarcEventPayload.class);
     var event = eventJson.mapTo(SourceRecordDomainEvent.class);
     event.setEventPayload(payload);
     event.getEventMetadata().setEventDate(Instant.ofEpochMilli(eventTime).atZone(ZoneId.systemDefault()).toLocalDateTime());

@@ -29,5 +29,5 @@ public class SourceRecordDomainEvent {
   private String eventId;
   private SourceRecordDomainEventType eventType;
   private EventMetadata eventMetadata;
-  private EventPayload eventPayload;
+  private MarcEventPayload eventPayload;
 }
