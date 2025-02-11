@@ -29,7 +29,6 @@ import org.folio.dao.inventory.impl.InventoryEventDaoImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.inventory.InventoryResourceType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -50,7 +49,6 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
   private static final String INVENTORY_INSTANCE_AUDIT_PATH = "/audit-data/inventory/instance/";
   private static final String INVENTORY_HOLDINGS_AUDIT_PATH = "/audit-data/inventory/holdings/";
-
 
   @InjectMocks
   InstanceEventDao instanceEventDao;
@@ -159,10 +157,11 @@ public class InventoryAuditApiTest extends ApiTestBase {
       .body("inventoryAuditItems", hasSize(0));
   }
 
-  @Test
-  void shouldReturn400ForInvalidEntityId() {
+  @ParameterizedTest
+  @MethodSource("providePath")
+  void shouldReturn400ForInvalidEntityId(String apiPath) {
     given().headers(HEADERS)
-      .get(INVENTORY_INSTANCE_AUDIT_PATH + "invalid-id")
+      .get(apiPath + "invalid-id")
       .then().log().all()
       .statusCode(HttpStatus.HTTP_BAD_REQUEST.toInt())
       .body("errors[0].message", containsString("Invalid UUID string"));
