@@ -46,22 +46,50 @@ public class InventoryAuditImpl implements AuditDataInventory {
       service.getEvents(InventoryResourceType.INSTANCE, entityId, eventTs, tenantId)
         .map(AuditDataInventory.GetAuditDataInventoryInstanceByEntityIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToResponse)
+        .otherwise(this::mapExceptionToInstanceResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
       LOGGER.error(
         "getAuditDataInventoryInstanceByEntityId:: Error retrieving Audit Data Inventory Instance by [entityId: {}, eventDate: {}]",
         entityId, eventTs, e);
-      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToInstanceResponse(e)));
     }
   }
 
-  private Response mapExceptionToResponse(Throwable throwable) {
-    LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
+  @Override
+  public void getAuditDataInventoryHoldingsByEntityId(String entityId, String eventTs, Map<String, String> okapiHeaders,
+                                                      Handler<AsyncResult<Response>> asyncResultHandler,
+                                                      Context vertxContext) {
+    LOGGER.debug(
+      "getAuditDataInventoryHoldingsByEntityId:: Retrieving Audit Data Inventory Holdings by [entityId: {}, eventTs: {}]",
+      entityId, eventTs);
+    var tenantId = TenantTool.tenantId(okapiHeaders);
+    try {
+      service.getEvents(InventoryResourceType.HOLDINGS, entityId, eventTs, tenantId)
+        .map(AuditDataInventory.GetAuditDataInventoryHoldingsByEntityIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToHoldingsResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error(
+        "getAuditDataInventoryHoldingsByEntityId:: Error retrieving Audit Data Inventory Holdings by [entityId: {}, eventDate: {}]",
+        entityId, eventTs, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToHoldingsResponse(e)));
+    }
+  }
+
+  private Response mapExceptionToInstanceResponse(Throwable throwable) {
+    LOGGER.debug("mapExceptionToInstanceResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     if (throwable instanceof ValidationException) {
       return errorResponse(HttpStatus.HTTP_BAD_REQUEST, VALIDATION_ERROR_CODE, throwable);
     }
     LOGGER.error("mapExceptionToResponse:: Error occurred during processing request", throwable);
     return errorResponse(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, GENERIC_ERROR_CODE, throwable);
+  }
+
+  private Response mapExceptionToHoldingsResponse(Throwable throwable) {
+    LOGGER.debug("mapExceptionToHoldingsResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
+    return AuditDataInventory.GetAuditDataInventoryHoldingsByEntityIdResponse
+      .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
 }
