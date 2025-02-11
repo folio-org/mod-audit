@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.resource.AuditDataInventory;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.ErrorUtils;
 import org.folio.util.inventory.InventoryResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -46,13 +45,13 @@ public class InventoryAuditImpl implements AuditDataInventory {
       service.getEvents(InventoryResourceType.INSTANCE, entityId, eventTs, tenantId)
         .map(AuditDataInventory.GetAuditDataInventoryInstanceByEntityIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToInstanceResponse)
+        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
       LOGGER.error(
         "getAuditDataInventoryInstanceByEntityId:: Error retrieving Audit Data Inventory Instance by [entityId: {}, eventDate: {}]",
         entityId, eventTs, e);
-      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToInstanceResponse(e)));
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
 
@@ -68,28 +67,22 @@ public class InventoryAuditImpl implements AuditDataInventory {
       service.getEvents(InventoryResourceType.HOLDINGS, entityId, eventTs, tenantId)
         .map(AuditDataInventory.GetAuditDataInventoryHoldingsByEntityIdResponse::respond200WithApplicationJson)
         .map(Response.class::cast)
-        .otherwise(this::mapExceptionToHoldingsResponse)
+        .otherwise(this::mapExceptionToResponse)
         .onComplete(asyncResultHandler);
     } catch (Exception e) {
       LOGGER.error(
         "getAuditDataInventoryHoldingsByEntityId:: Error retrieving Audit Data Inventory Holdings by [entityId: {}, eventDate: {}]",
         entityId, eventTs, e);
-      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToHoldingsResponse(e)));
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
     }
   }
 
-  private Response mapExceptionToInstanceResponse(Throwable throwable) {
-    LOGGER.debug("mapExceptionToInstanceResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
+  private Response mapExceptionToResponse(Throwable throwable) {
+    LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     if (throwable instanceof ValidationException) {
       return errorResponse(HttpStatus.HTTP_BAD_REQUEST, VALIDATION_ERROR_CODE, throwable);
     }
     LOGGER.error("mapExceptionToResponse:: Error occurred during processing request", throwable);
     return errorResponse(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, GENERIC_ERROR_CODE, throwable);
-  }
-
-  private Response mapExceptionToHoldingsResponse(Throwable throwable) {
-    LOGGER.debug("mapExceptionToHoldingsResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
-    return AuditDataInventory.GetAuditDataInventoryHoldingsByEntityIdResponse
-      .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
   }
 }
