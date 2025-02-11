@@ -276,6 +276,13 @@
           "permissionsRequired": [
             "audit.inventory.instance.collection.get"
           ]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/inventory/holdings/{entityId}",
+          "permissionsRequired": [
+            "audit.inventory.holdings.collection.get"
+          ]
         }
       ]
     },
@@ -407,8 +414,13 @@
     },
     {
       "permissionName": "audit.inventory.instance.collection.get",
-      "displayName": "Inventory Audit - get events",
-      "description": "Get inventory audit events"
+      "displayName": "Inventory Audit - get instance events",
+      "description": "Get inventory instance audit events"
+    },
+    {
+      "permissionName": "audit.inventory.holdings.collection.get",
+      "displayName": "Inventory Audit - get holdings events",
+      "description": "Get inventory holdings audit events"
     },
     {
       "permissionName": "audit.all",
@@ -428,7 +440,8 @@
         "acquisition.invoice.events.get",
         "acquisition.invoice-line.events.get",
         "acquisition.organization.events.get",
-        "audit.inventory.instance.collection.get"
+        "audit.inventory.instance.collection.get",
+        "audit.inventory.holdings.collection.get"
       ]
     }
   ],
