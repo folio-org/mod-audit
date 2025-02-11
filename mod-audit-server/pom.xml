@@ -24,6 +24,11 @@
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <awaitility.version>4.2.0</awaitility.version>
     <argLine />
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <lombok.version>1.18.30</lombok.version>
+    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+    <assertj.version>3.27.2</assertj.version>
+    <javers.version>7.7.0</javers.version>
   </properties>
 
   <dependencies>
@@ -39,6 +44,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.javers</groupId>
+      <artifactId>javers-core</artifactId>
+      <version>${javers.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-kafka-wrapper</artifactId>
       <version>3.0.0</version>
@@ -51,6 +61,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-kafka-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${mapstruct.version}</version>
     </dependency>
     <dependency>
       <groupId>net.mguenther.kafka</groupId>
@@ -146,6 +161,11 @@
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -164,6 +184,23 @@
         <configuration>
           <release>17</release>
           <encoding>UTF-8</encoding>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>${lombok-mapstruct-binding.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
 

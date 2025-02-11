@@ -8,10 +8,10 @@ import static org.hamcrest.Matchers.hasSize;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.folio.CopilotGenerated;
 import org.folio.HttpStatus;
@@ -20,6 +20,9 @@ import org.folio.dao.configuration.SettingEntity;
 import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.impl.InstanceEventDao;
+import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.domain.diff.ChangeType;
+import org.folio.domain.diff.FieldChangeDto;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,8 +56,8 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
   @Test
   void shouldReturnInventoryEventsOnGetByEntityId() {
-    var jsonObject = new JsonObject();
-    jsonObject.put("name", "Test Product");
+    var changeRecordDto = new ChangeRecordDto();
+    changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "new")));
 
     var inventoryAuditEntity = new InventoryAuditEntity(
       UUID.randomUUID(),
@@ -62,7 +65,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
       UUID.fromString(ENTITY_ID),
       "CREATE",
       UUID.randomUUID(),
-      jsonObject.getMap()
+      changeRecordDto
     );
 
     instanceEventDao.save(inventoryAuditEntity, TENANT_ID);
@@ -89,8 +92,8 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
     // Create InventoryAuditEntity entities with a year date difference
     for (int i = 0; i < 5; i++) {
-      var jsonObject = new JsonObject();
-      jsonObject.put("name", "Test Product " + i);
+      var changeRecordDto = new ChangeRecordDto();
+      changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "Test Product " + i)));
 
       var inventoryAuditEntity = new InventoryAuditEntity(
         UUID.randomUUID(),
@@ -98,7 +101,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
         UUID.fromString(ENTITY_ID),
         "CREATE",
         UUID.randomUUID(),
-        jsonObject.getMap()
+        changeRecordDto
       );
 
       instanceEventDao.save(inventoryAuditEntity, TENANT_ID).result();

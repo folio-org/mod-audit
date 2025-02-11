@@ -1,0 +1,296 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "administrativeNotes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "alternativeTitles": {
+      "items": {
+        "properties": {
+          "alternativeTitle": {
+            "type": "string"
+          },
+          "alternativeTitleTypeId": {
+            "type": "string"
+          },
+          "authorityId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "catalogedDate": {
+      "type": "string"
+    },
+    "classifications": {
+      "items": {
+        "properties": {
+          "classificationNumber": {
+            "type": "string"
+          },
+          "classificationTypeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "contributors": {
+      "items": {
+        "properties": {
+          "authorityId": {
+            "type": "string"
+          },
+          "contributorNameTypeId": {
+            "type": "string"
+          },
+          "contributorTypeId": {
+            "type": "string"
+          },
+          "contributorTypeText": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "dates": {
+      "properties": {
+        "date1": {
+          "type": "string"
+        },
+        "date2": {
+          "type": "string"
+        },
+        "dateTypeId": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "deleted": {
+      "type": "boolean"
+    },
+    "discoverySuppress": {
+      "type": "boolean"
+    },
+    "editions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "electronicAccess": {
+      "items": {
+        "properties": {
+          "linkText": {
+            "type": "string"
+          },
+          "materialsSpecification": {
+            "type": "string"
+          },
+          "publicNote": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "hrid": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "identifiers": {
+      "items": {
+        "properties": {
+          "identifierTypeId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "indexTitle": {
+      "type": "string"
+    },
+    "instanceFormatIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "instanceTypeId": {
+      "type": "string"
+    },
+    "languages": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "matchKey": {
+      "type": "string"
+    },
+    "modeOfIssuanceId": {
+      "type": "string"
+    },
+    "natureOfContentTermIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "notes": {
+      "items": {
+        "properties": {
+          "instanceNoteTypeId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "staffOnly": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "physicalDescriptions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "previouslyHeld": {
+      "default": false,
+      "type": "boolean"
+    },
+    "publication": {
+      "items": {
+        "properties": {
+          "dateOfPublication": {
+            "type": "string"
+          },
+          "place": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "publicationFrequency": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publicationRange": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "series": {
+      "items": {
+        "properties": {
+          "authorityId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "source": {
+      "type": "string"
+    },
+    "staffSuppress": {
+      "type": "boolean"
+    },
+    "statisticalCodeIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "statusId": {
+      "type": "string"
+    },
+    "statusUpdatedDate": {
+      "type": "string"
+    },
+    "subjects": {
+      "items": {
+        "properties": {
+          "authorityId": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "typeId": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "tags": {
+      "properties": {
+        "tagList": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
