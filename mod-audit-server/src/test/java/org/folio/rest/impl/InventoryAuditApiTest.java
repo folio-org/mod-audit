@@ -29,21 +29,19 @@ import org.mockito.Spy;
 @CopilotGenerated(partiallyGenerated = true)
 public class InventoryAuditApiTest extends ApiTestBase {
 
-  private static final Header TENANT_HEADER = new Header("X-Okapi-Tenant", "modaudittest");
+  private static final String TENANT_ID = "modaudittest";
+  private static final String ENTITY_ID = UUID.randomUUID().toString();
+  private static final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_ID);
   private static final Header PERMS_HEADER = new Header("X-Okapi-Permissions", "audit.all");
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
   private static final String INVENTORY_INSTANCE_AUDIT_PATH = "/audit-data/inventory/instance/";
-  private static final String TENANT_ID = "modaudittest";
-  private static final String ENTITY_ID = UUID.randomUUID().toString();
-
-  @Spy
-  private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
-
   @InjectMocks
   InstanceEventDao instanceEventDao;
   @InjectMocks
   SettingDao settingDao;
+  @Spy
+  private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @BeforeEach
   public void setUp() {
@@ -127,9 +125,18 @@ public class InventoryAuditApiTest extends ApiTestBase {
   @Test
   void shouldReturnEmptyListForInvalidEntityId() {
     given().headers(HEADERS)
-      .get(INVENTORY_INSTANCE_AUDIT_PATH + UUID.randomUUID().toString())
+      .get(INVENTORY_INSTANCE_AUDIT_PATH + UUID.randomUUID())
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .body("inventoryAuditItems", hasSize(0));
+  }
+
+  @Test
+  void shouldReturn400ForInvalidEntityId() {
+    given().headers(HEADERS)
+      .get(INVENTORY_INSTANCE_AUDIT_PATH + "invalid-id")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_BAD_REQUEST.toInt())
+      .body("errors[0].message", containsString("Invalid UUID string"));
   }
 }

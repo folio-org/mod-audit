@@ -4,6 +4,7 @@ import static org.folio.util.ErrorCodes.GENERIC_ERROR_CODE;
 import static org.folio.util.ErrorCodes.NOT_FOUND_ERROR_CODE;
 import static org.folio.util.ErrorCodes.UNAUTHORIZED_ERROR_CODE;
 import static org.folio.util.ErrorCodes.VALIDATION_ERROR_CODE;
+import static org.folio.util.ErrorUtils.errorResponse;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -25,7 +26,6 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.PermissionCheckerHelper;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.ErrorCodes;
 import org.folio.util.ErrorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -114,12 +114,5 @@ public class AuditConfigImpl implements AuditConfig {
     LOGGER.error("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     return GetAuditConfigGroupsResponse
       .respond400WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
-  }
-
-  private Response errorResponse(HttpStatus status, ErrorCodes errorCode, Throwable throwable) {
-    return Response.status(status.toInt())
-      .entity(ErrorUtils.buildErrors(errorCode.getCode(), throwable))
-      .header("Content-Type", "application/json")
-      .build();
   }
 }

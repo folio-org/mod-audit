@@ -1,6 +1,8 @@
 package org.folio.rest.impl;
 
 import static org.folio.util.ErrorCodes.GENERIC_ERROR_CODE;
+import static org.folio.util.ErrorCodes.VALIDATION_ERROR_CODE;
+import static org.folio.util.ErrorUtils.errorResponse;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -11,6 +13,8 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.HttpStatus;
+import org.folio.exception.ValidationException;
 import org.folio.rest.jaxrs.resource.AuditDataInventory;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.inventory.InventoryEventService;
@@ -54,7 +58,10 @@ public class InventoryAuditImpl implements AuditDataInventory {
 
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
-    return AuditDataInventory.GetAuditDataInventoryInstanceByEntityIdResponse
-      .respond500WithApplicationJson(ErrorUtils.buildErrors(GENERIC_ERROR_CODE.getCode(), throwable));
+    if (throwable instanceof ValidationException) {
+      return errorResponse(HttpStatus.HTTP_BAD_REQUEST, VALIDATION_ERROR_CODE, throwable);
+    }
+    LOGGER.error("mapExceptionToResponse:: Error occurred during processing request", throwable);
+    return errorResponse(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, GENERIC_ERROR_CODE, throwable);
   }
 }
