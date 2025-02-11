@@ -4,6 +4,7 @@ import static org.folio.util.AuditEventDBConstants.UNIQUE_CONSTRAINT_VIOLATION_C
 
 import io.vertx.core.Future;
 import io.vertx.pgclient.PgException;
+import javax.ws.rs.core.Response;
 import org.folio.HttpStatus;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.jaxrs.model.Error;
@@ -30,5 +31,12 @@ public class ErrorUtils {
     return (throwable instanceof PgException pgException && pgException.getSqlState().equals(UNIQUE_CONSTRAINT_VIOLATION_CODE)) ?
       Future.failedFuture(new DuplicateEventException(String.format("Event with id=%s is already processed.", id))) :
       Future.failedFuture(throwable);
+  }
+
+  public static Response errorResponse(HttpStatus status, ErrorCodes errorCode, Throwable throwable) {
+    return Response.status(status.toInt())
+      .entity(buildErrors(errorCode.getCode(), throwable))
+      .header("Content-Type", "application/json")
+      .build();
   }
 }
