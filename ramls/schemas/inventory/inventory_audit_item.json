@@ -31,8 +31,7 @@
     },
     "diff": {
       "description": "Difference for entity cause by an action",
-      "type": "object",
-      "javaType": "java.lang.Object"
+      "$ref": "../../common/diff.json"
     }
   },
   "additionalProperties": false

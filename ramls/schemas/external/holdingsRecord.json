@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "acquisitionFormat": {
+      "type": "string"
+    },
+    "acquisitionMethod": {
+      "type": "string"
+    },
+    "administrativeNotes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "callNumber": {
+      "type": "string"
+    },
+    "callNumberPrefix": {
+      "type": "string"
+    },
+    "callNumberSuffix": {
+      "type": "string"
+    },
+    "callNumberTypeId": {
+      "type": "string"
+    },
+    "copyNumber": {
+      "type": "string"
+    },
+    "digitizationPolicy": {
+      "type": "string"
+    },
+    "discoverySuppress": {
+      "type": "boolean"
+    },
+    "effectiveLocationId": {
+      "type": "string"
+    },
+    "electronicAccess": {
+      "items": {
+        "properties": {
+          "linkText": {
+            "type": "string"
+          },
+          "materialsSpecification": {
+            "type": "string"
+          },
+          "publicNote": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "formerIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "holdingsStatements": {
+      "items": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "staffNote": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "holdingsStatementsForIndexes": {
+      "items": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "staffNote": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "holdingsStatementsForSupplements": {
+      "items": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "staffNote": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "holdingsTypeId": {
+      "type": "string"
+    },
+    "hrid": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "illPolicyId": {
+      "type": "string"
+    },
+    "instanceId": {
+      "type": "string"
+    },
+    "notes": {
+      "items": {
+        "properties": {
+          "holdingsNoteTypeId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "staffOnly": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "numberOfItems": {
+      "type": "string"
+    },
+    "permanentLocationId": {
+      "type": "string"
+    },
+    "receiptStatus": {
+      "type": "string"
+    },
+    "receivingHistory": {
+      "properties": {
+        "displayType": {
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "properties": {
+              "chronology": {
+                "type": "string"
+              },
+              "enumeration": {
+                "type": "string"
+              },
+              "publicDisplay": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "retentionPolicy": {
+      "type": "string"
+    },
+    "shelvingTitle": {
+      "type": "string"
+    },
+    "sourceId": {
+      "type": "string"
+    },
+    "statisticalCodeIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "tags": {
+      "properties": {
+        "tagList": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "temporaryLocationId": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
