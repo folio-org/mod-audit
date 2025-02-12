@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -36,14 +37,14 @@ public class MarcAuditDaoTest {
 
   @BeforeEach
   void setUp() {
-    entity = new MarcAuditEntity(UUID.randomUUID().toString(), LocalDateTime.now(), UUID.randomUUID().toString(), "origin", SourceRecordDomainEventType.SOURCE_RECORD_CREATED.getValue(), UUID.randomUUID().toString(), SourceRecordType.MARC_BIB, Map.of());
+    entity = new MarcAuditEntity(UUID.randomUUID().toString(), LocalDateTime.now(), UUID.randomUUID().toString(), "origin", SourceRecordDomainEventType.SOURCE_RECORD_CREATED.getValue(), UUID.randomUUID().toString(), Map.of());
     MockitoAnnotations.openMocks(this);
     marcAuditDao = new MarcAuditDaoImpl(postgresClientFactory);
   }
 
   @Test
   void shouldCreateEventProcessed() {
-    var saveFuture = marcAuditDao.save(entity, TENANT_ID);
+    var saveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
 
     verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
@@ -51,13 +52,62 @@ public class MarcAuditDaoTest {
 
   @Test
   void shouldThrowConstraintViolation() {
-    var saveFuture = marcAuditDao.save(entity, TENANT_ID);
+    var saveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
     saveFuture.onComplete(ar -> {
-      var reSaveFuture = marcAuditDao.save(entity, TENANT_ID);
+      var reSaveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
       reSaveFuture.onComplete(re -> {
         assertTrue(re.failed());
         assertInstanceOf(PgException.class, re.cause());
       });
+    });
+
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+  }
+
+  @Test
+  void shouldRetrieveMarcAuditEntitiesSuccessfully() {
+    var entityId = UUID.randomUUID();
+    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
+    getFuture.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertFalse(ar.result().isEmpty());
+    });
+
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenNoEntitiesFound() {
+    var entityId = UUID.randomUUID();
+    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
+    getFuture.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertTrue(ar.result().isEmpty());
+    });
+
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+  }
+
+  @Test
+  void shouldMapRowToAuditEntityListSuccessfully() {
+    var entityId = UUID.randomUUID();
+    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
+    getFuture.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertFalse(ar.result().isEmpty());
+      assertInstanceOf(MarcAuditEntity.class, ar.result().get(0));
+    });
+
+    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenNoRowsToMap() {
+    var entityId = UUID.randomUUID();
+    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
+    getFuture.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertTrue(ar.result().isEmpty());
     });
 
     verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);

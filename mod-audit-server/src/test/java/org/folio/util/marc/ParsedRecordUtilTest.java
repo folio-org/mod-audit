@@ -26,7 +26,6 @@ public class ParsedRecordUtilTest {
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
     assertEquals(EntityUtils.USER_ID, entity.userId());
-    assertEquals(SourceRecordType.MARC_BIB, entity.recordType());
 
     assertTrue(entity.diff().containsKey("added"));
     assertEquals(3, ((List<?>) entity.diff().get("added")).size());
@@ -42,7 +41,6 @@ public class ParsedRecordUtilTest {
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
     assertEquals(EntityUtils.USER_ID, entity.userId());
-    assertEquals(SourceRecordType.MARC_BIB, entity.recordType());
 
     assertTrue(entity.diff().containsKey("modified"));
     assertEquals(2, ((List<?>) entity.diff().get("modified")).size());
@@ -79,7 +77,6 @@ public class ParsedRecordUtilTest {
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
     assertEquals(EntityUtils.USER_ID, entity.userId());
-    assertEquals(SourceRecordType.MARC_BIB, entity.recordType());
 
     // Verify differences calculated for update
     Map<String, Object> diff = entity.diff();
@@ -107,7 +104,6 @@ public class ParsedRecordUtilTest {
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
     assertEquals(EntityUtils.USER_ID, entity.userId());
-    assertEquals(SourceRecordType.MARC_BIB, entity.recordType());
 
     // Verify differences calculated for deletion
     Map<String, Object> diff = entity.diff();

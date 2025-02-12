@@ -232,10 +232,10 @@ public class EntityUtils {
   public static SourceRecordDomainEvent createSourceRecordDomainEvent() {
     return new SourceRecordDomainEvent(
       UUID.randomUUID().toString(),
-      SourceRecordDomainEventType.SOURCE_RECORD_CREATED,
+      SourceRecordType.MARC_BIB,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
       new MarcEventPayload(
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,
             "fields", List.of(
@@ -245,17 +245,17 @@ public class EntityUtils {
           )
         ), Map.of("createdByUserId", USER_ID)),
         null
-      )
+      ), SourceRecordDomainEventType.SOURCE_RECORD_CREATED
     );
   }
 
   public static SourceRecordDomainEvent updateSourceRecordDomainEvent() {
     return new SourceRecordDomainEvent(
       UUID.randomUUID().toString(),
-      SourceRecordDomainEventType.SOURCE_RECORD_UPDATED,
+      SourceRecordType.MARC_BIB,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
       new MarcEventPayload(
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,
             "fields", List.of(
@@ -264,7 +264,7 @@ public class EntityUtils {
             )
           )
         ), Map.of("updatedByUserId", USER_ID)),
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_OLD,
             "fields", List.of(
@@ -273,7 +273,7 @@ public class EntityUtils {
             )
           )
         ), Map.of("updatedByUserId", USER_ID))
-      )
+      ), SourceRecordDomainEventType.SOURCE_RECORD_UPDATED
     );
   }
 

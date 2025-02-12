@@ -16,6 +16,7 @@ import org.folio.dao.marc.MarcAuditDao;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
 import org.folio.util.PostgresClientFactory;
+import org.folio.util.marc.SourceRecordType;
 import org.folio.utils.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,12 +45,12 @@ public class MarcAuditServiceTest {
   void shouldCallDaoForSuccessfulCase() {
     var event = EntityUtils.createSourceRecordDomainEvent();
 
-    doReturn(Future.succeededFuture(rowSet)).when(marcAuditDao).save(any(MarcAuditEntity.class), any());
+    doReturn(Future.succeededFuture(rowSet)).when(marcAuditDao).save(any(MarcAuditEntity.class), any(SourceRecordType.class), any());
 
     var saveFuture = marcAuditService.saveMarcDomainEvent(event);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
-    verify(marcAuditDao, times(1)).save(any(MarcAuditEntity.class), eq(EntityUtils.TENANT_ID));
+    verify(marcAuditDao, times(1)).save(any(MarcAuditEntity.class), any(SourceRecordType.class), eq(EntityUtils.TENANT_ID));
   }
 
   @Test
@@ -59,14 +60,14 @@ public class MarcAuditServiceTest {
     var saveFuture = marcAuditService.saveMarcDomainEvent(event);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
 
-    verify(marcAuditDao, never()).save(any(MarcAuditEntity.class), any());
+    verify(marcAuditDao, never()).save(any(MarcAuditEntity.class), any(SourceRecordType.class), any());
   }
 
   @Test
   void shouldFailWhenDaoFails() {
     var event = EntityUtils.createSourceRecordDomainEvent();
 
-    doReturn(Future.failedFuture("Database error")).when(marcAuditDao).save(any(MarcAuditEntity.class), any());
+    doReturn(Future.failedFuture("Database error")).when(marcAuditDao).save(any(MarcAuditEntity.class), any(SourceRecordType.class), any());
 
     var saveFuture = marcAuditService.saveMarcDomainEvent(event);
     saveFuture.onComplete(ar -> {
@@ -74,6 +75,6 @@ public class MarcAuditServiceTest {
       assertTrue(ar.cause().getMessage().contains("Database error"));
     });
 
-    verify(marcAuditDao, times(1)).save(any(MarcAuditEntity.class), eq(EntityUtils.TENANT_ID));
+    verify(marcAuditDao, times(1)).save(any(MarcAuditEntity.class), any(SourceRecordType.class), eq(EntityUtils.TENANT_ID));
   }
 }

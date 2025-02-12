@@ -7,13 +7,29 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.MarcAuditDao;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+
 import static java.lang.String.format;
+import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
+import static org.folio.util.AuditEventDBConstants.DIFF_FIELD;
+import static org.folio.util.AuditEventDBConstants.ENTITY_ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
+import static org.folio.util.AuditEventDBConstants.EVENT_ID_FIELD;
+import static org.folio.util.AuditEventDBConstants.ORIGIN_FIELD;
+import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 @Repository
@@ -22,8 +38,16 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   private static final String MARC_BIB_TABLE = "marc_bib_audit";
   private static final String MARC_AUTHORITY_TABLE = "marc_authority_audit";
-  private static final String INSERT_SQL = "INSERT INTO %s (event_id, event_date, entity_id, origin, action, user_id, diff)" +
-    " VALUES ($1, $2, $3, $4, $5, $6, $7)";
+  private static final String INSERT_SQL = """
+    INSERT INTO %s (event_id, event_date, entity_id, origin, action, user_id, diff)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    """;
+  private static final String SELECT_SQL = """
+    SELECT * FROM %s
+      WHERE entity_id = $1
+      ORDER BY event_date DESC
+      LIMIT $2 OFFSET $3
+    """;
 
   private final PostgresClientFactory pgClientFactory;
 
@@ -32,13 +56,22 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
   }
 
   @Override
-  public Future<RowSet<Row>> save(MarcAuditEntity entity, String tenantId) {
-    LOGGER.debug("save:: Saving Marc domain event with id: '{}' and record id: '{}'", entity.recordId(), entity.recordId());
-    var tableName = tableName(entity.recordType());
-    var query = format(INSERT_SQL, formatDBTableName(tenantId, tableName));
+  public Future<RowSet<Row>> save(MarcAuditEntity entity, SourceRecordType recordType, String tenantId) {
+    LOGGER.debug("save:: Saving Marc domain event with id: '{}' and record id: '{}'", entity.entityId(), entity.entityId());
+    var tableName = tableName(recordType);
+    var query = INSERT_SQL.formatted(formatDBTableName(tenantId, tableName));
     return makeSaveCall(query, entity, tenantId)
-      .onSuccess(rows -> LOGGER.info("save:: Saved Marc domain event with id: '{}' and recordId: '{}' in to table '{}'", entity.eventId(), entity.recordId(), tableName))
-      .onFailure(e -> LOGGER.error("save:: Failed to save Marc domain event with id: '{}' and recordId: '{}' in to table '{}'", entity.recordId(), entity.recordId(), tableName, e));
+      .onSuccess(rows -> LOGGER.info("save:: Saved Marc domain event with id: '{}' and entityId: '{}' in to table '{}'", entity.eventId(), entity.entityId(), tableName))
+      .onFailure(e -> LOGGER.error("save:: Failed to save Marc domain event with id: '{}' and entityId: '{}' in to table '{}'", entity.eventId(), entity.entityId(), tableName, e));
+  }
+
+  @Override
+  public Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, int limit, int offset) {
+    LOGGER.debug("get:: Retrieve records by tenantId: '{}' and entityId: '{}'", tenantId, entityId);
+    var tableName = tableName(recordType);
+    var query = SELECT_SQL.formatted(formatDBTableName(tenantId, tableName));
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(entityId, limit, offset))
+            .map(this::mapRowToAuditEntityList);
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
@@ -47,7 +80,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
       return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(
         entity.eventId(),
         entity.eventDate(),
-        entity.recordId(),
+        entity.entityId(),
         entity.origin(),
         entity.action(),
         entity.userId(),
@@ -55,6 +88,32 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     } catch (Exception e) {
       return Future.failedFuture(e);
     }
+  }
+
+  private List<MarcAuditEntity> mapRowToAuditEntityList(RowSet<Row> rowSet) {
+    LOGGER.debug("mapRowToAuditEntityList:: Mapping row set to List of Marc Audit Entities");
+    if (rowSet.rowCount() == 0) {
+      return new LinkedList<>();
+    }
+    var entities = new LinkedList<MarcAuditEntity>();
+    rowSet.iterator().forEachRemaining(row ->
+            entities.add(mapRowToAuditEntity(row)));
+    LOGGER.debug("mapRowToAuditEntityList:: Mapped row set to List of Marc Audit Entities");
+    return entities;
+  }
+
+  private MarcAuditEntity mapRowToAuditEntity(Row row) {
+    LOGGER.debug("mapRowToAuditEntity:: Mapping row to Marc Audit Entity");
+    var diffJson = row.getJsonObject(DIFF_FIELD);
+    return new MarcAuditEntity(
+            row.getUUID(EVENT_ID_FIELD).toString(),
+            row.getLocalDateTime(EVENT_DATE_FIELD),
+            row.getUUID(ENTITY_ID_FIELD).toString(),
+            row.getString(ORIGIN_FIELD),
+            row.getString(ACTION_FIELD),
+            row.getUUID(USER_ID_FIELD).toString(),
+            diffJson == null ? null : diffJson.getMap()
+    );
   }
 
   private String tableName(SourceRecordType recordType) {

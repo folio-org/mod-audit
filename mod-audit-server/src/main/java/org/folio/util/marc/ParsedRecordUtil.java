@@ -4,11 +4,15 @@ import io.vertx.core.json.JsonObject;
 import lombok.experimental.UtilityClass;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.exception.ValidationException;
+import org.folio.rest.jaxrs.model.MarcAuditCollection;
+import org.folio.rest.jaxrs.model.MarcAuditItem;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,9 @@ public class ParsedRecordUtil {
   private static final String UPDATED_BY = "updatedByUserId";
   private static final String OLD_VALUE_KEY = "oldValue";
   private static final String NEW_VALUE_KEY = "newValue";
+  private static final String CREATED = "CREATED";
+  private static final String UPDATED = "UPDATED";
+  private static final String DELETED = "DELETED";
 
   /**
    * Maps a {@link SourceRecordDomainEvent} to a {@link MarcAuditEntity}.
@@ -57,19 +64,22 @@ public class ParsedRecordUtil {
     Map<String, Object> difference;
     var oldRecord = event.getEventPayload().getOld();
     var newRecord = event.getEventPayload().getNewRecord();
-
+    String action;
     switch (event.getEventType()) {
       case SOURCE_RECORD_CREATED -> {
         data = extractRecordData(newRecord, CREATED_BY);
         difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
+        action = CREATED;
       }
       case SOURCE_RECORD_UPDATED -> {
         data = extractRecordData(newRecord, UPDATED_BY);
         difference = calculateDifferences(oldRecord.getParsedRecord(), newRecord.getParsedRecord());
+        action = UPDATED;
       }
       case SOURCE_RECORD_DELETED -> {
         data = extractRecordData(oldRecord, UPDATED_BY);
         difference = getDifference(oldRecord.getParsedRecord(), event.getEventType());
+        action = DELETED;
       }
       default -> throw new ValidationException("Unsupported event type: " + event.getEventType());
     }
@@ -79,18 +89,49 @@ public class ParsedRecordUtil {
       event.getEventMetadata().getEventDate(),
       data.recordId,
       event.getEventMetadata().getPublishedBy(),
-      event.getEventType().getValue(),
+      action,
       data.userId,
-      data.recordType,
       difference
     );
   }
 
+  /**
+   * Maps a list of MarcAuditEntity objects to a MarcAuditCollection object.
+   *
+   * @param entities the list of MarcAuditEntity objects to be mapped
+   * @return a MarcAuditCollection containing the mapped MarcAuditItems
+   */
+  public static MarcAuditCollection mapToCollection(List<MarcAuditEntity> entities) {
+    var collection = new MarcAuditCollection();
+    collection.setMarcAuditItems(entities.stream()
+      .map(ParsedRecordUtil::mapEntityToItem) // Use the extracted method
+      .toList());
+    return collection;
+  }
+
+  /**
+   * Maps a MarcAuditEntity to a MarcAuditItem.
+   *
+   * @param entity the MarcAuditEntity to be mapped
+   * @return a MarcAuditItem containing the mapped values
+   */
+  private static MarcAuditItem mapEntityToItem(MarcAuditEntity entity) {
+    var item = new MarcAuditItem();
+    item.setEventId(entity.eventId());
+    item.setEventDate(Date.from(entity.eventDate().atZone(ZoneId.systemDefault()).toInstant()));
+    item.setEntityId(entity.entityId());
+    item.setAction(entity.action());
+    item.setUserId(entity.userId());
+    item.setOrigin(entity.origin());
+    item.setDiff(entity.diff());
+    return item;
+  }
+
+
   private static RecordData extractRecordData(Record value, String userKey) {
     return new RecordData(
-      value.getId(),
-      getUserIdFromMetadata(value.getMetadata(), userKey),
-      value.getRecordType()
+      value.getMatchedId(),
+      getUserIdFromMetadata(value.getMetadata(), userKey)
     );
   }
 
@@ -246,7 +287,7 @@ public class ParsedRecordUtil {
     }
   }
 
-  private record RecordData(String recordId, String userId, SourceRecordType recordType) {
+  private record RecordData(String recordId, String userId) {
   }
 
 }
