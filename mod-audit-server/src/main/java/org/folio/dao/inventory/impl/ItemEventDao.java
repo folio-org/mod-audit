@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ItemEventDao extends InventoryEventDaoImpl {
 
-  protected ItemEventDao(PostgresClientFactory pgClientFactory) {
+  public ItemEventDao(PostgresClientFactory pgClientFactory) {
     super(pgClientFactory);
   }
 

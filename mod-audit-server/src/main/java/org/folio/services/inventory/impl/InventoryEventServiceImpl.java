@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.InventoryEventDao;
+import org.folio.exception.ValidationException;
 import org.folio.rest.jaxrs.model.InventoryAuditCollection;
 import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.Setting;
@@ -86,7 +87,7 @@ public class InventoryEventServiceImpl implements InventoryEventService {
       LOGGER.error(
         "getEvents:: Could not parse entityId or eventTs [tenantId: {}, resourceType: {}, entityId: {}, eventTs: {}]",
         tenantId, resourceType, entityId, eventTs, e);
-      return Future.failedFuture(e);
+      return Future.failedFuture(new ValidationException(e.getMessage()));
     }
 
     return getDao(resourceType)
