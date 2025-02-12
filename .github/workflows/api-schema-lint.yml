@@ -14,7 +14,7 @@ name: api-schema-lint
 
 env:
   API_DIRECTORIES: 'ramls'
-  API_EXCLUDES: ''
+  API_EXCLUDES: 'external'
 
 on:
   push:

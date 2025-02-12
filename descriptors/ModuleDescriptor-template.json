@@ -31,10 +31,6 @@
       "version": "14.0"
     },
     {
-      "id": "holdings-storage",
-      "version": "6.0 7.0 8.0"
-    },
-    {
       "id": "cancellation-reason-storage",
       "version": "1.2"
     }
@@ -43,6 +39,18 @@
     {
       "id": "circulation-item",
       "version": "1.0"
+    },
+    {
+      "id": "item-storage",
+      "version": "10.1"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "8.0"
+    },
+    {
+      "id": "instance-storage",
+      "version": "11.1"
     }
   ],
   "provides": [
@@ -276,6 +284,20 @@
           "permissionsRequired": [
             "audit.inventory.instance.collection.get"
           ]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/inventory/holdings/{entityId}",
+          "permissionsRequired": [
+            "audit.inventory.holdings.collection.get"
+          ]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/inventory/item/{entityId}",
+          "permissionsRequired": [
+            "audit.inventory.item.collection.get"
+          ]
         }
       ]
     },
@@ -407,8 +429,18 @@
     },
     {
       "permissionName": "audit.inventory.instance.collection.get",
-      "displayName": "Inventory Audit - get events",
-      "description": "Get inventory audit events"
+      "displayName": "Inventory Audit - get instance events",
+      "description": "Get inventory instance audit events"
+    },
+    {
+      "permissionName": "audit.inventory.holdings.collection.get",
+      "displayName": "Inventory Audit - get holdings events",
+      "description": "Get inventory holdings audit events"
+    },
+    {
+      "permissionName": "audit.inventory.item.collection.get",
+      "displayName": "Inventory Audit - get item events",
+      "description": "Get inventory item audit events"
     },
     {
       "permissionName": "audit.all",
@@ -428,7 +460,9 @@
         "acquisition.invoice.events.get",
         "acquisition.invoice-line.events.get",
         "acquisition.organization.events.get",
-        "audit.inventory.instance.collection.get"
+        "audit.inventory.instance.collection.get",
+        "audit.inventory.holdings.collection.get",
+        "audit.inventory.item.collection.get"
       ]
     }
   ],

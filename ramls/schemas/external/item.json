@@ -1,0 +1,259 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "accessionNumber": {
+      "type": "string"
+    },
+    "administrativeNotes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "barcode": {
+      "type": "string"
+    },
+    "chronology": {
+      "type": "string"
+    },
+    "circulationNotes": {
+      "items": {
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "noteType": {
+            "type": "string"
+          },
+          "source": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "personal": {
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "staffOnly": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "copyNumber": {
+      "type": "string"
+    },
+    "descriptionOfPieces": {
+      "type": "string"
+    },
+    "discoverySuppress": {
+      "type": "boolean"
+    },
+    "displaySummary": {
+      "type": "string"
+    },
+    "effectiveCallNumberComponents": {
+      "properties": {
+        "callNumber": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "suffix": {
+          "type": "string"
+        },
+        "typeId": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "effectiveLocationId": {
+      "type": "string"
+    },
+    "electronicAccess": {
+      "items": {
+        "properties": {
+          "linkText": {
+            "type": "string"
+          },
+          "materialsSpecification": {
+            "type": "string"
+          },
+          "publicNote": {
+            "type": "string"
+          },
+          "relationshipId": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "enumeration": {
+      "type": "string"
+    },
+    "formerIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "holdingsRecordId": {
+      "type": "string"
+    },
+    "hrid": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "inTransitDestinationServicePointId": {
+      "type": "string"
+    },
+    "itemDamagedStatusDate": {
+      "type": "string"
+    },
+    "itemDamagedStatusId": {
+      "type": "string"
+    },
+    "itemIdentifier": {
+      "type": "string"
+    },
+    "itemLevelCallNumber": {
+      "type": "string"
+    },
+    "itemLevelCallNumberPrefix": {
+      "type": "string"
+    },
+    "itemLevelCallNumberSuffix": {
+      "type": "string"
+    },
+    "itemLevelCallNumberTypeId": {
+      "type": "string"
+    },
+    "lastCheckIn": {
+      "properties": {
+        "dateTime": {
+          "type": "string"
+        },
+        "servicePointId": {
+          "type": "string"
+        },
+        "staffMemberId": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "materialTypeId": {
+      "type": "string"
+    },
+    "missingPieces": {
+      "type": "string"
+    },
+    "missingPiecesDate": {
+      "type": "string"
+    },
+    "notes": {
+      "items": {
+        "properties": {
+          "itemNoteTypeId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "staffOnly": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "numberOfMissingPieces": {
+      "type": "string"
+    },
+    "numberOfPieces": {
+      "type": "string"
+    },
+    "permanentLoanTypeId": {
+      "type": "string"
+    },
+    "permanentLocationId": {
+      "type": "string"
+    },
+    "purchaseOrderLineIdentifier": {
+      "type": "string"
+    },
+    "statisticalCodeIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "tags": {
+      "properties": {
+        "tagList": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "temporaryLoanTypeId": {
+      "type": "string"
+    },
+    "temporaryLocationId": {
+      "type": "string"
+    },
+    "volume": {
+      "type": "string"
+    },
+    "yearCaption": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "type": "object"
+}

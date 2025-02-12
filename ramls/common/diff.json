@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for diff",
+  "type": "object",
+  "properties": {
+    "fieldChanges": {
+      "description": "Changes in fields",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "changeType": {
+            "type": "string",
+            "description": "Type of change",
+            "enum": [
+              "MODIFIED",
+              "REMOVED",
+              "ADDED",
+              "NOTHING"
+            ]
+          },
+          "fieldName": {
+            "description": "Name of the field",
+            "type": "string"
+          },
+          "fullPath": {
+            "description": "Full path of the field",
+            "type": "string"
+          },
+          "oldValue": {
+            "description": "Old value of the field",
+            "type": "object",
+            "javaType": "java.lang.Object"
+          },
+          "newValue": {
+            "description": "New value of the field",
+            "type": "object",
+            "javaType": "java.lang.Object"
+          }
+        },
+        "required": [
+          "changeType",
+          "fieldName",
+          "fullPath"
+        ]
+      }
+    },
+    "collectionChanges": {
+      "description": "Changes in collections",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "collectionName": {
+            "description": "Name of the collection",
+            "type": "string"
+          },
+          "itemChanges": {
+            "description": "Changes of the collection",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "changeType": {
+                  "description": "Type of change",
+                  "type": "string",
+                  "enum": [
+                    "MODIFIED",
+                    "REMOVED",
+                    "ADDED",
+                    "NOTHING"
+                  ]
+                },
+                "oldValue": {
+                  "description": "Old value of the item",
+                  "type": "object",
+                  "javaType": "java.lang.Object"
+                },
+                "newValue": {
+                  "description": "New value of the item",
+                  "type": "object",
+                  "javaType": "java.lang.Object"
+                }
+              },
+              "required": [
+                "changeType"
+              ]
+            }
+          }
+        },
+        "required": [
+          "collectionName",
+          "itemChanges"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

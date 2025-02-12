@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.InventoryEventDao;
+import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.util.PostgresClientFactory;
 
 public abstract class InventoryEventDaoImpl implements InventoryEventDao {
@@ -119,7 +120,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       row.getUUID(ENTITY_ID_FIELD),
       row.getString(ACTION_FIELD),
       row.getUUID(USER_ID_FIELD),
-      diffJson == null ? null : diffJson.getMap()
+      diffJson == null ? null : diffJson.mapTo(ChangeRecordDto.class)
     );
   }
 }
