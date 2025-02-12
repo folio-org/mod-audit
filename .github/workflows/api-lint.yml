@@ -16,14 +16,13 @@ name: api-lint
 # to exclude from traversal, in addition to the default exclusions.
 # e.g. ''
 #
-# API_WARNINGS: boolean: Whether to cause Warnings to be displayed,
-# and to fail the workflow.
+# API_WARNINGS: boolean: Whether to cause Warnings to be displayed, and to fail the workflow.
 # e.g. false
 
 env:
   API_TYPES: 'RAML'
   API_DIRECTORIES: 'ramls'
-  API_EXCLUDES: ''
+  API_EXCLUDES: 'external'
   API_WARNINGS: false
 
 on:

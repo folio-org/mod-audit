@@ -3,8 +3,6 @@ package org.folio.services.inventory.impl;
 import static org.folio.util.ErrorUtils.handleFailures;
 
 import io.vertx.core.Future;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +19,7 @@ import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.Setting;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.util.inventory.InventoryEvent;
+import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -49,18 +48,27 @@ public class InventoryEventServiceImpl implements InventoryEventService {
   }
 
   @Override
-  public Future<RowSet<Row>> saveEvent(InventoryEvent inventoryEvent, String tenantId) {
-    LOGGER.debug("saveEvent:: Trying to save inventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
+  public Future<String> saveEvent(InventoryEvent inventoryEvent, String tenantId) {
+    LOGGER.debug("saveEvent:: Trying to save InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
       tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
 
+    var eventId = inventoryEvent.getEventId();
     return getDao(inventoryEvent.getResourceType())
       .compose(inventoryEventDao -> {
         var entity = eventToEntityMapper.apply(inventoryEvent);
-        return inventoryEventDao.save(entity, tenantId);})
+        if (InventoryEventType.UPDATE.name().equals(entity.action()) && entity.diff() == null) {
+          LOGGER.debug(
+            "saveEvent:: No diff calculated for InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
+            tenantId, eventId, inventoryEvent.getEntityId());
+          return Future.succeededFuture(eventId);
+        }
+
+        return inventoryEventDao.save(entity, tenantId).map(eventId);
+      })
       .recover(throwable -> {
         LOGGER.error("saveEvent:: Could not save InventoryEvent for [tenantId: {}, eventId: {}, entityId: {}]",
-          tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
-        return handleFailures(throwable, inventoryEvent.getEventId());
+          tenantId, eventId, inventoryEvent.getEntityId());
+        return handleFailures(throwable, eventId);
       });
   }
 

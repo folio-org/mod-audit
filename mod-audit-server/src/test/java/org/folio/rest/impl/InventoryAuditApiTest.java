@@ -8,12 +8,12 @@ import static org.hamcrest.Matchers.hasSize;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -26,6 +26,9 @@ import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.impl.HoldingsEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
 import org.folio.dao.inventory.impl.InventoryEventDaoImpl;
+import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.domain.diff.ChangeType;
+import org.folio.domain.diff.FieldChangeDto;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.inventory.InventoryResourceType;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,8 +76,8 @@ public class InventoryAuditApiTest extends ApiTestBase {
   @MethodSource("provideResourceTypeAndPath")
   void shouldReturnInventoryEventsOnGetByEntityId(InventoryResourceType resourceType, String apiPath) {
     var dao = resourceToDaoMap.get(resourceType);
-    var jsonObject = new JsonObject();
-    jsonObject.put("name", "Test Product");
+    var changeRecordDto = new ChangeRecordDto();
+    changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "new")));
 
     var inventoryAuditEntity = new InventoryAuditEntity(
       UUID.randomUUID(),
@@ -82,7 +85,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
       UUID.fromString(ENTITY_ID),
       "CREATE",
       UUID.randomUUID(),
-      jsonObject.getMap()
+      changeRecordDto
     );
 
     dao.save(inventoryAuditEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
@@ -112,8 +115,8 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
     // Create InventoryAuditEntity entities with a year date difference
     for (int i = 0; i < 5; i++) {
-      var jsonObject = new JsonObject();
-      jsonObject.put("name", "Test Product " + i);
+      var changeRecordDto = new ChangeRecordDto();
+      changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "Test Product " + i)));
 
       var inventoryAuditEntity = new InventoryAuditEntity(
         UUID.randomUUID(),
@@ -121,7 +124,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
         UUID.fromString(ENTITY_ID),
         "CREATE",
         UUID.randomUUID(),
-        jsonObject.getMap()
+        changeRecordDto
       );
 
       dao.save(inventoryAuditEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
