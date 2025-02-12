@@ -12,8 +12,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -26,6 +26,7 @@ import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.impl.HoldingsEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
 import org.folio.dao.inventory.impl.InventoryEventDaoImpl;
+import org.folio.dao.inventory.impl.ItemEventDao;
 import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.FieldChangeDto;
@@ -52,11 +53,14 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
   private static final String INVENTORY_INSTANCE_AUDIT_PATH = "/audit-data/inventory/instance/";
   private static final String INVENTORY_HOLDINGS_AUDIT_PATH = "/audit-data/inventory/holdings/";
+  private static final String INVENTORY_ITEM_AUDIT_PATH = "/audit-data/inventory/item/";
 
   @InjectMocks
   InstanceEventDao instanceEventDao;
   @InjectMocks
   HoldingsEventDao holdingsEventDao;
+  @InjectMocks
+  ItemEventDao itemEventDao;
   @InjectMocks
   SettingDao settingDao;
   @Spy
@@ -69,6 +73,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
     resourceToDaoMap = new EnumMap<>(InventoryResourceType.class);
     resourceToDaoMap.put(InventoryResourceType.INSTANCE, instanceEventDao);
     resourceToDaoMap.put(InventoryResourceType.HOLDINGS, holdingsEventDao);
+    resourceToDaoMap.put(InventoryResourceType.ITEM, itemEventDao);
   }
 
   @SneakyThrows
@@ -152,7 +157,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
   @ParameterizedTest
   @MethodSource("providePath")
-  void shouldReturnEmptyListForInvalidEntityId(String apiPath) {
+  void shouldReturnEmptyListForNonExistentEntityId(String apiPath) {
     given().headers(HEADERS)
       .get(apiPath + UUID.randomUUID())
       .then().log().all()
@@ -173,14 +178,16 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private static Stream<Arguments> provideResourceTypeAndPath() {
     return Stream.of(
       Arguments.of(InventoryResourceType.INSTANCE, INVENTORY_INSTANCE_AUDIT_PATH),
-      Arguments.of(InventoryResourceType.HOLDINGS, INVENTORY_HOLDINGS_AUDIT_PATH)
+      Arguments.of(InventoryResourceType.HOLDINGS, INVENTORY_HOLDINGS_AUDIT_PATH),
+      Arguments.of(InventoryResourceType.ITEM, INVENTORY_ITEM_AUDIT_PATH)
     );
   }
 
   private static Stream<Arguments> providePath() {
     return Stream.of(
       Arguments.of(INVENTORY_INSTANCE_AUDIT_PATH),
-      Arguments.of(INVENTORY_HOLDINGS_AUDIT_PATH)
+      Arguments.of(INVENTORY_HOLDINGS_AUDIT_PATH),
+      Arguments.of(INVENTORY_ITEM_AUDIT_PATH)
     );
   }
 }

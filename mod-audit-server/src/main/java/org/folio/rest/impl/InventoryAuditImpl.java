@@ -77,6 +77,28 @@ public class InventoryAuditImpl implements AuditDataInventory {
     }
   }
 
+  @Override
+  public void getAuditDataInventoryItemByEntityId(String entityId, String eventTs, Map<String, String> okapiHeaders,
+                                                  Handler<AsyncResult<Response>> asyncResultHandler,
+                                                  Context vertxContext) {
+    LOGGER.debug(
+      "getAuditDataInventoryItemByEntityId:: Retrieving Audit Data Inventory Item by [entityId: {}, eventTs: {}]",
+      entityId, eventTs);
+    var tenantId = TenantTool.tenantId(okapiHeaders);
+    try {
+      service.getEvents(InventoryResourceType.ITEM, entityId, eventTs, tenantId)
+        .map(AuditDataInventory.GetAuditDataInventoryItemByEntityIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error(
+        "getAuditDataInventoryItemByEntityId:: Error retrieving Audit Data Inventory Item by [entityId: {}, eventDate: {}]",
+        entityId, eventTs, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
+  }
+
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     if (throwable instanceof ValidationException) {
