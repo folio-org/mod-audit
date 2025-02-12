@@ -10,16 +10,19 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.CopilotGenerated;
+import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.dao.inventory.impl.HoldingsEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
 import org.folio.dao.inventory.impl.InventoryEventDaoImpl;
@@ -45,6 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class InventoryEventServiceImplTest {
 
+  private static final String TENANT_ID = "testTenant";
   private final Map<InventoryResourceType, InventoryEventDaoImpl> daos = new EnumMap<>(InventoryResourceType.class);
 
   @Mock
@@ -82,18 +86,37 @@ public class InventoryEventServiceImplTest {
     var dao = daos.get(resourceType);
     var inventoryEvent = createInventoryEvent(resourceType);
     doReturn(Future.succeededFuture(rowSet)).when(dao).save(any(), anyString());
+    when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(
+      new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(
+        Instant.now()), UUID.randomUUID(), InventoryEventType.CREATE.name(), null, null));
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, "testTenant");
+    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(dao, times(1)).save(any(), anyString());
   }
 
   @Test
+  void shouldNotSaveUpdateEventWhenDiffIsNull() {
+    var resourceType = InventoryResourceType.INSTANCE;
+    var inventoryEvent = createInventoryEvent(resourceType);
+    inventoryEvent.setType(InventoryEventType.UPDATE);
+
+    var entity = new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(),
+      InventoryEventType.UPDATE.name(), null, null);
+    when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(entity);
+
+    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(instanceEventDao, never()).save(any(), anyString());
+  }
+
+  @Test
   void shouldFailToSaveEventWhenDaoNotFound() {
     var inventoryEvent = createInventoryEvent(InventoryResourceType.UNKNOWN);
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, "testTenant");
+    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, times(0)).save(any(), anyString());
@@ -105,7 +128,7 @@ public class InventoryEventServiceImplTest {
     var dao = daos.get(resourceType);
     var entityId = UUID.randomUUID().toString();
     var eventDate = "1672531200000";
-    var tenantId = "testTenant";
+    var tenantId = TENANT_ID;
     var inventoryAuditCollection = new InventoryAuditCollection();
     var entityUUID = UUID.fromString(entityId);
     var eventDateTime = new Timestamp(Long.parseLong(eventDate));
@@ -127,7 +150,7 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.INSTANCE;
     var invalidEntityId = "invalid-uuid";
     var validEventDate = "1672531200000";
-    var tenantId = "testTenant";
+    var tenantId = TENANT_ID;
 
     var getFuture = eventService.getEvents(resourceType, invalidEntityId, validEventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
@@ -140,7 +163,7 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.INSTANCE;
     var validEntityId = UUID.randomUUID().toString();
     var invalidEventDate = "invalid-date";
-    var tenantId = "testTenant";
+    var tenantId = TENANT_ID;
 
     var getFuture = eventService.getEvents(resourceType, validEntityId, invalidEventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
@@ -153,7 +176,7 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.UNKNOWN;
     var entityId = UUID.randomUUID().toString();
     var eventDate = "1672531200000";
-    var tenantId = "testTenant";
+    var tenantId = TENANT_ID;
 
     var getFuture = eventService.getEvents(resourceType, entityId, eventDate, tenantId);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));

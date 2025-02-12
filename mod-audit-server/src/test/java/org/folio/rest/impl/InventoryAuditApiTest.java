@@ -75,6 +75,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
   @ParameterizedTest
   @MethodSource("provideResourceTypeAndPath")
   void shouldReturnInventoryEventsOnGetByEntityId(InventoryResourceType resourceType, String apiPath) {
+    var dao = resourceToDaoMap.get(resourceType);
     var changeRecordDto = new ChangeRecordDto();
     changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "new")));
 
