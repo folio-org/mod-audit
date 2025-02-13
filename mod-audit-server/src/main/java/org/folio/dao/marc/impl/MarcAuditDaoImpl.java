@@ -7,22 +7,17 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.inventory.InventoryAuditEntity;
-import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.MarcAuditDao;
+import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
 import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
 import static org.folio.util.AuditEventDBConstants.DIFF_FIELD;
 import static org.folio.util.AuditEventDBConstants.ENTITY_ID_FIELD;
@@ -44,10 +39,12 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     """;
   private static final String SELECT_SQL = """
     SELECT * FROM %s
-      WHERE entity_id = $1
+      WHERE entity_id = $1 %s
       ORDER BY event_date DESC
-      LIMIT $2 OFFSET $3
+      LIMIT $2
     """;
+
+  private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
   private final PostgresClientFactory pgClientFactory;
 
@@ -66,12 +63,13 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
   }
 
   @Override
-  public Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, int limit, int offset) {
+  public Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, LocalDateTime eventDate, int limit) {
     LOGGER.debug("get:: Retrieve records by tenantId: '{}' and entityId: '{}'", tenantId, entityId);
     var tableName = tableName(recordType);
-    var query = SELECT_SQL.formatted(formatDBTableName(tenantId, tableName));
-    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(entityId, limit, offset))
-            .map(this::mapRowToAuditEntityList);
+    var query = SELECT_SQL.formatted(formatDBTableName(tenantId, tableName), eventDate == null ? "" : SEEK_BY_DATE_CLAUSE);
+    var tuple = eventDate == null ? Tuple.of(entityId, limit) : Tuple.of(entityId, limit, eventDate);
+    return pgClientFactory.createInstance(tenantId).execute(query, tuple)
+      .map(this::mapRowToAuditEntityList);
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
@@ -97,7 +95,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     }
     var entities = new LinkedList<MarcAuditEntity>();
     rowSet.iterator().forEachRemaining(row ->
-            entities.add(mapRowToAuditEntity(row)));
+      entities.add(mapRowToAuditEntity(row)));
     LOGGER.debug("mapRowToAuditEntityList:: Mapped row set to List of Marc Audit Entities");
     return entities;
   }
@@ -106,17 +104,18 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     LOGGER.debug("mapRowToAuditEntity:: Mapping row to Marc Audit Entity");
     var diffJson = row.getJsonObject(DIFF_FIELD);
     return new MarcAuditEntity(
-            row.getUUID(EVENT_ID_FIELD).toString(),
-            row.getLocalDateTime(EVENT_DATE_FIELD),
-            row.getUUID(ENTITY_ID_FIELD).toString(),
-            row.getString(ORIGIN_FIELD),
-            row.getString(ACTION_FIELD),
-            row.getUUID(USER_ID_FIELD).toString(),
-            diffJson == null ? null : diffJson.getMap()
+      row.getUUID(EVENT_ID_FIELD).toString(),
+      row.getLocalDateTime(EVENT_DATE_FIELD),
+      row.getUUID(ENTITY_ID_FIELD).toString(),
+      row.getString(ORIGIN_FIELD),
+      row.getString(ACTION_FIELD),
+      row.getUUID(USER_ID_FIELD).toString(),
+      diffJson == null ? null : diffJson.getMap()
     );
   }
 
   private String tableName(SourceRecordType recordType) {
     return SourceRecordType.MARC_BIB.equals(recordType) ? MARC_BIB_TABLE : MARC_AUTHORITY_TABLE;
   }
+
 }

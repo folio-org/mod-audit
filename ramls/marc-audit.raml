@@ -13,7 +13,7 @@ types:
   marc_audit_collection: !include schemas/marc/marc_audit_collection.json
 traits:
   validate: !include raml-util/traits/validation.raml
-  pageable: !include raml-util/traits/pageable.raml
+  seek: !include traits/seek-by-date.raml
 
 /audit-data/marc:
   /bib/{entityId}:
@@ -21,11 +21,8 @@ traits:
       description: Get list of marc record events
       is: [
         validate,
-        pageable
+        seek
       ]
-      queryParameters:
-        limit:
-          default: 15
       responses:
         200:
           body:

@@ -5,6 +5,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.util.marc.SourceRecordType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,9 +27,9 @@ public interface MarcAuditDao {
    * @param entityId  the unique identifier of the entity for which audit records are retrieved
    * @param recordType the type of the source record (e.g., MARC_BIB or MARC_AUTHORITY)
    * @param tenantId   the identifier of the tenant
+   * @param eventDate event date to seek from
    * @param limit      the maximum number of records to retrieve
-   * @param offset     the starting position of the records to retrieve
    * @return a Future containing a List of MarcAuditEntity objects matching the specified parameters
    */
-  Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, int limit, int offset);
+  Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, LocalDateTime eventDate, int limit);
 }

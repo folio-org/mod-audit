@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * for audit and logging purposes. This class provides methods to process and compare parsed
  * MARC records and extract relevant data for creating audit entities.
  * <p>
- * The {@code ParsedRecordUtil} handles operations such as:
+ * The {@code MarcUtil} handles operations such as:
  * - Mapping a source record domain event to a MarcAuditEntity.
  * - Extracting user IDs from metadata.
  * - Flattening complex parsed record structures into more manageable formats.
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * This class is intended to function as a utility and should not be instantiated directly.
  */
 @UtilityClass
-public class ParsedRecordUtil {
+public class MarcUtil {
   private static final String LDR = "LDR";
   private static final String FIELD_005 = "005";
   private static final String SUBFIELDS_KEY = "subfields";
@@ -104,7 +104,7 @@ public class ParsedRecordUtil {
   public static MarcAuditCollection mapToCollection(List<MarcAuditEntity> entities) {
     var collection = new MarcAuditCollection();
     collection.setMarcAuditItems(entities.stream()
-      .map(ParsedRecordUtil::mapEntityToItem) // Use the extracted method
+      .map(MarcUtil::mapEntityToItem) // Use the extracted method
       .toList());
     return collection;
   }

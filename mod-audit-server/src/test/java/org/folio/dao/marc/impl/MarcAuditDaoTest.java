@@ -1,115 +1,141 @@
 package org.folio.dao.marc.impl;
 
-import io.vertx.core.Vertx;
-import io.vertx.pgclient.PgException;
-import org.folio.dao.marc.MarcAuditDao;
+import io.vertx.core.Future;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
 import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
-import org.folio.util.marc.SourceRecordDomainEventType;
 import org.folio.util.marc.SourceRecordType;
+import org.folio.utils.MockUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
+import static org.folio.utils.EntityUtils.createMarcAuditEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class MarcAuditDaoTest {
 
   private static final String TENANT_ID = "diku";
 
-  @Spy
-  private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
+  @Mock
+  private PostgresClientFactory pgClientFactory;
 
-  @InjectMocks
-  private MarcAuditDao marcAuditDao = new MarcAuditDaoImpl(postgresClientFactory);
+  @Mock
+  private RowSet<Row> mockRowSet;
 
-  private MarcAuditEntity entity;
+  private MarcAuditDaoImpl marcAuditDao;
 
   @BeforeEach
   void setUp() {
-    entity = new MarcAuditEntity(UUID.randomUUID().toString(), LocalDateTime.now(), UUID.randomUUID().toString(), "origin", SourceRecordDomainEventType.SOURCE_RECORD_CREATED.getValue(), UUID.randomUUID().toString(), Map.of());
     MockitoAnnotations.openMocks(this);
-    marcAuditDao = new MarcAuditDaoImpl(postgresClientFactory);
+    marcAuditDao = new MarcAuditDaoImpl(pgClientFactory);
   }
 
   @Test
-  void shouldCreateEventProcessed() {
-    var saveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
-    saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
+  void shouldSaveMarcAuditEntitySuccessfully() {
+    var entity = createMarcAuditEntity();
+    var pgClient = mock(PostgresClient.class);
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    when(pgClient.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mockRowSet));
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    Future<RowSet<Row>> result = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
+
+    assertTrue(result.succeeded());
+    verify(pgClient).execute(anyString(), any(Tuple.class));
+
+    ArgumentCaptor<Tuple> tupleCaptor = ArgumentCaptor.forClass(Tuple.class);
+    verify(pgClient).execute(anyString(), tupleCaptor.capture());
+    Tuple capturedTuple = tupleCaptor.getValue();
+
+    assertEquals(entity.eventId(), capturedTuple.getUUID(0).toString());
+    assertEquals(entity.entityId(), capturedTuple.getUUID(2).toString());
+    assertEquals(entity.origin(), capturedTuple.getString(3));
+    assertEquals(entity.action(), capturedTuple.getString(4));
+    assertEquals(entity.userId(), capturedTuple.getUUID(5).toString());
   }
 
   @Test
-  void shouldThrowConstraintViolation() {
-    var saveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
-    saveFuture.onComplete(ar -> {
-      var reSaveFuture = marcAuditDao.save(entity, SourceRecordType.MARC_BIB, TENANT_ID);
-      reSaveFuture.onComplete(re -> {
-        assertTrue(re.failed());
-        assertInstanceOf(PgException.class, re.cause());
-      });
-    });
-
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
-  }
-
-  @Test
-  void shouldRetrieveMarcAuditEntitiesSuccessfully() {
+  void shouldRetrieveMarcAuditEntities() {
+    var entity = createMarcAuditEntity();
     var entityId = UUID.randomUUID();
-    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
-    getFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-      assertFalse(ar.result().isEmpty());
-    });
+    var pgClient = mock(PostgresClient.class);
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    RowSet<Row> rowSetMock = mockRowSet(entity);
+    when(pgClient.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(rowSetMock));
+
+    Future<List<MarcAuditEntity>> result = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, null, 10);
+
+    assertTrue(result.succeeded());
+    assertFalse(result.result().isEmpty());
+    verify(pgClient).execute(anyString(), any(Tuple.class));
+
+    var retrievedEntity = result.result().get(0);
+    assertEquals(entity.eventId(), retrievedEntity.eventId());
+    assertEquals(entity.entityId(), retrievedEntity.entityId());
+    assertEquals(entity.userId(), retrievedEntity.userId());
   }
 
   @Test
-  void shouldReturnEmptyListWhenNoEntitiesFound() {
+  void shouldRetrieveMarcAuditEntitiesWithEventDateFilter() {
+    var entity = createMarcAuditEntity();
     var entityId = UUID.randomUUID();
-    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
-    getFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-      assertTrue(ar.result().isEmpty());
-    });
+    var eventDate = LocalDateTime.now();
+    var pgClient = mock(PostgresClient.class);
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    RowSet<Row> rowSetMock = mockRowSet(entity);
+    when(pgClient.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(rowSetMock));
+
+    Future<List<MarcAuditEntity>> result = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, eventDate, 5);
+
+    assertTrue(result.succeeded());
+    assertFalse(result.result().isEmpty());
+    verify(pgClient).execute(anyString(), any(Tuple.class));
   }
 
   @Test
-  void shouldMapRowToAuditEntityListSuccessfully() {
+  void shouldReturnEmptyListWhenNoAuditRecordsExist() {
     var entityId = UUID.randomUUID();
-    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
-    getFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-      assertFalse(ar.result().isEmpty());
-      assertInstanceOf(MarcAuditEntity.class, ar.result().get(0));
-    });
+    var pgClient = mock(PostgresClient.class);
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    when(pgClient.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mockRowSet));
+    when(mockRowSet.rowCount()).thenReturn(0);
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    Future<List<MarcAuditEntity>> result = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, null, 5);
+
+    assertTrue(result.succeeded());
+    assertNotNull(result.result());
+    assertTrue(result.result().isEmpty());
   }
 
-  @Test
-  void shouldReturnEmptyListWhenNoRowsToMap() {
-    var entityId = UUID.randomUUID();
-    var getFuture = marcAuditDao.get(entityId, SourceRecordType.MARC_BIB, TENANT_ID, 10, 0);
-    getFuture.onComplete(ar -> {
-      assertTrue(ar.succeeded());
-      assertTrue(ar.result().isEmpty());
-    });
+  private RowSet<Row> mockRowSet(MarcAuditEntity entity) {
+    var row = mock(Row.class);
+    when(row.getUUID("event_id")).thenReturn(UUID.fromString(entity.eventId()));
+    when(row.getUUID("entity_id")).thenReturn(UUID.fromString(entity.entityId()));
+    when(row.getUUID("user_id")).thenReturn(UUID.fromString(entity.userId()));
+    when(row.getString("origin")).thenReturn(entity.origin());
+    when(row.getString("action")).thenReturn(entity.action());
+    when(row.getJsonObject("diff")).thenReturn(null);
+    when(row.getLocalDateTime("event_date")).thenReturn(entity.eventDate());
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    return MockUtils.mockRowSet(row);
   }
 }

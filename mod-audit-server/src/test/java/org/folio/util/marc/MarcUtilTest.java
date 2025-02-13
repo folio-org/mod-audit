@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ParsedRecordUtilTest {
+public class MarcUtilTest {
   private static final String FIELD_KEY = "field";
   private static final String OLD_VALUE_KEY = "oldValue";
   private static final String NEW_VALUE_KEY = "newValue";
@@ -21,7 +21,7 @@ public class ParsedRecordUtilTest {
   void testMapToEntity_SourceRecordCreated_MarcBib() {
     var event = EntityUtils.createSourceRecordDomainEvent();
 
-    MarcAuditEntity entity = ParsedRecordUtil.mapToEntity(event);
+    MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
@@ -36,7 +36,7 @@ public class ParsedRecordUtilTest {
   void testMapToEntity_SourceRecordUpdated_MarcBib() {
     var event = EntityUtils.updateSourceRecordDomainEvent();
     var prefix = "10$a";
-    MarcAuditEntity entity = ParsedRecordUtil.mapToEntity(event);
+    MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     assertNotNull(entity);
     assertEquals(event.getEventId(), entity.eventId());
@@ -58,7 +58,7 @@ public class ParsedRecordUtilTest {
   void testMapToEntity_SourceRecordUnchanged() {
     var event = EntityUtils.sourceRecordDomainEventWithNoDiff();
 
-    MarcAuditEntity entity = ParsedRecordUtil.mapToEntity(event);
+    MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     assertNotNull(entity);
     assertTrue(entity.diff().isEmpty(), "Diff should be empty for an unchanged record.");
@@ -71,7 +71,7 @@ public class ParsedRecordUtilTest {
     var event = EntityUtils.updateSourceRecordDomainEvent();
 
     // Act
-    MarcAuditEntity entity = ParsedRecordUtil.mapToEntity(event);
+    MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     // Assert
     assertNotNull(entity);
@@ -98,7 +98,7 @@ public class ParsedRecordUtilTest {
     var event = EntityUtils.deleteSourceRecordDomainEvent();
 
     // Act
-    MarcAuditEntity entity = ParsedRecordUtil.mapToEntity(event);
+    MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     // Assert
     assertNotNull(entity);
