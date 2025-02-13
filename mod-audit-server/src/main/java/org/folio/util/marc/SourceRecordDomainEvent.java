@@ -6,19 +6,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+
 /**
- * Represents a domain event related to source records in a library system.
+ * Represents a domain event related to a SourceRecord in a library cataloging system.
  * <p>
- * The SourceRecordDomainEvent class encapsulates the details of events that are
- * triggered in response to changes in source records. This includes information
- * about the event's unique identifier, type, associated metadata, and payload.
+ * The SourceRecordDomainEvent class encapsulates information about a specific type of event
+ * associated with a MARC record, including its metadata, payload, and type. This class is
+ * utilized to track changes or actions performed on a MARC record, such as its creation,
+ * update, or deletion.
  * <p>
  * Fields:
- * - eventId: A unique identifier for the domain event.
- * - eventType: The type of the event, indicating the action performed (created, updated, deleted).
- * - eventMetadata: Metadata associated with the event, such as publisher, tenant information,
- *   and the event's timestamp.
- * - eventPayload: The payload of the event, containing details of the new and old states of the record.
+ * - eventId: A unique identifier representing the event.
+ * - recordType: Represents the type of source record (e.g., bibliographic or authority)
+ *   associated with the event. This is defined by the SourceRecordType enum.
+ * - eventMetadata: Contains metadata related to the event, such as publisher details,
+ *   event timestamp, and tenant information.
+ * - eventPayload: Contains details about the state of the record involved in the event,
+ *   including its previous and updated state. This is defined by the MarcEventPayload class.
+ * - eventType: Specifies the type of the domain event, such as creation, update, deletion,
+ *   or other states. This is defined by the SourceRecordDomainEventType enum.
  */
 @Data
 @AllArgsConstructor
@@ -27,7 +33,8 @@ import lombok.RequiredArgsConstructor;
 public class SourceRecordDomainEvent {
   @JsonProperty("id")
   private String eventId;
-  private SourceRecordDomainEventType eventType;
+  private SourceRecordType recordType;
   private EventMetadata eventMetadata;
   private MarcEventPayload eventPayload;
+  private SourceRecordDomainEventType eventType;
 }

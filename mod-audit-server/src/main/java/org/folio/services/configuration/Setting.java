@@ -4,12 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum Setting {
+  AUTHORITY_RECORDS_PAGE_SIZE(SettingGroup.AUTHORITY, Setting.RECORDS_PAGE_SIZE_KEY),
+  INVENTORY_RECORDS_PAGE_SIZE(SettingGroup.INVENTORY, Setting.RECORDS_PAGE_SIZE_KEY),
+  MARC_RECORD_PAGE_SIZE(SettingGroup.MARC, Setting.RECORDS_PAGE_SIZE_KEY);
 
-  AUTHORITY_RECORDS_PAGE_SIZE(SettingGroup.AUTHORITY, "records.page.size"),
-  INVENTORY_RECORDS_PAGE_SIZE(SettingGroup.INVENTORY, "records.page.size");
+  public static final String RECORDS_PAGE_SIZE_KEY = "records.page.size";
 
-  private final SettingGroup group;
   private final String key;
+  private final SettingGroup group;
 
   Setting(SettingGroup group, String key) {
     this.group = group;
