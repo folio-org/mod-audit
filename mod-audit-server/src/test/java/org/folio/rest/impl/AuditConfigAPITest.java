@@ -47,15 +47,15 @@ public class AuditConfigAPITest extends ApiTestBase {
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .assertThat()
-      .body("totalRecords", equalTo(1))
-      .body("settings[0].key", equalTo(INVENTORY_RECORDS_PAGE_SIZE.getKey()))
-      .body("settings[0].value", notNullValue())
-      .body("settings[0].type", equalTo("INTEGER"))
-      .body("settings[0].groupId", equalTo(INVENTORY.getId()))
-      .body("settings[0].metadata.createdDate", notNullValue())
-      .body("settings[0].metadata.updatedDate", notNullValue())
-      .body("settings[0].metadata.createdByUserId", notNullValue())
-      .body("settings[0].metadata.updatedByUserId", notNullValue());
+      .body("totalRecords", equalTo(2))
+      .body("settings[1].key", equalTo(INVENTORY_RECORDS_PAGE_SIZE.getKey()))
+      .body("settings[1].value", notNullValue())
+      .body("settings[1].type", equalTo("INTEGER"))
+      .body("settings[1].groupId", equalTo(INVENTORY.getId()))
+      .body("settings[1].metadata.createdDate", notNullValue())
+      .body("settings[1].metadata.updatedDate", notNullValue())
+      .body("settings[1].metadata.createdByUserId", notNullValue())
+      .body("settings[1].metadata.updatedByUserId", notNullValue());
   }
 
   @Test
@@ -83,9 +83,9 @@ public class AuditConfigAPITest extends ApiTestBase {
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .assertThat()
-      .body("totalRecords", equalTo(1))
-      .body("settings[0].key", equalTo("records.page.size"))
-      .body("settings[0].value", equalTo(50));
+      .body("totalRecords", equalTo(2))
+      .body("settings[1].key", equalTo("records.page.size"))
+      .body("settings[1].value", equalTo(50));
   }
 
   @Test

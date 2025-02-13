@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum Setting {
 
+  AUTHORITY_RECORDS_ENABLED(SettingGroup.AUTHORITY, "enabled"),
   AUTHORITY_RECORDS_PAGE_SIZE(SettingGroup.AUTHORITY, "records.page.size"),
+  INVENTORY_RECORDS_ENABLED(SettingGroup.INVENTORY, "enabled"),
   INVENTORY_RECORDS_PAGE_SIZE(SettingGroup.INVENTORY, "records.page.size");
 
   private final SettingGroup group;

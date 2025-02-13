@@ -12,6 +12,7 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.SourceRecordDomainEvent;
+import org.folio.util.marc.SourceRecordDomainEventType;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -34,18 +35,23 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
     var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp());
-    LOGGER.info("saveMarcDomainEvent:: Starting processing of Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
+    if (SourceRecordDomainEventType.UNKNOWN == event.getEventType()) {
+      LOGGER.debug("handle:: Event type not supported [eventId: {}]", event.getEventId());
+      result.complete(event.getEventId());
+      return result.future();
+    }
+    LOGGER.info("handle:: Starting processing of Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
     marcAuditService.saveMarcDomainEvent(event)
       .onSuccess(ar -> {
-        LOGGER.info("saveMarcDomainEvent:: Saved Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
+        LOGGER.info("handle:: Processed Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
         result.complete(event.getEventId());
       })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
-          LOGGER.info("saveMarcDomainEvent:: Duplicate Marc bib audit event with id: {} received, skipped processing", event.getEventId());
+          LOGGER.info("handle:: Duplicate Marc Record audit event with id: {} received, skipped processing", event.getEventId());
           result.complete(event.getEventId());
         } else {
-          LOGGER.error("saveMarcDomainEvent:: Processing of Marc Bib audit event with id: {} and type '{}' has been failed", event.getEventId(), event.getEventType(), e);
+          LOGGER.error("handle:: Processing of Marc Record audit event with id: {} and type '{}' has been failed", event.getEventId(), event.getEventType(), e);
           result.fail(e);
         }
       });

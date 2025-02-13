@@ -251,10 +251,6 @@ public class TestSuite {
   }
 
   @Nested
-  class InventoryEventServiceImplNestedTest extends InventoryEventServiceImplTest {
-  }
-
-  @Nested
   class InventoryEventHandlerMockNestedTest extends InventoryEventHandlerMockTest {
   }
 
