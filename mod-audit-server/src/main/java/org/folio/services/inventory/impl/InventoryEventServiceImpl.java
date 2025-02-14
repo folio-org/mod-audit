@@ -28,8 +28,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InventoryEventServiceImpl implements InventoryEventService {
-  private static final String DAO_NOT_FOUND_MESSAGE = "Could not find dao for resource type: ";
+
   private static final Logger LOGGER = LogManager.getLogger();
+
+  private static final String DAO_NOT_FOUND_MESSAGE = "Could not find dao for resource type: ";
 
   private final Function<InventoryEvent, InventoryAuditEntity> eventToEntityMapper;
   private final Function<List<InventoryAuditEntity>, InventoryAuditCollection> entitiesToCollectionMapper;
@@ -52,6 +54,22 @@ public class InventoryEventServiceImpl implements InventoryEventService {
     LOGGER.debug("saveEvent:: Trying to save InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
       tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
 
+    return configurationService.getSetting(Setting.INVENTORY_RECORDS_ENABLED, tenantId)
+      .compose(setting -> {
+        if (!((boolean) setting.getValue())) {
+          LOGGER.debug("saveEvent:: Inventory audit is disabled for tenant [tenantId: {}]", tenantId);
+          return Future.succeededFuture(inventoryEvent.getEventId());
+        }
+        return save(inventoryEvent, tenantId);
+      })
+      .recover(throwable -> {
+        LOGGER.error("saveEvent:: Could not save InventoryEvent for [tenantId: {}, eventId: {}, entityId: {}]",
+          tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
+        return handleFailures(throwable, inventoryEvent.getEventId());
+      });
+  }
+
+  private Future<String> save(InventoryEvent inventoryEvent, String tenantId) {
     var eventId = inventoryEvent.getEventId();
     return getDao(inventoryEvent.getResourceType())
       .compose(inventoryEventDao -> {
@@ -64,11 +82,6 @@ public class InventoryEventServiceImpl implements InventoryEventService {
         }
 
         return inventoryEventDao.save(entity, tenantId).map(eventId);
-      })
-      .recover(throwable -> {
-        LOGGER.error("saveEvent:: Could not save InventoryEvent for [tenantId: {}, eventId: {}, entityId: {}]",
-          tenantId, eventId, inventoryEvent.getEntityId());
-        return handleFailures(throwable, eventId);
       });
   }
 
