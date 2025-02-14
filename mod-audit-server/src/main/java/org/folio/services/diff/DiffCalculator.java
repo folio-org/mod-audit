@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
@@ -34,18 +35,33 @@ public abstract class DiffCalculator<T> {
     .withListCompareAlgorithm(ListCompareAlgorithm.AS_SET)
     .build();
 
+  /**
+   * Calculates the difference between the old and new values.
+   *
+   * @param oldValue the old value
+   * @param newValue the new value
+   * @return the difference between the old and new values or null if there is no difference
+   */
   public ChangeRecordDto calculateDiff(Map<String, Object> oldValue, Map<String, Object> newValue) {
     var oldRecord = new JsonObject(oldValue).mapTo(getType());
     var newRecord = new JsonObject(newValue).mapTo(getType());
-    var diff = javers.compare(oldRecord, newRecord);
+    var diff = javers.compare(access(oldRecord).get(), access(newRecord).get());
     return convert(diff.getChanges());
   }
 
   public abstract InventoryResourceType getResourceType();
 
+  /**
+   * Accessor for the object to be compared. May be useful to initialize some fields before comparison.
+   */
+  protected abstract Supplier<T> access(T value);
+
   protected abstract Class<T> getType();
 
   private ChangeRecordDto convert(Changes changes) {
+    if (changes == null || changes.isEmpty()) {
+      return null;
+    }
     var result = new ChangeRecordDto();
     var groupedChanges = groupChanges(changes);
     var parentChanges = groupedChanges.get(getType().getName());

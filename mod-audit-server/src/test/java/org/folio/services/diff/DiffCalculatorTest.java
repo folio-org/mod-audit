@@ -6,6 +6,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.CollectionItemChangeDto;
@@ -31,9 +32,20 @@ class DiffCalculatorTest {
         return Instance.class;
       }
 
+
       @Override
       public InventoryResourceType getResourceType() {
         return InventoryResourceType.INSTANCE;
+      }
+
+      @Override
+      protected Supplier<Instance> access(Instance value) {
+        return () -> {
+          if (value.getDates() == null) {
+            value.setDates(new Dates());
+          }
+          return value;
+        };
       }
     };
   }
@@ -83,6 +95,25 @@ class DiffCalculatorTest {
       .as("Field changes should contain source field added change")
       .hasSize(1)
       .containsExactlyInAnyOrder(FieldChangeDto.added("source", "source", "Source 1"));
+  }
+
+  @Test
+  void shouldDetectFieldAddedChangeInInnerObject() {
+    // given
+    var oldInstance = getMap(new Instance().withId("1"));
+    var newInstance = getMap(new Instance().withId("1").withDates(new Dates().withDate1("Date1").withDate2("Date2")));
+
+    // when
+    var changeRecordDTO = diffCalculator.calculateDiff(oldInstance, newInstance);
+
+    // then
+    assertThat(changeRecordDTO.getFieldChanges())
+      .as("Field changes should contain added changes in inner object")
+      .hasSize(2)
+      .containsExactlyInAnyOrder(
+        FieldChangeDto.added("date1", "dates.date1", "Date1"),
+        FieldChangeDto.added("date2", "dates.date2", "Date2")
+      );
   }
 
   @Test
