@@ -110,7 +110,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
     // Update the INVENTORY_RECORDS_PAGE_SIZE setting to 3
     var settingEntity = SettingEntity.builder()
       .id(INVENTORY_RECORDS_PAGE_SIZE.getSettingId())
-      .key(INVENTORY_RECORDS_PAGE_SIZE.getKey())
+      .key(INVENTORY_RECORDS_PAGE_SIZE.getKey().getValue())
       .value(3)
       .type(SettingValueType.INTEGER)
       .groupId(INVENTORY_RECORDS_PAGE_SIZE.getGroup().getId())
