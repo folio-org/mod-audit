@@ -37,7 +37,8 @@ public class MarcAuditApiTest extends ApiTestBase {
   private static final Header PERMS_HEADER = new Header("X-Okapi-Permissions", "audit.all");
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
-  private static final String AUDIT_DATA_MARC_BIB_PATH = "/audit-data/marc/bib/";
+  private static final String MARC_BIB_PATH = "/audit-data/marc/bib/";
+  private static final String MARC_AUTHORITY_PATH = "/audit-data/marc/authority/";
   private static final String DIFF = """
     {
         "removed": [{"field": "019", "value": "  $a1222786121"}],
@@ -96,13 +97,15 @@ public class MarcAuditApiTest extends ApiTestBase {
 
   private static Stream<Arguments> provideSourceTypeAndPath() {
     return Stream.of(
-      Arguments.of(SourceRecordType.MARC_BIB, AUDIT_DATA_MARC_BIB_PATH)
+      Arguments.of(SourceRecordType.MARC_BIB, MARC_BIB_PATH),
+      Arguments.of(SourceRecordType.MARC_AUTHORITY, MARC_AUTHORITY_PATH)
     );
   }
 
   private static Stream<Arguments> providePath() {
     return Stream.of(
-      Arguments.of(AUDIT_DATA_MARC_BIB_PATH)
+      Arguments.of(MARC_BIB_PATH),
+      Arguments.of(MARC_AUTHORITY_PATH)
     );
   }
 }

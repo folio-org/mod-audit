@@ -52,6 +52,24 @@ public class MarcAuditImpl implements AuditDataMarc {
     }
   }
 
+  @Override
+  public void getAuditDataMarcAuthorityByEntityId(String entityId, String eventTs, Map<String, String> okapiHeaders,
+                                                  Handler<AsyncResult<Response>> asyncResultHandler,
+                                                  Context vertxContext) {
+    LOGGER.debug("getAuditDataMarcAuthorityByEntityId:: Retrieving Authority Audit Data by entityId: '{}'", entityId);
+    var tenantId = TenantTool.tenantId(okapiHeaders);
+    try {
+      service.getMarcAuditRecords(entityId, SourceRecordType.MARC_AUTHORITY, tenantId, eventTs)
+        .map(AuditDataMarc.GetAuditDataMarcAuthorityByEntityIdResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(this::mapExceptionToResponse)
+        .onComplete(asyncResultHandler);
+    } catch (Exception e) {
+      LOGGER.error("getAuditDataMarcAuthorityByEntityId:: Error retrieving Marc Authority Audit Data by entityId: '{}'", entityId, e);
+      asyncResultHandler.handle(Future.succeededFuture(mapExceptionToResponse(e)));
+    }
+  }
+
   private Response mapExceptionToResponse(Throwable throwable) {
     LOGGER.debug("mapExceptionToResponse:: Mapping Exception :{} to Response", throwable.getMessage(), throwable);
     if (throwable instanceof ValidationException) {
