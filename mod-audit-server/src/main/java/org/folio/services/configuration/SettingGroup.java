@@ -6,8 +6,7 @@ import lombok.Getter;
 public enum SettingGroup {
 
   AUTHORITY("audit.authority"),
-  INVENTORY("audit.inventory"),
-  MARC("audit.marc");
+  INVENTORY("audit.inventory");
 
   private final String id;
 
