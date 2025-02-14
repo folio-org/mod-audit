@@ -1,7 +1,6 @@
 package org.folio.dao.marc;
 
 import lombok.NonNull;
-import org.folio.util.marc.SourceRecordType;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -12,10 +11,9 @@ import java.util.Map;
 public record MarcAuditEntity(
   @NonNull String eventId,
   @NonNull LocalDateTime eventDate,
-  @NonNull String recordId,
+  @NonNull String entityId,
   @NonNull String origin,
   @NonNull String action,
   @NonNull String userId,
-  @NonNull SourceRecordType recordType,
   Map<String, Object> diff) {
 }

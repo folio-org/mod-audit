@@ -5,4 +5,4 @@ VALUES ('audit.inventory',
        ('audit.authority',
         'Authority Audit Configuration',
         'Group of configurations for audit of authority records')
-ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO NOTHING;

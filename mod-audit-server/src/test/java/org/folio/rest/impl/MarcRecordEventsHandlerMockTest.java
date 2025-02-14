@@ -36,8 +36,9 @@ public class MarcRecordEventsHandlerMockTest {
   private static final String TENANT_ID = "diku";
   private static final String TOKEN = "token";
   private static final String KAFKA_ENV = "folio";
-  public static final String OKAPI_TOKEN_HEADER = "x-okapi-token";
-  public static final String OKAPI_URL_HEADER = "x-okapi-url";
+  private static final String OKAPI_TOKEN_HEADER = "x-okapi-token";
+  private static final String OKAPI_URL_HEADER = "x-okapi-url";
+  private static final String RECORD_TYPE_HEADER = "folio.srs.recordType";
 
   @Spy
   private Vertx vertx = Vertx.vertx();
@@ -118,6 +119,7 @@ public class MarcRecordEventsHandlerMockTest {
     consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, TOKEN.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RECORD_TYPE_HEADER, event.getRecordType().name().getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;
   }
 }
