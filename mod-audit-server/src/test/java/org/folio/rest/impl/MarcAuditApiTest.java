@@ -52,10 +52,6 @@ public class MarcAuditApiTest extends ApiTestBase {
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
-  @BeforeEach
-  public void setUp() {
-  }
-
   @SneakyThrows
   @ParameterizedTest
   @MethodSource("provideSourceTypeAndPath")

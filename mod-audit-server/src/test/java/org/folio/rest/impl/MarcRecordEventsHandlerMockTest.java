@@ -13,7 +13,6 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.SourceRecordDomainEvent;
-import org.folio.util.marc.SourceRecordType;
 import org.folio.verticle.marc.consumers.MarcRecordEventsHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
