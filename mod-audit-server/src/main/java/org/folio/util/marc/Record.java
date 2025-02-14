@@ -16,7 +16,7 @@ import java.util.Map;
  * the parsed record content, and associated metadata.
  * <p>
  * Fields:
- * - id: A unique identifier for the record.
+ * - matchedId: A unique identifier for the record.
  * - recordType: An enumeration indicating the type of the record (e.g., MARC_BIB, MARC_AUTHORITY).
  * - parsedRecord: A map containing the parsed content of the record.
  * - metadata: A map containing additional metadata related to the record.
@@ -27,8 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Record {
-  private String id;
-  private SourceRecordType recordType;
+  private String matchedId;
   private Map<String, Object> parsedRecord;
   private Map<String, Object> metadata;
 }

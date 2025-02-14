@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Marc audit collection",
+  "type": "object",
+  "properties": {
+    "marcAuditItems": {
+      "description": "List of marc audit items",
+      "type": "array",
+      "id": "marcAuditItems",
+      "items": {
+        "type": "object",
+        "$ref": "marc_audit_item.json"
+      }
+    }
+  },
+  "required": [
+    "marcAuditItems"
+  ],
+  "additionalProperties": false
+}
