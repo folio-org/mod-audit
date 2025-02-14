@@ -54,7 +54,7 @@ public class MarcAuditApiTest extends ApiTestBase {
   @SneakyThrows
   @ParameterizedTest
   @MethodSource("provideSourceTypeAndPath")
-  void shouldReturnInventoryEventsOnGetByEntityId(SourceRecordType recordType, String apiPath) {
+  void shouldReturnMarcEventsOnGetByEntityId(SourceRecordType recordType, String apiPath) {
     var entity = new MarcAuditEntity(
       UUID.randomUUID().toString(),
       Timestamp.from(Instant.now()).toLocalDateTime(),
