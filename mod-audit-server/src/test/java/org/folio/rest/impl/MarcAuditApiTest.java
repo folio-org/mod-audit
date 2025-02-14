@@ -11,7 +11,6 @@ import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
