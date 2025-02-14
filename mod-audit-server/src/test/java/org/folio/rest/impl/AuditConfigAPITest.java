@@ -37,7 +37,7 @@ public class AuditConfigAPITest extends ApiTestBase {
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .assertThat()
-      .body("totalRecords", equalTo(3))
+      .body("totalRecords", equalTo(2))
       .body("settingGroups[0].id", equalTo(AUTHORITY.getId()));
   }
 

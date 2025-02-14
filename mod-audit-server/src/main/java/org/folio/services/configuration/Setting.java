@@ -5,8 +5,7 @@ import lombok.Getter;
 @Getter
 public enum Setting {
   AUTHORITY_RECORDS_PAGE_SIZE(SettingGroup.AUTHORITY, Setting.RECORDS_PAGE_SIZE_KEY),
-  INVENTORY_RECORDS_PAGE_SIZE(SettingGroup.INVENTORY, Setting.RECORDS_PAGE_SIZE_KEY),
-  MARC_RECORD_PAGE_SIZE(SettingGroup.MARC, Setting.RECORDS_PAGE_SIZE_KEY);
+  INVENTORY_RECORDS_PAGE_SIZE(SettingGroup.INVENTORY, Setting.RECORDS_PAGE_SIZE_KEY);
 
   public static final String RECORDS_PAGE_SIZE_KEY = "records.page.size";
 

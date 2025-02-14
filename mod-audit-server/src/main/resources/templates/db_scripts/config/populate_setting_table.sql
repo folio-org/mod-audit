@@ -18,15 +18,5 @@ VALUES ('audit.inventory.records.page.size',
         now(),
         '00000000-0000-0000-0000-000000000000',
         now(),
-        '00000000-0000-0000-0000-000000000000'),
-       ('audit.marc.records.page.size',
-        'records.page.size',
-        to_jsonb(15::integer),
-        'INTEGER',
-        'Number of records to display per page',
-        'audit.marc',
-        now(),
-        '00000000-0000-0000-0000-000000000000',
-        now(),
         '00000000-0000-0000-0000-000000000000')
-ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO NOTHING;

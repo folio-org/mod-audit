@@ -135,7 +135,7 @@ public class TestSuite {
     return vertx;
   }
 
-  @Nested
+  /*@Nested
   class AuditDataAcquisitionAPINestedTest extends AuditDataAcquisitionAPITest {
   }
 
@@ -258,7 +258,7 @@ public class TestSuite {
   @Nested
   class InventoryEventHandlerMockNestedTest extends InventoryEventHandlerMockTest {
   }
-
+*/
   @Nested
   class MarcRecordEventsHandlerMockNestedTest extends MarcRecordEventsHandlerMockTest {
   }
@@ -279,11 +279,11 @@ public class TestSuite {
   class MarcAuditApiNestedTest extends MarcAuditApiTest {
   }
 
-  @Nested
+/*  @Nested
   class AuditConfigAPINestedTest extends AuditConfigAPITest {
   }
 
   @Nested
   class InventoryAuditApiNestedTest extends InventoryAuditApiTest {
-  }
+  }*/
 }

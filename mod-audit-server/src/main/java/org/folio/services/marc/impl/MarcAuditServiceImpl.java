@@ -61,6 +61,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
 
   @Override
   public Future<MarcAuditCollection> getMarcAuditRecords(String entityId, SourceRecordType recordType, String tenantId, String dateTime) {
+    LOGGER.debug("getMarcAuditRecords:: Trying to get records by tenantId: '{}', entityId: '{}', record type '{}';", tenantId, entityId, recordType);
     UUID entityUUID;
     LocalDateTime eventDateTime;
     try {
@@ -70,13 +71,18 @@ public class MarcAuditServiceImpl implements MarcAuditService {
       LOGGER.error("getMarcAuditRecords:: Could not parse entityId or eventDateTime for tenantId: '{}', recordType: '{}', entityId: '{}'", tenantId, recordType, entityId, e);
       return Future.failedFuture(new ValidationException(e.getMessage()));
     }
-    return configurationService.getSetting(Setting.MARC_RECORD_PAGE_SIZE, tenantId)
-      .map(setting -> (int) setting.getValue())
+    return getMarcRecordPageSize(tenantId, recordType)
       .compose(limit -> marcAuditDao.get(entityUUID, recordType, tenantId, eventDateTime, limit))
       .map(MarcUtil::mapToCollection)
       .recover(throwable -> {
         LOGGER.error("getMarcAuditRecords:: Could not retrieve marc audit records for tenantId: '{}', recordType: '{}', entityId: '{}'", tenantId, recordType, entityId, throwable);
         return handleFailures(throwable, entityId);
       });
+  }
+
+  private Future<Integer> getMarcRecordPageSize(String tenantId, SourceRecordType type) {
+    var setting = SourceRecordType.MARC_BIB.equals(type) ? Setting.INVENTORY_RECORDS_PAGE_SIZE : Setting.AUTHORITY_RECORDS_PAGE_SIZE;
+    return configurationService.getSetting(setting, tenantId)
+      .map(result -> (int) result.getValue());
   }
 }

@@ -104,7 +104,7 @@ public class MarcUtil {
   public static MarcAuditCollection mapToCollection(List<MarcAuditEntity> entities) {
     var collection = new MarcAuditCollection();
     collection.setMarcAuditItems(entities.stream()
-      .map(MarcUtil::mapEntityToItem) // Use the extracted method
+      .map(MarcUtil::mapEntityToItem)
       .toList());
     return collection;
   }
