@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.folio.dao.inventory.InventoryAuditEntity;
+import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.services.diff.DiffCalculator;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
@@ -32,7 +33,7 @@ public class InventoryEventToEntityMapper implements Function<InventoryEvent, In
   public InventoryAuditEntity apply(InventoryEvent event) {
     var userId = extractUserId(event);
     var diff = InventoryEventType.UPDATE.equals(event.getType())
-               ? diffServices.get(event.getResourceType()).calculateDiff(event.getOldValue(), event.getNewValue())
+               ? getDiff(event)
                : null;
     return new InventoryAuditEntity(
       UUID.fromString(event.getEventId()),
@@ -42,5 +43,13 @@ public class InventoryEventToEntityMapper implements Function<InventoryEvent, In
       UUID.fromString(userId),
       diff
     );
+  }
+
+  private ChangeRecordDto getDiff(InventoryEvent event) {
+    var diff = diffServices.get(event.getResourceType()).calculateDiff(event.getOldValue(), event.getNewValue());
+    if (diff == null || (diff.getFieldChanges().isEmpty() && diff.getCollectionChanges().isEmpty())) {
+      return null;
+    }
+    return diff;
   }
 }

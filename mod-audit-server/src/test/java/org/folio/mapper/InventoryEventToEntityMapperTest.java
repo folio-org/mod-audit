@@ -17,6 +17,8 @@ import org.folio.util.inventory.InventoryUtils;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.MockedStatic;
 
 @UnitTest
@@ -57,13 +59,14 @@ class InventoryEventToEntityMapperTest {
     }
   }
 
-  @Test
-  void shouldMapDeleteEventWithNullDiff() {
+  @EnumSource(value = InventoryEventType.class, names = {"CREATE", "DELETE"})
+  @ParameterizedTest
+  void shouldMapDeleteAndCreateEventWithNullDiff(InventoryEventType eventType) {
     var event = new InventoryEvent();
     event.setEventId(UUID.randomUUID().toString());
     event.setEntityId(UUID.randomUUID().toString());
     event.setEventTs(System.currentTimeMillis());
-    event.setType(InventoryEventType.DELETE);
+    event.setType(eventType);
 
     try (MockedStatic<InventoryUtils> utilities = mockStatic(InventoryUtils.class)) {
       utilities.when(() -> InventoryUtils.extractUserId(event)).thenReturn(UUID.randomUUID().toString());
@@ -73,7 +76,34 @@ class InventoryEventToEntityMapperTest {
       assertEquals(UUID.fromString(event.getEventId()), result.eventId());
       assertEquals(new Timestamp(event.getEventTs()), result.eventDate());
       assertEquals(UUID.fromString(event.getEntityId()), result.entityId());
-      assertEquals(InventoryEventType.DELETE.name(), result.action());
+      assertEquals(eventType.name(), result.action());
+      assertEquals(UUID.fromString(InventoryUtils.extractUserId(event)), result.userId());
+      assertNull(result.diff());
+    }
+  }
+
+  @Test
+  void shouldMapUpdateEventWithNullDiffIfNoChanges() {
+    var event = new InventoryEvent();
+    event.setEventId(UUID.randomUUID().toString());
+    event.setEntityId(UUID.randomUUID().toString());
+    event.setEventTs(System.currentTimeMillis());
+    event.setType(InventoryEventType.UPDATE);
+    event.setResourceType(InventoryResourceType.INSTANCE);
+    event.setNewValue(Map.of("title", "value2", "dates", Map.of("date1", "1233"), "subjects",
+      List.of(Map.of("value", "subject3"), Map.of("value", "subject2"), Map.of("value", "subject4"))));
+    event.setOldValue(Map.of("title", "value2", "dates", Map.of("date1", "1233"), "subjects",
+      List.of(Map.of("value", "subject3"), Map.of("value", "subject2"), Map.of("value", "subject4"))));
+
+    try (MockedStatic<InventoryUtils> utilities = mockStatic(InventoryUtils.class)) {
+      utilities.when(() -> InventoryUtils.extractUserId(event)).thenReturn(UUID.randomUUID().toString());
+
+      var result = mapper.apply(event);
+
+      assertEquals(UUID.fromString(event.getEventId()), result.eventId());
+      assertEquals(new Timestamp(event.getEventTs()), result.eventDate());
+      assertEquals(UUID.fromString(event.getEntityId()), result.entityId());
+      assertEquals(InventoryEventType.UPDATE.name(), result.action());
       assertEquals(UUID.fromString(InventoryUtils.extractUserId(event)), result.userId());
       assertNull(result.diff());
     }
