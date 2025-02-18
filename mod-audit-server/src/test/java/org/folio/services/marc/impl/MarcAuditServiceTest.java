@@ -124,7 +124,7 @@ public class MarcAuditServiceTest {
 
   @Test
   void shouldRetrieveMarcAuthorityAuditRecordsSuccessfully() {
-    when(configurationService.getSetting(Setting.AUTHORITY_RECORDS_PAGE_SIZE, TENANT_ID))
+    when(configurationService.getSetting(org.folio.services.configuration.Setting.AUTHORITY_RECORDS_PAGE_SIZE, TENANT_ID))
       .thenReturn(Future.succeededFuture(new org.folio.rest.jaxrs.model.Setting().withValue(10)));
     var saveFuture = marcAuditService.getMarcAuditRecords(EntityUtils.SOURCE_RECORD_ID, SourceRecordType.MARC_AUTHORITY, TENANT_ID, DATE_TIME);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
