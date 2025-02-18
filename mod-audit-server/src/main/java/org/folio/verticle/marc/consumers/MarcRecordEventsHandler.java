@@ -40,6 +40,13 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
+    var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp());
+    if (SourceRecordDomainEventType.UNKNOWN == event.getEventType()) {
+      LOGGER.debug("handle:: Event type not supported [eventId: {}]", event.getEventId());
+      result.complete(event.getEventId());
+      return result.future();
+    }
+    LOGGER.info("handle:: Starting processing of Marc Record audit event with id '{} and type '{}''", event.getEventId(), event.getEventType());
     var headers = KafkaHeaderUtils.kafkaHeadersToMap(kafkaConsumerRecord.headers());
     var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp(), headers);
     var log = String.format(LOG_DATA, event.getEventId(), event.getEventType(), event.getRecordType());

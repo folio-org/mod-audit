@@ -431,14 +431,34 @@
       "description": "Update setting for a group"
     },
     {
-      "permissionName": "audit.config.groups.settings.audit.inventory.item.put",
-      "displayName": "Audit Configuration - update setting for a audit inventory group",
-      "description": "Update setting for a audit inventory group"
+      "permissionName": "audit.config.groups.settings.audit.inventory.records.page.size.item.put",
+      "displayName": "Audit Configuration - update setting for a audit inventory records page size",
+      "description": "Update setting for a audit inventory records page size"
     },
     {
-      "permissionName": "audit.config.groups.settings.audit.authority.item.put",
-      "displayName": "Audit Configuration - update setting for a audit authority group",
-      "description": "Update setting for a audit authority group"
+      "permissionName": "audit.config.groups.settings.audit.authority.records.page.size.item.put",
+      "displayName": "Audit Configuration - update setting for a audit authority records page size",
+      "description": "Update setting for a audit authority records page size"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.records.retention.period.item.put",
+      "displayName": "Audit Configuration - update setting for a audit inventory records retention period",
+      "description": "Update setting for a audit inventory records retention period"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.records.retention.period.item.put",
+      "displayName": "Audit Configuration - update setting for a audit authority records retention period",
+      "description": "Update setting for a audit authority records retention period"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.inventory.enabled.item.put",
+      "displayName": "Audit Configuration - enable/disable audit inventory records",
+      "description": "Enable/disable audit inventory records"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.authority.enabled.item.put",
+      "displayName": "Audit Configuration - enable/disable audit authority records",
+      "description": "Enable/disable audit authority records"
     },
     {
       "permissionName": "audit.inventory.instance.collection.get",
