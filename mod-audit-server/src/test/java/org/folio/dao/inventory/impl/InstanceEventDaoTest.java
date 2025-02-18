@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -98,6 +99,20 @@ public class InstanceEventDaoTest {
       .onComplete(ctx.succeeding(result -> {
         assertEquals(1, result.size());
         assertEquals(inventoryAuditEntity.entityId(), result.get(0).entityId());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldDeleteAllInventoryAuditEntities(VertxTestContext ctx) {
+    var entityId = UUID.randomUUID();
+
+    doReturn(Future.succeededFuture())
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
+
+    instanceEventDao.deleteAll(entityId, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }

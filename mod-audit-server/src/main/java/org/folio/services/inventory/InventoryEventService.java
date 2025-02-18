@@ -14,7 +14,7 @@ public interface InventoryEventService {
    * @param tenantId       id of tenant
    * @return Future with event id
    */
-  Future<String> saveEvent(InventoryEvent inventoryEvent, String tenantId);
+  Future<String> processEvent(InventoryEvent inventoryEvent, String tenantId);
 
   /**
    * Retrieves InventoryEvent List

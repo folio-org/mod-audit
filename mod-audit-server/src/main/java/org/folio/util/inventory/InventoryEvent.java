@@ -22,6 +22,7 @@ public class InventoryEvent {
   private InventoryResourceType resourceType;
   private InventoryDeleteEventSubType deleteEventSubType;
   private Long eventTs;
+  private Boolean isConsortiumShadowCopy;
 
   @JsonProperty("new")
   private Map<String, Object> newValue;

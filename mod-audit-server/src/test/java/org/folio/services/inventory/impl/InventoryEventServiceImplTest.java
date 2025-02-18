@@ -94,7 +94,7 @@ public class InventoryEventServiceImplTest {
       new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(
         Instant.now()), UUID.randomUUID(), InventoryEventType.CREATE.name(), null, null));
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(dao, times(1)).save(any(), anyString());
@@ -111,18 +111,33 @@ public class InventoryEventServiceImplTest {
       InventoryEventType.UPDATE.name(), null, null);
     when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(entity);
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(instanceEventDao, never()).save(any(), anyString());
   }
 
+  @ParameterizedTest
+  @EnumSource(value = InventoryResourceType.class, mode = EnumSource.Mode.EXCLUDE, names = {"UNKNOWN"})
+  void shouldDeleteAllInventoryRecordsWhenConsortiumShadowCopy(InventoryResourceType resourceType) {
+    var dao = daos.get(resourceType);
+    var inventoryEvent = createInventoryEvent(resourceType);
+    inventoryEvent.setIsConsortiumShadowCopy(true);
+    mockAuditEnabled(true);
+    doReturn(Future.succeededFuture()).when(dao).deleteAll(UUID.fromString(inventoryEvent.getEntityId()), TENANT_ID);
+
+    var deleteFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
+    deleteFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(dao, times(1)).deleteAll(any(UUID.class), anyString());
+  }
+
   @Test
-  void shouldFailToSaveEventWhenDaoNotFound() {
+  void shouldFailToProcessEventWhenDaoNotFound() {
     var inventoryEvent = createInventoryEvent(InventoryResourceType.UNKNOWN);
 
     mockAuditEnabled(true);
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, times(0)).save(any(), anyString());
