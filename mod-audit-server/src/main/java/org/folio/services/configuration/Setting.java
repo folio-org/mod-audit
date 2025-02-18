@@ -10,7 +10,7 @@ public enum Setting {
   AUTHORITY_RECORDS_RETENTION_PERIOD(SettingGroup.AUTHORITY, SettingKey.RETENTION_PERIOD),
   INVENTORY_RECORDS_RETENTION_PERIOD(SettingGroup.INVENTORY, SettingKey.RETENTION_PERIOD),
   INVENTORY_RECORDS_ENABLED(SettingGroup.INVENTORY, SettingKey.ENABLED),
-  AUTHORITY_RECORDS_ENABLED(SettingGroup.INVENTORY, SettingKey.ENABLED);
+  AUTHORITY_RECORDS_ENABLED(SettingGroup.AUTHORITY, SettingKey.ENABLED);
 
   private final SettingGroup group;
   private final SettingKey key;
