@@ -1,22 +1,29 @@
 package org.folio.services.marc.impl;
 
-import static org.folio.util.ErrorUtils.handleFailures;
-
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
 import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.exception.ValidationException;
+import org.folio.rest.jaxrs.model.MarcAuditCollection;
 import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.Setting;
 import org.folio.services.marc.MarcAuditService;
-import org.folio.util.marc.ParsedRecordUtil;
+import org.folio.util.marc.MarcUtil;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.folio.util.ErrorUtils.handleFailures;
 
 @Service
 public class MarcAuditServiceImpl implements MarcAuditService {
@@ -40,28 +47,21 @@ public class MarcAuditServiceImpl implements MarcAuditService {
     var tenantId = event.getEventMetadata().getTenantId();
     LOGGER.debug("saveMarcDomainEvent:: Trying to save SourceRecordDomainEvent tenantId: '{}', eventId: '{};", tenantId,
       event.getEventId());
-    var recordType = getSourceRecordType(event);
-    return configurationService.getSetting(SETTINGS_MAP.get(recordType), tenantId)
+    return configurationService.getSetting(SETTINGS_MAP.get(event.getRecordType()), tenantId)
       .compose(setting -> {
         if (!((boolean) setting.getValue())) {
           LOGGER.debug("saveMarcDomainEvent:: Audit is disabled for tenantId: '{}', recordType: '{}", tenantId,
-            recordType);
+            event.getRecordType());
           return Future.succeededFuture();
         }
         return save(event, tenantId);
       });
   }
 
-  private SourceRecordType getSourceRecordType(SourceRecordDomainEvent event) {
-    var marcRecord = event.getEventPayload().getNewRecord() == null ? event.getEventPayload().getOld()
-                                                                    : event.getEventPayload().getNewRecord();
-    return marcRecord.getRecordType();
-  }
-
   private Future<RowSet<Row>> save(SourceRecordDomainEvent event, String tenantId) {
     MarcAuditEntity entity;
     try {
-      entity = ParsedRecordUtil.mapToEntity(event);
+      entity = MarcUtil.mapToEntity(event);
     } catch (Exception e) {
       LOGGER.warn(
         "save:: Error during mapping SourceRecordDomainEvent to MarcAuditEntity for event '{}'",
@@ -70,10 +70,10 @@ public class MarcAuditServiceImpl implements MarcAuditService {
     }
     if (entity.diff() == null || entity.diff().isEmpty()) {
       LOGGER.debug("save:: No changes detected, skipping save record '{}' and tenantId='{}'",
-        entity.recordId(), tenantId);
+        entity.entityId(), tenantId);
       return Future.succeededFuture();
     }
-    return marcAuditDao.save(entity, tenantId)
+    return marcAuditDao.save(entity, event.getRecordType(), tenantId)
       .recover(throwable -> {
         LOGGER.error("save:: Could not save order audit event for tenantId: {}", tenantId);
         return handleFailures(throwable, event.getEventId());
