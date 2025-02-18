@@ -34,7 +34,7 @@ public class AuditConfigImpl implements AuditConfig {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private static final String GET_GROUP_SETTING_PERMISSION = "audit.config.groups.settings.%s.collection.get";
-  private static final String PUT_GROUP_SETTING_PERMISSION = "audit.config.groups.settings.%s.item.put";
+  private static final String PUT_GROUP_SETTING_PERMISSION = "audit.config.groups.settings.%s.%s.item.put";
 
   @Autowired
   private ConfigurationService configurationService;
@@ -89,7 +89,7 @@ public class AuditConfigImpl implements AuditConfig {
                  + "Updating setting by groupId: {} and settingId: {}", groupId, settingId);
     String tenantId = TenantTool.tenantId(okapiHeaders);
     var userId = okapiHeaders.get(XOkapiHeaders.USER_ID);
-    var desiredPermission = PUT_GROUP_SETTING_PERMISSION.formatted(groupId);
+    var desiredPermission = PUT_GROUP_SETTING_PERMISSION.formatted(groupId, settingId);
     try {
       PermissionCheckerHelper.checkPermission(okapiHeaders, desiredPermission)
         .compose(aVoid -> configurationService.updateSetting(groupId, settingId, entity, userId, tenantId))
