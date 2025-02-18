@@ -13,6 +13,7 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.SourceRecordDomainEvent;
+import org.folio.util.marc.SourceRecordDomainEventType;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
 
   private static final String RECORD_TYPE = "folio.srs.recordType";
   private static final String EVENT_PAYLOAD_KEY = "eventPayload";
-  private static final String LOG_DATA = "Marc Record audit event with id '%s', action '%s' and record type '%s'";
+  private static final String LOG_DATA = "Marc Record audit event with [eventId '%s', action '%s' and record type '%s']";
 
   private final MarcAuditService marcAuditService;
   private final Vertx vertx;
@@ -40,21 +41,29 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
-    var headers = KafkaHeaderUtils.kafkaHeadersToMap(kafkaConsumerRecord.headers());
-    var event = buildSourceRecordDomainEvent(kafkaConsumerRecord.value(), kafkaConsumerRecord.timestamp(), headers);
+    var event = buildSourceRecordDomainEvent(
+      kafkaConsumerRecord.value(),
+      kafkaConsumerRecord.timestamp(),
+      KafkaHeaderUtils.kafkaHeadersToMap(kafkaConsumerRecord.headers())
+    );
+    if (SourceRecordDomainEventType.UNKNOWN == event.getEventType()) {
+      LOGGER.debug("handle:: Event type not supported [eventId: {}]", event.getEventId());
+      result.complete(event.getEventId());
+      return result.future();
+    }
     var log = String.format(LOG_DATA, event.getEventId(), event.getEventType(), event.getRecordType());
-    LOGGER.info("saveMarcDomainEvent:: Starting processing of {}", log);
+    LOGGER.info("handle:: Starting processing of {}", log);
     marcAuditService.saveMarcDomainEvent(event)
       .onSuccess(ar -> {
-        LOGGER.info("saveMarcDomainEvent:: Saved {}", log);
+        LOGGER.info("handle:: Saved {}", log);
         result.complete(event.getEventId());
       })
       .onFailure(e -> {
         if (e instanceof DuplicateEventException) {
-          LOGGER.info("saveMarcDomainEvent:: Duplicate Marc bib audit event with id: {} received, skipped processing", event.getEventId());
+          LOGGER.info("handle:: Duplicate Marc bib audit event with id: {} received, skipped processing", event.getEventId());
           result.complete(event.getEventId());
         } else {
-          LOGGER.error("saveMarcDomainEvent:: Processing of {}", log, e);
+          LOGGER.error("handle:: Fail to process of {}", log, e);
           result.fail(e);
         }
       });

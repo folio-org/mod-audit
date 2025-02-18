@@ -117,5 +117,4 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
   private String tableName(SourceRecordType recordType) {
     return SourceRecordType.MARC_BIB.equals(recordType) ? MARC_BIB_TABLE : MARC_AUTHORITY_TABLE;
   }
-
 }

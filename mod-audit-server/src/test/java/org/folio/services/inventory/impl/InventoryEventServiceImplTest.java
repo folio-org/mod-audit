@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -36,6 +37,7 @@ import org.folio.services.inventory.InventoryEventService;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@UnitTest
 @CopilotGenerated(partiallyGenerated = true)
 @ExtendWith(MockitoExtension.class)
 public class InventoryEventServiceImplTest {
@@ -85,6 +88,7 @@ public class InventoryEventServiceImplTest {
   void shouldSaveInventoryRecordSuccessfully(InventoryResourceType resourceType) {
     var dao = daos.get(resourceType);
     var inventoryEvent = createInventoryEvent(resourceType);
+    mockAuditEnabled(true);
     doReturn(Future.succeededFuture(rowSet)).when(dao).save(any(), anyString());
     when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(
       new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(
@@ -102,6 +106,7 @@ public class InventoryEventServiceImplTest {
     var inventoryEvent = createInventoryEvent(resourceType);
     inventoryEvent.setType(InventoryEventType.UPDATE);
 
+    mockAuditEnabled(true);
     var entity = new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(),
       InventoryEventType.UPDATE.name(), null, null);
     when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(entity);
@@ -116,6 +121,7 @@ public class InventoryEventServiceImplTest {
   void shouldFailToSaveEventWhenDaoNotFound() {
     var inventoryEvent = createInventoryEvent(InventoryResourceType.UNKNOWN);
 
+    mockAuditEnabled(true);
     var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
@@ -128,21 +134,20 @@ public class InventoryEventServiceImplTest {
     var dao = daos.get(resourceType);
     var entityId = UUID.randomUUID().toString();
     var eventDate = "1672531200000";
-    var tenantId = TENANT_ID;
     var inventoryAuditCollection = new InventoryAuditCollection();
     var entityUUID = UUID.fromString(entityId);
     var eventDateTime = new Timestamp(Long.parseLong(eventDate));
     var setting = new Setting().withValue(10);
 
     doReturn(Future.succeededFuture(setting)).when(configurationService).getSetting(
-      org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE, tenantId);
-    doReturn(Future.succeededFuture(List.of())).when(dao).get(entityUUID, eventDateTime, 10, tenantId);
+      org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE, TENANT_ID);
+    doReturn(Future.succeededFuture(List.of())).when(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
     doReturn(inventoryAuditCollection).when(entitiesToAuditCollectionMapper).apply(anyList());
 
-    var getFuture = eventService.getEvents(resourceType, entityId, eventDate, tenantId);
+    var getFuture = eventService.getEvents(resourceType, entityId, eventDate, TENANT_ID);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
-    verify(dao).get(entityUUID, eventDateTime, 10, tenantId);
+    verify(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
   }
 
   @Test
@@ -150,9 +155,8 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.INSTANCE;
     var invalidEntityId = "invalid-uuid";
     var validEventDate = "1672531200000";
-    var tenantId = TENANT_ID;
 
-    var getFuture = eventService.getEvents(resourceType, invalidEntityId, validEventDate, tenantId);
+    var getFuture = eventService.getEvents(resourceType, invalidEntityId, validEventDate, TENANT_ID);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
@@ -163,9 +167,8 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.INSTANCE;
     var validEntityId = UUID.randomUUID().toString();
     var invalidEventDate = "invalid-date";
-    var tenantId = TENANT_ID;
 
-    var getFuture = eventService.getEvents(resourceType, validEntityId, invalidEventDate, tenantId);
+    var getFuture = eventService.getEvents(resourceType, validEntityId, invalidEventDate, TENANT_ID);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
@@ -176,9 +179,8 @@ public class InventoryEventServiceImplTest {
     var resourceType = InventoryResourceType.UNKNOWN;
     var entityId = UUID.randomUUID().toString();
     var eventDate = "1672531200000";
-    var tenantId = TENANT_ID;
 
-    var getFuture = eventService.getEvents(resourceType, entityId, eventDate, tenantId);
+    var getFuture = eventService.getEvents(resourceType, entityId, eventDate, TENANT_ID);
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
@@ -192,5 +194,10 @@ public class InventoryEventServiceImplTest {
     inventoryEvent.setEventTs(System.currentTimeMillis());
     inventoryEvent.setType(InventoryEventType.CREATE);
     return inventoryEvent;
+  }
+
+  private void mockAuditEnabled(boolean value) {
+    when(configurationService.getSetting(any(), eq(TENANT_ID)))
+      .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
   }
 }
