@@ -45,6 +45,8 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       LIMIT $2
     """;
 
+  private static final String COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE entity_id = $1";
+
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
   private final PostgresClientFactory pgClientFactory;
@@ -74,6 +76,15 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
                                                                    ? Tuple.of(entityId, limit)
                                                                    : Tuple.of(entityId, limit, LocalDateTime.ofInstant(eventTs.toInstant(), ZoneId.systemDefault())))
       .map(this::mapRowToInventoryAuditEntityList);
+  }
+
+  @Override
+  public Future<Integer> count(UUID entityId, String tenantId) {
+    LOGGER.debug("count:: Count records by [tenantId: {}, entityId: {}]", tenantId, entityId);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = COUNT_SQL.formatted(table);
+    return pgClientFactory.createInstance(tenantId).selectSingle(query, Tuple.of(entityId))
+      .map(row -> row.getInteger(0));
   }
 
   private String tableName() {

@@ -11,6 +11,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
@@ -141,6 +143,7 @@ public class InventoryEventServiceImplTest {
 
     doReturn(Future.succeededFuture(setting)).when(configurationService).getSetting(
       org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE, TENANT_ID);
+    doReturn(Future.succeededFuture(1)).when(dao).count(entityUUID, TENANT_ID);
     doReturn(Future.succeededFuture(List.of())).when(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
     doReturn(inventoryAuditCollection).when(entitiesToAuditCollectionMapper).apply(anyList());
 
@@ -148,6 +151,24 @@ public class InventoryEventServiceImplTest {
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
+  }
+
+  @Test
+  void shouldRetrieveEmptyCollectionSuccessfully() {
+    var dao = daos.get(InventoryResourceType.INSTANCE);
+    var entityId = UUID.randomUUID().toString();
+    var eventDate = "1672531200000";
+    var entityUUID = UUID.fromString(entityId);
+
+    doReturn(Future.succeededFuture(0)).when(dao).count(entityUUID, TENANT_ID);
+
+    var getFuture = eventService.getEvents(InventoryResourceType.INSTANCE, entityId, eventDate, TENANT_ID);
+    getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(dao).count(entityUUID, TENANT_ID);
+    verifyNoMoreInteractions(dao);
+    verifyNoInteractions(configurationService);
+    verifyNoInteractions(entitiesToAuditCollectionMapper);
   }
 
   @Test
