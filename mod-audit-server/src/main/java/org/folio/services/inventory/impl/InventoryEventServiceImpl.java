@@ -69,6 +69,31 @@ public class InventoryEventServiceImpl implements InventoryEventService {
       });
   }
 
+  @Override
+  public Future<InventoryAuditCollection> getEvents(InventoryResourceType resourceType, String entityId,
+                                                    String eventTs, String tenantId) {
+    LOGGER.debug(
+      "getEvents:: Trying to retrieve inventory events with [tenantId: {}, resourceType: {},entityId: {}, eventTs: {}]",
+      tenantId, resourceType, entityId, eventTs);
+    UUID entityUUID;
+    Timestamp eventTsTimestamp;
+    try {
+      entityUUID = UUID.fromString(entityId);
+      eventTsTimestamp = eventTs == null ? null : new Timestamp(Long.parseLong(eventTs));
+    } catch (IllegalArgumentException e) {
+      LOGGER.error(
+        "getEvents:: Could not parse entityId or eventTs [tenantId: {}, resourceType: {}, entityId: {}, eventTs: {}]",
+        tenantId, resourceType, entityId, eventTs, e);
+      return Future.failedFuture(new ValidationException(e.getMessage()));
+    }
+
+    return getDao(resourceType)
+      .compose(inventoryEventDao ->
+        inventoryEventDao.count(entityUUID, tenantId)
+          .compose(fetchIfExist(resourceType, eventTs, tenantId, inventoryEventDao, entityUUID, eventTsTimestamp))
+      );
+  }
+
   private Future<String> process(InventoryEvent inventoryEvent, String tenantId) {
     return getDao(inventoryEvent.getResourceType())
       .compose(inventoryEventDao -> {
@@ -102,31 +127,6 @@ public class InventoryEventServiceImpl implements InventoryEventService {
       tenantId, entityId);
     return inventoryEventDao.deleteAll(entityId, tenantId)
       .map(inventoryEvent.getEventId());
-  }
-
-  @Override
-  public Future<InventoryAuditCollection> getEvents(InventoryResourceType resourceType, String entityId,
-                                                    String eventTs, String tenantId) {
-    LOGGER.debug(
-      "getEvents:: Trying to retrieve inventory events with [tenantId: {}, resourceType: {},entityId: {}, eventTs: {}]",
-      tenantId, resourceType, entityId, eventTs);
-    UUID entityUUID;
-    Timestamp eventTsTimestamp;
-    try {
-      entityUUID = UUID.fromString(entityId);
-      eventTsTimestamp = eventTs == null ? null : new Timestamp(Long.parseLong(eventTs));
-    } catch (IllegalArgumentException e) {
-      LOGGER.error(
-        "getEvents:: Could not parse entityId or eventTs [tenantId: {}, resourceType: {}, entityId: {}, eventTs: {}]",
-        tenantId, resourceType, entityId, eventTs, e);
-      return Future.failedFuture(new ValidationException(e.getMessage()));
-    }
-
-    return getDao(resourceType)
-      .compose(inventoryEventDao ->
-        inventoryEventDao.count(entityUUID, tenantId)
-          .compose(fetchIfExist(resourceType, eventTs, tenantId, inventoryEventDao, entityUUID, eventTsTimestamp))
-      );
   }
 
   private Function<Integer, Future<InventoryAuditCollection>> fetchIfExist(InventoryResourceType resourceType,
