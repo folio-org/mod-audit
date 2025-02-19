@@ -45,4 +45,6 @@ public interface InventoryEventDao {
    * @return InventoryResourceType
    */
   InventoryResourceType resourceType();
+
+  Future<Integer> count(UUID entityId, String tenantId);
 }
