@@ -47,6 +47,11 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
 
   private static final String COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE entity_id = $1";
 
+  private static final String DELETE_ALL_SQL = """
+    DELETE FROM %s
+      WHERE entity_id = $1
+    """;
+
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
   private final PostgresClientFactory pgClientFactory;
@@ -68,7 +73,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
 
   @Override
   public Future<List<InventoryAuditEntity>> get(UUID entityId, Timestamp eventTs, int limit, String tenantId) {
-    LOGGER.debug("get:: Retrieve records by [tenantId: {}, eventId: {}, eventTs before: {}, limit: {}]",
+    LOGGER.debug("get:: Retrieve records by [tenantId: {}, entityId: {}, eventTs before: {}, limit: {}]",
       tenantId, entityId, eventTs, limit);
     var table = formatDBTableName(tenantId, tableName());
     var query = SELECT_SQL.formatted(table, eventTs == null ? "" : SEEK_BY_DATE_CLAUSE);
@@ -85,6 +90,16 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
     var query = COUNT_SQL.formatted(table);
     return pgClientFactory.createInstance(tenantId).selectSingle(query, Tuple.of(entityId))
       .map(row -> row.getInteger(0));
+  }
+
+  @Override
+  public Future<Void> deleteAll(UUID entityId, String tenantId) {
+    LOGGER.debug("deleteAll:: Delete records by [tenantId: {}, entityId: {}]",
+      tenantId, entityId);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = DELETE_ALL_SQL.formatted(table);
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(entityId))
+      .mapEmpty();
   }
 
   private String tableName() {
