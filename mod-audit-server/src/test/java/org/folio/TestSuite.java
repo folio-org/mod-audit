@@ -41,6 +41,7 @@ import org.folio.rest.impl.InventoryAuditApiTest;
 import org.folio.rest.impl.InventoryEventHandlerMockTest;
 import org.folio.rest.impl.InvoiceEventsHandlerMockTest;
 import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
+import org.folio.rest.impl.MarcAuditApiTest;
 import org.folio.rest.impl.MarcRecordEventsHandlerMockTest;
 import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
@@ -53,7 +54,7 @@ import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.OrganizationAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
 import org.folio.services.marc.impl.MarcAuditServiceTest;
-import org.folio.util.marc.ParsedRecordUtilTest;
+import org.folio.util.marc.MarcUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -266,7 +267,11 @@ public class TestSuite {
   }
 
   @Nested
-  class ParsedRecordUtilNestedTest extends ParsedRecordUtilTest {
+  class MarcUtilNestedTest extends MarcUtilTest {
+  }
+
+  @Nested
+  class MarcAuditApiNestedTest extends MarcAuditApiTest {
   }
 
   @Nested

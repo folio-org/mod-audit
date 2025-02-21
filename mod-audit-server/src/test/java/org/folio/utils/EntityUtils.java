@@ -1,16 +1,10 @@
 package org.folio.utils;
 
 import io.vertx.core.json.JsonObject;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.folio.dao.configuration.SettingEntity;
 import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.inventory.InventoryAuditEntity;
+import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.FieldChangeDto;
@@ -28,6 +22,14 @@ import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordDomainEventType;
 import org.folio.util.marc.SourceRecordType;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class EntityUtils {
 
@@ -239,10 +241,10 @@ public class EntityUtils {
   public static SourceRecordDomainEvent createSourceRecordDomainEvent() {
     return new SourceRecordDomainEvent(
       UUID.randomUUID().toString(),
-      SourceRecordDomainEventType.SOURCE_RECORD_CREATED,
+      SourceRecordType.MARC_BIB,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
       new MarcEventPayload(
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,
             "fields", List.of(
@@ -252,17 +254,17 @@ public class EntityUtils {
           )
         ), Map.of("createdByUserId", USER_ID)),
         null
-      )
+      ), SourceRecordDomainEventType.SOURCE_RECORD_CREATED
     );
   }
 
   public static SourceRecordDomainEvent updateSourceRecordDomainEvent() {
     return new SourceRecordDomainEvent(
       UUID.randomUUID().toString(),
-      SourceRecordDomainEventType.SOURCE_RECORD_UPDATED,
+      SourceRecordType.MARC_BIB,
       new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
       new MarcEventPayload(
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_NEW,
             "fields", List.of(
@@ -271,7 +273,7 @@ public class EntityUtils {
             )
           )
         ), Map.of("updatedByUserId", USER_ID)),
-        new org.folio.util.marc.Record(SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, Map.of(
+        new org.folio.util.marc.Record(SOURCE_RECORD_ID, Map.of(
           "content", Map.of(
             "leader", LEADER_OLD,
             "fields", List.of(
@@ -280,7 +282,7 @@ public class EntityUtils {
             )
           )
         ), Map.of("updatedByUserId", USER_ID))
-      )
+      ), SourceRecordDomainEventType.SOURCE_RECORD_UPDATED
     );
   }
 
@@ -296,5 +298,17 @@ public class EntityUtils {
     var newRecord = event.getEventPayload().getNewRecord();
     event.getEventPayload().setOld(newRecord);
     return event;
+  }
+
+  public static MarcAuditEntity createMarcAuditEntity() {
+    return new MarcAuditEntity(
+      UUID.randomUUID().toString(),
+      LocalDateTime.now(),
+      UUID.randomUUID().toString(),
+      "origin",
+      "action",
+      UUID.randomUUID().toString(),
+      null
+    );
   }
 }

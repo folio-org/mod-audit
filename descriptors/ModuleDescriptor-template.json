@@ -302,6 +302,25 @@
       ]
     },
     {
+      "id": "audit-marc",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/marc/bib/{entityId}",
+          "permissionsRequired": [
+            "audit.marc.bib.collection.get"
+          ]
+        },  {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/marc/authority/{entityId}",
+          "permissionsRequired": [
+            "audit.marc.authority.collection.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -463,6 +482,16 @@
       "description": "Get inventory item audit events"
     },
     {
+      "permissionName": "audit.marc.bib.collection.get",
+      "displayName": "Marc Audit - get Marc Bib events",
+      "description": "Get Marc Bib audit events"
+    },
+    {
+      "permissionName": "audit.marc.authority.collection.get",
+      "displayName": "Marc Audit - get Marc Authority events",
+      "description": "Get Marc Authority audit events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -482,7 +511,9 @@
         "acquisition.organization.events.get",
         "audit.inventory.instance.collection.get",
         "audit.inventory.holdings.collection.get",
-        "audit.inventory.item.collection.get"
+        "audit.inventory.item.collection.get",
+        "audit.marc.bib.collection.get",
+        "audit.marc.authority.collection.get"
       ]
     }
   ],

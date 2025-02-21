@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Marc audit item",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "description": "UUID of the event",
+      "$ref": "../../common/uuid.json"
+    },
+    "entityId": {
+      "description": "UUID of the entity",
+      "$ref": "../../common/uuid.json"
+    },
+    "eventDate": {
+      "description": "Date time when event triggered",
+      "format": "date-time",
+      "type": "string"
+    },
+    "origin": {
+      "description": "Origin of the event",
+      "type": "string"
+    },
+    "action": {
+      "description": "Action for event (CREATE, UPDATE or DELETE)",
+      "type": "string"
+    },
+    "userId": {
+      "description": "UUID of the user who performed the action",
+      "$ref": "../../common/uuid.json"
+    },
+    "diff": {
+      "description": "Difference for entity cause by an action",
+      "type": "object",
+      "javaType": "java.lang.Object"
+    }
+  },
+  "additionalProperties": false
+}
