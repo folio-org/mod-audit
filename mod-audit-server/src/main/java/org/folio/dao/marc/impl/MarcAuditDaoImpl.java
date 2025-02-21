@@ -64,7 +64,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, LocalDateTime eventDate, int limit) {
-    LOGGER.debug("get:: Retrieve records by tenantId: '{}' and entityId: '{}'", tenantId, entityId);
+    LOGGER.debug("get:: Retrieve records by tenantId: '{}', entityId: '{}' and record type '{}'", tenantId, entityId, recordType);
     var tableName = tableName(recordType);
     var query = SELECT_SQL.formatted(formatDBTableName(tenantId, tableName), eventDate == null ? "" : SEEK_BY_DATE_CLAUSE);
     var tuple = eventDate == null ? Tuple.of(entityId, limit) : Tuple.of(entityId, limit, eventDate);

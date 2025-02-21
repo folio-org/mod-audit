@@ -311,6 +311,12 @@
           "permissionsRequired": [
             "audit.marc.bib.collection.get"
           ]
+        },  {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/marc/authority/{entityId}",
+          "permissionsRequired": [
+            "audit.marc.authority.collection.get"
+          ]
         }
       ]
     },
@@ -481,6 +487,11 @@
       "description": "Get Marc Bib audit events"
     },
     {
+      "permissionName": "audit.marc.authority.collection.get",
+      "displayName": "Marc Audit - get Marc Authority events",
+      "description": "Get Marc Authority audit events"
+    },
+    {
       "permissionName": "audit.all",
       "displayName": "Audit - all permissions",
       "description": "Audit - all permissions",
@@ -501,7 +512,8 @@
         "audit.inventory.instance.collection.get",
         "audit.inventory.holdings.collection.get",
         "audit.inventory.item.collection.get",
-        "audit.marc.bib.collection.get"
+        "audit.marc.bib.collection.get",
+        "audit.marc.authority.collection.get"
       ]
     }
   ],
