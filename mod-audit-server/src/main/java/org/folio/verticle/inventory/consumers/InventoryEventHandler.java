@@ -1,6 +1,8 @@
 package org.folio.verticle.inventory.consumers;
 
+import static org.folio.util.inventory.InventoryEventType.CREATE;
 import static org.folio.util.inventory.InventoryEventType.UNKNOWN;
+import static org.folio.util.inventory.InventoryUtils.isShadowCopyEvent;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -53,10 +55,15 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
         event.getEventId(), event.getEntityId());
       result.complete(event.getEventId());
       return result.future();
+    } else if (CREATE == event.getType() && Boolean.TRUE.equals(event.getIsConsortiumShadowCopy())) {
+      LOGGER.debug("handle:: Shadow copy create event received, skipping processing [eventId: {}, entityId: {}]",
+        event.getEventId(), event.getEntityId());
+      result.complete(event.getEventId());
+      return result.future();
     }
 
     LOGGER.info("handle:: Starting processing of Inventory event with id: {} for entity id: {}", event.getEventId(), event.getEntityId());
-    inventoryEventService.saveEvent(event, okapiConnectionParams.getTenantId())
+    inventoryEventService.processEvent(event, okapiConnectionParams.getTenantId())
       .onSuccess(ar -> {
         LOGGER.info("handle:: Inventory event with id: {} has been processed for entity id: {}", event.getEventId(), event.getEntityId());
         result.complete(event.getEventId());
@@ -79,6 +86,8 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
     var entityId = consumerRecord.key();
 
     var event = new JsonObject(consumerRecord.value()).mapTo(InventoryEvent.class);
+    var shadowCopyEvent = isShadowCopyEvent(event);
+    event.setIsConsortiumShadowCopy(shadowCopyEvent);
     event.setEntityId(entityId);
     event.setResourceType(resourceType);
     return event;

@@ -1,7 +1,9 @@
 package org.folio.util.inventory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,23 +17,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 @UnitTest
 @CopilotGenerated
 class InventoryUtilsTest {
-
-  @Test
-  void shouldExtractEntityIdFromPayload() {
-    var payload = new HashMap<String, Object>();
-    payload.put("id", "12345");
-
-    var entityId = InventoryUtils.extractEntityIdFromPayload(payload);
-    assertEquals("12345", entityId);
-  }
-
-  @Test
-  void shouldReturnDefaultIdWhenEntityIdNotPresent() {
-    var payload = new HashMap<String, Object>();
-
-    var entityId = InventoryUtils.extractEntityIdFromPayload(payload);
-    assertEquals(InventoryUtils.DEFAULT_ID, entityId);
-  }
 
   @Test
   void shouldExtractUserIdFromEvent() {
@@ -132,5 +117,46 @@ class InventoryUtilsTest {
   void shouldFormatInventoryTopicPattern(InventoryKafkaEvent eventType) {
     var pattern = InventoryUtils.formatInventoryTopicPattern("env", eventType);
     assertEquals("(env\\.)(.*\\.)" + eventType.getTopicPattern(), pattern);
+  }
+
+  @Test
+  void isShadowCopyEvent_shouldReturnTrueForShadowCopyEvent() {
+    var event = new InventoryEvent();
+    var payload = new HashMap<String, Object>();
+    payload.put("source", "CONSORTIUM-123");
+    event.setNewValue(payload);
+
+    var result = InventoryUtils.isShadowCopyEvent(event);
+    assertTrue(result);
+  }
+
+  @Test
+  void isShadowCopyEvent_shouldReturnFalseForNonShadowCopyEvent() {
+    var event = new InventoryEvent();
+    var payload = new HashMap<String, Object>();
+    payload.put("source", "NON-CONSORTIUM");
+    event.setNewValue(payload);
+
+    var result = InventoryUtils.isShadowCopyEvent(event);
+    assertFalse(result);
+  }
+
+  @Test
+  void isShadowCopyEvent_shouldReturnFalseWhenPayloadIsNull() {
+    var event = new InventoryEvent();
+    event.setNewValue(null);
+
+    var result = InventoryUtils.isShadowCopyEvent(event);
+    assertFalse(result);
+  }
+
+  @Test
+  void isShadowCopyEvent_shouldReturnFalseWhenSourceIsNull() {
+    var event = new InventoryEvent();
+    var payload = new HashMap<String, Object>();
+    event.setNewValue(payload);
+
+    var result = InventoryUtils.isShadowCopyEvent(event);
+    assertFalse(result);
   }
 }

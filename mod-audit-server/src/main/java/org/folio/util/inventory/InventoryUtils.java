@@ -14,14 +14,12 @@ import org.apache.commons.collections4.MapUtils;
 public class InventoryUtils {
 
   public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
-  private static final String ID_FIELD = "id";
+
+  private static final String CONSORTIUM_SOURCE = "CONSORTIUM-";
+
+  private static final String SOURCE_FIELD = "source";
   private static final String UPDATED_BY_USER_ID_PATH = "metadata.updatedByUserId";
   private static final String CREATED_BY_USER_ID_PATH = "metadata.createdByUserId";
-
-  public static String extractEntityIdFromPayload(Map<String, Object> payload) {
-    return Optional.ofNullable(getString(payload, ID_FIELD))
-      .orElse(DEFAULT_ID);
-  }
 
   public static String extractUserId(InventoryEvent event) {
     var payload = getEventPayload(event);
@@ -78,5 +76,11 @@ public class InventoryUtils {
       return CollectionUtils.isNotEmpty(result) ? result : null;
     }
     return null;
+  }
+
+  public static boolean isShadowCopyEvent(InventoryEvent event) {
+    var payload = getEventPayload(event);
+    var source = getString(payload, SOURCE_FIELD);
+    return source != null && source.startsWith(CONSORTIUM_SOURCE);
   }
 }
