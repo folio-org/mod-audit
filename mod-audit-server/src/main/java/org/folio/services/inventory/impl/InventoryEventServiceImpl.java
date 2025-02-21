@@ -50,7 +50,7 @@ public class InventoryEventServiceImpl implements InventoryEventService {
   }
 
   @Override
-  public Future<String> saveEvent(InventoryEvent inventoryEvent, String tenantId) {
+  public Future<String> processEvent(InventoryEvent inventoryEvent, String tenantId) {
     LOGGER.debug("saveEvent:: Trying to save InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
       tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
 
@@ -60,28 +60,12 @@ public class InventoryEventServiceImpl implements InventoryEventService {
           LOGGER.debug("saveEvent:: Inventory audit is disabled for tenant [tenantId: {}]", tenantId);
           return Future.succeededFuture(inventoryEvent.getEventId());
         }
-        return save(inventoryEvent, tenantId);
+        return process(inventoryEvent, tenantId);
       })
       .recover(throwable -> {
         LOGGER.error("saveEvent:: Could not save InventoryEvent for [tenantId: {}, eventId: {}, entityId: {}]",
           tenantId, inventoryEvent.getEventId(), inventoryEvent.getEntityId());
         return handleFailures(throwable, inventoryEvent.getEventId());
-      });
-  }
-
-  private Future<String> save(InventoryEvent inventoryEvent, String tenantId) {
-    var eventId = inventoryEvent.getEventId();
-    return getDao(inventoryEvent.getResourceType())
-      .compose(inventoryEventDao -> {
-        var entity = eventToEntityMapper.apply(inventoryEvent);
-        if (InventoryEventType.UPDATE.name().equals(entity.action()) && entity.diff() == null) {
-          LOGGER.debug(
-            "saveEvent:: No diff calculated for InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
-            tenantId, eventId, inventoryEvent.getEntityId());
-          return Future.succeededFuture(eventId);
-        }
-
-        return inventoryEventDao.save(entity, tenantId).map(eventId);
       });
   }
 
@@ -105,10 +89,63 @@ public class InventoryEventServiceImpl implements InventoryEventService {
 
     return getDao(resourceType)
       .compose(inventoryEventDao ->
-        configurationService.getSetting(Setting.INVENTORY_RECORDS_PAGE_SIZE, tenantId)
-          .compose(setting ->
-            inventoryEventDao.get(entityUUID, eventTsTimestamp, (int) setting.getValue(), tenantId)))
-      .map(entitiesToCollectionMapper);
+        inventoryEventDao.count(entityUUID, tenantId)
+          .compose(fetchIfExist(resourceType, eventTs, tenantId, inventoryEventDao, entityUUID, eventTsTimestamp))
+      );
+  }
+
+  private Future<String> process(InventoryEvent inventoryEvent, String tenantId) {
+    return getDao(inventoryEvent.getResourceType())
+      .compose(inventoryEventDao -> {
+        if (Boolean.TRUE.equals(inventoryEvent.getIsConsortiumShadowCopy())) {
+          return deleteAll(inventoryEventDao, inventoryEvent, tenantId);
+        } else {
+          return save(inventoryEventDao, inventoryEvent, tenantId);
+        }
+      });
+  }
+
+  private Future<String> save(InventoryEventDao inventoryEventDao, InventoryEvent inventoryEvent, String tenantId) {
+    var eventId = inventoryEvent.getEventId();
+    LOGGER.debug("save:: Trying to save InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
+      tenantId, eventId, inventoryEvent.getEntityId());
+
+    var entity = eventToEntityMapper.apply(inventoryEvent);
+    if (InventoryEventType.UPDATE.name().equals(entity.action()) && entity.diff() == null) {
+      LOGGER.debug(
+        "save:: No diff calculated for InventoryEvent with [tenantId: {}, eventId: {}, entityId: {}]",
+        tenantId, eventId, inventoryEvent.getEntityId());
+      return Future.succeededFuture(eventId);
+    }
+
+    return inventoryEventDao.save(entity, tenantId).map(eventId);
+  }
+
+  private Future<String> deleteAll(InventoryEventDao inventoryEventDao, InventoryEvent inventoryEvent, String tenantId) {
+    var entityId = UUID.fromString(inventoryEvent.getEntityId());
+    LOGGER.debug("deleteAll:: Trying to delete all InventoryEvents with [tenantId: {}, entityId: {}]",
+      tenantId, entityId);
+    return inventoryEventDao.deleteAll(entityId, tenantId)
+      .map(inventoryEvent.getEventId());
+  }
+
+  private Function<Integer, Future<InventoryAuditCollection>> fetchIfExist(InventoryResourceType resourceType,
+                                                                           String eventTs, String tenantId,
+                                                                           InventoryEventDao inventoryEventDao,
+                                                                           UUID entityId, Timestamp eventTsTimestamp) {
+    return count -> {
+      if (count == 0) {
+        LOGGER.debug(
+          "fetchIfExist:: No inventory events found for [tenantId: {}, resourceType: {}, entityId: {}, eventTs: {}]",
+          tenantId, resourceType, entityId, eventTs);
+        return Future.succeededFuture(new InventoryAuditCollection().withTotalRecords(0));
+      }
+      return configurationService.getSetting(Setting.INVENTORY_RECORDS_PAGE_SIZE, tenantId)
+        .map(setting -> (Integer) setting.getValue())
+        .compose(limit -> inventoryEventDao.get(entityId, eventTsTimestamp, limit, tenantId))
+        .map(entitiesToCollectionMapper)
+        .map(inventoryAuditCollection -> inventoryAuditCollection.withTotalRecords(count));
+    };
   }
 
   private Future<InventoryEventDao> getDao(InventoryResourceType resourceType) {

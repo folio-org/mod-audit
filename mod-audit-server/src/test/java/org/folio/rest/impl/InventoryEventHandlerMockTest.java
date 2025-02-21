@@ -62,14 +62,14 @@ public class InventoryEventHandlerMockTest {
     var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.CREATE, InventoryResourceType.INSTANCE);
     var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
 
-    when(inventoryEventService.saveEvent(any(), any())).thenReturn(Future.succeededFuture());
+    when(inventoryEventService.processEvent(any(), any())).thenReturn(Future.succeededFuture());
 
     var result = inventoryEventHandler.handle(kafkaConsumerRecord);
 
     result.onComplete(ar -> {
       assertTrue(ar.succeeded());
       assertEquals(event.getEventId(), ar.result());
-      verify(inventoryEventService, times(1)).saveEvent(any(), any());
+      verify(inventoryEventService, times(1)).processEvent(any(), any());
     });
   }
 
@@ -78,14 +78,14 @@ public class InventoryEventHandlerMockTest {
     var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.CREATE, InventoryResourceType.INSTANCE);
     var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
 
-    when(inventoryEventService.saveEvent(any(), any())).thenReturn(Future.failedFuture(new DuplicateEventException("Duplicate event")));
+    when(inventoryEventService.processEvent(any(), any())).thenReturn(Future.failedFuture(new DuplicateEventException("Duplicate event")));
 
     var result = inventoryEventHandler.handle(kafkaConsumerRecord);
 
     result.onComplete(ar -> {
       assertTrue(ar.succeeded());
       assertEquals(event.getEventId(), ar.result());
-      verify(inventoryEventService, times(1)).saveEvent(any(), any());
+      verify(inventoryEventService, times(1)).processEvent(any(), any());
     });
   }
 
@@ -99,7 +99,21 @@ public class InventoryEventHandlerMockTest {
     result.onComplete(ar -> {
       assertTrue(ar.succeeded());
       assertEquals(event.getEventId(), ar.result());
-      verify(inventoryEventService, never()).saveEvent(any(), any());
+      verify(inventoryEventService, never()).processEvent(any(), any());
+    });
+  }
+
+  @Test
+  void shouldSkipProcessingForConsortiumShadowCopyCreateEvent() {
+    var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.CREATE, InventoryResourceType.INSTANCE, true);
+    var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
+
+    var result = inventoryEventHandler.handle(kafkaConsumerRecord);
+
+    result.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertEquals(event.getEventId(), ar.result());
+      verify(inventoryEventService, never()).processEvent(any(), any());
     });
   }
 
@@ -108,13 +122,13 @@ public class InventoryEventHandlerMockTest {
     var event = createInventoryEvent(UUID.randomUUID().toString(), InventoryEventType.CREATE, InventoryResourceType.INSTANCE);
     var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
 
-    when(inventoryEventService.saveEvent(any(), any())).thenReturn(Future.failedFuture(new RuntimeException("Error")));
+    when(inventoryEventService.processEvent(any(), any())).thenReturn(Future.failedFuture(new RuntimeException("Error")));
 
     var result = inventoryEventHandler.handle(kafkaConsumerRecord);
 
     result.onComplete(ar -> {
       assertTrue(ar.failed());
-      verify(inventoryEventService, times(1)).saveEvent(any(), any());
+      verify(inventoryEventService, times(1)).processEvent(any(), any());
     });
   }
 

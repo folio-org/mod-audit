@@ -32,8 +32,19 @@ public interface InventoryEventDao {
   Future<List<InventoryAuditEntity>> get(UUID entityId, Timestamp eventDate, int limit, String tenantId);
 
   /**
+   * Delete all rows by entityId
+   *
+   * @param entityId  entity id
+   * @param tenantId  tenant id
+   * @return Void future
+   */
+  Future<Void> deleteAll(UUID entityId, String tenantId);
+
+  /**
    * Returns inventory resource type for the dao
    * @return InventoryResourceType
    */
   InventoryResourceType resourceType();
+
+  Future<Integer> count(UUID entityId, String tenantId);
 }
