@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * This class is intended to function as a utility and should not be instantiated directly.
  */
 @UtilityClass
-public class ParsedRecordUtil {
+public class MarcUtil {
   private static final String LDR = "LDR";
   private static final String FIELD_005 = "005";
   private static final String SUBFIELDS_KEY = "subfields";
