@@ -11,6 +11,10 @@
         "type": "object",
         "$ref": "inventory_audit_item.json"
       }
+    },
+    "totalRecords": {
+      "description": "Total number of records",
+      "type": "integer"
     }
   },
   "required": [

@@ -220,6 +220,12 @@ public class EntityUtils {
 
   public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type,
                                                     InventoryResourceType resourceType) {
+    return createInventoryEvent(eventId, type, resourceType, false);
+  }
+
+  public static InventoryEvent createInventoryEvent(String eventId, InventoryEventType type,
+                                                    InventoryResourceType resourceType, boolean isConsortiumShadowCopy) {
+    var sourcePrefix = isConsortiumShadowCopy ? "CONSORTIUM-" : "";
     return InventoryEvent.builder()
       .entityId(UUID.randomUUID().toString())
       .eventId(eventId)
@@ -227,7 +233,7 @@ public class EntityUtils {
       .type(type)
       .resourceType(resourceType)
       .eventTs(System.currentTimeMillis())
-      .newValue(Map.of("key", "newValue"))
+      .newValue(Map.of("key", "newValue", "source", sourcePrefix + "FOLIO"))
       .oldValue(Map.of("key", "oldValue"))
       .build();
   }

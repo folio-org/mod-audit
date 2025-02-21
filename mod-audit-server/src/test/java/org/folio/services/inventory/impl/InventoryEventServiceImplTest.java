@@ -11,6 +11,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
@@ -94,7 +96,7 @@ public class InventoryEventServiceImplTest {
       new InventoryAuditEntity(UUID.randomUUID(), Timestamp.from(
         Instant.now()), UUID.randomUUID(), InventoryEventType.CREATE.name(), null, null));
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(dao, times(1)).save(any(), anyString());
@@ -111,18 +113,33 @@ public class InventoryEventServiceImplTest {
       InventoryEventType.UPDATE.name(), null, null);
     when(eventToEntityMapper.apply(inventoryEvent)).thenReturn(entity);
 
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(instanceEventDao, never()).save(any(), anyString());
   }
 
+  @ParameterizedTest
+  @EnumSource(value = InventoryResourceType.class, mode = EnumSource.Mode.EXCLUDE, names = {"UNKNOWN"})
+  void shouldDeleteAllInventoryRecordsWhenConsortiumShadowCopy(InventoryResourceType resourceType) {
+    var dao = daos.get(resourceType);
+    var inventoryEvent = createInventoryEvent(resourceType);
+    inventoryEvent.setIsConsortiumShadowCopy(true);
+    mockAuditEnabled(true);
+    doReturn(Future.succeededFuture()).when(dao).deleteAll(UUID.fromString(inventoryEvent.getEntityId()), TENANT_ID);
+
+    var deleteFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
+    deleteFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(dao, times(1)).deleteAll(any(UUID.class), anyString());
+  }
+
   @Test
-  void shouldFailToSaveEventWhenDaoNotFound() {
+  void shouldFailToProcessEventWhenDaoNotFound() {
     var inventoryEvent = createInventoryEvent(InventoryResourceType.UNKNOWN);
 
     mockAuditEnabled(true);
-    var saveFuture = eventService.saveEvent(inventoryEvent, TENANT_ID);
+    var saveFuture = eventService.processEvent(inventoryEvent, TENANT_ID);
     saveFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, times(0)).save(any(), anyString());
@@ -141,6 +158,7 @@ public class InventoryEventServiceImplTest {
 
     doReturn(Future.succeededFuture(setting)).when(configurationService).getSetting(
       org.folio.services.configuration.Setting.INVENTORY_RECORDS_PAGE_SIZE, TENANT_ID);
+    doReturn(Future.succeededFuture(1)).when(dao).count(entityUUID, TENANT_ID);
     doReturn(Future.succeededFuture(List.of())).when(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
     doReturn(inventoryAuditCollection).when(entitiesToAuditCollectionMapper).apply(anyList());
 
@@ -148,6 +166,24 @@ public class InventoryEventServiceImplTest {
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
 
     verify(dao).get(entityUUID, eventDateTime, 10, TENANT_ID);
+  }
+
+  @Test
+  void shouldRetrieveEmptyCollectionSuccessfully() {
+    var dao = daos.get(InventoryResourceType.INSTANCE);
+    var entityId = UUID.randomUUID().toString();
+    var eventDate = "1672531200000";
+    var entityUUID = UUID.fromString(entityId);
+
+    doReturn(Future.succeededFuture(0)).when(dao).count(entityUUID, TENANT_ID);
+
+    var getFuture = eventService.getEvents(InventoryResourceType.INSTANCE, entityId, eventDate, TENANT_ID);
+    getFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(dao).count(entityUUID, TENANT_ID);
+    verifyNoMoreInteractions(dao);
+    verifyNoInteractions(configurationService);
+    verifyNoInteractions(entitiesToAuditCollectionMapper);
   }
 
   @Test

@@ -102,6 +102,20 @@ public class InstanceEventDaoTest {
       }));
   }
 
+  @Test
+  void shouldDeleteAllInventoryAuditEntities(VertxTestContext ctx) {
+    var entityId = UUID.randomUUID();
+
+    doReturn(Future.succeededFuture())
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
+
+    instanceEventDao.deleteAll(entityId, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        ctx.completeNow();
+      }));
+  }
+
   private RowSet<Row> mockRowSet(InventoryAuditEntity entity) {
     var row = mock(Row.class);
     when(row.getUUID("event_id")).thenReturn(entity.eventId());
