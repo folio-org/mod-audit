@@ -92,12 +92,27 @@ public class MarcAuditServiceImpl implements MarcAuditService {
       LOGGER.error("getMarcAuditRecords:: Could not parse entityId or eventDateTime for tenantId: '{}', recordType: '{}', entityId: '{}'", tenantId, recordType, entityId, e);
       return Future.failedFuture(new ValidationException(e.getMessage()));
     }
-    return getMarcRecordPageSize(tenantId, recordType)
-      .compose(limit -> marcAuditDao.get(entityUUID, recordType, tenantId, eventDateTime, limit))
-      .map(MarcUtil::mapToCollection)
+    return fetchIfExists(entityUUID, recordType, tenantId, eventDateTime);
+  }
+
+  /**
+   * Fetches MarcAudit records **only if** count > 0.
+   */
+  private Future<MarcAuditCollection> fetchIfExists(UUID entityUUID, SourceRecordType recordType, String tenantId, LocalDateTime eventDateTime) {
+    return marcAuditDao.count(entityUUID, recordType, tenantId)
+      .compose(count -> {
+        if (count == 0) {
+          LOGGER.debug("fetchIfExists:: No records found for entityId: '{}'", entityUUID);
+          return Future.succeededFuture(new MarcAuditCollection().withTotalRecords(count));
+        }
+        return getMarcRecordPageSize(tenantId, recordType)
+          .compose(limit -> marcAuditDao.get(entityUUID, recordType, tenantId, eventDateTime, limit))
+          .map(entities -> MarcUtil.mapToCollection(entities).withTotalRecords(count));
+      })
       .recover(throwable -> {
-        LOGGER.error("getMarcAuditRecords:: Could not retrieve marc audit records for tenantId: '{}', recordType: '{}', entityId: '{}'", tenantId, recordType, entityId, throwable);
-        return handleFailures(throwable, entityId);
+        LOGGER.error("fetchIfExists:: Could not retrieve marc audit records for tenantId: '{}', recordType: '{}', entityId: '{}'",
+          tenantId, recordType, entityUUID, throwable);
+        return handleFailures(throwable, entityUUID.toString());
       });
   }
 
