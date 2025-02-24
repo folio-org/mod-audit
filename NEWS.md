@@ -2,6 +2,7 @@
 * [MODAUD-205](https://folio-org.atlassian.net/browse/MODAUD-205) - Consume domain event for MARC_BIB and MARC_AUTHORITY
 * [MODAUD-231](https://folio-org.atlassian.net/browse/MODAUD-231) - Handle inventory shadow copy events
 * [MODAUD-214](https://folio-org.atlassian.net/browse/MODAUD-214) - Rest Endpoint for history of MARC_BIB
+* [MODAUD-210](https://folio-org.atlassian.net/browse/MODAUD-210) - Create scheduled job to delete expired audit records
 
 ## 2.10.2 2025-01-10
 

@@ -39,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @CopilotGenerated(partiallyGenerated = true)
 @UnitTest
 @ExtendWith({VertxExtension.class, MockitoExtension.class})
-public class InstanceEventDaoTest {
+class InstanceEventDaoTest {
 
   @Mock
   PostgresClientFactory postgresClientFactory;
@@ -49,7 +49,7 @@ public class InstanceEventDaoTest {
   InstanceEventDao instanceEventDao;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
     mockPostgresExecutionSuccess(2).when(postgresClient).execute(anyString(), any(Tuple.class), any());
   }
@@ -110,6 +110,20 @@ public class InstanceEventDaoTest {
       .when(postgresClient).execute(anyString(), any(Tuple.class));
 
     instanceEventDao.deleteAll(entityId, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldDeleteOlderThanDate(VertxTestContext ctx) {
+    var eventDate = Timestamp.from(Instant.now());
+
+    doReturn(Future.succeededFuture())
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
+
+    instanceEventDao.deleteOlderThanDate(eventDate, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
         verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
         ctx.completeNow();

@@ -32,6 +32,15 @@ public interface InventoryEventDao {
   Future<List<InventoryAuditEntity>> get(UUID entityId, Timestamp eventDate, int limit, String tenantId);
 
   /**
+   * Deletes entity records from DB older than eventDate
+   *
+   * @param eventDate event date, before which records should be deleted
+   * @param tenantId  tenant id
+   * @return future with result list
+   */
+  Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId);
+
+  /**
    * Delete all rows by entityId
    *
    * @param entityId  entity id

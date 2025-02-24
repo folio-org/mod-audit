@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.rest.jaxrs.model.MarcAuditCollection;
+import java.sql.Timestamp;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordType;
 
@@ -30,4 +31,14 @@ public interface MarcAuditService {
    * @return a Future containing a MarcAuditCollection object that includes the requested MARC audit records.
    */
   Future<MarcAuditCollection> getMarcAuditRecords(String entityId, SourceRecordType recordType, String tenantId, String eventsDateTime);
+
+  /**
+   * Delete all MARC records which are expired
+   *
+   * @param tenantId id of tenant
+   * @param expireOlderThan timestamp to expire records older than
+   * @param recordType type of records to expire
+   * @return Future void
+   */
+  Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan, SourceRecordType recordType);
 }
