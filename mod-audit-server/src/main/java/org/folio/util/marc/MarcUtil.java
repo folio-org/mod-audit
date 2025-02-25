@@ -13,10 +13,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
  * for audit and logging purposes. This class provides methods to process and compare parsed
  * MARC records and extract relevant data for creating audit entities.
  * <p>
- * The {@code MarcUtil} handles operations such as:
+ * The {@code ParsedRecordUtil} handles operations such as:
  * - Mapping a source record domain event to a MarcAuditEntity.
  * - Extracting user IDs from metadata.
  * - Flattening complex parsed record structures into more manageable formats.
@@ -64,22 +66,19 @@ public class MarcUtil {
     Map<String, Object> difference;
     var oldRecord = event.getEventPayload().getOld();
     var newRecord = event.getEventPayload().getNewRecord();
-    String action;
+
     switch (event.getEventType()) {
       case SOURCE_RECORD_CREATED -> {
-        data = extractRecordData(newRecord, CREATED_BY);
+        data = extractRecordData(newRecord, CREATED_BY, CREATED);
         difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
-        action = CREATED;
       }
       case SOURCE_RECORD_UPDATED -> {
-        data = extractRecordData(newRecord, UPDATED_BY);
+        data = extractRecordData(newRecord, UPDATED_BY, UPDATED);
         difference = calculateDifferences(oldRecord.getParsedRecord(), newRecord.getParsedRecord());
-        action = UPDATED;
       }
       case SOURCE_RECORD_DELETED -> {
-        data = extractRecordData(oldRecord, UPDATED_BY);
+        data = extractRecordData(oldRecord, UPDATED_BY, DELETED);
         difference = getDifference(oldRecord.getParsedRecord(), event.getEventType());
-        action = DELETED;
       }
       default -> throw new ValidationException("Unsupported event type: " + event.getEventType());
     }
@@ -89,7 +88,7 @@ public class MarcUtil {
       event.getEventMetadata().getEventDate(),
       data.recordId,
       event.getEventMetadata().getPublishedBy(),
-      action,
+      data.action,
       data.userId,
       difference
     );
@@ -127,11 +126,11 @@ public class MarcUtil {
     return item;
   }
 
-
-  private static RecordData extractRecordData(Record value, String userKey) {
+  private static RecordData extractRecordData(Record value, String userKey, String action) {
     return new RecordData(
       value.getMatchedId(),
-      getUserIdFromMetadata(value.getMetadata(), userKey)
+      getUserIdFromMetadata(value.getMetadata(), userKey),
+      action
     );
   }
 
@@ -214,49 +213,139 @@ public class MarcUtil {
     return value.toString();
   }
 
+
   /**
-   * Compares two maps representing parsed records and identifies added, modified,
-   * and removed entries. It determines the differences by comparing the keys
-   * and values of the given maps.
+   * Compares two maps of parsed records and identifies the differences between them.
+   * The method determines the added, modified, and removed entries by analyzing
+   * the keys and values in the input maps. The results are aggregated into categorized lists
+   * and returned as a single map.
    *
-   * @param oldMap the original map representing the state of a parsed record before changes
-   * @param newMap the updated map representing the state of a parsed record after changes
-   * @return a map containing three keys ("added", "removed", "modified"), each mapped
-   * to a list of maps. The "added" key contains entries present only in the new map,
-   * the "removed" key contains entries present only in the old map,
-   * and the "modified" key contains entries with mismatched values between the maps.
+   * @param oldMap a map representing the original state of parsed records
+   * @param newMap a map representing the updated state of parsed records
+   * @return a map containing three lists:
+   * - "added" for entries present in the new map but not in the old map
+   * - "removed" for entries present in the old map but not in the new map
+   * - "modified" for
    */
   private static Map<String, Object> compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
     List<Map<String, Object>> added = new ArrayList<>();
     List<Map<String, Object>> modified = new ArrayList<>();
     List<Map<String, Object>> removed = new ArrayList<>();
 
-    newMap.forEach((key, newValue) -> {
-      if (!oldMap.containsKey(key)) {
-        added.add(Map.of(FIELD_KEY, key, VALUE_KEY, newValue));
+    populateEntries(newMap, oldMap, added);
+    populateEntries(oldMap, newMap, removed);
+    processModifiedEntries(newMap, oldMap, added, removed, modified);
+    return toMap(added, removed, modified);
+  }
+
+
+  /**
+   * Populates a list with entries from the source map that are absent in the target map.
+   * For each key-value pair in the source map, if the key is not found in the target map,
+   * an entry is added to the result list containing the key and value.
+   *
+   * @param sourceMap  the map containing the source key-value pairs to compare
+   * @param targetMap  the map used as reference to check for existing keys
+   * @param resultList the list to store entries that are present in the source map
+   *                   but not in the target map
+   */
+  private static void populateEntries(Map<String, Object> sourceMap, Map<String, Object> targetMap,
+                                      List<Map<String, Object>> resultList) {
+    sourceMap.forEach((key, value) -> {
+      if (!targetMap.containsKey(key)) {
+        resultList.add(Map.of(FIELD_KEY, key, VALUE_KEY, value));
       }
     });
+  }
 
-    oldMap.forEach((key, oldValue) -> {
-      if (!newMap.containsKey(key)) {
-        removed.add(Map.of(FIELD_KEY, key, VALUE_KEY, oldValue));
-      }
-    });
-
+  /**
+   * Processes the differences between two maps representing the new and old states of a dataset.
+   * The method identifies added, removed, and modified entries by comparing the key-value pairs
+   * in the input maps and categorizes them into the respective provided lists.
+   *
+   * @param newMap   the map containing the new state of the dataset
+   * @param oldMap   the map containing the old state of the dataset
+   * @param added    a list to store entries that are present in the new map but not in the old map
+   * @param removed  a list to store entries that are present in the old map but not in the new map
+   * @param modified a list to store entries that exist in both maps but have different values
+   */
+  private static void processModifiedEntries(Map<String, Object> newMap, Map<String, Object> oldMap,
+                                             List<Map<String, Object>> added, List<Map<String, Object>> removed,
+                                             List<Map<String, Object>> modified) {
     newMap.forEach((key, newValue) -> {
       if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
         var oldValue = oldMap.get(key);
         if (!Objects.equals(oldValue, newValue)) {
-          modified.add(Map.of(
-            FIELD_KEY, key,
-            OLD_VALUE_KEY, oldValue,
-            NEW_VALUE_KEY, newValue
-          ));
+          var modifiedField = getModifiedFieldMap(key, oldValue, newValue);
+          if (!modifiedField.containsKey(OLD_VALUE_KEY)) {
+            added.add(modifiedField);
+          } else if (!modifiedField.containsKey(NEW_VALUE_KEY)) {
+            removed.add(modifiedField);
+          } else {
+            modified.add(modifiedField);
+          }
         }
       }
     });
+  }
 
-    return toMap(added, removed, modified);
+  /**
+   * Generates a map representing the differences between an old and a new value for a specified field key.
+   * The method computes the added, removed, and modified elements between the old and new values,
+   * returning a map containing the field key and any relevant changes.
+   *
+   * @param key      the name of the field being evaluated for changes
+   * @param oldValue the previous value of the field, which can be a single object or a list of objects
+   * @param newValue the updated value of the field, which can be a single object or a list of objects
+   * @return a map containing the field key and detected differences between the old and new values.
+   *         The map may include:
+   *         - "fieldKey" with the provided key
+   *         - "oldValue" with the previous data if applicable
+   *         - "newValue" with the updated data if applicable
+   */
+  private static Map<String, Object> getModifiedFieldMap(String key, Object oldValue, Object newValue) {
+    var oldList = convertToList(oldValue);
+    var newList = convertToList(newValue);
+
+    var oldSet = new HashSet<>(oldList);
+    var newSet = new HashSet<>(newList);
+
+    var removedSet = new HashSet<>(oldSet);
+    var addedSet = new HashSet<>(newSet);
+
+    removedSet.removeAll(newSet);
+    addedSet.removeAll(oldSet);
+
+    var oldResult = formatSingleOrList(removedSet);
+    var newResult = formatSingleOrList(addedSet);
+
+    var map = new HashMap<String, Object>();
+    map.put(FIELD_KEY, key);
+
+    if (oldList.size() == newList.size()) {
+      if (!Objects.equals(oldValue, newValue)) {
+        map.put(OLD_VALUE_KEY, oldValue);
+        map.put(NEW_VALUE_KEY, newValue);
+      }
+    } else {
+      if (removedSet.isEmpty()) {
+        map.put(NEW_VALUE_KEY, newResult);
+      } else if (addedSet.isEmpty()) {
+        map.put(OLD_VALUE_KEY, oldResult);
+      } else {
+        map.put(OLD_VALUE_KEY, oldResult);
+        map.put(NEW_VALUE_KEY, newResult);
+      }
+    }
+    return map;
+  }
+
+  private static Object formatSingleOrList(Set<Object> set) {
+    return set.size() == 1 ? set.iterator().next() : new ArrayList<>(set);
+  }
+
+  private static List<Object> convertToList(Object value) {
+    return value instanceof List<?> ? new ArrayList<>((List<?>) value) : List.of(value);
   }
 
   @SuppressWarnings("unchecked")
@@ -287,7 +376,7 @@ public class MarcUtil {
     }
   }
 
-  private record RecordData(String recordId, String userId) {
+  private record RecordData(String recordId, String userId, String action) {
   }
 
 }
