@@ -3,6 +3,7 @@ package org.folio.dao.marc;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import java.sql.Timestamp;
 import org.folio.util.marc.SourceRecordType;
 
 import java.time.LocalDateTime;
@@ -47,4 +48,13 @@ public interface MarcAuditDao {
    * @return a Future containing the total number of audit records for the specified entity
    */
   Future<Integer> count(UUID entityId, SourceRecordType recordType, String tenantId);
+
+  /**
+   * Deletes entity records from DB older than eventDate
+   *
+   * @param eventDate event date, before which records should be deleted
+   * @param tenantId  tenant id
+   * @return future with result list
+   */
+  Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId, SourceRecordType recordType);
 }

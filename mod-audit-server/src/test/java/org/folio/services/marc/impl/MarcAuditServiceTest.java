@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import java.sql.Timestamp;
 import org.folio.dao.marc.MarcAuditDao;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
@@ -16,6 +17,8 @@ import org.folio.util.marc.SourceRecordType;
 import org.folio.utils.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -155,6 +158,19 @@ public class MarcAuditServiceTest {
     assertTrue(result.failed());
     assertInstanceOf(ValidationException.class, result.cause());
     verify(marcAuditDao, never()).get(any(), any(), any(), any(), anyInt());
+  }
+
+  @ParameterizedTest
+  @EnumSource(SourceRecordType.class)
+  void shouldExpireRecordsSuccessfully(SourceRecordType recordType) {
+    var expireOlderThan = Timestamp.from(Instant.now().minusSeconds(3600));
+
+    doReturn(Future.succeededFuture()).when(marcAuditDao).deleteOlderThanDate(expireOlderThan, TENANT_ID, recordType);
+
+    var expireFuture = marcAuditService.expireRecords(TENANT_ID, expireOlderThan, recordType);
+    expireFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(marcAuditDao).deleteOlderThanDate(expireOlderThan, TENANT_ID, recordType);
   }
 
   private void mockAuditEnabled(boolean value) {
