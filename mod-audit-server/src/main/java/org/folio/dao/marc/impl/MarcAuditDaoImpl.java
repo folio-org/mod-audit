@@ -39,6 +39,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     INSERT INTO %s (event_id, event_date, entity_id, origin, action, user_id, diff)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     """;
+
   private static final String SELECT_SQL = """
     SELECT * FROM %s
       WHERE entity_id = $1 %s
