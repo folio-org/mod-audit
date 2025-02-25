@@ -70,11 +70,22 @@ public class AuditManager {
           return Future.succeededFuture();
         }
 
-        var expireOlderThan = new Timestamp(currentTime - retentionPeriod * 24 * 60 * 60 * 1000L);
+        var expireOlderThan = getExpireOlderThan(currentTime, retentionPeriod);
         LOGGER.info(
           "deleteExpiredRecordsForSettingGroup:: Deleting expired records for [tenantId: {}, settingGroup: {}, retentionPeriod: {}, expireOlderThan: {}]",
           tenantId, settingGroup.getId(), retentionPeriod, expireOlderThan);
         return expirationFutureSupplier.apply(tenantId, expireOlderThan);
       });
+  }
+
+  /**
+   * Calculate the latest timestamp that should be kept based on the current time and retention period.
+   *
+   * @param currentTime current time in milliseconds
+   * @param retentionPeriod retention period in days
+   * @return Timestamp
+   * */
+  private Timestamp getExpireOlderThan(long currentTime, int retentionPeriod) {
+    return new Timestamp(currentTime - retentionPeriod * 24 * 60 * 60 * 1000L);
   }
 }
