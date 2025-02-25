@@ -45,6 +45,11 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       LIMIT $2
     """;
 
+  private static final String DELETE_OLDER_THAN_DATE_SQL = """
+    DELETE FROM %s
+      WHERE event_date < $1
+    """;
+
   private static final String COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE entity_id = $1";
 
   private static final String DELETE_ALL_SQL = """
@@ -81,6 +86,16 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
                                                                    ? Tuple.of(entityId, limit)
                                                                    : Tuple.of(entityId, limit, LocalDateTime.ofInstant(eventTs.toInstant(), ZoneId.systemDefault())))
       .map(this::mapRowToInventoryAuditEntityList);
+  }
+
+  @Override
+  public Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId) {
+    LOGGER.debug("deleteOlderThanDate:: Delete records by [tenantId: {}, eventDate: {}]",
+      tenantId, eventDate);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = DELETE_OLDER_THAN_DATE_SQL.formatted(table);
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(LocalDateTime.ofInstant(eventDate.toInstant(), ZoneId.systemDefault())))
+      .mapEmpty();
   }
 
   @Override
