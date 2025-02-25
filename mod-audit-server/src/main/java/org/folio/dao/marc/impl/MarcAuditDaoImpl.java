@@ -5,6 +5,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import java.sql.Timestamp;
+import java.time.ZoneId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
@@ -46,6 +48,11 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
+  private static final String DELETE_OLDER_THAN_DATE_SQL = """
+    DELETE FROM %s
+      WHERE event_date < $1
+    """;
+
   private final PostgresClientFactory pgClientFactory;
 
   public MarcAuditDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -70,6 +77,17 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     var tuple = eventDate == null ? Tuple.of(entityId, limit) : Tuple.of(entityId, limit, eventDate);
     return pgClientFactory.createInstance(tenantId).execute(query, tuple)
       .map(this::mapRowToAuditEntityList);
+  }
+
+  @Override
+  public Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId, SourceRecordType recordType) {
+    LOGGER.debug("deleteOlderThanDate:: Delete records by [tenantId: {}, eventDate: {}, recordType: {}]",
+      tenantId, eventDate, recordType);
+    var table = formatDBTableName(tenantId, tableName(recordType));
+    var query = DELETE_OLDER_THAN_DATE_SQL.formatted(table);
+    return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(
+        LocalDateTime.ofInstant(eventDate.toInstant(), ZoneId.systemDefault())))
+      .mapEmpty();
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
