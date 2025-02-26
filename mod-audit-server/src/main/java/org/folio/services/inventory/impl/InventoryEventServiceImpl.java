@@ -129,6 +129,14 @@ public class InventoryEventServiceImpl implements InventoryEventService {
       .map(inventoryEvent.getEventId());
   }
 
+  @Override
+  public Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan) {
+    return Future.all(inventoryEventDaos.values().stream()
+        .map(dao -> dao.deleteOlderThanDate(expireOlderThan, tenantId))
+        .toList())
+      .mapEmpty();
+  }
+
   private Function<Integer, Future<InventoryAuditCollection>> fetchIfExist(InventoryResourceType resourceType,
                                                                            String eventTs, String tenantId,
                                                                            InventoryEventDao inventoryEventDao,

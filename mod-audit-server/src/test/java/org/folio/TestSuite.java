@@ -34,6 +34,7 @@ import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditConfigAPITest;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
+import org.folio.rest.impl.AuditDataCleanupApiTest;
 import org.folio.rest.impl.AuditDataImplApiTest;
 import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
@@ -280,5 +281,9 @@ public class TestSuite {
 
   @Nested
   class InventoryAuditApiNestedTest extends InventoryAuditApiTest {
+  }
+
+  @Nested
+  class AuditDataCleanupApiNestedTest extends AuditDataCleanupApiTest {
   }
 }

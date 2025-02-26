@@ -51,7 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @UnitTest
 @CopilotGenerated(partiallyGenerated = true)
 @ExtendWith(MockitoExtension.class)
-public class InventoryEventServiceImplTest {
+class InventoryEventServiceImplTest {
 
   private static final String TENANT_ID = "testTenant";
   private final Map<InventoryResourceType, InventoryEventDaoImpl> daos = new EnumMap<>(InventoryResourceType.class);
@@ -74,7 +74,7 @@ public class InventoryEventServiceImplTest {
   private InventoryEventService eventService;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     daos.put(InventoryResourceType.INSTANCE, instanceEventDao);
     daos.put(InventoryResourceType.HOLDINGS, holdingsEventDao);
     daos.put(InventoryResourceType.ITEM, itemEventDao);
@@ -220,6 +220,22 @@ public class InventoryEventServiceImplTest {
     getFuture.onComplete(asyncResult -> assertTrue(asyncResult.failed()));
 
     verify(instanceEventDao, never()).get(any(UUID.class), any(Timestamp.class), anyInt(), anyString());
+  }
+
+  @Test
+  void shouldExpireRecordsSuccessfully() {
+    var expireOlderThan = Timestamp.from(Instant.now().minusSeconds(3600));
+
+    doReturn(Future.succeededFuture()).when(instanceEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
+    doReturn(Future.succeededFuture()).when(holdingsEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
+    doReturn(Future.succeededFuture()).when(itemEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
+
+    var expireFuture = eventService.expireRecords(TENANT_ID, expireOlderThan);
+    expireFuture.onComplete(asyncResult -> assertTrue(asyncResult.succeeded()));
+
+    verify(instanceEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
+    verify(holdingsEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
+    verify(itemEventDao).deleteOlderThanDate(expireOlderThan, TENANT_ID);
   }
 
   private InventoryEvent createInventoryEvent(InventoryResourceType resourceType) {

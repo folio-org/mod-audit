@@ -3,6 +3,7 @@ package org.folio.services.marc.impl;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import java.sql.Timestamp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
@@ -99,6 +100,11 @@ public class MarcAuditServiceImpl implements MarcAuditService {
         LOGGER.error("getMarcAuditRecords:: Could not retrieve marc audit records for tenantId: '{}', recordType: '{}', entityId: '{}'", tenantId, recordType, entityId, throwable);
         return handleFailures(throwable, entityId);
       });
+  }
+
+  @Override
+  public Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan, SourceRecordType recordType) {
+    return marcAuditDao.deleteOlderThanDate(expireOlderThan, tenantId, recordType);
   }
 
   private Future<Integer> getMarcRecordPageSize(String tenantId, SourceRecordType type) {

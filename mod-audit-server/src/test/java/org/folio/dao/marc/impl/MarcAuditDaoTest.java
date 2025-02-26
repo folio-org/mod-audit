@@ -4,6 +4,9 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
@@ -124,6 +127,25 @@ public class MarcAuditDaoTest {
     assertTrue(result.succeeded());
     assertNotNull(result.result());
     assertTrue(result.result().isEmpty());
+  }
+
+  @Test
+  void shouldDeleteOlderThanDate() {
+    var eventDate = Timestamp.from(Instant.now());
+    var pgClient = mock(PostgresClient.class);
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    when(pgClient.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture());
+
+    var result = marcAuditDao.deleteOlderThanDate(eventDate, TENANT_ID, SourceRecordType.MARC_BIB);
+
+    assertTrue(result.succeeded());
+    verify(pgClient).execute(anyString(), any(Tuple.class));
+
+    ArgumentCaptor<Tuple> tupleCaptor = ArgumentCaptor.forClass(Tuple.class);
+    verify(pgClient).execute(anyString(), tupleCaptor.capture());
+    Tuple capturedTuple = tupleCaptor.getValue();
+
+    assertEquals(LocalDateTime.ofInstant(eventDate.toInstant(), ZoneId.systemDefault()), capturedTuple.getLocalDateTime(0));
   }
 
   private RowSet<Row> mockRowSet(MarcAuditEntity entity) {
