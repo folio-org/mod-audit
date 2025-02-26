@@ -44,7 +44,6 @@ public class MarcUtil {
   private static final String FIELD_KEY = "field";
   private static final String FIELDS_KEY = "fields";
   private static final String LEADER_KEY = "leader";
-  private static final String VALUE_KEY = "value";
   private static final String CREATED_BY = "createdByUserId";
   private static final String UPDATED_BY = "updatedByUserId";
   private static final String OLD_VALUE_KEY = "oldValue";
@@ -146,10 +145,11 @@ public class MarcUtil {
 
   private static Map<String, Object> getDifference(Map<String, Object> parsedRecord, SourceRecordDomainEventType type) {
     List<Map<String, Object>> fields = new ArrayList<>();
+    var condition = type.equals(SourceRecordDomainEventType.SOURCE_RECORD_CREATED);
     flattenFields(parsedRecord).forEach((key, value) ->
-      fields.add(Map.of(FIELD_KEY, key, VALUE_KEY, value))
+      fields.add(Map.of(FIELD_KEY, key, condition ? NEW_VALUE_KEY : OLD_VALUE_KEY, value))
     );
-    return type.equals(SourceRecordDomainEventType.SOURCE_RECORD_CREATED)
+    return condition
       ? toMap(fields, null, null)
       : toMap(null, fields, null);
   }
@@ -232,28 +232,28 @@ public class MarcUtil {
     List<Map<String, Object>> modified = new ArrayList<>();
     List<Map<String, Object>> removed = new ArrayList<>();
 
-    populateEntries(newMap, oldMap, added);
-    populateEntries(oldMap, newMap, removed);
+    populateEntries(newMap, oldMap, added, NEW_VALUE_KEY);
+    populateEntries(oldMap, newMap, removed, OLD_VALUE_KEY);
     processModifiedEntries(newMap, oldMap, added, removed, modified);
     return toMap(added, removed, modified);
   }
 
-
   /**
-   * Populates a list with entries from the source map that are absent in the target map.
-   * For each key-value pair in the source map, if the key is not found in the target map,
-   * an entry is added to the result list containing the key and value.
+   * Populates the provided list with entries that are present in the source map but not in the target map.
+   * The method iterates over the key-value pairs in the source map, comparing them to the target map.
+   * If a key is present in the source map but not in the target map, the method adds the key-value pair
+   * to the provided result list, associating the value with the specified key.
    *
-   * @param sourceMap  the map containing the source key-value pairs to compare
-   * @param targetMap  the map used as reference to check for existing keys
-   * @param resultList the list to store entries that are present in the source map
-   *                   but not in the target map
+   * @param sourceMap  the map containing the source key-value pairs
+   * @param targetMap  the map containing the target key-value pairs
+   * @param resultList the list to store entries that are present in the source map but not in the target map
+   * @param valueKey   the key to use for associating the value in the result list
    */
   private static void populateEntries(Map<String, Object> sourceMap, Map<String, Object> targetMap,
-                                      List<Map<String, Object>> resultList) {
+                                      List<Map<String, Object>> resultList, String valueKey) {
     sourceMap.forEach((key, value) -> {
       if (!targetMap.containsKey(key)) {
-        resultList.add(Map.of(FIELD_KEY, key, VALUE_KEY, value));
+        resultList.add(Map.of(FIELD_KEY, key, valueKey, value));
       }
     });
   }
