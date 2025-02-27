@@ -160,4 +160,39 @@ public class MarcAuditDaoTest {
 
     return MockUtils.mockRowSet(row);
   }
+
+  @Test
+  void shouldReturnTotalCountSuccessfully() {
+    var entityId = UUID.randomUUID();
+    var pgClient = mock(PostgresClient.class);
+    var rowMock = mock(Row.class);
+
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    when(pgClient.selectSingle(anyString(), any(Tuple.class)))
+      .thenReturn(Future.succeededFuture(rowMock));
+
+    when(rowMock.getInteger(0)).thenReturn(5);
+
+    Future<Integer> result = marcAuditDao.count(entityId, SourceRecordType.MARC_BIB, TENANT_ID);
+
+    assertTrue(result.succeeded());
+    assertEquals(5, result.result());
+    verify(pgClient).selectSingle(anyString(), any(Tuple.class));
+  }
+
+  @Test
+  void shouldFailWhenDatabaseThrowsException() {
+    var entityId = UUID.randomUUID();
+    var pgClient = mock(PostgresClient.class);
+
+    when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(pgClient);
+    when(pgClient.selectSingle(anyString(), any(Tuple.class)))
+      .thenReturn(Future.failedFuture(new RuntimeException("Database error")));
+
+    Future<Integer> result = marcAuditDao.count(entityId, SourceRecordType.MARC_BIB, TENANT_ID);
+
+    assertTrue(result.failed());
+    assertEquals("Database error", result.cause().getMessage());
+    verify(pgClient).selectSingle(anyString(), any(Tuple.class));
+  }
 }

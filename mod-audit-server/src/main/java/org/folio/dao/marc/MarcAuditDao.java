@@ -10,6 +10,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * The MarcAuditDao interface provides methods to interact with the database for managing and querying
+ * MARC audit records. It defines operations for saving audit records, retrieving audit records based
+ * on specific criteria, and counting the total audit records for a given entity.
+ */
 public interface MarcAuditDao {
 
   /**
@@ -33,6 +38,16 @@ public interface MarcAuditDao {
    * @return a Future containing a List of MarcAuditEntity objects matching the specified parameters
    */
   Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, LocalDateTime eventDate, int limit);
+
+  /**
+   * Counts the total number of audit records for a given entity.
+   *
+   * @param entityId the unique identifier of the entity
+   * @param recordType the type of the source record (e.g., MARC_BIB or MARC_AUTHORITY)
+   * @param tenantId the identifier of the tenant
+   * @return a Future containing the total number of audit records for the specified entity
+   */
+  Future<Integer> count(UUID entityId, SourceRecordType recordType, String tenantId);
 
   /**
    * Deletes entity records from DB older than eventDate
