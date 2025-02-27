@@ -300,7 +300,6 @@ public class EntityUtils {
           "content", Map.of(
             "leader", LEADER_OLD,
             "fields", List.of(
-              Map.of(FIELD_001, VALUE_001),
               Map.of(FIELD_245, Map.of("ind1", "1", "ind2", "0", "subfields", List.of(Map.of("a", TITLE_OLD))))
             )
           )

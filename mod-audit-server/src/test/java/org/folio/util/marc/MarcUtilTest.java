@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.folio.utils.EntityUtils.FIELD_001;
+import static org.folio.utils.EntityUtils.VALUE_001;
 import static org.folio.utils.EntityUtils.updateSourceRecordDomainEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -87,12 +89,16 @@ public class MarcUtilTest {
     // Verify differences calculated for update
     Map<String, Object> diff = entity.diff();
     assertTrue(diff.containsKey(MODIFIED_KEY));
-    assertFalse(diff.containsKey(ADDED_KEY));
+    assertTrue(diff.containsKey(ADDED_KEY));
     assertFalse(diff.containsKey(REMOVED_KEY));
 
     var modifiedFields = (List<Map<String, Object>>) diff.get(MODIFIED_KEY);
+    var addedFields = (List<Map<String, Object>>) diff.get(ADDED_KEY);
     assertEquals(2, modifiedFields.size());
+    assertEquals(1, addedFields.size());
     assertEquals("LDR", modifiedFields.get(1).get(FIELD_KEY));
+    assertEquals(FIELD_001, addedFields.get(0).get(FIELD_KEY));
+    assertEquals(VALUE_001, addedFields.get(0).get(NEW_VALUE_KEY));
     assertEquals(EntityUtils.LEADER_OLD, modifiedFields.get(1).get(OLD_VALUE_KEY));
     assertEquals(EntityUtils.LEADER_NEW, modifiedFields.get(1).get(NEW_VALUE_KEY));
   }
@@ -120,9 +126,9 @@ public class MarcUtilTest {
     assertFalse(diff.containsKey(MODIFIED_KEY));
 
     var removedFields = (List<Map<String, Object>>) diff.get(REMOVED_KEY);
-    assertEquals(3, removedFields.size());
-    assertEquals("LDR", removedFields.get(2).get(FIELD_KEY));
-    assertEquals(EntityUtils.LEADER_OLD, removedFields.get(2).get("value"));
+    assertEquals(2, removedFields.size());
+    assertEquals("LDR", removedFields.get(1).get(FIELD_KEY));
+    assertEquals(EntityUtils.LEADER_OLD, removedFields.get(1).get("oldValue"));
   }
 
   @Test
