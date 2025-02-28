@@ -3,6 +3,7 @@
 * [MODAUD-231](https://folio-org.atlassian.net/browse/MODAUD-231) - Handle inventory shadow copy events
 * [MODAUD-214](https://folio-org.atlassian.net/browse/MODAUD-214) - Rest Endpoint for history of MARC_BIB
 * [MODAUD-210](https://folio-org.atlassian.net/browse/MODAUD-210) - Create scheduled job to delete expired audit records
+* [MODAUD-235](https://folio-org.atlassian.net/browse/MODAUD-235) - Extend scheduled job with old empty partitions deletion, new partitions creation
 
 ## 2.10.2 2025-01-10
 

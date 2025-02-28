@@ -41,12 +41,14 @@ class AuditManagerTest {
   private InventoryEventService inventoryService;
   @Mock
   private MarcAuditService marcService;
+  @Mock
+  private PartitionService partitionService;
 
   private AuditManager auditManager;
 
   @BeforeEach
   void setUp() {
-    auditManager = new AuditManager(configurationService, inventoryService, marcService);
+    auditManager = new AuditManager(configurationService, inventoryService, marcService, partitionService);
   }
 
   @Test
@@ -69,6 +71,8 @@ class AuditManagerTest {
       .thenReturn(Future.succeededFuture());
     when(marcService.expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_AUTHORITY)))
       .thenReturn(Future.succeededFuture());
+    when(partitionService.cleanUpAndCreateSubPartitions(TENANT_ID))
+      .thenReturn(Future.succeededFuture());
 
     var result = auditManager.executeDatabaseCleanup(TENANT_ID);
     result.onComplete(ar -> assertTrue(ar.succeeded()));
@@ -78,8 +82,9 @@ class AuditManagerTest {
     verify(inventoryService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture());
     verify(marcService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture(), eq(SourceRecordType.MARC_BIB));
     verify(marcService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture(), eq(SourceRecordType.MARC_AUTHORITY));
+    verify(partitionService).cleanUpAndCreateSubPartitions(TENANT_ID);
 
-    List<Timestamp> capturedTimestamps = timestampCaptor.getAllValues();
+    var capturedTimestamps = timestampCaptor.getAllValues();
     capturedTimestamps.forEach(timestamp -> {
       assertEquals(new Timestamp(currentTime - 10L * 24 * 60 * 60 * 1000).toLocalDateTime().toLocalDate(),
         timestamp.toLocalDateTime().toLocalDate());
@@ -98,6 +103,8 @@ class AuditManagerTest {
       .thenReturn(Future.succeededFuture(authoritySettingCollection));
     when(configurationService.getAllSettingsByGroupId(SettingGroup.INVENTORY.getId(), TENANT_ID))
       .thenReturn(Future.succeededFuture(inventorySettingCollection));
+    when(partitionService.cleanUpAndCreateSubPartitions(TENANT_ID))
+      .thenReturn(Future.succeededFuture());
 
     var result = auditManager.executeDatabaseCleanup(TENANT_ID);
     result.onComplete(ar -> assertTrue(ar.succeeded()));
@@ -105,5 +112,6 @@ class AuditManagerTest {
     verify(inventoryService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class));
     verify(marcService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_BIB));
     verify(marcService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_AUTHORITY));
+    verify(partitionService).cleanUpAndCreateSubPartitions(TENANT_ID);
   }
 }

@@ -21,12 +21,14 @@ public class AuditManager {
   private final ConfigurationService configurationService;
   private final InventoryEventService inventoryService;
   private final MarcAuditService marcService;
+  private final PartitionService partitionService;
 
   public AuditManager(ConfigurationService configurationService, InventoryEventService inventoryService,
-                      MarcAuditService marcService) {
+                      MarcAuditService marcService, PartitionService partitionService) {
     this.configurationService = configurationService;
     this.inventoryService = inventoryService;
     this.marcService = marcService;
+    this.partitionService = partitionService;
   }
 
   public Future<Void> executeDatabaseCleanup(String tenantId) {
@@ -42,7 +44,8 @@ public class AuditManager {
           marcService.expireRecords(tenant, expireOlderThan, SourceRecordType.MARC_BIB)).mapEmpty()),
       deleteExpiredRecordsForSettingGroup(tenantId, SettingGroup.AUTHORITY, currentTime,
         (tenant, expireOlderThan) ->
-          marcService.expireRecords(tenant, expireOlderThan, SourceRecordType.MARC_AUTHORITY))
+          marcService.expireRecords(tenant, expireOlderThan, SourceRecordType.MARC_AUTHORITY)),
+      partitionService.cleanUpAndCreateSubPartitions(tenantId)
     ).mapEmpty();
   }
 

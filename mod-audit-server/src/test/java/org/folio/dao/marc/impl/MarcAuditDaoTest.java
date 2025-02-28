@@ -148,6 +148,18 @@ public class MarcAuditDaoTest {
     assertEquals(LocalDateTime.ofInstant(eventDate.toInstant(), ZoneId.systemDefault()), capturedTuple.getLocalDateTime(0));
   }
 
+  @Test
+  void shouldReturnMarcBibTableName() {
+    var tableName = marcAuditDao.tableName(SourceRecordType.MARC_BIB);
+    assertEquals("marc_bib_audit", tableName);
+  }
+
+  @Test
+  void shouldReturnMarcAuthorityTableName() {
+    var tableName = marcAuditDao.tableName(SourceRecordType.MARC_AUTHORITY);
+    assertEquals("marc_authority_audit", tableName);
+  }
+
   private RowSet<Row> mockRowSet(MarcAuditEntity entity) {
     var row = mock(Row.class);
     when(row.getUUID("event_id")).thenReturn(UUID.fromString(entity.eventId()));

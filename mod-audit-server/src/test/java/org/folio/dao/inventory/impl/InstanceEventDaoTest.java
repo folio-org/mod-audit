@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,7 +51,7 @@ class InstanceEventDaoTest {
 
   @BeforeEach
   void setUp() {
-    when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
+    lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
     mockPostgresExecutionSuccess(2).when(postgresClient).execute(anyString(), any(Tuple.class), any());
   }
 
@@ -128,6 +129,13 @@ class InstanceEventDaoTest {
         verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
+  }
+
+  @Test
+  void shouldReturnCorrectTableName() {
+    var expectedTableName = "instance_audit";
+    var actualTableName = instanceEventDao.tableName();
+    assertEquals(expectedTableName, actualTableName);
   }
 
   private RowSet<Row> mockRowSet(InventoryAuditEntity entity) {

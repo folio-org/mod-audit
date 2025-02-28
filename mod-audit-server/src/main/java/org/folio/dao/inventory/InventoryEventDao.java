@@ -56,4 +56,10 @@ public interface InventoryEventDao {
   InventoryResourceType resourceType();
 
   Future<Integer> count(UUID entityId, String tenantId);
+
+  /**
+   * Returns audit table name for the dao
+   * @return table name
+   */
+  String tableName();
 }
