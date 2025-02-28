@@ -38,11 +38,17 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     INSERT INTO %s (event_id, event_date, entity_id, origin, action, user_id, diff)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     """;
+
   private static final String SELECT_SQL = """
     SELECT * FROM %s
       WHERE entity_id = $1 %s
       ORDER BY event_date DESC
       LIMIT $2
+    """;
+
+  private static final String COUNT_SQL = """
+    SELECT COUNT(*) FROM %s
+      WHERE entity_id = $1
     """;
 
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
@@ -76,6 +82,15 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     var tuple = eventDate == null ? Tuple.of(entityId, limit) : Tuple.of(entityId, limit, eventDate);
     return pgClientFactory.createInstance(tenantId).execute(query, tuple)
       .map(this::mapRowToAuditEntityList);
+  }
+
+  @Override
+  public Future<Integer> count(UUID entityId, SourceRecordType recordType, String tenantId) {
+    LOGGER.debug("count:: Retrieving total count by tenantId: '{}', entityId: '{}', recordType '{}'", tenantId, entityId, recordType);
+    var tableName = tableName(recordType);
+    var query = COUNT_SQL.formatted(formatDBTableName(tenantId, tableName));
+    return pgClientFactory.createInstance(tenantId).selectSingle(query, Tuple.of(entityId))
+      .map(row -> row.getInteger(0));
   }
 
   @Override

@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +73,8 @@ public class MarcAuditApiTest extends ApiTestBase {
       .get(apiPath + ENTITY_ID)
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
-      .body(containsString(ENTITY_ID));
+      .body(containsString(ENTITY_ID))
+      .body("totalRecords", equalTo(1));
   }
 
   @ParameterizedTest
@@ -82,7 +84,8 @@ public class MarcAuditApiTest extends ApiTestBase {
       .get(apiPath + UUID.randomUUID())
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
-      .body("marcAuditItems", hasSize(0));
+      .body("marcAuditItems", hasSize(0))
+      .body("totalRecords", equalTo(0));
   }
 
   @ParameterizedTest

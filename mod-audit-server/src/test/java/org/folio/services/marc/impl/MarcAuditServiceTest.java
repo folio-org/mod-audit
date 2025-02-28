@@ -63,7 +63,7 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldCallDaoForSuccessfulCase() {
+  void shouldSaveEventWhenAuditIsEnabledAndDaoCompletes() {
     var event = EntityUtils.createSourceRecordDomainEvent();
 
     mockAuditEnabled(true);
@@ -76,7 +76,7 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldSkipSavingWhenNoChangesDetected() {
+  void shouldNotSaveEventWhenNoChangesDetected() {
     var event = EntityUtils.sourceRecordDomainEventWithNoDiff();
 
     mockAuditEnabled(true);
@@ -88,7 +88,7 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldSkipSavingWhenFeatureIsDisabled() {
+  void shouldNotSaveEventWhenAuditFeatureIsDisabled() {
     var event = EntityUtils.sourceRecordDomainEventWithNoDiff();
 
     mockAuditEnabled(false);
@@ -100,7 +100,7 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldFailWhenDaoFails() {
+  void shouldFailToSaveEventWhenDaoThrowsError() {
     var event = EntityUtils.createSourceRecordDomainEvent();
 
     mockAuditEnabled(true);
@@ -116,9 +116,11 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldRetrieveMarcBibAuditRecordsSuccessfully() {
+  void shouldRetrieveMarcBibAuditRecordsWhenDaoSucceeds() {
     when(configurationService.getSetting(any(), eq(EntityUtils.TENANT_ID)))
       .thenReturn(Future.succeededFuture(new Setting().withValue(10)));
+    when(marcAuditDao.count(any(UUID.class), any(SourceRecordType.class), anyString()))
+      .thenReturn(Future.succeededFuture(1));
     var saveFuture = marcAuditService.getMarcAuditRecords(EntityUtils.SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, TENANT_ID, DATE_TIME);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
 
@@ -126,9 +128,11 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldRetrieveMarcAuthorityAuditRecordsSuccessfully() {
+  void shouldRetrieveMarcAuthorityAuditRecordsWhenDaoSucceeds() {
     when(configurationService.getSetting(org.folio.services.configuration.Setting.AUTHORITY_RECORDS_PAGE_SIZE, TENANT_ID))
       .thenReturn(Future.succeededFuture(new org.folio.rest.jaxrs.model.Setting().withValue(10)));
+    when(marcAuditDao.count(any(UUID.class), any(SourceRecordType.class), anyString()))
+      .thenReturn(Future.succeededFuture(1));
     var saveFuture = marcAuditService.getMarcAuditRecords(EntityUtils.SOURCE_RECORD_ID, SourceRecordType.MARC_AUTHORITY, TENANT_ID, DATE_TIME);
     saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
 
@@ -136,7 +140,19 @@ public class MarcAuditServiceTest {
   }
 
   @Test
-  void shouldFailWhenInvalidEntityIdProvided() {
+  void shouldNotRetrieveRecordsWhenCountIsZero() {
+    when(configurationService.getSetting(any(), eq(EntityUtils.TENANT_ID)))
+      .thenReturn(Future.succeededFuture(new Setting().withValue(10)));
+    when(marcAuditDao.count(any(UUID.class), any(SourceRecordType.class), anyString()))
+      .thenReturn(Future.succeededFuture(0));
+    var saveFuture = marcAuditService.getMarcAuditRecords(EntityUtils.SOURCE_RECORD_ID, SourceRecordType.MARC_BIB, TENANT_ID, DATE_TIME);
+    saveFuture.onComplete(ar -> assertTrue(ar.succeeded()));
+
+    verify(marcAuditDao, times(0)).get(any(UUID.class), any(SourceRecordType.class), eq(TENANT_ID), any(LocalDateTime.class), anyInt());
+  }
+
+  @Test
+  void shouldFailToRetrieveRecordsWhenInvalidEntityIdProvided() {
     Future<MarcAuditCollection> result = marcAuditService.getMarcAuditRecords(INVALID_ENTITY_ID, SourceRecordType.MARC_BIB, TENANT_ID, DATE_TIME);
 
     assertTrue(result.failed());

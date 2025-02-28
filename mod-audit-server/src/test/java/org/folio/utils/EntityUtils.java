@@ -19,6 +19,7 @@ import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.util.marc.EventMetadata;
 import org.folio.util.marc.MarcEventPayload;
+import org.folio.util.marc.Record;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordDomainEventType;
 import org.folio.util.marc.SourceRecordType;
@@ -238,6 +239,28 @@ public class EntityUtils {
       .build();
   }
 
+  public static SourceRecordDomainEvent createSourceRecordDomainEvent(SourceRecordDomainEventType eventType, List<Map<String, Object>> oldFields, List<Map<String, Object>> newFields) {
+    Record oldRecord = null;
+    Record newRecord = null;
+    Map<String, Object> metadata = SourceRecordDomainEventType.SOURCE_RECORD_CREATED.equals(eventType) ? Map.of("createdByUserId", USER_ID) : Map.of("updatedByUserId", USER_ID);
+    if (oldFields != null && !oldFields.isEmpty()) {
+      oldRecord = new Record(SOURCE_RECORD_ID, Map.of("content", Map.of("fields", oldFields)), metadata);
+    }
+    if (newFields != null && !newFields.isEmpty()) {
+      newRecord = new Record(SOURCE_RECORD_ID, Map.of("content", Map.of("fields", newFields)), metadata);
+    }
+
+    return new SourceRecordDomainEvent(
+      UUID.randomUUID().toString(),
+      SourceRecordType.MARC_BIB,
+      new EventMetadata("module", TENANT_ID, LocalDateTime.now()),
+      new MarcEventPayload(
+        newRecord,
+        oldRecord
+      ), eventType
+    );
+  }
+
   public static SourceRecordDomainEvent createSourceRecordDomainEvent() {
     return new SourceRecordDomainEvent(
       UUID.randomUUID().toString(),
@@ -277,20 +300,12 @@ public class EntityUtils {
           "content", Map.of(
             "leader", LEADER_OLD,
             "fields", List.of(
-              Map.of(FIELD_001, VALUE_001),
               Map.of(FIELD_245, Map.of("ind1", "1", "ind2", "0", "subfields", List.of(Map.of("a", TITLE_OLD))))
             )
           )
         ), Map.of("updatedByUserId", USER_ID))
       ), SourceRecordDomainEventType.SOURCE_RECORD_UPDATED
     );
-  }
-
-  public static SourceRecordDomainEvent deleteSourceRecordDomainEvent() {
-    var event = updateSourceRecordDomainEvent();
-    event.getEventPayload().setNewRecord(null);
-    event.setEventType(SourceRecordDomainEventType.SOURCE_RECORD_DELETED);
-    return event;
   }
 
   public static SourceRecordDomainEvent sourceRecordDomainEventWithNoDiff() {
