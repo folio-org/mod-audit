@@ -1,25 +1,5 @@
 package org.folio.dao.marc.impl;
 
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.Tuple;
-import java.sql.Timestamp;
-import java.time.ZoneId;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.dao.marc.MarcAuditDao;
-import org.folio.dao.marc.MarcAuditEntity;
-import org.folio.util.PostgresClientFactory;
-import org.folio.util.marc.SourceRecordType;
-import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
 import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
 import static org.folio.util.AuditEventDBConstants.DIFF_FIELD;
 import static org.folio.util.AuditEventDBConstants.ENTITY_ID_FIELD;
@@ -28,6 +8,25 @@ import static org.folio.util.AuditEventDBConstants.EVENT_ID_FIELD;
 import static org.folio.util.AuditEventDBConstants.ORIGIN_FIELD;
 import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
+
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.dao.marc.MarcAuditDao;
+import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.util.PostgresClientFactory;
+import org.folio.util.marc.SourceRecordType;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class MarcAuditDaoImpl implements MarcAuditDao {
@@ -132,7 +131,8 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
     );
   }
 
-  private String tableName(SourceRecordType recordType) {
+  @Override
+  public String tableName(SourceRecordType recordType) {
     return SourceRecordType.MARC_BIB.equals(recordType) ? MARC_BIB_TABLE : MARC_AUTHORITY_TABLE;
   }
 }

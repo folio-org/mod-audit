@@ -4,11 +4,10 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.sql.Timestamp;
-import org.folio.util.marc.SourceRecordType;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.folio.util.marc.SourceRecordType;
 
 public interface MarcAuditDao {
 
@@ -42,4 +41,10 @@ public interface MarcAuditDao {
    * @return future with result list
    */
   Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId, SourceRecordType recordType);
+
+  /**
+   * Returns audit table name for the record type.
+   * @return table name
+   */
+  String tableName(SourceRecordType recordType);
 }
