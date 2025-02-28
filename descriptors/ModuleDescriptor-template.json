@@ -259,7 +259,7 @@
             "audit.config.groups.settings.collection.get"
           ],
           "permissionsDesired": [
-            "audit.config.groups.settings.*.collection.get"
+            "audit.config.groups.settings.*"
           ]
         },
         {
@@ -269,7 +269,7 @@
             "audit.config.groups.settings.item.put"
           ],
           "permissionsDesired": [
-            "audit.config.groups.settings.*.item.put"
+            "audit.config.groups.settings.*"
           ]
         }
       ]
