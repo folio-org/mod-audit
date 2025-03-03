@@ -16,10 +16,10 @@ import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.util.List;
-import java.util.stream.Stream;
 import org.folio.CopilotGenerated;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.management.DatabaseSubPartition;
+import org.folio.services.management.YearQuarter;
 import org.folio.util.PostgresClientFactory;
 import org.folio.utils.MockUtils;
 import org.folio.utils.UnitTest;
@@ -80,10 +80,18 @@ class PartitionDaoTest {
 
   @Test
   void shouldCreateSubPartitions(VertxTestContext ctx) {
-    var subPartitions = Stream.iterate(0, i -> i + 1)
-      .limit(8)
-      .map(this::subPartition)
-      .toList();
+    var subPartitions = List.of(
+      subPartition(YearQuarter.Q4, 2024),
+      subPartition(YearQuarter.Q1, 2025),
+      subPartition(YearQuarter.Q2, 2025),
+      subPartition(YearQuarter.Q3, 2025)
+    );
+    var expectedRanges = List.of(
+      "FROM ('2024-10-01') TO ('2025-01-01')",
+      "FROM ('2025-01-01') TO ('2025-04-01')",
+      "FROM ('2025-04-01') TO ('2025-07-01')",
+      "FROM ('2025-07-01') TO ('2025-10-01')"
+    );
 
     doReturn(Future.succeededFuture())
       .when(postgresClient).runSqlFile(anyString());
@@ -94,7 +102,8 @@ class PartitionDaoTest {
         verify(postgresClient, times(1)).runSqlFile(captor.capture());
         var query = captor.getValue();
         assertThat(query)
-          .contains(subPartitions.stream().map(DatabaseSubPartition::toString).toList());
+          .contains(subPartitions.stream().map(DatabaseSubPartition::toString).toList())
+          .contains(expectedRanges);
         ctx.completeNow();
       }));
   }
@@ -104,7 +113,11 @@ class PartitionDaoTest {
   }
 
   private DatabaseSubPartition subPartition(int mainPartitionNumber) {
-    return DatabaseSubPartition.fromString("audit_p" + mainPartitionNumber + "_2025_q1");
+    return DatabaseSubPartition.fromString("audit_p" + mainPartitionNumber + "_2024_q4");
+  }
+
+  private DatabaseSubPartition subPartition(YearQuarter quarter, int year) {
+    return new DatabaseSubPartition("audit", 0, year, quarter);
   }
 
   private RowSet<Row> mockRowSet(DatabaseSubPartition subPartition) {

@@ -1,6 +1,7 @@
 package org.folio.dao.management;
 
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
+import static org.folio.services.management.YearQuarter.Q4;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
@@ -19,7 +20,7 @@ public class PartitionDao {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private static final String FULL_TABLE_NAME = "%s.%s";
-  private static final String SUB_PARTITION_DATE = "%s-%s-%s";
+  private static final String SUB_PARTITION_DATE = "%s-%02d-01";
   private static final String EMPTY_SUB_PARTITIONS_QUERY = """
     SELECT relname
       FROM pg_stat_user_tables
@@ -73,12 +74,13 @@ public class PartitionDao {
   }
 
   private String createSubPartitionQuery(String schema, DatabaseSubPartition subPartition) {
-    var quater = subPartition.getQuarter();
+    var quarter = subPartition.getQuarter();
+    var yearTo = Q4.equals(quarter) ? subPartition.getYear() + 1 : subPartition.getYear();
     return CREATE_SUB_PARTITION_QUERY.formatted(
       FULL_TABLE_NAME.formatted(schema, subPartition.toString()),
       FULL_TABLE_NAME.formatted(schema, subPartition.getMainPartition()),
-      SUB_PARTITION_DATE.formatted(subPartition.getYear(), quater.getMonthFrom(), quater.getDayFrom()),
-      SUB_PARTITION_DATE.formatted(subPartition.getYear(), quater.getMonthTo(), quater.getDayTo())
+      SUB_PARTITION_DATE.formatted(subPartition.getYear(), quarter.getMonthFrom()),
+      SUB_PARTITION_DATE.formatted(yearTo, quarter.getMonthTo())
     );
   }
 

@@ -6,23 +6,19 @@ import lombok.Getter;
 @Getter
 public enum YearQuarter {
 
-  Q1(1, 1, 3, 1, 31),
-  Q2(2, 4, 6, 1, 30),
-  Q3(3, 7, 9, 1, 30),
-  Q4(4, 10, 12, 1, 31);
+  Q1(1, 1, 4),
+  Q2(2, 4, 7),
+  Q3(3, 7, 10),
+  Q4(4, 10, 1);
 
   private final int value;
   private final int monthFrom;
-  private final int dayFrom;
   private final int monthTo;
-  private final int dayTo;
 
-  YearQuarter(int value, int monthFrom, int monthTo, int dayFrom, int dayTo) {
+  YearQuarter(int value, int monthFrom, int monthTo) {
     this.value = value;
     this.monthFrom = monthFrom;
     this.monthTo = monthTo;
-    this.dayFrom = dayFrom;
-    this.dayTo = dayTo;
   }
 
   public static YearQuarter current(LocalDateTime dateTime) {
