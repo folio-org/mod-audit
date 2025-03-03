@@ -3,51 +3,41 @@ package org.folio.util.marc;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.UtilityClass;
 import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.domain.diff.ChangeType;
+import org.folio.domain.diff.CollectionChangeDto;
+import org.folio.domain.diff.CollectionItemChangeDto;
+import org.folio.domain.diff.FieldChangeDto;
 import org.folio.exception.ValidationException;
 import org.folio.rest.jaxrs.model.MarcAuditCollection;
 import org.folio.rest.jaxrs.model.MarcAuditItem;
 
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Utility class for mapping and transforming parsed MARC records into entities suitable
- * for audit and logging purposes. This class provides methods to process and compare parsed
- * MARC records and extract relevant data for creating audit entities.
- * <p>
- * The {@code ParsedRecordUtil} handles operations such as:
- * - Mapping a source record domain event to a MarcAuditEntity.
- * - Extracting user IDs from metadata.
- * - Flattening complex parsed record structures into more manageable formats.
- * - Calculating differences between old and new parsed records for auditing purposes.
- * - Formatting and restructuring MARC field data.
- * </p>
- * <p>
- * This class is intended to function as a utility and should not be instantiated directly.
+ * Utility class for mapping and processing MARC records and audit-related entities.
+ * The MarcUtil class provides static methods for mapping domain events to entities,
+ * comparing old and new states of records, identifying differences, and formatting field data.
  */
 @UtilityClass
 public class MarcUtil {
   private static final String LDR = "LDR";
   private static final String FIELD_005 = "005";
   private static final String SUBFIELDS_KEY = "subfields";
-  private static final String FIELD_KEY = "field";
   private static final String FIELDS_KEY = "fields";
   private static final String LEADER_KEY = "leader";
   private static final String CREATED_BY = "createdByUserId";
   private static final String UPDATED_BY = "updatedByUserId";
-  private static final String OLD_VALUE_KEY = "oldValue";
-  private static final String NEW_VALUE_KEY = "newValue";
   private static final String CREATED = "CREATED";
   private static final String UPDATED = "UPDATED";
   private static final String DELETED = "DELETED";
@@ -62,14 +52,14 @@ public class MarcUtil {
    */
   public static MarcAuditEntity mapToEntity(SourceRecordDomainEvent event) {
     RecordData data;
-    Map<String, Object> difference;
+    ChangeRecordDto difference;
     var oldRecord = event.getEventPayload().getOld();
     var newRecord = event.getEventPayload().getNewRecord();
 
     switch (event.getEventType()) {
       case SOURCE_RECORD_CREATED -> {
         data = extractRecordData(newRecord, CREATED_BY, CREATED);
-        difference = getDifference(newRecord.getParsedRecord(), event.getEventType());
+        difference = getDifference(newRecord.getParsedRecord(), ChangeType.ADDED);
       }
       case SOURCE_RECORD_UPDATED -> {
         data = extractRecordData(newRecord, UPDATED_BY, UPDATED);
@@ -77,7 +67,7 @@ public class MarcUtil {
       }
       case SOURCE_RECORD_DELETED -> {
         data = extractRecordData(oldRecord, UPDATED_BY, DELETED);
-        difference = getDifference(oldRecord.getParsedRecord(), event.getEventType());
+        difference = getDifference(oldRecord.getParsedRecord(), ChangeType.REMOVED);
       }
       default -> throw new ValidationException("Unsupported event type: " + event.getEventType());
     }
@@ -122,36 +112,88 @@ public class MarcUtil {
     item.setUserId(entity.userId());
     item.setOrigin(entity.origin());
     item.setDiff(entity.diff());
+    item.setEventTs(entity.eventDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
     return item;
   }
 
-  private static RecordData extractRecordData(Record value, String userKey, String action) {
-    return new RecordData(
-      value.getMatchedId(),
-      getUserIdFromMetadata(value.getMetadata(), userKey),
-      action
-    );
-  }
-
-  private static String getUserIdFromMetadata(Map<String, Object> metadata, String key) {
-    return metadata.get(key).toString();
-  }
-
-  private static Map<String, Object> calculateDifferences(Map<String, Object> oldParsedRecord, Map<String, Object> newParsedRecord) {
+  private static ChangeRecordDto calculateDifferences(Map<String, Object> oldParsedRecord, Map<String, Object> newParsedRecord) {
     var oldFields = flattenFields(oldParsedRecord);
     var newFields = flattenFields(newParsedRecord);
     return compareParsedRecords(oldFields, newFields);
   }
 
-  private static Map<String, Object> getDifference(Map<String, Object> parsedRecord, SourceRecordDomainEventType type) {
-    List<Map<String, Object>> fields = new ArrayList<>();
-    var condition = type.equals(SourceRecordDomainEventType.SOURCE_RECORD_CREATED);
-    flattenFields(parsedRecord).forEach((key, value) ->
-      fields.add(Map.of(FIELD_KEY, key, condition ? NEW_VALUE_KEY : OLD_VALUE_KEY, value))
-    );
-    return condition
-      ? toMap(fields, null, null)
-      : toMap(null, fields, null);
+  private static ChangeRecordDto getDifference(Map<String, Object> parsedRecord, ChangeType type) {
+    var changes = new ArrayList<FieldChangeDto>();
+    var content = flattenFields(parsedRecord);
+    content.forEach((key, value) -> {
+      if (value instanceof List<?>) {
+        ((List<?>) value).forEach(v -> addChange(changes, type, key, v));
+      } else {
+        addChange(changes, type, key, value);
+      }
+    });
+    return new ChangeRecordDto(changes, Collections.emptyList());
+  }
+
+  private static ChangeRecordDto compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
+    List<FieldChangeDto> added = new ArrayList<>();
+    List<FieldChangeDto> removed = new ArrayList<>();
+    List<FieldChangeDto> modified = new ArrayList<>();
+    List<CollectionChangeDto> repeatable = new ArrayList<>();
+
+    populateEntries(newMap, oldMap, added, ChangeType.ADDED);
+    populateEntries(newMap, oldMap, removed, ChangeType.REMOVED);
+    processModifiedEntries(newMap, oldMap, repeatable, modified);
+
+    List<FieldChangeDto> fieldChanges = new ArrayList<>();
+    fieldChanges.addAll(added);
+    fieldChanges.addAll(removed);
+    fieldChanges.addAll(modified);
+
+    return new ChangeRecordDto(fieldChanges, repeatable);
+  }
+
+  /**
+   * Populates the given list of {@link FieldChangeDto} with changes detected between the source and target maps.
+   * This method identifies entries in the source map that do not exist in the target map, and based on their values,
+   * adds corresponding change records to the provided list.
+   *
+   * @param firstMap  the first map, potentially representing either the source or target, depending on the change type.
+   * @param secondMap the second map, potentially representing either the source or target, depending on the change type.
+   * @param changes   the list of {@link FieldChangeDto} objects to which detected changes will be added.
+   * @param type      the {@link ChangeType} indicating the type of change (e.g., ADDED, REMOVED, etc.).
+   *                  Determines which map acts as the source and which as the target.
+   *
+   *                  <p>The method determines the source and target maps based on the change type:
+   *                  <ul>
+   *                    <li>If type is {@link ChangeType#ADDED}, {@code firstMap} is treated as the source
+   *                        and {@code secondMap} as the target.</li>
+   *                    <li>Otherwise, {@code secondMap} is treated as the source and {@code firstMap} as the target.</li>
+   *                  </ul>
+   *
+   *                  <p>For every key in the source map that does not exist in the target map:
+   *                  <ul>
+   *                    <li>If the value associated with the key is a {@link List}, each element of the list
+   *                        is treated as a separate change and recorded in the list of {@link FieldChangeDto}.</li>
+   *                    <li>For non-list values, the value itself is recorded as a change.</li>
+   *                  </ul>
+   *
+   *                  <p>{@link FieldChangeDto} objects are created using the {@code addChange} helper method,
+   *                  which encapsulates the creation and storage of change records.
+   */
+  private static void populateEntries(Map<String, Object> firstMap, Map<String, Object> secondMap,
+                                      List<FieldChangeDto> changes, ChangeType type) {
+    var source = ChangeType.ADDED.equals(type) ? firstMap : secondMap;
+    var target = ChangeType.ADDED.equals(type) ? secondMap : firstMap;
+    source.forEach((key, value) -> {
+      if (!target.containsKey(key)) {
+        if (value instanceof List<?>) {
+          ((List<?>) value).forEach(v -> addChange(changes, type, key, v));
+        } else {
+          addChange(changes, type, key, value);
+        }
+      }
+    });
   }
 
   /**
@@ -188,6 +230,7 @@ public class MarcUtil {
     return result;
   }
 
+
   /**
    * Formats the given field value into a standardized string representation.
    * If the input value is a map containing subfields, it creates a formatted string
@@ -206,104 +249,33 @@ public class MarcUtil {
       var subfields = (List<Map<String, Object>>) fieldData.get(SUBFIELDS_KEY);
       var subfieldsString = subfields.stream()
         .flatMap(subObj -> subObj.entrySet().stream()
-          .map(e -> "$" + e.getKey() + e.getValue()))
+          .map(e -> "$" + e.getKey() + " " + e.getValue()))
         .collect(Collectors.joining());
       return ind1 + ind2 + subfieldsString;
     }
     return value.toString();
   }
 
-
   /**
-   * Compares two maps of parsed records and identifies the differences between them.
-   * The method determines the added, modified, and removed entries by analyzing
-   * the keys and values in the input maps. The results are aggregated into categorized lists
-   * and returned as a single map.
+   * Compares old and new values of a field to track changes, including modifications, additions, and removals.
+   * The method categorizes changes into field-level and collection-level changes.
    *
-   * @param oldMap a map representing the original state of parsed records
-   * @param newMap a map representing the updated state of parsed records
-   * @return a map containing three lists:
-   * - "added" for entries present in the new map but not in the old map
-   * - "removed" for entries present in the old map but not in the new map
-   * - "modified" for
+   * @param key        The identifier or key of the field being compared.
+   * @param oldValue   The old value of the field before the change. Can be a single value or a collection.
+   * @param newValue   The new value of the field after the change. Can be a single value or a collection.
+   * @param repeatable A list of {@link CollectionChangeDto} to track changes for fields that are collections.
+   *                   This includes added and/or removed items.
+   * @param changes    A list of {@link FieldChangeDto} to track modifications to single field values
+   *                   (e.g., direct changes in non-collection fields).
    */
-  private static Map<String, Object> compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
-    List<Map<String, Object>> added = new ArrayList<>();
-    List<Map<String, Object>> modified = new ArrayList<>();
-    List<Map<String, Object>> removed = new ArrayList<>();
 
-    populateEntries(newMap, oldMap, added, NEW_VALUE_KEY);
-    populateEntries(oldMap, newMap, removed, OLD_VALUE_KEY);
-    processModifiedEntries(newMap, oldMap, added, removed, modified);
-    return toMap(added, removed, modified);
-  }
-
-  /**
-   * Populates the provided list with entries that are present in the source map but not in the target map.
-   * The method iterates over the key-value pairs in the source map, comparing them to the target map.
-   * If a key is present in the source map but not in the target map, the method adds the key-value pair
-   * to the provided result list, associating the value with the specified key.
-   *
-   * @param sourceMap  the map containing the source key-value pairs
-   * @param targetMap  the map containing the target key-value pairs
-   * @param resultList the list to store entries that are present in the source map but not in the target map
-   * @param valueKey   the key to use for associating the value in the result list
-   */
-  private static void populateEntries(Map<String, Object> sourceMap, Map<String, Object> targetMap,
-                                      List<Map<String, Object>> resultList, String valueKey) {
-    sourceMap.forEach((key, value) -> {
-      if (!targetMap.containsKey(key)) {
-        resultList.add(Map.of(FIELD_KEY, key, valueKey, value));
-      }
-    });
-  }
-
-  /**
-   * Processes the differences between two maps representing the new and old states of a dataset.
-   * The method identifies added, removed, and modified entries by comparing the key-value pairs
-   * in the input maps and categorizes them into the respective provided lists.
-   *
-   * @param newMap   the map containing the new state of the dataset
-   * @param oldMap   the map containing the old state of the dataset
-   * @param added    a list to store entries that are present in the new map but not in the old map
-   * @param removed  a list to store entries that are present in the old map but not in the new map
-   * @param modified a list to store entries that exist in both maps but have different values
-   */
-  private static void processModifiedEntries(Map<String, Object> newMap, Map<String, Object> oldMap,
-                                             List<Map<String, Object>> added, List<Map<String, Object>> removed,
-                                             List<Map<String, Object>> modified) {
-    newMap.forEach((key, newValue) -> {
-      if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
-        var oldValue = oldMap.get(key);
-        if (!Objects.equals(oldValue, newValue)) {
-          var modifiedField = getModifiedFieldMap(key, oldValue, newValue);
-          if (!modifiedField.containsKey(OLD_VALUE_KEY)) {
-            added.add(modifiedField);
-          } else if (!modifiedField.containsKey(NEW_VALUE_KEY)) {
-            removed.add(modifiedField);
-          } else {
-            modified.add(modifiedField);
-          }
-        }
-      }
-    });
-  }
-
-  /**
-   * Generates a map representing the differences between an old and a new value for a specified field key.
-   * The method computes the added, removed, and modified elements between the old and new values,
-   * returning a map containing the field key and any relevant changes.
-   *
-   * @param key      the name of the field being evaluated for changes
-   * @param oldValue the previous value of the field, which can be a single object or a list of objects
-   * @param newValue the updated value of the field, which can be a single object or a list of objects
-   * @return a map containing the field key and detected differences between the old and new values.
-   *         The map may include:
-   *         - "fieldKey" with the provided key
-   *         - "oldValue" with the previous data if applicable
-   *         - "newValue" with the updated data if applicable
-   */
-  private static Map<String, Object> getModifiedFieldMap(String key, Object oldValue, Object newValue) {
+  private static void getModifiedFieldMap(
+    String key,
+    Object oldValue,
+    Object newValue,
+    List<CollectionChangeDto> repeatable,
+    List<FieldChangeDto> changes
+  ) {
     var oldList = convertToList(oldValue);
     var newList = convertToList(newValue);
 
@@ -316,32 +288,106 @@ public class MarcUtil {
     removedSet.removeAll(newSet);
     addedSet.removeAll(oldSet);
 
-    var oldResult = formatSingleOrList(removedSet);
-    var newResult = formatSingleOrList(addedSet);
-
-    var map = new HashMap<String, Object>();
-    map.put(FIELD_KEY, key);
-
-    if (oldList.size() == newList.size()) {
-      if (!Objects.equals(oldValue, newValue)) {
-        map.put(OLD_VALUE_KEY, oldValue);
-        map.put(NEW_VALUE_KEY, newValue);
+    // Case: Single field modified
+    if (isSingleValueChange(oldList, newList)) {
+      var singleOld = oldList.get(0);
+      var singleNew = newList.get(0);
+      if (!Objects.equals(singleOld, singleNew)) {
+        changes.add(FieldChangeDto.modified(key, key, singleOld, singleNew));
       }
-    } else {
-      if (removedSet.isEmpty()) {
-        map.put(NEW_VALUE_KEY, newResult);
-      } else if (addedSet.isEmpty()) {
-        map.put(OLD_VALUE_KEY, oldResult);
-      } else {
-        map.put(OLD_VALUE_KEY, oldResult);
-        map.put(NEW_VALUE_KEY, newResult);
-      }
+      return;
     }
-    return map;
+    // Case: No changes at all
+    if (removedSet.isEmpty() && addedSet.isEmpty()) {
+      return;
+    }
+    // Case: Only additions
+    if (removedSet.isEmpty()) {
+      repeatable.add(new CollectionChangeDto(
+        key,
+        addedSet.stream()
+          .map(CollectionItemChangeDto::added)
+          .toList()
+      ));
+      return;
+    }
+    // Case: Only removals
+    if (addedSet.isEmpty()) {
+      repeatable.add(new CollectionChangeDto(
+        key,
+        removedSet.stream()
+          .map(CollectionItemChangeDto::removed)
+          .toList()
+      ));
+      return;
+    }
+    // Case: Mixed changes (both added and removed)
+    List<CollectionItemChangeDto> itemChanges = new ArrayList<>();
+    removedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.removed(item)));
+    addedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.added(item)));
+    repeatable.add(new CollectionChangeDto(key, itemChanges));
   }
 
-  private static Object formatSingleOrList(Set<Object> set) {
-    return set.size() == 1 ? set.iterator().next() : new ArrayList<>(set);
+  /**
+   * Processes entries in the new map to identify fields that have been modified compared to the old map.
+   * For each key in the new map that also exists in the old map, the method checks if the corresponding values
+   * are different. If a difference is detected, the method delegates handling of the modification to
+   * {@code getModifiedFieldMap}.
+   *
+   * @param newMap     the map representing the updated state of fields.
+   * @param oldMap     the map representing the original state of fields.
+   * @param repeatable the list of {@link CollectionChangeDto} objects to store information about repeatable
+   *                   field changes, if applicable.
+   * @param modified   the list of {@link FieldChangeDto} objects to store information about detected field modifications.
+   *
+   *                   <p>For each key-value pair in {@code newMap}:
+   *                   <ul>
+   *                     <li>The method skips processing if the key is equal to {@code FIELD_005}, as this field is excluded from modification checks.</li>
+   *                     <li>If the key also exists in {@code oldMap}, the method further checks if the values in both maps are different using {@link Objects#equals}.</li>
+   *                     <li>If a difference is detected, the method calls {@code getModifiedFieldMap} to handle the detected change.</li>
+   *                   </ul>
+   *
+   *                   <p>Detected field modifications are typically categorized into repeatable and non-repeatable changes:
+   *                   <ul>
+   *                     <li>Repeatable field changes are added to the {@code repeatable} list as {@link CollectionChangeDto} objects.</li>
+   *                     <li>Non-repeatable field changes are added to the {@code modified} list as {@link FieldChangeDto} objects.</li>
+   *                   </ul>
+   */
+  private static void processModifiedEntries(
+    Map<String, Object> newMap,
+    Map<String, Object> oldMap,
+    List<CollectionChangeDto> repeatable,
+    List<FieldChangeDto> modified
+  ) {
+    newMap.forEach((key, newValue) -> {
+      if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
+        var oldValue = oldMap.get(key);
+        if (!Objects.equals(oldValue, newValue)) {
+          getModifiedFieldMap(key, oldValue, newValue, repeatable, modified);
+        }
+      }
+    });
+  }
+
+  private static boolean isSingleValueChange(List<Object> oldList, List<Object> newList) {
+    return oldList.size() == 1 && newList.size() == 1;
+  }
+
+  private static RecordData extractRecordData(Record value, String userKey, String action) {
+    return new RecordData(
+      value.getMatchedId(),
+      getUserIdFromMetadata(value.getMetadata(), userKey),
+      action
+    );
+  }
+
+  private static String getUserIdFromMetadata(Map<String, Object> metadata, String key) {
+    return metadata.get(key).toString();
+  }
+
+  private static void addChange(List<FieldChangeDto> changes, ChangeType type, String key, Object value) {
+    var fieldChange = ChangeType.ADDED.equals(type) ? FieldChangeDto.added(key, key, value) : FieldChangeDto.removed(key, key, value);
+    changes.add(fieldChange);
   }
 
   private static List<Object> convertToList(Object value) {
@@ -360,20 +406,6 @@ public class MarcUtil {
       return Collections.emptyMap();
     }
     return content;
-  }
-
-  private static Map<String, Object> toMap(Collection<?> added, Collection<?> removed, Collection<?> modified) {
-    Map<String, Object> result = new HashMap<>();
-    addIfNotEmpty(result, "added", added);
-    addIfNotEmpty(result, "removed", removed);
-    addIfNotEmpty(result, "modified", modified);
-    return result;
-  }
-
-  private static void addIfNotEmpty(Map<String, Object> map, String key, Collection<?> collection) {
-    if (collection != null && !collection.isEmpty()) {
-      map.put(key, collection);
-    }
   }
 
   private record RecordData(String recordId, String userId, String action) {
