@@ -9,6 +9,7 @@ import io.vertx.core.Vertx;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,11 +95,12 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
     createAuditRecords(entityId, oneDayBefore, oneDayAfter);
 
     // Prepare partitions
-    var currentQuarter = YearQuarter.current(LocalDateTime.now());
+    var currentDate = LocalDateTime.ofInstant(now,  ZoneId.systemDefault());
+    var currentQuarter = YearQuarter.current(currentDate);
     var previousQuarter = currentQuarter.getValue() == 1 ? YearQuarter.fromValue(4) : YearQuarter.fromValue(currentQuarter.getValue() - 1);
-    var nextQuarter = YearQuarter.next(LocalDateTime.now());
-    var yearForPreviousQuarter = currentQuarter.getValue() > previousQuarter.getValue() ? LocalDateTime.now().getYear() : LocalDateTime.now().getYear() - 1;
-    var yearForNextQuarter = currentQuarter.getValue() < nextQuarter.getValue() ? LocalDateTime.now().getYear() : LocalDateTime.now().getYear() + 1;
+    var nextQuarter = YearQuarter.next(currentDate);
+    var yearForPreviousQuarter = currentQuarter.getValue() > previousQuarter.getValue() ? currentDate.getYear() : currentDate.getYear() - 1;
+    var yearForNextQuarter = currentQuarter.getValue() < nextQuarter.getValue() ? currentDate.getYear() : currentDate.getYear() + 1;
 
     var tableNames = new LinkedList<>(resourceToDaoMap.values().stream().map(InventoryEventDaoImpl::tableName).toList());
     tableNames.add(marcAuditDao.tableName(SourceRecordType.MARC_BIB));

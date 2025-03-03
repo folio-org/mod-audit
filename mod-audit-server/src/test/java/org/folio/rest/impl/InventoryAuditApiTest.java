@@ -54,6 +54,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private static final String INVENTORY_INSTANCE_AUDIT_PATH = "/audit-data/inventory/instance/";
   private static final String INVENTORY_HOLDINGS_AUDIT_PATH = "/audit-data/inventory/holdings/";
   private static final String INVENTORY_ITEM_AUDIT_PATH = "/audit-data/inventory/item/";
+  private static final Instant EVENT_DATE = Instant.parse("2025-02-15T13:07:10Z");
 
   @InjectMocks
   InstanceEventDao instanceEventDao;
@@ -69,7 +70,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private Map<InventoryResourceType, InventoryEventDaoImpl> resourceToDaoMap;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     resourceToDaoMap = new EnumMap<>(InventoryResourceType.class);
     resourceToDaoMap.put(InventoryResourceType.INSTANCE, instanceEventDao);
     resourceToDaoMap.put(InventoryResourceType.HOLDINGS, holdingsEventDao);
@@ -87,7 +88,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
     var inventoryAuditEntity = new InventoryAuditEntity(
       UUID.randomUUID(),
-      Timestamp.from(Instant.now()),
+      Timestamp.from(EVENT_DATE),
       UUID.fromString(entityId),
       "CREATE",
       UUID.randomUUID(),
@@ -122,14 +123,14 @@ public class InventoryAuditApiTest extends ApiTestBase {
     var entityId = UUID.randomUUID().toString();
     settingDao.update(settingEntity.getId(), settingEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
-    // Create InventoryAuditEntity entities with a year date difference
+    // Create InventoryAuditEntity entities with a day date difference
     for (int i = 0; i < 5; i++) {
       var changeRecordDto = new ChangeRecordDto();
       changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "id", "id", "old", "Test Product " + i)));
 
       var inventoryAuditEntity = new InventoryAuditEntity(
         UUID.randomUUID(),
-        Timestamp.from(Instant.now().plusSeconds(2628000L * i)), // 1 month difference
+        Timestamp.from(EVENT_DATE.plusSeconds(86400L * i)), // 1 day difference
         UUID.fromString(entityId),
         "CREATE",
         UUID.randomUUID(),
