@@ -117,7 +117,8 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
       .mapEmpty();
   }
 
-  private String tableName() {
+  @Override
+  public String tableName() {
     return INVENTORY_AUDIT_TABLE.formatted(resourceType().getType());
   }
 
