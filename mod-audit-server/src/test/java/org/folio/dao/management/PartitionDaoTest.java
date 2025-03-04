@@ -5,9 +5,11 @@ import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
@@ -45,7 +47,7 @@ class PartitionDaoTest {
 
   @BeforeEach
   void setUp() {
-    when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
+    lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
   }
 
   @Test
@@ -74,6 +76,15 @@ class PartitionDaoTest {
     partitionDao.deleteSubPartitions(TENANT_ID, List.of(subPartition))
       .onComplete(ctx.succeeding(result -> {
         verify(postgresClient, times(1)).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldHandleNullSubPartitionsOnDelete(VertxTestContext ctx) {
+    partitionDao.deleteSubPartitions(TENANT_ID, null)
+      .onComplete(ctx.succeeding(result -> {
+        verifyNoInteractions(postgresClient);
         ctx.completeNow();
       }));
   }
