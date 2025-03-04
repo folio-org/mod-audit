@@ -8,6 +8,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.services.management.DatabaseSubPartition;
@@ -51,6 +52,9 @@ public class PartitionDao {
   }
 
   public Future<Void> deleteSubPartitions(String tenantId, List<DatabaseSubPartition> subPartitions) {
+    if (CollectionUtils.isEmpty(subPartitions)) {
+      return Future.succeededFuture();
+    }
     LOGGER.debug("deleteSubPartitions:: tenantId: '{}', subPartitions: [{}]", tenantId, subPartitions);
     var schema = convertToPsqlStandard(tenantId);
     var subPartitionsString = subPartitions.stream()
