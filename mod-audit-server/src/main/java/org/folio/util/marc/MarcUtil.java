@@ -122,6 +122,22 @@ public class MarcUtil {
     return compareParsedRecords(oldFields, newFields);
   }
 
+  /**
+   * Generates a {@link ChangeRecordDto} representing the differences in a given parsed record
+   * based on the provided change type.
+   *
+   * <p>This method processes the parsed record by flattening its structure and creating a list of
+   * {@link FieldChangeDto} objects for each field. If a field's value is a list, it iterates through
+   * the list and creates individual changes for each element. Otherwise, it directly creates a
+   * change for the field value. The resulting changes are of the specified {@link ChangeType}.
+   *
+   * <p>The method uses the flattened structure of the record to create changes for both individual
+   * values and collections, depending on the structure of the input map.
+   *
+   * @param parsedRecord the map representing the parsed record to process
+   * @param type the {@link ChangeType} indicating the type of change (e.g., ADDED, REMOVED)
+   * @return a {@link ChangeRecordDto} containing the list of field changes, with no repeatable changes
+   */
   private static ChangeRecordDto getDifference(Map<String, Object> parsedRecord, ChangeType type) {
     var changes = new ArrayList<FieldChangeDto>();
     var content = flattenFields(parsedRecord);
@@ -135,6 +151,26 @@ public class MarcUtil {
     return new ChangeRecordDto(changes, Collections.emptyList());
   }
 
+  /**
+   * Compares two given maps representing parsed records and identifies the changes between them.
+   *
+   * <p>This method computes the differences between the two maps (`oldMap` and `newMap`)
+   * and categorizes the changes into four categories:
+   * <ul>
+   *   <li>Added fields: Fields that exist in the `newMap` but not in the `oldMap`.</li>
+   *   <li>Removed fields: Fields that exist in the `oldMap` but not in the `newMap`.</li>
+   *   <li>Modified fields: Fields that exist in both maps but have different values.</li>
+   *   <li>Repeatable fields: Collections (e.g., lists) that were modified, tracked as repeatable changes.</li>
+   * </ul>
+   *
+   * <p>The method returns a {@link ChangeRecordDto} containing the categorized changes, including both
+   * individual field changes and repeatable field changes.
+   *
+   * @param oldMap the map representing the original parsed record (state before changes)
+   * @param newMap the map representing the updated parsed record (state after changes)
+   * @return a {@link ChangeRecordDto} consisting of field changes (added, removed, modified) and
+   *         repeatable collection changes
+   */
   private static ChangeRecordDto compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
     List<FieldChangeDto> added = new ArrayList<>();
     List<FieldChangeDto> removed = new ArrayList<>();
