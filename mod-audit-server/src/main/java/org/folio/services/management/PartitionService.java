@@ -49,17 +49,20 @@ public class PartitionService {
       });
   }
 
-  private Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> subPartitions) {
+  private Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> existingSubPartitions) {
     var currentQuarter = YearQuarter.current(now);
     var nextQuarter = YearQuarter.next(now);
     var year = currentQuarter.getValue() < nextQuarter.getValue() ? now.getYear() : now.getYear() + 1;
 
     var inventoryTableNames = inventoryTableNames();
     var authorityTableNames = authorityTableNames();
+    if (existingSubPartitions == null) {
+      existingSubPartitions = new LinkedList<>();
+    }
 
     return Future.all(
-      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, nextQuarter, inventoryTableNames, subPartitions),
-      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, nextQuarter, authorityTableNames, subPartitions)
+      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, nextQuarter, inventoryTableNames, existingSubPartitions),
+      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, nextQuarter, authorityTableNames, existingSubPartitions)
     ).mapEmpty();
   }
 
@@ -67,7 +70,7 @@ public class PartitionService {
    * Verify that feature is enabled for tenant and create sub partitions for tables which doesn't have them for the next quarter
    * */
   private Future<Void> createSubPartitionsForSetting(String tenantId, Setting setting, int year, YearQuarter nextQuarter,
-                                                     List<String> tableNames, List<DatabaseSubPartition> subPartitions) {
+                                                     List<String> tableNames, List<DatabaseSubPartition> existingSubPartitions) {
     return configurationService.getSetting(setting, tenantId)
       .compose(settingValue -> {
         if (settingValue == null || !((boolean) settingValue.getValue())) {
@@ -77,7 +80,7 @@ public class PartitionService {
         }
 
         var tableNamesWithoutSubPartitions = tableNames.stream()
-          .filter(tableName -> subPartitions.stream()
+          .filter(tableName -> existingSubPartitions.stream()
             .noneMatch(subPartition -> subPartition.getTable().equals(tableName)))
           .toList();
 
