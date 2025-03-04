@@ -9,6 +9,7 @@ import org.folio.HttpStatus;
 import org.folio.dao.configuration.SettingDao;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
+import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +43,7 @@ public class MarcAuditApiTest extends ApiTestBase {
   private static final String MARC_AUTHORITY_PATH = "/audit-data/marc/authority/";
   private static final String DIFF = """
     {
-        "removed": [{"field": "019", "value": "  $a1222786121"}],
-        "modified": [{"field": "245", "newValue": "10$aUpdated", "oldValue": "10$Old."}]
+        "fieldChanges": [{"fullPath": "019", "newValue": "01016cam a2200325Mu 4500", "oldValue": "00962cam a2200301Mu 4500", "fieldName": "LDR", "changeType": "MODIFIED"}]
     }
     """;
   @InjectMocks
@@ -64,7 +64,7 @@ public class MarcAuditApiTest extends ApiTestBase {
       "origin",
       "CREATE",
       UUID.randomUUID().toString(),
-      new JsonObject(DIFF).getMap()
+      new JsonObject(DIFF).mapTo(ChangeRecordDto.class)
     );
 
     marcAuditDao.save(entity, recordType, TENANT_ID).toCompletionStage().toCompletableFuture().get();

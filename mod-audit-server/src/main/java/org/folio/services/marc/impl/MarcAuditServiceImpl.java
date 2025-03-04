@@ -3,7 +3,6 @@ package org.folio.services.marc.impl;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.sql.Timestamp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
@@ -18,6 +17,7 @@ import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -69,7 +69,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
         event.getEventId());
       return handleFailures(e, event.getEventId());
     }
-    if (entity.diff() == null || entity.diff().isEmpty()) {
+    if (isDiffEmpty(entity)) {
       LOGGER.debug("save:: No changes detected, skipping save record '{}' and tenantId='{}'",
         entity.entityId(), tenantId);
       return Future.succeededFuture();
@@ -126,5 +126,14 @@ public class MarcAuditServiceImpl implements MarcAuditService {
     var setting = SourceRecordType.MARC_BIB.equals(type) ? Setting.INVENTORY_RECORDS_PAGE_SIZE : Setting.AUTHORITY_RECORDS_PAGE_SIZE;
     return configurationService.getSetting(setting, tenantId)
       .map(result -> (int) result.getValue());
+  }
+
+  private boolean isDiffEmpty(MarcAuditEntity entity) {
+    if (entity == null || entity.diff() == null) {
+      return true;
+    }
+    var diff = entity.diff();
+    return (diff.getFieldChanges() == null || diff.getFieldChanges().isEmpty()) &&
+      (diff.getCollectionChanges() == null || diff.getCollectionChanges().isEmpty());
   }
 }
