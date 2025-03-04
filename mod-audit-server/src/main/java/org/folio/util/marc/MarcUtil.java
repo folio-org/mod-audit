@@ -249,7 +249,7 @@ public class MarcUtil {
       var subfields = (List<Map<String, Object>>) fieldData.get(SUBFIELDS_KEY);
       var subfieldsString = subfields.stream()
         .flatMap(subObj -> subObj.entrySet().stream()
-          .map(e -> "$" + e.getKey() + " " + e.getValue()))
+          .map(e -> " $" + e.getKey() + " " + e.getValue()))
         .collect(Collectors.joining());
       return ind1 + ind2 + subfieldsString;
     }

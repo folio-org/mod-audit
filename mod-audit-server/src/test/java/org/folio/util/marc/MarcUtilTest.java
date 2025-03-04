@@ -35,7 +35,7 @@ public class MarcUtilTest {
   @Test
   void testMapToEntity_SourceRecordUpdated_MarcBib() {
     var event = updateSourceRecordDomainEvent();
-    var prefix = "10$a ";
+    var prefix = "10 $a ";
     MarcAuditEntity entity = MarcUtil.mapToEntity(event);
 
     assertNotNull(entity);
