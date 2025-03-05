@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,8 @@ public class MarcUtil {
   private static final String CREATED = "CREATED";
   private static final String UPDATED = "UPDATED";
   private static final String DELETED = "DELETED";
+  private static final String SPACE_DELIMETER = " ";
+  private static final String SUBFIELD_DELIMITER = " $";
 
   /**
    * Maps a {@link SourceRecordDomainEvent} to a {@link MarcAuditEntity}.
@@ -135,19 +139,13 @@ public class MarcUtil {
    * values and collections, depending on the structure of the input map.
    *
    * @param parsedRecord the map representing the parsed record to process
-   * @param type the {@link ChangeType} indicating the type of change (e.g., ADDED, REMOVED)
+   * @param type         the {@link ChangeType} indicating the type of change (e.g., ADDED, REMOVED)
    * @return a {@link ChangeRecordDto} containing the list of field changes, with no repeatable changes
    */
   private static ChangeRecordDto getDifference(Map<String, Object> parsedRecord, ChangeType type) {
     var changes = new ArrayList<FieldChangeDto>();
     var content = flattenFields(parsedRecord);
-    content.forEach((key, value) -> {
-      if (value instanceof List<?>) {
-        ((List<?>) value).forEach(v -> addChange(changes, type, key, v));
-      } else {
-        addChange(changes, type, key, value);
-      }
-    });
+    content.forEach((key, value) -> addChangesFromValue(value, key, type, changes));
     return new ChangeRecordDto(changes, Collections.emptyList());
   }
 
@@ -169,7 +167,7 @@ public class MarcUtil {
    * @param oldMap the map representing the original parsed record (state before changes)
    * @param newMap the map representing the updated parsed record (state after changes)
    * @return a {@link ChangeRecordDto} consisting of field changes (added, removed, modified) and
-   *         repeatable collection changes
+   * repeatable collection changes
    */
   private static ChangeRecordDto compareParsedRecords(Map<String, Object> oldMap, Map<String, Object> newMap) {
     List<FieldChangeDto> added = new ArrayList<>();
@@ -223,11 +221,7 @@ public class MarcUtil {
     var target = ChangeType.ADDED.equals(type) ? secondMap : firstMap;
     source.forEach((key, value) -> {
       if (!target.containsKey(key)) {
-        if (value instanceof List<?>) {
-          ((List<?>) value).forEach(v -> addChange(changes, type, key, v));
-        } else {
-          addChange(changes, type, key, value);
-        }
+        addChangesFromValue(value, key, type, changes);
       }
     });
   }
@@ -280,12 +274,12 @@ public class MarcUtil {
   private static String formatField(Object value) {
     if (value instanceof Map<?, ?> map && map.containsKey(SUBFIELDS_KEY)) {
       var fieldData = (Map<String, Object>) map;
-      var ind1 = (String) fieldData.getOrDefault("ind1", " ");
-      var ind2 = (String) fieldData.getOrDefault("ind2", " ");
+      var ind1 = (String) fieldData.getOrDefault("ind1", SPACE_DELIMETER);
+      var ind2 = (String) fieldData.getOrDefault("ind2", SPACE_DELIMETER);
       var subfields = (List<Map<String, Object>>) fieldData.get(SUBFIELDS_KEY);
       var subfieldsString = subfields.stream()
         .flatMap(subObj -> subObj.entrySet().stream()
-          .map(e -> " $" + e.getKey() + " " + e.getValue()))
+          .map(e -> SUBFIELD_DELIMITER + e.getKey() + SPACE_DELIMETER + e.getValue()))
         .collect(Collectors.joining());
       return ind1 + ind2 + subfieldsString;
     }
@@ -304,8 +298,7 @@ public class MarcUtil {
    * @param changes    A list of {@link FieldChangeDto} to track modifications to single field values
    *                   (e.g., direct changes in non-collection fields).
    */
-
-  private static void getModifiedFieldMap(
+  private static void populateChanges(
     String key,
     Object oldValue,
     Object newValue,
@@ -315,50 +308,32 @@ public class MarcUtil {
     var oldList = convertToList(oldValue);
     var newList = convertToList(newValue);
 
-    var oldSet = new HashSet<>(oldList);
-    var newSet = new HashSet<>(newList);
+    var removedSet = new HashSet<>(oldList);
+    var addedSet = new HashSet<>(newList);
 
-    var removedSet = new HashSet<>(oldSet);
-    var addedSet = new HashSet<>(newSet);
+    newList.forEach(removedSet::remove);
+    oldList.forEach(addedSet::remove);
 
-    removedSet.removeAll(newSet);
-    addedSet.removeAll(oldSet);
+    //Case 1: No changes detected
+    if (removedSet.isEmpty() && addedSet.isEmpty()) return;
 
-    // Case: Single field modified
-    if (isSingleValueChange(oldList, newList)) {
-      var singleOld = oldList.get(0);
-      var singleNew = newList.get(0);
-      if (!Objects.equals(singleOld, singleNew)) {
-        changes.add(FieldChangeDto.modified(key, key, singleOld, singleNew));
-      }
+    if (isSingleValueChange(oldList, newList) &&
+      !Objects.equals(oldList.get(0), newList.get(0))) {
+      changes.add(FieldChangeDto.modified(key, key, oldList.get(0), newList.get(0)));
       return;
     }
-    // Case: No changes at all
-    if (removedSet.isEmpty() && addedSet.isEmpty()) {
+
+    //Case 2: Only addition or removal changes detected
+    if (removedSet.isEmpty() || addedSet.isEmpty()) {
+      var targetSet = removedSet.isEmpty() ? addedSet : removedSet;
+      Function<Object, CollectionItemChangeDto> mapper = removedSet.isEmpty()
+        ? CollectionItemChangeDto::added
+        : CollectionItemChangeDto::removed;
+      addRepeatableChange(key, targetSet, mapper, repeatable);
       return;
     }
-    // Case: Only additions
-    if (removedSet.isEmpty()) {
-      repeatable.add(new CollectionChangeDto(
-        key,
-        addedSet.stream()
-          .map(CollectionItemChangeDto::added)
-          .toList()
-      ));
-      return;
-    }
-    // Case: Only removals
-    if (addedSet.isEmpty()) {
-      repeatable.add(new CollectionChangeDto(
-        key,
-        removedSet.stream()
-          .map(CollectionItemChangeDto::removed)
-          .toList()
-      ));
-      return;
-    }
-    // Case: Mixed changes (both added and removed)
-    List<CollectionItemChangeDto> itemChanges = new ArrayList<>();
+
+    var itemChanges = new ArrayList<CollectionItemChangeDto>();
     removedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.removed(item)));
     addedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.added(item)));
     repeatable.add(new CollectionChangeDto(key, itemChanges));
@@ -399,10 +374,56 @@ public class MarcUtil {
       if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
         var oldValue = oldMap.get(key);
         if (!Objects.equals(oldValue, newValue)) {
-          getModifiedFieldMap(key, oldValue, newValue, repeatable, modified);
+          populateChanges(key, oldValue, newValue, repeatable, modified);
         }
       }
     });
+  }
+
+  /**
+   * Adds a repeatable field change to the list of repeatable changes.
+   *
+   * <p>This method is used when either additions or removals are detected in repeatable MARC fields.
+   * It applies the provided mapper function (either {@link CollectionItemChangeDto#added} or {@link CollectionItemChangeDto#removed})
+   * to each element in the given set, creating a list of {@link CollectionItemChangeDto}.
+   *
+   * @param key          the MARC field tag (e.g., "020") that the changes apply to.
+   * @param targetSet    the set of values that were either added or removed.
+   * @param changeMapper a function defining how to map the items (either as additions or removals).
+   * @param repeatable   the list to which the created {@link CollectionChangeDto} is added.
+   */
+  private static void addRepeatableChange(
+    String key,
+    Set<Object> targetSet,
+    Function<Object, CollectionItemChangeDto> changeMapper,
+    List<CollectionChangeDto> repeatable
+  ) {
+    List<CollectionItemChangeDto> itemChanges = targetSet.stream()
+      .map(changeMapper)
+      .toList();
+    repeatable.add(new CollectionChangeDto(key, itemChanges));
+  }
+
+  /**
+   * Adds individual field changes to the provided list of {@link FieldChangeDto}.
+   *
+   * <p>This method checks if the provided value is a list (repeatable field) or a single value.
+   * For lists, it iterates over each element and creates separate change entries.
+   * For single values, it adds the change directly.
+   *
+   * <p>The change type (added or removed) determines whether the value is treated as an addition or removal.
+   *
+   * @param changes the list to which the created {@link FieldChangeDto} entries are added.
+   * @param type    the type of change ({@link ChangeType#ADDED} or {@link ChangeType#REMOVED}).
+   * @param key     the MARC field tag (e.g., "020") that the change applies to.
+   * @param value   the value or list of values representing the field content.
+   */
+  private static void addChangesFromValue(Object value, String key, ChangeType type, List<FieldChangeDto> changes) {
+    if (value instanceof List<?>) {
+      ((List<?>) value).forEach(v -> addChange(changes, type, key, v));
+    } else {
+      addChange(changes, type, key, value);
+    }
   }
 
   private static boolean isSingleValueChange(List<Object> oldList, List<Object> newList) {
