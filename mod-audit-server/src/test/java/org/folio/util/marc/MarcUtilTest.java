@@ -7,17 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.folio.utils.EntityUtils.FIELD_001;
 import static org.folio.utils.EntityUtils.VALUE_001;
 import static org.folio.utils.EntityUtils.updateSourceRecordDomainEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MarcUtilTest {
   private static final String FIELD_020 = "020";
+  private static final String FIELD_999 = "999";
 
   @Test
   void testMapToEntity_SourceRecordCreated_MarcBib() {
@@ -179,11 +182,11 @@ public class MarcUtilTest {
     var collectionChanges = diff.getCollectionChanges();
     assertEquals(1, collectionChanges.size());
 
-    var collectionChange = collectionChanges.get(0);
+    var collectionChange = collectionChanges.getFirst();
     assertEquals(FIELD_020, collectionChange.getCollectionName());
     assertEquals(1, collectionChange.getItemChanges().size());
 
-    var itemChange = collectionChange.getItemChanges().get(0);
+    var itemChange = collectionChange.getItemChanges().getFirst();
     assertEquals(ChangeType.ADDED, itemChange.getChangeType());
     assertNull(itemChange.getOldValue());
     assertEquals(newValue, itemChange.getNewValue());
@@ -213,11 +216,11 @@ public class MarcUtilTest {
     var collectionChanges = diff.getCollectionChanges();
     assertEquals(1, collectionChanges.size());
 
-    var collectionChange = collectionChanges.get(0);
+    var collectionChange = collectionChanges.getFirst();
     assertEquals(FIELD_020, collectionChange.getCollectionName());
     assertEquals(1, collectionChange.getItemChanges().size());
 
-    var itemChange = collectionChange.getItemChanges().get(0);
+    var itemChange = collectionChange.getItemChanges().getFirst();
     assertEquals(ChangeType.REMOVED, itemChange.getChangeType());
     assertEquals(toRemoveValue, itemChange.getOldValue());
     assertNull(itemChange.getNewValue());
@@ -251,7 +254,7 @@ public class MarcUtilTest {
     var collectionChanges = diff.getCollectionChanges();
     assertEquals(1, collectionChanges.size());
 
-    var collectionChange = collectionChanges.get(0);
+    var collectionChange = collectionChanges.getFirst();
     assertEquals(FIELD_020, collectionChange.getCollectionName());
 
     var itemChanges = collectionChange.getItemChanges();
@@ -272,4 +275,53 @@ public class MarcUtilTest {
     assertEquals("020_3", addedItem.getNewValue());
   }
 
+  @Test
+  void testMapToEntity_IgnoreUpdateIn999FF() {
+    // Arrange
+    List<Map<String, Object>> oldFields = List.of(
+      Map.of(FIELD_999, "ff$s%s$i%s".formatted(UUID.randomUUID().toString(), UUID.randomUUID().toString())),
+      Map.of(FIELD_999, "999_to_update"),
+      Map.of(FIELD_999, "999_to_remove"),
+      Map.of(FIELD_999, "999_to_stay")
+    );
+    List<Map<String, Object>> newFields = List.of(
+      Map.of(FIELD_999, "ff$s%s$i%s".formatted(UUID.randomUUID().toString(), UUID.randomUUID().toString())),
+      Map.of(FIELD_999, "999_updated"),
+      Map.of(FIELD_999, "999_to_stay")
+    );
+
+    var event = EntityUtils.createSourceRecordDomainEvent(
+      SourceRecordDomainEventType.SOURCE_RECORD_UPDATED,
+      oldFields,
+      newFields
+    );
+
+    // Act
+    var diff = MarcUtil.mapToEntity(event).diff();
+
+    // Assert
+    assertNotNull(diff);
+    assertTrue(diff.getFieldChanges().isEmpty());
+
+    var collectionChanges = diff.getCollectionChanges();
+    assertEquals(1, collectionChanges.size());
+
+    var collectionChange = collectionChanges.getFirst();
+    assertEquals(FIELD_999, collectionChange.getCollectionName());
+
+    var itemChanges = collectionChange.getItemChanges();
+    assertEquals(3, itemChanges.size());
+
+    var removedItems = itemChanges.stream()
+      .filter(item -> item.getChangeType() == ChangeType.REMOVED)
+      .toList();
+    assertFalse(removedItems.stream().anyMatch(item -> item.getOldValue().toString().startsWith("ff")));
+    assertEquals(2, removedItems.size());
+
+    var addedItem = itemChanges.stream()
+      .filter(item -> item.getChangeType() == ChangeType.ADDED)
+      .toList();
+    assertEquals(1, addedItem.size());
+    assertFalse(addedItem.getFirst().getNewValue().toString().startsWith("ff"));
+  }
 }

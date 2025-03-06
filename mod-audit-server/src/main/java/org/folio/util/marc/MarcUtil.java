@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 public class MarcUtil {
   private static final String LDR = "LDR";
   private static final String FIELD_005 = "005";
+  private static final String FIELD_999 = "999";
+  private static final String FF_IND = "ff";
   private static final String SUBFIELDS_KEY = "subfields";
   private static final String FIELDS_KEY = "fields";
   private static final String LEADER_KEY = "leader";
@@ -43,7 +45,7 @@ public class MarcUtil {
   private static final String CREATED = "CREATED";
   private static final String UPDATED = "UPDATED";
   private static final String DELETED = "DELETED";
-  private static final String SPACE_DELIMETER = " ";
+  private static final String SPACE_DELIMITER = " ";
   private static final String SUBFIELD_DELIMITER = " $";
 
   /**
@@ -274,12 +276,12 @@ public class MarcUtil {
   private static String formatField(Object value) {
     if (value instanceof Map<?, ?> map && map.containsKey(SUBFIELDS_KEY)) {
       var fieldData = (Map<String, Object>) map;
-      var ind1 = (String) fieldData.getOrDefault("ind1", SPACE_DELIMETER);
-      var ind2 = (String) fieldData.getOrDefault("ind2", SPACE_DELIMETER);
+      var ind1 = (String) fieldData.getOrDefault("ind1", SPACE_DELIMITER);
+      var ind2 = (String) fieldData.getOrDefault("ind2", SPACE_DELIMITER);
       var subfields = (List<Map<String, Object>>) fieldData.get(SUBFIELDS_KEY);
       var subfieldsString = subfields.stream()
         .flatMap(subObj -> subObj.entrySet().stream()
-          .map(e -> SUBFIELD_DELIMITER + e.getKey() + SPACE_DELIMETER + e.getValue()))
+          .map(e -> SUBFIELD_DELIMITER + e.getKey() + SPACE_DELIMITER + e.getValue()))
         .collect(Collectors.joining());
       return ind1 + ind2 + subfieldsString;
     }
@@ -353,7 +355,7 @@ public class MarcUtil {
    *
    *                   <p>For each key-value pair in {@code newMap}:
    *                   <ul>
-   *                     <li>The method skips processing if the key is equal to {@code FIELD_005}, as this field is excluded from modification checks.</li>
+   *                     <li>The method skips processing if the key is equal to {@code FIELD_005} or {@code FIELD_999} with indication {@code FF_IND}, as this field is excluded from modification checks.</li>
    *                     <li>If the key also exists in {@code oldMap}, the method further checks if the values in both maps are different using {@link Objects#equals}.</li>
    *                     <li>If a difference is detected, the method calls {@code getModifiedFieldMap} to handle the detected change.</li>
    *                   </ul>
@@ -373,7 +375,14 @@ public class MarcUtil {
     newMap.forEach((key, newValue) -> {
       if (!FIELD_005.equals(key) && oldMap.containsKey(key)) {
         var oldValue = oldMap.get(key);
-        if (!Objects.equals(oldValue, newValue)) {
+        if (FIELD_999.equals(key)) {
+          var filteredOld = filterNonFFValues(oldValue);
+          var filteredNew = filterNonFFValues(newValue);
+          if (filteredOld.isEmpty() && filteredNew.isEmpty()) return;
+          if (!Objects.equals(filteredOld, filteredNew)) {
+            populateChanges(key, filteredOld, filteredNew, repeatable, modified);
+          }
+        } else if (!Objects.equals(oldValue, newValue)) {
           populateChanges(key, oldValue, newValue, repeatable, modified);
         }
       }
@@ -426,6 +435,12 @@ public class MarcUtil {
     }
   }
 
+  private static List<Object> filterNonFFValues(Object value) {
+    return convertToList(value).stream()
+      .filter(v -> !(v instanceof String str && str.startsWith(FF_IND)))
+      .toList();
+  }
+
   private static boolean isSingleValueChange(List<Object> oldList, List<Object> newList) {
     return oldList.size() == 1 && newList.size() == 1;
   }
@@ -467,5 +482,4 @@ public class MarcUtil {
 
   private record RecordData(String recordId, String userId, String action) {
   }
-
 }
