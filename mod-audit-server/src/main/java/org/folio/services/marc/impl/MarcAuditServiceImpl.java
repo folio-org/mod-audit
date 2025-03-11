@@ -130,7 +130,11 @@ public class MarcAuditServiceImpl implements MarcAuditService {
   }
 
   private boolean isDiffEmpty(MarcAuditEntity entity) {
-    LOGGER.info("isDiffEmpty:: Checking if diff is empty for entity '{}'", Json.encode(entity));
+    try {
+      LOGGER.info("isDiffEmpty:: Checking if diff is empty for entity '{}'", Json.encode(entity.diff()));
+    } catch (Exception ignored) {
+    }
+    LOGGER.info("isDiffEmpty:: Checking if diff is empty for entity '{}'", Json.encode(entity.diff()));
     if (entity == null || entity.diff() == null) {
       return true;
     }
