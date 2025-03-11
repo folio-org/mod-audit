@@ -27,7 +27,7 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
 
   private static final String RECORD_TYPE = "folio.srs.recordType";
   private static final String EVENT_PAYLOAD_KEY = "eventPayload";
-  private static final String LOG_DATA = "Marc Record audit event with [eventId '%s', action '%s' and record type '%s']";
+  private static final String LOG_DATA = "Marc Record audit event with [eventId '%s', action '%s', record type '%s', tenantId '%s']";
 
   private final MarcAuditService marcAuditService;
   private final Vertx vertx;
@@ -51,7 +51,7 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
       result.complete(event.getEventId());
       return result.future();
     }
-    var log = String.format(LOG_DATA, event.getEventId(), event.getEventType(), event.getRecordType());
+    var log = String.format(LOG_DATA, event.getEventId(), event.getEventType(), event.getRecordType(), event.getEventMetadata().getTenantId());
     LOGGER.info("handle:: Starting processing of {}", log);
     marcAuditService.saveMarcDomainEvent(event)
       .onSuccess(ar -> {
