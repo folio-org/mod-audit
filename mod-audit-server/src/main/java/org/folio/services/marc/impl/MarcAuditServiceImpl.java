@@ -1,6 +1,7 @@
 package org.folio.services.marc.impl;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.Json;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.apache.logging.log4j.LogManager;
@@ -46,12 +47,12 @@ public class MarcAuditServiceImpl implements MarcAuditService {
   @Override
   public Future<RowSet<Row>> saveMarcDomainEvent(SourceRecordDomainEvent event) {
     var tenantId = event.getEventMetadata().getTenantId();
-    LOGGER.debug("saveMarcDomainEvent:: Trying to save SourceRecordDomainEvent tenantId: '{}', eventId: '{};", tenantId,
+    LOGGER.info("saveMarcDomainEvent:: Trying to save SourceRecordDomainEvent tenantId: '{}', eventId: '{};", tenantId,
       event.getEventId());
     return configurationService.getSetting(SETTINGS_MAP.get(event.getRecordType()), tenantId)
       .compose(setting -> {
         if (!((boolean) setting.getValue())) {
-          LOGGER.debug("saveMarcDomainEvent:: Audit is disabled for tenantId: '{}', recordType: '{}", tenantId,
+          LOGGER.info("saveMarcDomainEvent:: Audit is disabled for tenantId: '{}', recordType: '{}", tenantId,
             event.getRecordType());
           return Future.succeededFuture();
         }
@@ -70,7 +71,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
       return handleFailures(e, event.getEventId());
     }
     if (isDiffEmpty(entity)) {
-      LOGGER.debug("save:: No changes detected, skipping save record '{}' and tenantId='{}'",
+      LOGGER.info("save:: No changes detected, skipping save record '{}' and tenantId='{}'",
         entity.entityId(), tenantId);
       return Future.succeededFuture();
     }
@@ -83,7 +84,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
 
   @Override
   public Future<MarcAuditCollection> getMarcAuditRecords(String entityId, SourceRecordType recordType, String tenantId, String dateTime) {
-    LOGGER.debug("getMarcAuditRecords:: Trying to get records by tenantId: '{}', entityId: '{}', record type '{}';", tenantId, entityId, recordType);
+    LOGGER.info("getMarcAuditRecords:: Trying to get records by tenantId: '{}', entityId: '{}', record type '{}';", tenantId, entityId, recordType);
     UUID entityUUID;
     LocalDateTime eventDateTime;
     try {
@@ -103,7 +104,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
     return marcAuditDao.count(entityUUID, recordType, tenantId)
       .compose(count -> {
         if (count == 0) {
-          LOGGER.debug("fetchIfExists:: No records found for entityId: '{}'", entityUUID);
+          LOGGER.info("fetchIfExists:: No records found for entityId: '{}'", entityUUID);
           return Future.succeededFuture(new MarcAuditCollection().withTotalRecords(count));
         }
         return getMarcRecordPageSize(tenantId, recordType)
@@ -129,6 +130,7 @@ public class MarcAuditServiceImpl implements MarcAuditService {
   }
 
   private boolean isDiffEmpty(MarcAuditEntity entity) {
+    LOGGER.info("isDiffEmpty:: Checking if diff is empty for entity '{}'", Json.encode(entity));
     if (entity == null || entity.diff() == null) {
       return true;
     }

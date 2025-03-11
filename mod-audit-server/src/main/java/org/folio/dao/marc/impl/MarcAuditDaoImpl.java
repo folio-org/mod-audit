@@ -68,7 +68,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<RowSet<Row>> save(MarcAuditEntity entity, SourceRecordType recordType, String tenantId) {
-    LOGGER.debug("save:: Saving Marc domain event with id: '{}' and record id: '{}'", entity.entityId(), entity.entityId());
+    LOGGER.info("save:: Saving Marc domain event with id: '{}' and record id: '{}'", entity.entityId(), entity.entityId());
     var tableName = tableName(recordType);
     var query = INSERT_SQL.formatted(formatDBTableName(tenantId, tableName));
     return makeSaveCall(query, entity, tenantId)
@@ -78,7 +78,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<List<MarcAuditEntity>> get(UUID entityId, SourceRecordType recordType, String tenantId, LocalDateTime eventDate, int limit) {
-    LOGGER.debug("get:: Retrieve records by tenantId: '{}', entityId: '{}' and record type '{}'", tenantId, entityId, recordType);
+    LOGGER.info("get:: Retrieve records by tenantId: '{}', entityId: '{}' and record type '{}'", tenantId, entityId, recordType);
     var tableName = tableName(recordType);
     var query = SELECT_SQL.formatted(formatDBTableName(tenantId, tableName), eventDate == null ? "" : SEEK_BY_DATE_CLAUSE);
     var tuple = eventDate == null ? Tuple.of(entityId, limit) : Tuple.of(entityId, limit, eventDate);
@@ -88,7 +88,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<Integer> count(UUID entityId, SourceRecordType recordType, String tenantId) {
-    LOGGER.debug("count:: Retrieving total count by tenantId: '{}', entityId: '{}', recordType '{}'", tenantId, entityId, recordType);
+    LOGGER.info("count:: Retrieving total count by tenantId: '{}', entityId: '{}', recordType '{}'", tenantId, entityId, recordType);
     var tableName = tableName(recordType);
     var query = COUNT_SQL.formatted(formatDBTableName(tenantId, tableName));
     return pgClientFactory.createInstance(tenantId).selectSingle(query, Tuple.of(entityId))
@@ -97,7 +97,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
 
   @Override
   public Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId, SourceRecordType recordType) {
-    LOGGER.debug("deleteOlderThanDate:: Delete records by [tenantId: {}, eventDate: {}, recordType: {}]",
+    LOGGER.info("deleteOlderThanDate:: Delete records by [tenantId: {}, eventDate: {}, recordType: {}]",
       tenantId, eventDate, recordType);
     var table = formatDBTableName(tenantId, tableName(recordType));
     var query = DELETE_OLDER_THAN_DATE_SQL.formatted(table);
@@ -107,7 +107,7 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, MarcAuditEntity entity, String tenantId) {
-    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
+    LOGGER.info("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
       return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(
         entity.eventId(),
@@ -123,19 +123,19 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
   }
 
   private List<MarcAuditEntity> mapRowToAuditEntityList(RowSet<Row> rowSet) {
-    LOGGER.debug("mapRowToAuditEntityList:: Mapping row set to List of Marc Audit Entities");
+    LOGGER.info("mapRowToAuditEntityList:: Mapping row set to List of Marc Audit Entities");
     if (rowSet.rowCount() == 0) {
       return new LinkedList<>();
     }
     var entities = new LinkedList<MarcAuditEntity>();
     rowSet.iterator().forEachRemaining(row ->
       entities.add(mapRowToAuditEntity(row)));
-    LOGGER.debug("mapRowToAuditEntityList:: Mapped row set to List of Marc Audit Entities");
+    LOGGER.info("mapRowToAuditEntityList:: Mapped row set to List of Marc Audit Entities");
     return entities;
   }
 
   private MarcAuditEntity mapRowToAuditEntity(Row row) {
-    LOGGER.debug("mapRowToAuditEntity:: Mapping row to Marc Audit Entity");
+    LOGGER.info("mapRowToAuditEntity:: Mapping row to Marc Audit Entity");
     var diffJson = row.getJsonObject(DIFF_FIELD);
     return new MarcAuditEntity(
       row.getUUID(EVENT_ID_FIELD).toString(),
