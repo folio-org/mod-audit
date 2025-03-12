@@ -21,10 +21,10 @@
     <aspectj.version>1.9.22.1</aspectj.version>
     <raml-module-builder.version>35.4.0</raml-module-builder.version>
     <vertx.version>4.5.13</vertx.version>
-    <wiremock.version>2.25.1</wiremock.version>
-    <junit.jupiter.version>5.11.4</junit.jupiter.version>
-    <rest-assured.version>5.5.0</rest-assured.version>
-    <pubsub.client.version>2.13.0</pubsub.client.version>
+    <wiremock.version>3.0.1</wiremock.version>
+    <junit.jupiter.version>5.12.0</junit.jupiter.version>
+    <rest-assured.version>5.5.1</rest-assured.version>
+    <pubsub.client.version>2.17.0-SNAPSHOT</pubsub.client.version>
     <streamx.version>0.7.3</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,7 +45,7 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-bom</artifactId>
-        <version>2.24.0</version>
+        <version>2.24.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -169,7 +169,7 @@
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.2.0</version>
+            <version>1.3.2</version>
           </dependency>
           <dependency>
             <groupId>org.junit.jupiter</groupId>
