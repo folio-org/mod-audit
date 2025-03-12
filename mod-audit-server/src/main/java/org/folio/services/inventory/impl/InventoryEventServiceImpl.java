@@ -36,16 +36,16 @@ public class InventoryEventServiceImpl implements InventoryEventService {
   private final Function<InventoryEvent, InventoryAuditEntity> eventToEntityMapper;
   private final Function<List<InventoryAuditEntity>, InventoryAuditCollection> entitiesToCollectionMapper;
   private final ConfigurationService configurationService;
-  private final Map<InventoryResourceType, InventoryEventDao> inventoryEventDaos;
+  private final Map<InventoryResourceType, InventoryEventDao> inventoryEventDaoMap;
 
   public InventoryEventServiceImpl(Function<InventoryEvent, InventoryAuditEntity> eventToEntityMapper,
                                    Function<List<InventoryAuditEntity>, InventoryAuditCollection> entitiesToCollectionMapper,
                                    ConfigurationService configurationService,
-                                   List<InventoryEventDao> inventoryEventDao) {
+                                   List<InventoryEventDao> inventoryEventDaoList) {
     this.eventToEntityMapper = eventToEntityMapper;
     this.entitiesToCollectionMapper = entitiesToCollectionMapper;
     this.configurationService = configurationService;
-    this.inventoryEventDaos = inventoryEventDao.stream()
+    this.inventoryEventDaoMap = inventoryEventDaoList.stream()
       .collect(Collectors.toMap(InventoryEventDao::resourceType, Function.identity()));
   }
 
@@ -131,7 +131,7 @@ public class InventoryEventServiceImpl implements InventoryEventService {
 
   @Override
   public Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan) {
-    return Future.all(inventoryEventDaos.values().stream()
+    return Future.all(inventoryEventDaoMap.values().stream()
         .map(dao -> dao.deleteOlderThanDate(expireOlderThan, tenantId))
         .toList())
       .mapEmpty();
@@ -157,7 +157,7 @@ public class InventoryEventServiceImpl implements InventoryEventService {
   }
 
   private Future<InventoryEventDao> getDao(InventoryResourceType resourceType) {
-    var dao = inventoryEventDaos.get(resourceType);
+    var dao = inventoryEventDaoMap.get(resourceType);
     if (dao == null) {
       var message = DAO_NOT_FOUND_MESSAGE + resourceType;
       LOGGER.error(message);

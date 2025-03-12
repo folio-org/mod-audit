@@ -5,17 +5,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
-import java.sql.Timestamp;
-import java.time.ZoneId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.marc.MarcAuditDao;
 import org.folio.dao.marc.MarcAuditEntity;
+import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -143,11 +144,12 @@ public class MarcAuditDaoImpl implements MarcAuditDao {
       row.getString(ORIGIN_FIELD),
       row.getString(ACTION_FIELD),
       row.getUUID(USER_ID_FIELD).toString(),
-      diffJson == null ? null : diffJson.getMap()
+      diffJson == null ? null : diffJson.mapTo(ChangeRecordDto.class)
     );
   }
 
-  private String tableName(SourceRecordType recordType) {
+  @Override
+  public String tableName(SourceRecordType recordType) {
     return SourceRecordType.MARC_BIB.equals(recordType) ? MARC_BIB_TABLE : MARC_AUTHORITY_TABLE;
   }
 }

@@ -8,7 +8,11 @@ import io.restassured.http.Headers;
 import io.vertx.core.Vertx;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.EnumMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -22,11 +26,14 @@ import org.folio.dao.inventory.impl.HoldingsEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
 import org.folio.dao.inventory.impl.InventoryEventDaoImpl;
 import org.folio.dao.inventory.impl.ItemEventDao;
+import org.folio.dao.management.PartitionDao;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
 import org.folio.services.configuration.Setting;
 import org.folio.services.configuration.SettingGroup;
 import org.folio.services.configuration.SettingKey;
+import org.folio.services.management.DatabaseSubPartition;
+import org.folio.services.management.YearQuarter;
 import org.folio.util.PostgresClientFactory;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.util.marc.SourceRecordType;
@@ -57,6 +64,8 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
   MarcAuditDaoImpl marcAuditDao;
   @InjectMocks
   SettingDao settingDao;
+  @InjectMocks
+  PartitionDao partitionDao;
   @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
@@ -72,7 +81,7 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
 
   @SneakyThrows
   @Test
-  void shouldCleanupExpiredRecords() {
+  void shouldCleanupExpiredRecordsAndManagePartitions() {
     // Prepare retention settings
     setRetentionToOneDay(Setting.INVENTORY_RECORDS_RETENTION_PERIOD, SettingGroup.INVENTORY);
     setRetentionToOneDay(Setting.AUTHORITY_RECORDS_RETENTION_PERIOD, SettingGroup.AUTHORITY);
@@ -85,6 +94,24 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
     var twoDaysAfter = Timestamp.from(now.plusSeconds(2 * 24 * 60 * 60));
     createAuditRecords(entityId, oneDayBefore, oneDayAfter);
 
+    // Prepare partitions
+    var currentDate = LocalDateTime.ofInstant(now,  ZoneId.systemDefault());
+    var currentQuarter = YearQuarter.current(currentDate);
+    var previousQuarter = currentQuarter.getValue() == 1 ? YearQuarter.fromValue(4) : YearQuarter.fromValue(currentQuarter.getValue() - 1);
+    var nextQuarter = YearQuarter.next(currentDate);
+    var yearForPreviousQuarter = currentQuarter.getValue() > previousQuarter.getValue() ? currentDate.getYear() : currentDate.getYear() - 1;
+    var yearForNextQuarter = currentQuarter.getValue() < nextQuarter.getValue() ? currentDate.getYear() : currentDate.getYear() + 1;
+
+    var tableNames = new LinkedList<>(resourceToDaoMap.values().stream().map(InventoryEventDaoImpl::tableName).toList());
+    tableNames.add(marcAuditDao.tableName(SourceRecordType.MARC_BIB));
+    tableNames.add(marcAuditDao.tableName(SourceRecordType.MARC_AUTHORITY));
+
+    var emptySubPartitions = tableNames.stream()
+      .map(tableName -> new DatabaseSubPartition(tableName, 0, yearForPreviousQuarter, previousQuarter))
+      .toList();
+
+    partitionDao.createSubPartitions(TENANT_ID, emptySubPartitions).toCompletionStage().toCompletableFuture().get();
+
     // Trigger the cleanup
     given().headers(HEADERS)
       .post("/audit-data/cleanup/timer")
@@ -93,6 +120,9 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
 
     // Verify that one record for each type is deleted and one remains
     verifyRemainingRecords(entityId, twoDaysAfter);
+
+    // Verify partitions
+    verifyPartitions(tableNames, yearForPreviousQuarter, previousQuarter, yearForNextQuarter, nextQuarter);
   }
 
   @SneakyThrows
@@ -154,5 +184,24 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
   private void verifyRemainingMarcRecords(SourceRecordType recordType, UUID entityId, Timestamp twoDaysAfter) {
     var remainingRecords = marcAuditDao.get(entityId, recordType, TENANT_ID, twoDaysAfter.toLocalDateTime(), 10).toCompletionStage().toCompletableFuture().get();
     assertThat(remainingRecords).hasSize(1);
+  }
+
+  @SneakyThrows
+  private void verifyPartitions(List<String> tableNames, int yearForPreviousQuarter, YearQuarter previousQuarter, int yearForNextQuarter, YearQuarter nextQuarter) {
+    var remainingPartitions = partitionDao.getEmptySubPartitions(TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    for (String tableName : tableNames) {
+      // Verify that partitions for the previous year/quarter do not exist
+      assertThat(remainingPartitions).doesNotContain(
+        new DatabaseSubPartition(tableName, 0, yearForPreviousQuarter, previousQuarter)
+      );
+
+      // Verify that partitions for the next year/quarter exist
+      for (int i = 0; i < 8; i++) {
+        assertThat(remainingPartitions).contains(
+          new DatabaseSubPartition(tableName, i, yearForNextQuarter, nextQuarter)
+        );
+      }
+    }
   }
 }

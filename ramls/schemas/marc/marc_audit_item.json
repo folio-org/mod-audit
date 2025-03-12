@@ -16,6 +16,11 @@
       "format": "date-time",
       "type": "string"
     },
+    "eventTs": {
+      "description": "Event timestamp",
+      "type": "string",
+      "format": "utc-millisec"
+    },
     "origin": {
       "description": "Origin of the event",
       "type": "string"
