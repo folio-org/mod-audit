@@ -1,9 +1,29 @@
-## X.XX.X XXXX-XX-XX
+## 2.11.0 XXXX-XX-XX
 * [MODAUD-205](https://folio-org.atlassian.net/browse/MODAUD-205) - Consume domain event for MARC_BIB and MARC_AUTHORITY
 * [MODAUD-231](https://folio-org.atlassian.net/browse/MODAUD-231) - Handle inventory shadow copy events
 * [MODAUD-214](https://folio-org.atlassian.net/browse/MODAUD-214) - Rest Endpoint for history of MARC_BIB
 * [MODAUD-210](https://folio-org.atlassian.net/browse/MODAUD-210) - Create scheduled job to delete expired audit records
 * [MODAUD-235](https://folio-org.atlassian.net/browse/MODAUD-235) - Extend scheduled job with old empty partitions deletion, new partitions creation
+* [MODAUD-206](https://folio-org.atlassian.net/browse/MODAUD-206) - [Instance Audit] Consume domain event
+* [MODAUD-204](https://folio-org.atlassian.net/browse/MODAUD-204) - [Holdings Audit] Consume domain event
+* [MODAUD-203](https://folio-org.atlassian.net/browse/MODAUD-203) - [Item Audit] Consume domain event
+* [MODAUD-222](https://folio-org.atlassian.net/browse/MODAUD-222) - Support settings to configure number of cards in version history
+* [MODAUD-215](https://folio-org.atlassian.net/browse/MODAUD-215) - [Instance Audit] Rest Endpoint for history
+* [MODAUD-213](https://folio-org.atlassian.net/browse/MODAUD-213) - [Holding Audit] Rest Endpoint for history
+* [MODAUD-219](https://folio-org.atlassian.net/browse/MODAUD-219) - [Instance, Holdings, Item Audit] Calculate entity diff on event consumption
+* [MODAUD-212](https://folio-org.atlassian.net/browse/MODAUD-212) - [Item Audit] Rest Endpoint for history
+* [MODAUD-230](https://folio-org.atlassian.net/browse/MODAUD-230) - Issue with mod-audit module migration
+* [MODAUD-207](https://folio-org.atlassian.net/browse/MODAUD-207) - [Instance/Item/Holding/Bib/Authority Audit] Retention Period Configuration
+* [MODAUD-209](https://folio-org.atlassian.net/browse/MODAUD-209) - [Instance/Item/Holding/Bib/Authority Audit] Feature Flag Configuration
+* [MODAUD-234](https://folio-org.atlassian.net/browse/MODAUD-234) - Update request for configuration entries should be protected by separate permissions
+* [MODAUD-229](https://folio-org.atlassian.net/browse/MODAUD-229) - Support version counter in Version history pane
+* [MODAUD-225](https://folio-org.atlassian.net/browse/MODAUD-225) - Handle Repeatable Fields for MARC_BIB and MARC_AUTHORITY Audit Events
+* [MODAUD-236](https://folio-org.atlassian.net/browse/MODAUD-236) - Support version counter in Version history pane for MARC records
+* [MODAUD-228](https://folio-org.atlassian.net/browse/MODAUD-228) - "400" error is returned by GET and PUT for view and update number of cards in version history config on Eureka environments
+* [MODAUD-237](https://folio-org.atlassian.net/browse/MODAUD-237) - Sub-partitions tables have wrong date ranges
+* [FOLIO-4233](https://folio-org.atlassian.net/browse/FOLIO-4233) - Update to mod-audit Java 21
+* [MODAUD-238](https://folio-org.atlassian.net/browse/MODAUD-238) - Make adjustments for MARC repeatable fields diff calculation and format the values
+* [MODAUD-240](https://folio-org.atlassian.net/browse/MODAUD-240) - 999 subfield order is changed creating a log entry of "Updated" in MARC authority version history
 
 ## 2.10.2 2025-01-10
 
