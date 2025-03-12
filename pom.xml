@@ -24,7 +24,7 @@
     <wiremock.version>3.0.1</wiremock.version>
     <junit.jupiter.version>5.12.0</junit.jupiter.version>
     <rest-assured.version>5.5.1</rest-assured.version>
-    <pubsub.client.version>2.17.0-SNAPSHOT</pubsub.client.version>
+    <pubsub.client.version>2.16.0</pubsub.client.version>
     <streamx.version>0.7.3</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
