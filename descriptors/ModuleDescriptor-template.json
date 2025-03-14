@@ -20,7 +20,7 @@
     },
     {
       "id": "users",
-      "version": "16.1"
+      "version": "16.4"
     },
     {
       "id": "template-engine",
@@ -28,7 +28,7 @@
     },
     {
       "id": "inventory",
-      "version": "14.0"
+      "version": "14.1"
     },
     {
       "id": "cancellation-reason-storage",

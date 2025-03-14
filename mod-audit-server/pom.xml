@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>mod-audit-server</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>2.12.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <artifactId>mod-audit</artifactId>
     <groupId>org.folio</groupId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>2.12.0-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -20,15 +20,15 @@
 
   <properties>
     <json.path.version>2.9.0</json.path.version>
-    <mockito.version>5.14.2</mockito.version>
+    <mockito.version>5.16.0</mockito.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
-    <awaitility.version>4.2.0</awaitility.version>
+    <awaitility.version>4.3.0</awaitility.version>
     <argLine />
     <mapstruct.version>1.6.3</mapstruct.version>
-    <lombok.version>1.18.30</lombok.version>
+    <lombok.version>1.18.36</lombok.version>
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-    <assertj.version>3.27.2</assertj.version>
-    <javers.version>7.7.0</javers.version>
+    <assertj.version>3.27.3</assertj.version>
+    <javers.version>7.8.0</javers.version>
   </properties>
 
   <dependencies>
@@ -51,12 +51,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-kafka-wrapper</artifactId>
-      <version>3.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>3.7.1</version>
+      <version>3.3.0</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -118,7 +113,7 @@
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
-      <version>1.4.2</version>
+      <version>1.12.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -207,7 +202,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <id>add_generated_sources_folder</id>
@@ -241,7 +236,7 @@
       <plugin>
         <groupId>org.jsonschema2pojo</groupId>
         <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.2</version>
         <configuration>
           <includes>
             <include>*.json</include>
@@ -378,7 +373,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -421,7 +416,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.1</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
