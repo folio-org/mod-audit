@@ -21,6 +21,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
 
+import static org.folio.util.marc.SourceRecordType.MARC_HOLDING;
+
 @Component
 public class MarcRecordEventsHandler implements AsyncRecordHandler<String, String> {
   private static final Logger LOGGER = LogManager.getLogger();
@@ -28,6 +30,8 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
   private static final String RECORD_TYPE = "folio.srs.recordType";
   private static final String EVENT_PAYLOAD_KEY = "eventPayload";
   private static final String LOG_DATA = "Marc Record audit event with [eventId '%s', action '%s' and record type '%s']";
+  private static final String MARC_HOLDING_EVENT_RECEIVED_MSG =
+    "handle:: MARC_HOLDING record type does not require saving versions history. Skipping event processing [eventId: '{}']";
 
   private final MarcAuditService marcAuditService;
   private final Vertx vertx;
@@ -46,6 +50,10 @@ public class MarcRecordEventsHandler implements AsyncRecordHandler<String, Strin
       kafkaConsumerRecord.timestamp(),
       KafkaHeaderUtils.kafkaHeadersToMap(kafkaConsumerRecord.headers())
     );
+    if (MARC_HOLDING == event.getRecordType()) {
+      LOGGER.debug(MARC_HOLDING_EVENT_RECEIVED_MSG, event.getEventId());
+      return Future.succeededFuture(event.getEventId());
+    }
     if (SourceRecordDomainEventType.UNKNOWN == event.getEventType()) {
       LOGGER.debug("handle:: Event type not supported [eventId: {}]", event.getEventId());
       result.complete(event.getEventId());
