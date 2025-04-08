@@ -88,7 +88,7 @@ The information about `key` and `type` fields which are provided in the request 
 For example, to update the `enabled` configuration of the `audit.inventory` group, we can use the following API call:
 
 ```http
-GET /audit/config/groups/audit.inventory/settings/enabled
+PUT /audit/config/groups/audit.inventory/settings/enabled
 
 Content-Type: application/json
 x-okapi-tenant: [tenant]
