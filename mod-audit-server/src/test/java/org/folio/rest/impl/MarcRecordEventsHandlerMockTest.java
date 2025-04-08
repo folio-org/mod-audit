@@ -13,6 +13,7 @@ import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.SourceRecordDomainEvent;
+import org.folio.util.marc.SourceRecordType;
 import org.folio.verticle.marc.consumers.MarcRecordEventsHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import static org.folio.utils.EntityUtils.createSourceRecordDomainEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,6 +100,21 @@ public class MarcRecordEventsHandlerMockTest {
     result.onComplete(ar -> {
       assertTrue(ar.failed());
       verify(marcAuditService, times(1)).saveMarcDomainEvent(any());
+    });
+  }
+
+  @Test
+  void shouldNotSaveAuditDataIfEventRecordTypeIsMarcHolding() {
+    var event = createSourceRecordDomainEvent();
+    event.setRecordType(SourceRecordType.MARC_HOLDING);
+    var kafkaConsumerRecord = buildKafkaConsumerRecord(event);
+
+    var result = marcRecordEventsHandler.handle(kafkaConsumerRecord);
+
+    result.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      assertEquals(event.getEventId(), ar.result());
+      verify(marcAuditService, never()).saveMarcDomainEvent(any());
     });
   }
 
