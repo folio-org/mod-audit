@@ -8,9 +8,9 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 ## Table of contents
 
 - [Introduction](#introduction)
-- [Permissions](#permissions)
 - [API](#api)
   - [Configuration API](#configuration-api)
+    - [Permissions for working with audit configurations](#permissions-for-working-with-audit-configurations)
     - [Updating a configuration](#updating-a-configuration)
 - [Additional information](#additional-information)
   - [Other documentation](#other-documentation)
@@ -24,8 +24,6 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 The mod-audit module provides API to access and modify audit data.
 
-## Permissions
-
 ## API
 
 ### Configuration API
@@ -35,6 +33,17 @@ The mod-audit module provides API to access and modify audit data.
 | GET    | `/audit/config/groups`                                | Lists module's all available configuration groups |
 | GET    | `/audit/config/groups/{groupId}/settings`             | Retrieves configurations of specific group        |
 | PUT    | `/audit/config/groups/{groupId}/settings/{settingId}` | Updates a specific configuration of a group       |
+
+#### Permissions for working with audit configurations
+Audit configurations are grouped by certain identifiers and to view or update them the user must have the following special permissions:
+
+| Permission                                                    | DESCRIPTION                                                      |
+|:--------------------------------------------------------------|:-----------------------------------------------------------------|
+| `audit.config.groups.settings.{groupId}.collection.get`       | permission required for retrieving the configurations of a group |
+| `audit.config.groups.settings.{groupId}.{settingId}.item.put` | permission for updating a configuration of a group               |
+
+Here, `{groupId}` is the id of a configuration group that can have values like `audit.authority`, `audit.inventory` 
+and `{settingId}` is the id of a configuration to be updated that can have values like `enabled`, `records.page.size`, `records.retention.period` etc.
 
 Example response for the configuration groups API call `GET /audit/config/groups`:
 
@@ -102,6 +111,23 @@ x-okapi-token: [JWT_TOKEN]
     "groupId": "audit.inventory"
 }
 ```
+
+Only the `value` and `description` fields of a configuration can be updated using the above API call and the other fields should have the same
+values as they have in the response from the `GET /audit/config/groups/{groupId}/settings`. Providing the different values for those other fields will
+break the logic of configuration's usage.
+
+Here is an example of request body for updating the `records.retention.period` configuration which is of `INTEGER` type
+
+```json
+{
+  "key": "records.retention.period",
+  "value": 30,
+  "description": "Defines the retention period of audit records in days",
+  "type": "INTEGER",
+  "groupId": "audit.inventory"
+}
+``` 
+In general, the value for a configuration to be updated should be the valid value for the type of that configuration.
 
 ## Additional information
 
