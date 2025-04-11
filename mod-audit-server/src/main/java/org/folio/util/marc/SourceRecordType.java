@@ -12,12 +12,14 @@ import lombok.Getter;
  * Enum values:
  * - MARC_BIB: Represents a bibliographic record.
  * - MARC_AUTHORITY: Represents an authority record.
+ * - MARC_HOLDING: Represents a marc-holding record.
  */
 @Getter
 public enum SourceRecordType {
 
   MARC_BIB("MARC_BIB"),
-  MARC_AUTHORITY("MARC_AUTHORITY");
+  MARC_AUTHORITY("MARC_AUTHORITY"),
+  MARC_HOLDING("MARC_HOLDING");
 
   private final String value;
 

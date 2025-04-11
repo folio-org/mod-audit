@@ -1,4 +1,7 @@
-## 2.11.0 2025-03-XX
+## 2.12.0-SNAPSHOT 2025-mm-dd
+* [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
+
+## 2.11.0 2025-03-14
 * [MODAUD-205](https://folio-org.atlassian.net/browse/MODAUD-205) - Consume domain event for MARC_BIB and MARC_AUTHORITY
 * [MODAUD-231](https://folio-org.atlassian.net/browse/MODAUD-231) - Handle inventory shadow copy events
 * [MODAUD-214](https://folio-org.atlassian.net/browse/MODAUD-214) - Rest Endpoint for history of MARC_BIB
