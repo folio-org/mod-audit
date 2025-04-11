@@ -2,6 +2,6 @@
   "id": "records.page.size",
   "value": 50,
   "description": "Number of records to display per page",
-  "type": "NUMBER",
+  "type": "INTEGER",
   "groupId": "audit.inventory"
 }
