@@ -1,4 +1,4 @@
-## 2.12.0-SNAPSHOT 2025-mm-dd
+## 2.11.1 2025-04-15
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
 
 ## 2.11.0 2025-03-14
