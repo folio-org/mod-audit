@@ -24,6 +24,8 @@ public class LogRecordBuilderResolver {
   public static final String MANUAL_BLOCK_MODIFIED = "MANUAL_BLOCK_MODIFIED_EVENT";
   public static final String MANUAL_BLOCK_DELETED = "MANUAL_BLOCK_DELETED_EVENT";
   public static final String LOAN = "LOAN";
+  public static final String HELD_FOR_USE_AT_LOCATION = "HELD_FOR_USE_AT_LOCATION_EVENT";
+  public static final String PICKED_UP_FOR_USE_AT_LOCATION = "PICKED_UP_FOR_USE_AT_LOCATION_EVENT";
   public static final String NOTICE = "NOTICE";
   public static final String NOTICE_ERROR = "NOTICE_ERROR";
   public static final String FEE_FINE = "FEE_FINE";
@@ -51,6 +53,8 @@ public class LogRecordBuilderResolver {
     case MANUAL_BLOCK_DELETED:
       return new ManualBlockRecordBuilder(okapiHeaders, vertxContext);
     case LOAN:
+    case HELD_FOR_USE_AT_LOCATION:
+    case PICKED_UP_FOR_USE_AT_LOCATION:
       return new LoanRecordBuilder(okapiHeaders, vertxContext);
     case NOTICE:
       return new NoticeSuccessRecordBuilder(okapiHeaders, vertxContext);
