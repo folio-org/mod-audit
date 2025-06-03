@@ -36,8 +36,12 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           if (reply.succeeded()) {
             LOGGER.info("getAuditDataCirculationLogs:: Successfully retrieved audit data circulation logs");
             var results = reply.result().getResults();
-            results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
-              .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
+              for (LogRecord logRecord : results) {
+                  if (isNull(logRecord.getUserBarcode())) {
+                      logRecord.setUserBarcode(NO_BARCODE);
+                  }
+              }
+            LOGGER.info("getAuditDataCirculationLogs:: NO_BARCODE set for logs with null userBarcode");
             asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
               .respond200WithApplicationJson(new LogRecordCollection()
                 .withLogRecords(results)
