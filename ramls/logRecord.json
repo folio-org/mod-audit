@@ -11,6 +11,10 @@
       "description": "Event id",
       "$ref": "common/uuid.json"
     },
+    "rank": {
+      "description": "User barcode",
+      "type": "integer"
+    },
     "userBarcode": {
       "description": "User barcode",
       "type": "string"
