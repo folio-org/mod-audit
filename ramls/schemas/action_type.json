@@ -14,6 +14,8 @@
     "Checked in",
     "Checked out",
     "Checked out through override",
+    "Held for use at location",
+    "Picked up for use at location",
     "Claimed returned",
     "Closed loan",
     "Created",

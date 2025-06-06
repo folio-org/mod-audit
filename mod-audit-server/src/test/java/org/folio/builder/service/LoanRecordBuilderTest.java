@@ -3,6 +3,8 @@ package org.folio.builder.service;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.AGE_TO_LOST;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.ANONYMIZE;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.CHANGED_DUE_DATE;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.HELD_FOR_USE_AT_LOCATION;
+import static org.folio.rest.jaxrs.model.LogRecord.Action.PICKED_UP_FOR_USE_AT_LOCATION;
 import static org.folio.rest.jaxrs.model.LogRecord.Action.RENEWED;
 import static org.folio.util.Constants.SYSTEM;
 import static org.folio.util.LogEventPayloadField.ACTION;
@@ -12,6 +14,8 @@ import static org.folio.utils.TenantApiTestUtil.LOAN_CHANGED_DUE_DATE_PAYLOAD_JS
 import static org.folio.utils.TenantApiTestUtil.LOAN_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_WRONG_ACTION_JSON;
 import static org.folio.utils.TenantApiTestUtil.LOAN_EMPTY_ACTION_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_HELD_FOR_USE_AT_LOCATION_PAYLOAD_JSON;
+import static org.folio.utils.TenantApiTestUtil.LOAN_PICKED_UP_FOR_USE_AT_LOCATION_PAYLOAD_JSON;
 import static org.folio.utils.TenantApiTestUtil.getFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -24,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.LogRecord;
@@ -133,6 +136,55 @@ public class LoanRecordBuilderTest extends BuilderTestBase {
     assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
     assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
   }
+
+  @Test
+  void testHeldForUseAtLocation() throws Exception {
+    logger.info("===== Test log records builder: Held for use at location =====");
+
+    JsonObject payload = new JsonObject(getFile(LOAN_HELD_FOR_USE_AT_LOCATION_PAYLOAD_JSON));
+    List<LogRecord> records = loanRecordBuilder.buildLogRecord(payload).get();
+
+    assertThat(records.size(), equalTo(1));
+
+    LogRecord loanLogRecord = records.get(0);
+    assertThat(loanLogRecord.getItems().size(), equalTo(1));
+    assertThat(loanLogRecord.getUserBarcode(), equalTo("631888472578232"));
+    assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
+    assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
+    assertThat(loanLogRecord.getItems().get(0).getInstanceId(), equalTo("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"));
+    assertThat(loanLogRecord.getItems().get(0).getHoldingId(), equalTo("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
+    assertThat(loanLogRecord.getItems().get(0).getLoanId(), equalTo("336ec84c-27ed-483d-92e3-926fafa7ed1c"));
+    assertThat(loanLogRecord.getObject(), equalTo(LogRecord.Object.LOAN));
+    assertThat(loanLogRecord.getAction(), equalTo(HELD_FOR_USE_AT_LOCATION));
+    assertThat(loanLogRecord.getDate(), is(not(nullValue())));
+    assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
+    assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
+  }
+
+  @Test
+  void testPickedUpForUseAtLocation() throws Exception {
+    logger.info("===== Test log records builder: picked up for use at location =====");
+
+    JsonObject payload = new JsonObject(getFile(LOAN_PICKED_UP_FOR_USE_AT_LOCATION_PAYLOAD_JSON));
+    List<LogRecord> records = loanRecordBuilder.buildLogRecord(payload).get();
+
+    assertThat(records.size(), equalTo(1));
+
+    LogRecord loanLogRecord = records.get(0);
+    assertThat(loanLogRecord.getItems().size(), equalTo(1));
+    assertThat(loanLogRecord.getUserBarcode(), equalTo("631888472578232"));
+    assertThat(loanLogRecord.getItems().get(0).getItemBarcode(), equalTo("90000"));
+    assertThat(loanLogRecord.getItems().get(0).getItemId(), equalTo("100d10bf-2f06-4aa0-be15-0b95b2d9f9e3"));
+    assertThat(loanLogRecord.getItems().get(0).getInstanceId(), equalTo("5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"));
+    assertThat(loanLogRecord.getItems().get(0).getHoldingId(), equalTo("e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19"));
+    assertThat(loanLogRecord.getItems().get(0).getLoanId(), equalTo("336ec84c-27ed-483d-92e3-926fafa7ed1c"));
+    assertThat(loanLogRecord.getObject(), equalTo(LogRecord.Object.LOAN));
+    assertThat(loanLogRecord.getAction(), equalTo(PICKED_UP_FOR_USE_AT_LOCATION));
+    assertThat(loanLogRecord.getDate(), is(not(nullValue())));
+    assertThat(loanLogRecord.getServicePointId(), equalTo("c4c90014-c8c9-4ade-8f24-b5e313319f4b"));
+    assertThat(loanLogRecord.getSource(), equalTo("ADMINISTRATOR, DIKU"));
+  }
+
 
   @Test
   void testLoanWithWrongAction() {
