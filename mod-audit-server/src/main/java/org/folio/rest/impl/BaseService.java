@@ -1,5 +1,7 @@
 package org.folio.rest.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,7 +25,20 @@ public abstract class BaseService {
   PostgresClient getClient(Map<String, String> okapiHeaders, Context vertxContext) {
     LOGGER.debug("getClient:: Getting Postgres client");
     String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    return PostgresClient.getInstance(vertxContext.owner(), tenantId);
+    PostgresClient postgresClient = PostgresClient.getInstance(vertxContext.owner(), tenantId);
+
+    setExplainQueryThreshold(postgresClient);
+    return postgresClient;
+  }
+
+  private void setExplainQueryThreshold(PostgresClient postgresClient) {
+    try {
+      Field field = PostgresClient.class.getDeclaredField("explainQueryThreshold");
+      field.setAccessible(true);
+      field.setInt(null, 0); // null for static fields
+    } catch (Exception e) {
+      LOGGER.error("Failed to set explainQueryThreshold via reflection", e);
+    }
   }
 
   CompletableFuture<CQLWrapper> createCqlWrapper(String tableName, String query, int limit, int offset) {
