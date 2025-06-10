@@ -45,6 +45,8 @@ public class TenantApiTestUtil {
   public static final String FEE_FINE_PAYLOAD_JSON = "payloads/fee_fine_billed.json";
   public static final String FEE_FINE_VIRTUAL_ITEM_PAYLOAD_JSON = "payloads/fee_fine_billed_automated_virtual_item.json";
   public static final String LOAN_PAYLOAD_JSON = "payloads/loan.json";
+  public static final String LOAN_HELD_FOR_USE_AT_LOCATION_PAYLOAD_JSON = "payloads/loan_held_for_use_at_location.json";
+  public static final String LOAN_PICKED_UP_FOR_USE_AT_LOCATION_PAYLOAD_JSON = "payloads/loan_picked_up_for_use_at_location.json";
   public static final String LOAN_ANONYMIZE_PAYLOAD_JSON = "payloads/anonymize_loan.json";
   public static final String LOAN_AGE_TO_LOST_PAYLOAD_JSON = "payloads/loan_age_to_lost.json";
   public static final String LOAN_CHANGED_DUE_DATE_PAYLOAD_JSON = "payloads/loan_changed_due_date.json";
