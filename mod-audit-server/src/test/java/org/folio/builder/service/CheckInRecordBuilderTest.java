@@ -60,24 +60,28 @@ public class CheckInRecordBuilderTest extends BuilderTestBase {
     assertThat(records.get(LogRecord.Object.LOAN).get(LogRecord.Action.CLOSED_LOAN), hasSize(1));
     assertThat(records.get(LogRecord.Object.REQUEST).get(LogRecord.Action.REQUEST_STATUS_CHANGED), hasSize(1));
 
-    LogRecord itemCheckedInRecord = records.get(LogRecord.Object.N_A).get(LogRecord.Action.CHECKED_IN).get(0);
+    LogRecord itemCheckedInRecord = records.get(LogRecord.Object.N_A).get(LogRecord.Action.CHECKED_IN).getFirst();
     validateBaseContent(payload, itemCheckedInRecord);
     validateAdditionalContent(payload, itemCheckedInRecord);
     assertThat(itemCheckedInRecord.getDescription(), equalTo(format("Item status: %s to %s.",
         getProperty(payload, ITEM_STATUS_NAME), getProperty(payload, DESTINATION_SERVICE_POINT))));
 
-    LogRecord loanClosedRecord = records.get(LogRecord.Object.LOAN).get(LogRecord.Action.CLOSED_LOAN).get(0);
+    LogRecord loanClosedRecord = records.get(LogRecord.Object.LOAN).get(LogRecord.Action.CLOSED_LOAN).getFirst();
     validateAdditionalContent(payload, loanClosedRecord);
 
     if(!sample.equalsIgnoreCase(CHECK_IN_WITH_TIMEZONE_PAYLOAD_JSON)) {
+      var timezone = getProperty(payload, ZONE_ID) != null ? getProperty(payload, ZONE_ID) : ZoneOffset.UTC.getId();
+      var zoneId = ZoneId.of(timezone);
       assertThat(loanClosedRecord.getDescription(), equalTo(format("Item status: %s. Backdated to: %s. Overdue due date: %s.",
         getProperty(payload, ITEM_STATUS_NAME),
-        getFormattedDateTime(getDateInTenantTimeZone(getDateTimeProperty(payload, RETURN_DATE),
-          ZoneId.of(getProperty(payload, ZONE_ID) != null ? getProperty(payload, ZONE_ID) : ZoneOffset.UTC.getId())).toLocalDateTime()),
-        getFormattedDateTime(getDateTimeProperty(payload, DUE_DATE)))));
+        getFormattedDateTime(getDateInTenantTimeZone(getDateTimeProperty(payload, RETURN_DATE), zoneId)
+          .toLocalDateTime()),
+        getFormattedDateTime(getDateInTenantTimeZone(getDateTimeProperty(payload, DUE_DATE), zoneId)
+          .toLocalDateTime())
+      )));
     }
 
-    LogRecord requestStatusChangedRecord = records.get(LogRecord.Object.REQUEST).get(LogRecord.Action.REQUEST_STATUS_CHANGED).get(0);
+    LogRecord requestStatusChangedRecord = records.get(LogRecord.Object.REQUEST).get(LogRecord.Action.REQUEST_STATUS_CHANGED).getFirst();
     validateBaseContent(payload, requestStatusChangedRecord);
     validateRequestStatusChangedContent(payload, requestStatusChangedRecord);
 

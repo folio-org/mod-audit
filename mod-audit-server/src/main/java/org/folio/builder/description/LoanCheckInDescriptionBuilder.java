@@ -43,7 +43,7 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
     ZoneId zoneId = ZoneId.of(getProperty(logEventPayload, ZONE_ID) != null ? getProperty(logEventPayload, ZONE_ID) : ZoneOffset.UTC.getId());
     ZonedDateTime returnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, RETURN_DATE), zoneId);
     ZonedDateTime systemReturnDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, SYSTEM_RETURN_DATE), zoneId);
-    LocalDateTime dueDate = getDateTimeProperty(logEventPayload, DUE_DATE);
+    ZonedDateTime dueDate = getDateInTenantTimeZone(getDateTimeProperty(logEventPayload, DUE_DATE), zoneId);
 
     Comparator<ZonedDateTime> comparator = Comparator.comparing(
       zdt -> zdt.withSecond(0).withNano(0));
@@ -52,8 +52,8 @@ public class LoanCheckInDescriptionBuilder implements DescriptionBuilder {
       description.append(BACKDATED_TO_MSG).append(getFormattedDateTime(returnDate.toLocalDateTime()));
     }
 
-    if (dueDate.isAfter(returnDate.toLocalDateTime())) {
-      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate));
+    if (dueDate.isAfter(returnDate)) {
+      description.append(OVERDUE_DUE_DATE_MSG).append(getFormattedDateTime(dueDate.toLocalDateTime()));
     }
 
     description.append(DOT_MSG);
