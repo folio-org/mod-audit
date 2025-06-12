@@ -155,8 +155,7 @@
     },
     {
       "run": "before",
-      "snippetPath": "circulation_logs/createItemBarCodeScript.sql",
-      "fromModuleVersion": "mod-audit-2.11.0"
+      "snippetPath": "circulation_logs/createItemBarCodeScript.sql"
     }
   ]
 }
