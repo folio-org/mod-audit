@@ -63,8 +63,10 @@
         },
         {
           "fieldName": "itemBarcode",
-          "sqlExpression": "f_unaccent(jsonb -> 'items'->0->'itemBarcode')",
-          "sqlExpressionQuery": "f_unaccent($)"
+          "sqlExpression": "(jsonb->'items'->0->'itemBarcode')",
+          "sqlExpressionQuery": "$",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     }
