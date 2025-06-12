@@ -64,8 +64,8 @@
         {
           "fieldName": "itemBarcode",
           "tOps": "ADD",
-          "sqlExpression": "f_unaccent(concat_items_barcodes(jsonb->'items'))",
-          "sqlExpressionQuery": "f_unaccent(concat_items_barcodes($))",
+          "sqlExpression": "concat_items_barcodes(jsonb->'items')",
+          "sqlExpressionQuery": "$",
           "caseSensitive": false,
           "removeAccents": true
         }
