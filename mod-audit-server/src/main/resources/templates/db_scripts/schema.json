@@ -64,8 +64,8 @@
         {
           "fieldName": "itemBarcode",
           "tOps": "ADD",
-          "sqlExpression": "f_unaccent(jsonb->'items'->0->>'itemBarcode')",
-          "sqlExpressionQuery": "f_unaccent($)",
+          "sqlExpression": "f_unaccent(concat_items_barcodes(jsonb->'items'))",
+          "sqlExpressionQuery": "f_unaccent(concat_items_barcodes($))",
           "caseSensitive": false,
           "removeAccents": true
         }
@@ -151,6 +151,11 @@
     {
       "run": "after",
       "snippetPath": "acquisition/update_to_orders_storage_14.0.ftl",
+      "fromModuleVersion": "mod-audit-3.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "circulation_logs/createItemBarCodeScript.sql",
       "fromModuleVersion": "mod-audit-3.0.0"
     }
   ]
