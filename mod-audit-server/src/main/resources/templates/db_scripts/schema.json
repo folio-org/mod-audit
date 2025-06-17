@@ -153,7 +153,8 @@
     },
     {
       "run": "before",
-      "snippetPath": "circulation_logs/concat_items_barcodes_function.sql"
+      "snippetPath": "circulation_logs/concat_items_barcodes_function.sql",
+      "fromModuleVersion": "mod-audit-3.0.0"
     }
   ]
 }
