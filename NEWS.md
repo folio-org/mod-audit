@@ -1,5 +1,6 @@
 ## 3.0.0-SNAPSHOT 2025-mm-dd
 * [MODAUD-264](https://folio-org.atlassian.net/browse/MODAUD-264) - Respect tenant timezone when showing loan due date in log record
+* [MODAUD-252](https://folio-org.atlassian.net/browse/MODAUD-252) - Item barcode search performance with large circulation_logs dataset
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
