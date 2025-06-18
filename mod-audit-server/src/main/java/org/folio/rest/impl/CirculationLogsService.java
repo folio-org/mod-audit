@@ -6,7 +6,9 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
@@ -20,6 +22,7 @@ import org.folio.rest.jaxrs.resource.AuditDataCirculation;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import org.folio.rest.persist.interfaces.Results;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   private static final Logger LOGGER = LogManager.getLogger();
@@ -29,30 +32,30 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
   @Validate
   public void getAuditDataCirculationLogs(String query, int offset, int limit, String lang,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
     LOGGER.debug("getAuditDataCirculationLogs:: Getting audit data circulation logs");
-    createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
-      .thenAccept(cqlWrapper -> getClient(okapiHeaders, vertxContext)
-        .get(LOGS_TABLE_NAME, LogRecord.class, new String[] { "*" }, cqlWrapper, true, false, reply -> {
-          if (reply.succeeded()) {
-            LOGGER.info("getAuditDataCirculationLogs:: Successfully retrieved audit data circulation logs");
-            var results = reply.result().getResults();
-            results.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
-              .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
-            asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
-              .respond200WithApplicationJson(new LogRecordCollection()
-                .withLogRecords(results)
-                .withTotalRecords(reply.result().getResultInfo().getTotalRecords()))));
-          } else {
-            LOGGER.warn("Failed to retrieve audit data circulation logs: {}", reply.cause().getMessage());
-            asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
-              .respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), reply.cause().getLocalizedMessage()))));
-          }
-        }))
-      .exceptionally(throwable -> {
-        LOGGER.warn("Exception occurred while getting audit data circulation logs: {}", throwable.getLocalizedMessage());
-        asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse.
-          respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
-        return null;
-      });
+
+    CompletableFuture<Results<LogRecord>> logRecordResultFuture = createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
+      .thenCompose(cqlWrapper -> getClient(okapiHeaders, vertxContext)
+        .withReadTrans(conn -> conn.execute("SET LOCAL enable_indexscan = OFF; SET LOCAL enable_seqscan = OFF;")
+          .compose(rows -> conn.get(LOGS_TABLE_NAME, LogRecord.class, cqlWrapper, true))).toCompletionStage());
+
+    logRecordResultFuture.thenAccept(result -> {
+      LOGGER.info("getAuditDataCirculationLogs:: Successfully retrieved audit data circulation logs");
+
+      List<LogRecord> logRecordList = result.getResults();
+      logRecordList.stream().filter(logRecord -> isNull(logRecord.getUserBarcode()))
+        .forEach(logRecord -> logRecord.setUserBarcode(NO_BARCODE));
+
+      asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse
+        .respond200WithApplicationJson(new LogRecordCollection()
+          .withLogRecords(logRecordList)
+          .withTotalRecords(result.getResultInfo().getTotalRecords()))));
+    }).exceptionally(throwable -> {
+      LOGGER.warn("Exception occurred while getting audit data circulation logs: {}", throwable.getLocalizedMessage());
+      asyncResultHandler.handle(succeededFuture(GetAuditDataCirculationLogsResponse.
+        respond400WithApplicationJson(buildError(HTTP_BAD_REQUEST.toInt(), throwable.getLocalizedMessage()))));
+      return null;
+    });
   }
 }
