@@ -37,7 +37,7 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
 
     CompletableFuture<Results<LogRecord>> logRecordResultFuture = createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenCompose(cqlWrapper -> getClient(okapiHeaders, vertxContext)
-        .withReadTrans(conn -> conn.execute("SET LOCAL enable_indexscan = OFF; SET LOCAL enable_seqscan = OFF;")
+        .withReadTrans(conn -> conn.execute("SET LOCAL enable_indexscan = OFF;")
           .compose(rows -> conn.get(LOGS_TABLE_NAME, LogRecord.class, cqlWrapper, true))).toCompletionStage());
 
     logRecordResultFuture.thenAccept(result -> {
