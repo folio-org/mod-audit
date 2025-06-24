@@ -164,4 +164,11 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .statusCode(200)
       .assertThat().body("totalRecords", equalTo(expectedNumberOfRecords));
   }
+
+  @Test
+  void getCirculationAuditLogRecordsWithDisabledIndexScan() {
+    logger.info("Get circulation audit log records with disabled index scan");
+    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=326547658598) sortby date/sort.descending")
+      .then().log().all().statusCode(200);
+  }
 }

@@ -7,6 +7,7 @@ import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +20,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
 import org.folio.rest.jaxrs.resource.AuditDataCirculation;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.interfaces.Results;
 import org.z3950.zing.cql.CQLDefaultNodeVisitor;
 import org.z3950.zing.cql.CQLNode;
@@ -31,6 +33,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 
 public class CirculationLogsService extends BaseService implements AuditDataCirculation {
   private static final Logger LOGGER = LogManager.getLogger();
@@ -44,16 +48,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
 
     CompletableFuture<Results<LogRecord>> logRecordResultFuture = createCqlWrapper(LOGS_TABLE_NAME, query, limit, offset)
       .thenCompose(cqlWrapper -> getClient(okapiHeaders, vertxContext)
-        .withReadTrans(conn -> validateCqlForDisableIndexScan(query)
-          .compose(needsDisableIndexScan -> {
-            if (Boolean.TRUE.equals(needsDisableIndexScan)) {
-              LOGGER.info("getAuditDataCirculationLogs:: CQL query requires disabling index scan");
-              return conn.execute("SET LOCAL enable_indexscan = OFF;")
-                .compose(rows -> conn.get(LOGS_TABLE_NAME, LogRecord.class, cqlWrapper, true));
-            }
-            LOGGER.info("getAuditDataCirculationLogs:: CQL query does not require disabling index scan");
-            return conn.get(LOGS_TABLE_NAME, LogRecord.class, cqlWrapper, true);
-          }))
+        .withReadTrans(conn -> disableIndexScanIfNeeded(conn, query)
+          .compose(x -> conn.get(LOGS_TABLE_NAME, LogRecord.class, cqlWrapper, true)))
         .toCompletionStage());
 
     logRecordResultFuture.thenAccept(result -> {
@@ -76,31 +72,52 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
   }
 
   /**
+   * Disables index scan if needed based on CQL query validation.
+   *
+   * @param conn  The database connection
+   * @param query The CQL query to validate
+   * @return A Future that completes after setting the index scan configuration
+   */
+  private Future<RowSet<Row>> disableIndexScanIfNeeded(Conn conn, String query) {
+    Boolean needsDisableIndexScan = validateCqlForDisableIndexScan(query);
+    if (Boolean.TRUE.equals(needsDisableIndexScan)) {
+      LOGGER.info("disableIndexScanIfNeeded:: CQL query requires disabling index scan");
+      return conn.execute("SET LOCAL enable_indexscan = OFF;");
+    }
+    LOGGER.info("disableIndexScanIfNeeded:: CQL query does not require disabling index scan");
+    return Future.succeededFuture();
+  }
+
+  /**
    * Validates if the CQL query requires disabling index scan.
    *
    * @param cqlQuery The CQL query to validate.
    * @return A Future that completes with true if the query requires disabling index scan, false otherwise.
    */
-  public Future<Boolean> validateCqlForDisableIndexScan(String cqlQuery) {
-    return Future.succeededFuture(checkCqlFieldsAndSortConditions(cqlQuery, List.of("items"), List.of("description", "userBarcode"), List.of("date")));
+  public Boolean validateCqlForDisableIndexScan(String cqlQuery) {
+    return checkCqlFieldsAndSortConditions(cqlQuery, "items", List.of("description", "userBarcode"), "date");
   }
 
   /**
    * Checks if the CQL query contains specific fields and sort conditions.
    *
    * @param cqlQuery The CQL query to check.
-   * @param fieldNames The list of field names that must exist in the CQL query.
+   * @param fieldName The field name that must exist in the CQL query.
    * @param negativeFieldNames The list of field names that must not exist in the CQL query.
-   * @param sortFieldsNames The list of sort field names that must exist in the CQL query.
+   * @param sortFieldName The sort field name that must exist in the CQL query.
    * @return true if all conditions are met, false otherwise.
    */
-  public static Boolean checkCqlFieldsAndSortConditions(String cqlQuery, List<String> fieldNames, List<String> negativeFieldNames, List<String> sortFieldsNames) {
-    Boolean isFieldsNameExist = Boolean.FALSE;
+  public static Boolean checkCqlFieldsAndSortConditions(String cqlQuery, String fieldName, List<String> negativeFieldNames, String sortFieldName) {
+    if (cqlQuery == null) {
+      return Boolean.FALSE;
+    }
+
+    Boolean isFieldNameExist = Boolean.FALSE;
     Boolean isNegativeFieldsNameExist = Boolean.FALSE;
-    Boolean isSortFieldsNameExist = Boolean.FALSE;
+    Boolean isSortFieldNameExist = Boolean.FALSE;
 
     List<String> cqlFieldList = new ArrayList<>();
-    List<String> cqlSortModifiers = new ArrayList<>();
+    String cqlSortModifier;
     try {
       CQLParser parser = new CQLParser();
       CQLNode node = parser.parse(cqlQuery);
@@ -111,32 +128,34 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
         }
       });
 
-      if(node instanceof CQLSortNode cqlSortNode) {
-        cqlSortModifiers.addAll(cqlSortNode.getSortIndexes().stream().map(ModifierSet::getBase).toList());
-      }
+      cqlSortModifier = node instanceof CQLSortNode cqlSortNode ?
+        cqlSortNode.getSortIndexes().stream()
+          .findFirst()
+          .map(ModifierSet::getBase)
+          .orElse("") : "";
     } catch (Exception e) {
       LOGGER.debug("checkConditionExist:: Error parsing CQL cqlQuery: {}", e.getMessage());
       return Boolean.FALSE;
     }
 
-    // ✅ Check if all fieldNames exist in cqlFieldList
-    if (fieldNames == null || fieldNames.isEmpty() || cqlFieldList.containsAll(fieldNames)) {
-      isFieldsNameExist = Boolean.TRUE;
+    // ✅ Check if cqlFieldList equals to fieldName
+    if (fieldName == null || fieldName.isEmpty() || cqlFieldList.contains(fieldName)) {
+      isFieldNameExist = Boolean.TRUE;
     }
 
-    // ✅ Check if all sortFieldsNames exist in cqlSortModifiers
-   if (sortFieldsNames == null || sortFieldsNames.isEmpty() || cqlSortModifiers.containsAll(sortFieldsNames)) {
-      isSortFieldsNameExist = Boolean.TRUE;
+    // ✅ Check if cqlSortModifier equals to sortFieldName
+    if (sortFieldName == null || sortFieldName.isEmpty() || sortFieldName.equals(cqlSortModifier)) {
+      isSortFieldNameExist = Boolean.TRUE;
     }
 
     // ✅ Check if none of the negativeFieldNames exist in cqlFieldList
     boolean noneNegativeExist = negativeFieldNames == null || negativeFieldNames.isEmpty() ||
-                                negativeFieldNames.stream().noneMatch(cqlFieldList::contains);
+                                Collections.disjoint(negativeFieldNames, cqlFieldList);
     if (noneNegativeExist) {
       isNegativeFieldsNameExist = Boolean.TRUE;
     }
 
     // ✅ Final result: all 3 checks must be true
-    return isFieldsNameExist && isNegativeFieldsNameExist && isSortFieldsNameExist;
+    return isFieldNameExist && isNegativeFieldsNameExist && isSortFieldNameExist;
   }
 }
