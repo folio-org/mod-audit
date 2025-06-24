@@ -6,7 +6,6 @@ import static org.folio.HttpStatus.HTTP_BAD_REQUEST;
 import static org.folio.util.Constants.NO_BARCODE;
 import static org.folio.util.ErrorUtils.buildError;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.folio.rest.jaxrs.resource.AuditDataCirculation;
 import org.folio.rest.persist.interfaces.Results;
 import org.z3950.zing.cql.CQLDefaultNodeVisitor;
 import org.z3950.zing.cql.CQLNode;
-import org.z3950.zing.cql.CQLParseException;
 import org.z3950.zing.cql.CQLParser;
 import org.z3950.zing.cql.CQLSortNode;
 import org.z3950.zing.cql.CQLTermNode;
@@ -116,8 +114,9 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
       if(node instanceof CQLSortNode cqlSortNode) {
         cqlSortModifiers.addAll(cqlSortNode.getSortIndexes().stream().map(ModifierSet::getBase).toList());
       }
-    } catch (CQLParseException | IOException e) {
+    } catch (Exception e) {
       LOGGER.debug("checkConditionExist:: Error parsing CQL cqlQuery: {}", e.getMessage());
+      return Boolean.FALSE;
     }
 
     // ✅ Check if all fieldNames exist in cqlFieldList
