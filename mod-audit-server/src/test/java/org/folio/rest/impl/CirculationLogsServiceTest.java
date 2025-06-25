@@ -20,7 +20,7 @@ class CirculationLogsServiceTest {
 
   private static Stream<Arguments> getCQLAndFieldsData() {
     return Stream.of(
-      // Scenario 1: Simple query with only required field
+      // Scenario 1: Simple query with only required field and without sort modifier
       Arguments.of("(items=\"ITEM_BARCODE_256069\")", false),
 
       // Scenario 2: Query with missing required field
@@ -45,14 +45,14 @@ class CirculationLogsServiceTest {
       // Scenario 8: Complex query with multiple actions and valid sort
       Arguments.of("(items=\"ITEM_123\" and action==(\"Created\" or \"Updated\")) sortby date/sort.descending", true),
 
-      // Scenario 0: Query with date range, items, and multiple actions without sort
+      // Scenario 9: Query with date range, items, and multiple actions without sort
       Arguments.of(
         "(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"QQQ\" and action==(\"Changed due date\" or \"Billed\" or \"Send\" or \"Created\"))", false),
 
-      // Scenario 10: Query with single action sort fields
+      // Scenario 10: Query with single action and sort fields
       Arguments.of("(items=\"ITEM_BARCODE_256069\" and action==(\"Created\")) sortby date/sort.descending", true),
 
-      // Scenario 11: with date and items fields along with a valid sort condition
+      // Scenario 11: Query with date and items fields along with a valid sort condition
       Arguments.of("(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"ITEM_BARCODE_256069\") sortby date/sort.descending", true),
 
       // Scenario 12: Query with description and items fields along with a valid sort condition
