@@ -48,7 +48,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     logger.info("Get circulation audit log records: no filter");
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(26));
+      .assertThat().body("totalRecords", equalTo(29));
   }
 
   @Test
