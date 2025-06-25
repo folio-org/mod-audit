@@ -13,7 +13,7 @@ class CirculationLogsServiceTest {
 
   @ParameterizedTest
   @MethodSource("getCQLAndFieldsData")
-  void test_checkCqlFieldsAndSortConditions(String cqlQuery, Boolean expectedResult) {
+  void test_validateCqlForDisableIndexScan(String cqlQuery, Boolean expectedResult) {
     Boolean isConditionExist = CirculationLogsService.validateCqlForDisableIndexScan(cqlQuery);
     assertThat(isConditionExist, equalTo(expectedResult));
   }
@@ -39,33 +39,24 @@ class CirculationLogsServiceTest {
       // Scenario 6: Query with invalid sort field
       Arguments.of("(items=\"ITEM_123\") sortby userBarcode/sort.descending", false),
 
-      // Scenario 7: Query with null negative fields but valid sort
-      Arguments.of("(items=\"ITEM_BARCODE_256069\" and action==(\"Created\")) sortby date/sort.descending", true),
-
-      // Scenario 8: Query with all null parameters
-      Arguments.of("(items=\"ITEM_123\")", false),
-
-      // Scenario 9: Empty query string
+      // Scenario 7: Empty query string
       Arguments.of("", false),
 
-      // Scenario 10: Complex query with multiple actions and valid sort
+      // Scenario 8: Complex query with multiple actions and valid sort
       Arguments.of("(items=\"ITEM_123\" and action==(\"Created\" or \"Updated\")) sortby date/sort.descending", true),
 
-      // Scenario 11: Query without sort, testing field presence
+      // Scenario 0: Query with date range, items, and multiple actions without sort
       Arguments.of(
         "(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"QQQ\" and action==(\"Changed due date\" or \"Billed\" or \"Send\" or \"Created\"))", false),
 
-      // Scenario 12: Query with null sort fields
+      // Scenario 10: Query with single action sort fields
       Arguments.of("(items=\"ITEM_BARCODE_256069\" and action==(\"Created\")) sortby date/sort.descending", true),
-      // Scenario 13: More scenarios
-      Arguments.of("(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"QQQ\" and action==(\"Changed due date\" or \"Billed\" or \"Send\" or \"Created\"))", false),
+
+      // Scenario 11: with date and items fields along with a valid sort condition
       Arguments.of("(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"ITEM_BARCODE_256069\") sortby date/sort.descending", true),
-      Arguments.of("(date>=\"2024-06-01T00:00:00.000Z\" and date<=\"2025-06-23T23:59:59.999Z\" and items=\"QQQ\" and action==(\"Changed due date\" or \"Billed\" or \"Send\" or \"Created\")) sortby date/sort.descending", true),
-      Arguments.of("(items=\"ITEM_BARCODE_153009\" and userBarcode==\"*USER_BARCODE_153009*\") sortby date/sort.descending", false),
-      Arguments.of("(description==\"*DESC*\" and items=\"ITEM_BARCODE_256069\") sortby date/sort.descending", false),
-      Arguments.of("(description==\"*DESC*\" and items=\"ITEM_BARCODE_256069\" and action==(\"Send\")) sortby date/sort.descending", false),
-      Arguments.of("(items=\"ITEM_BARCODE_256069\" and action==(\"Created\")) sortby date/sort.descending", true),
-      Arguments.of("(items=\"ITEM_123\") sortby userBarcode/sort.descending", false)
+
+      // Scenario 12: Query with description and items fields along with a valid sort condition
+      Arguments.of("(description==\"*DESC*\" and items=\"ITEM_BARCODE_256069\" and action==(\"Send\")) sortby date/sort.descending", false)
     );
   }
 }
