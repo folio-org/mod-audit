@@ -40,6 +40,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
   private static final Logger LOGGER = LogManager.getLogger();
   public static final String LOGS_TABLE_NAME = "circulation_logs";
 
+  private static final CQLParser CQL_PARSER = new CQLParser();
+
   @Override
   @Validate
   public void getAuditDataCirculationLogs(String query, int offset, int limit, String lang,
@@ -79,8 +81,8 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
    * @return A Future that completes after setting the index scan configuration
    */
   private Future<RowSet<Row>> disableIndexScanIfNeeded(Conn conn, String query) {
-    Boolean needsDisableIndexScan = validateCqlForDisableIndexScan(query);
-    if (Boolean.TRUE.equals(needsDisableIndexScan)) {
+    boolean needsDisableIndexScan = validateCqlForDisableIndexScan(query);
+    if (needsDisableIndexScan) {
       LOGGER.info("disableIndexScanIfNeeded:: CQL query requires disabling index scan");
       return conn.execute("SET LOCAL enable_indexscan = OFF;");
     }
@@ -92,35 +94,17 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
    * Validates if the CQL query requires disabling index scan.
    *
    * @param cqlQuery The CQL query to validate.
-   * @return A Future that completes with true if the query requires disabling index scan, false otherwise.
+   * @return boolean true if the query requires disabling index scan, false otherwise.
    */
-  public Boolean validateCqlForDisableIndexScan(String cqlQuery) {
-    return checkCqlFieldsAndSortConditions(cqlQuery, "items", List.of("description", "userBarcode"), "date");
-  }
-
-  /**
-   * Checks if the CQL query contains specific fields and sort conditions.
-   *
-   * @param cqlQuery The CQL query to check.
-   * @param fieldName The field name that must exist in the CQL query.
-   * @param negativeFieldNames The list of field names that must not exist in the CQL query.
-   * @param sortFieldName The sort field name that must exist in the CQL query.
-   * @return true if all conditions are met, false otherwise.
-   */
-  public static Boolean checkCqlFieldsAndSortConditions(String cqlQuery, String fieldName, List<String> negativeFieldNames, String sortFieldName) {
+  public static boolean validateCqlForDisableIndexScan(String cqlQuery) {
     if (cqlQuery == null) {
-      return Boolean.FALSE;
+      return false;
     }
-
-    Boolean isFieldNameExist = Boolean.FALSE;
-    Boolean isNegativeFieldsNameExist = Boolean.FALSE;
-    Boolean isSortFieldNameExist = Boolean.FALSE;
 
     List<String> cqlFieldList = new ArrayList<>();
     String cqlSortModifier;
     try {
-      CQLParser parser = new CQLParser();
-      CQLNode node = parser.parse(cqlQuery);
+      CQLNode node = CQL_PARSER.parse(cqlQuery);
       node.traverse(new CQLDefaultNodeVisitor() {
         @Override
         public void onTermNode(CQLTermNode node) {
@@ -135,27 +119,11 @@ public class CirculationLogsService extends BaseService implements AuditDataCirc
           .orElse("") : "";
     } catch (Exception e) {
       LOGGER.debug("checkConditionExist:: Error parsing CQL cqlQuery: {}", e.getMessage());
-      return Boolean.FALSE;
+      return false;
     }
 
-    // ✅ Check if cqlFieldList equals to fieldName
-    if (fieldName == null || fieldName.isEmpty() || cqlFieldList.contains(fieldName)) {
-      isFieldNameExist = Boolean.TRUE;
-    }
-
-    // ✅ Check if cqlSortModifier equals to sortFieldName
-    if (sortFieldName == null || sortFieldName.isEmpty() || sortFieldName.equals(cqlSortModifier)) {
-      isSortFieldNameExist = Boolean.TRUE;
-    }
-
-    // ✅ Check if none of the negativeFieldNames exist in cqlFieldList
-    boolean noneNegativeExist = negativeFieldNames == null || negativeFieldNames.isEmpty() ||
-                                Collections.disjoint(negativeFieldNames, cqlFieldList);
-    if (noneNegativeExist) {
-      isNegativeFieldsNameExist = Boolean.TRUE;
-    }
-
-    // ✅ Final result: all 3 checks must be true
-    return isFieldNameExist && isNegativeFieldsNameExist && isSortFieldNameExist;
+    return cqlFieldList.contains("items")
+           && Collections.disjoint(cqlFieldList, List.of("description", "userBarcode"))
+           && "date".equals(cqlSortModifier);
   }
 }
