@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.Map;
 import org.folio.CopilotGenerated;
 import org.folio.domain.diff.FieldChangeDto;
+import org.folio.rest.external.EffectiveCallNumberComponents;
 import org.folio.rest.external.Item;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.utils.UnitTest;
@@ -52,6 +53,34 @@ class ItemDiffCalculatorTest {
       .as("Field changes should contain barcode field modified change")
       .hasSize(1)
       .containsExactlyInAnyOrder(FieldChangeDto.modified("barcode", "barcode", "Barcode 1", "Barcode 2"));
+  }
+
+  @Test
+  void testEffectiveCallNumberIsIgnored() {
+
+    Item oldItem = new Item();
+    oldItem.setItemLevelCallNumber("ABC");
+    oldItem.setItemLevelCallNumberPrefix("P1");
+    EffectiveCallNumberComponents effectiveCallNumberComponents = new EffectiveCallNumberComponents();
+    effectiveCallNumberComponents.setCallNumber("ABC");
+    effectiveCallNumberComponents.setPrefix("P1");
+    oldItem.setEffectiveCallNumberComponents(effectiveCallNumberComponents);
+
+
+    Item newItem = new Item();
+    newItem.setItemLevelCallNumber("XYZ");
+    newItem.setItemLevelCallNumberPrefix("P1");
+    EffectiveCallNumberComponents effectiveCallNumberComponents1 = new EffectiveCallNumberComponents();
+    effectiveCallNumberComponents1.setCallNumber("XYZ");
+    newItem.setEffectiveCallNumberComponents(effectiveCallNumberComponents1);
+
+    Map<String, Object> oldMap = getMap(oldItem);
+    Map<String, Object> newMap = getMap(newItem);
+
+    var diff = itemDiffCalculator.calculateDiff(oldMap, newMap);
+
+    assertThat(diff.getFieldChanges()).as("Only one change (itemLevelCallNumber) should be recorded").hasSize(1);
+
   }
 
   private static Map<String, Object> getMap(Item obj) {

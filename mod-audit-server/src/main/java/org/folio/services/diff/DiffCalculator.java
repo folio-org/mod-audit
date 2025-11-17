@@ -14,6 +14,7 @@ import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.CollectionItemChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
+import org.folio.rest.external.EffectiveCallNumberComponents;
 import org.folio.util.inventory.InventoryResourceType;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
@@ -33,6 +34,7 @@ public abstract class DiffCalculator<T> {
 
   protected final Javers javers = JaversBuilder.javers()
     .withListCompareAlgorithm(ListCompareAlgorithm.AS_SET)
+    .registerIgnoredClass(EffectiveCallNumberComponents.class)
     .build();
 
   /**
