@@ -85,8 +85,7 @@
           "type": "string"
         }
       },
-      "type": "object",
-      "diffIgnore": true
+      "type": "object"
     },
     "effectiveLocationId": {
       "type": "string"
