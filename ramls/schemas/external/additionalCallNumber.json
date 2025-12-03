@@ -3,18 +3,18 @@
   "description": "An additional call number",
   "type": "object",
   "properties": {
-    "typeId": {
+    "additionalCallNumberTypeId": {
       "type": "string"
     },
-    "prefix": {
+    "additionalCallNumberPrefix": {
       "type": "string"
     },
-    "callNumber": {
+    "additionalCallNumber": {
       "type": "string"
     },
-    "suffix": {
+    "additionalCallNumberSuffix": {
       "type": "string"
     }
   },
-  "required": ["callNumber"]
+  "required": ["additionalCallNumber"]
 }
