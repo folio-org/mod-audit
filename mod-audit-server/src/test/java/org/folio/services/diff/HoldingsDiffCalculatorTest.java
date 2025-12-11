@@ -12,7 +12,6 @@ import org.folio.CopilotGenerated;
 import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.AdditionalCallNumber;
 import org.folio.rest.external.HoldingsRecord;
-import org.folio.rest.external.Item;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
@@ -60,10 +59,10 @@ class HoldingsDiffCalculatorTest {
   @Test
   void shouldDetectNewAdditionalCallNumber() {
     List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
-    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withAdditionalCallNumber("123").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumber);
     var oldItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
-    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withAdditionalCallNumber("456").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withCallNumber("456").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumberNew);
     var newItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
     var changeRecordDTO = holdingsDiffCalculator.calculateDiff(oldItem, newItem);
@@ -73,10 +72,10 @@ class HoldingsDiffCalculatorTest {
   @Test
   void shouldDetectAdditionalCallNumberChange() {
     List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
-    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withAdditionalCallNumber("123").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumber);
     var oldItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
-    additionalCallNumberList.getFirst().setAdditionalCallNumber("456");
+    additionalCallNumberList.getFirst().setCallNumber("456");
     var newItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
     var changeRecordDTO = holdingsDiffCalculator.calculateDiff(oldItem, newItem);
     assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);

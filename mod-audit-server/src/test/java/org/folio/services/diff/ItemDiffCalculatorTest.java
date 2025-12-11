@@ -61,10 +61,10 @@ class ItemDiffCalculatorTest {
   @Test
   void shouldDetectNewAdditionalCallNumber() {
     List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
-    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withAdditionalCallNumber("123").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumber);
     var oldItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
-    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withAdditionalCallNumber("456").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withCallNumber("456").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumberNew);
     var newItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
     var changeRecordDTO = itemDiffCalculator.calculateDiff(oldItem, newItem);
@@ -74,10 +74,10 @@ class ItemDiffCalculatorTest {
   @Test
   void shouldDetectAdditionalCallNumberChange() {
     List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
-    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withAdditionalCallNumber("123").withAdditionalCallNumberPrefix("A").withAdditionalCallNumberSuffix("Z");
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
     additionalCallNumberList.add(additionalCallNumber);
     var oldItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
-    additionalCallNumberList.getFirst().setAdditionalCallNumber("456");
+    additionalCallNumberList.getFirst().setCallNumber("456");
     var newItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
     var changeRecordDTO = itemDiffCalculator.calculateDiff(oldItem, newItem);
     assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);
