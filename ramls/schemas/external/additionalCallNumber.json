@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "An additional call number",
+  "type": "object",
+  "properties": {
+    "typeId": {
+      "type": "string"
+    },
+    "prefix": {
+      "type": "string"
+    },
+    "callNumber": {
+      "type": "string"
+    },
+    "suffix": {
+      "type": "string"
+    }
+  },
+  "required": ["callNumber"]
+}

@@ -4,9 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.folio.CopilotGenerated;
 import org.folio.domain.diff.FieldChangeDto;
+import org.folio.rest.external.AdditionalCallNumber;
 import org.folio.rest.external.HoldingsRecord;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.utils.UnitTest;
@@ -50,6 +54,31 @@ class HoldingsDiffCalculatorTest {
       .as("Field changes should contain call number field modified change")
       .hasSize(1)
       .containsExactlyInAnyOrder(FieldChangeDto.modified("callNumber", "callNumber", "Call Number 1", "Call Number 2"));
+  }
+
+  @Test
+  void shouldDetectNewAdditionalCallNumber() {
+    List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumber);
+    var oldItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withCallNumber("456").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumberNew);
+    var newItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    var changeRecordDTO = holdingsDiffCalculator.calculateDiff(oldItem, newItem);
+    assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);
+  }
+
+  @Test
+  void shouldDetectAdditionalCallNumberChange() {
+    List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumber);
+    var oldItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    additionalCallNumberList.getFirst().setCallNumber("456");
+    var newItem = getMap(new HoldingsRecord().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    var changeRecordDTO = holdingsDiffCalculator.calculateDiff(oldItem, newItem);
+    assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);
   }
 
   private static Map<String, Object> getMap(HoldingsRecord obj) {

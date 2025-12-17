@@ -4,9 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.folio.CopilotGenerated;
 import org.folio.domain.diff.FieldChangeDto;
+import org.folio.rest.external.AdditionalCallNumber;
 import org.folio.rest.external.Item;
 import org.folio.util.inventory.InventoryResourceType;
 import org.folio.utils.UnitTest;
@@ -52,6 +56,31 @@ class ItemDiffCalculatorTest {
       .as("Field changes should contain barcode field modified change")
       .hasSize(1)
       .containsExactlyInAnyOrder(FieldChangeDto.modified("barcode", "barcode", "Barcode 1", "Barcode 2"));
+  }
+
+  @Test
+  void shouldDetectNewAdditionalCallNumber() {
+    List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumber);
+    var oldItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    AdditionalCallNumber additionalCallNumberNew = new AdditionalCallNumber().withCallNumber("456").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumberNew);
+    var newItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    var changeRecordDTO = itemDiffCalculator.calculateDiff(oldItem, newItem);
+    assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);
+  }
+
+  @Test
+  void shouldDetectAdditionalCallNumberChange() {
+    List<AdditionalCallNumber> additionalCallNumberList = new ArrayList<>();
+    AdditionalCallNumber additionalCallNumber = new AdditionalCallNumber().withCallNumber("123").withPrefix("A").withSuffix("Z");
+    additionalCallNumberList.add(additionalCallNumber);
+    var oldItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    additionalCallNumberList.getFirst().setCallNumber("456");
+    var newItem = getMap(new Item().withId("1").withAdditionalCallNumbers(additionalCallNumberList));
+    var changeRecordDTO = itemDiffCalculator.calculateDiff(oldItem, newItem);
+    assertThat(changeRecordDTO.getCollectionChanges()).hasSize(1);
   }
 
   private static Map<String, Object> getMap(Item obj) {

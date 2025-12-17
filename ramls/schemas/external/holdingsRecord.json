@@ -25,6 +25,14 @@
     "callNumberTypeId": {
       "type": "string"
     },
+    "additionalCallNumbers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "additionalCallNumber.json",
+        "uniqueItems": true
+      }
+    },
     "copyNumber": {
       "type": "string"
     },
