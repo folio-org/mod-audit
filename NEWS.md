@@ -1,3 +1,7 @@
+## 2.10.3 2025-12-22
+
+* [MODAUD-280](https://folio-org.atlassian.net/browse/MODAUD-280) - Update to RMB 35.3.1, Vert.x 4.5.22
+
 ## 2.10.2 2025-01-10
 
 * [MODAUD-216](https://folio-org.atlassian.net/browse/MODAUD-199) - Remove PII from mod-audit logs
