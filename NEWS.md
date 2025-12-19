@@ -1,3 +1,6 @@
+## 2.11.2 2025-12-22
+* [MODAUD-282](https://folio-org.atlassian.net/browse/MODAUD-282) - Update to RMB 35.4.1, Vert.x 4.5.22
+
 ## 2.11.1 2025-04-15
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
 
