@@ -12,10 +12,20 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import org.folio.services.management.AuditManager;
+import org.folio.spring.SpringContextUtil;
 import org.folio.util.pubsub.PubSubClientUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ModTenantService extends TenantAPI {
   private static final Logger log = LogManager.getLogger();
+
+  @Autowired
+  private AuditManager auditManager;
+
+  public ModTenantService() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
 
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context context) {
@@ -24,7 +34,8 @@ public class ModTenantService extends TenantAPI {
     registerModuleToPubSub(headers, context.owner())
       .thenAccept(p -> promise.complete(0));
     log.info("loadData:: Started Loading Data");
-    return promise.future();
+    return promise.future()
+      .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
   private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {

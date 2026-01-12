@@ -1,6 +1,7 @@
 ## 3.0.0-SNAPSHOT 2025-mm-dd
 * [MODAUD-264](https://folio-org.atlassian.net/browse/MODAUD-264) - Respect tenant timezone when showing loan due date in log record
 * [MODAUD-265](https://folio-org.atlassian.net/browse/MODAUD-265) - Bump Inventory Item Storage API version from 10.1 to 11.0
+* [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Prepare sub-partitions on tenant init
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
