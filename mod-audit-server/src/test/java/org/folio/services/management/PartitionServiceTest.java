@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
@@ -99,6 +100,20 @@ class PartitionServiceTest {
       new DatabaseSubPartition(marcBibTableName, 0, yearForPreviousQuarter, previousQuarter),
       new DatabaseSubPartition(marcAuthorityTableName, 0, yearForPreviousQuarter, previousQuarter)
     ));
+
+    // Verifies creation of current quarter subpartitions
+    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
+      new DatabaseSubPartition(marcBibTableName, 0, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 1, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 2, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 3, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 4, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 5, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 6, now.getYear(), currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 7, now.getYear(), currentQuarter)
+    ));
+
+    // Verifies creation of next quarter subpartitions
     verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
       new DatabaseSubPartition(marcBibTableName, 0, yearForNextQuarter, nextQuarter),
       new DatabaseSubPartition(marcBibTableName, 1, yearForNextQuarter, nextQuarter),
@@ -109,6 +124,8 @@ class PartitionServiceTest {
       new DatabaseSubPartition(marcBibTableName, 6, yearForNextQuarter, nextQuarter),
       new DatabaseSubPartition(marcBibTableName, 7, yearForNextQuarter, nextQuarter)
     ));
+
+    verifyNoMoreInteractions(partitionDao);
   }
 
   private org.folio.rest.jaxrs.model.Setting enabledSetting(boolean enabled) {

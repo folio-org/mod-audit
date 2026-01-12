@@ -32,6 +32,7 @@ public class AuditManager {
   }
 
   public Future<Void> executeDatabaseCleanup(String tenantId) {
+    LOGGER.info("executeDatabaseCleanup:: Deleting expired records and prepare sub-partitions for tenant [tenantId: {}]", tenantId);
     var currentTime = System.currentTimeMillis();
     return deleteExpiredRecords(tenantId, currentTime);
   }

@@ -61,6 +61,8 @@ public class PartitionService {
     }
 
     return Future.all(
+      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, currentQuarter, inventoryTableNames, existingSubPartitions),
+      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, currentQuarter, authorityTableNames, existingSubPartitions),
       createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, nextQuarter, inventoryTableNames, existingSubPartitions),
       createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, nextQuarter, authorityTableNames, existingSubPartitions)
     ).mapEmpty();

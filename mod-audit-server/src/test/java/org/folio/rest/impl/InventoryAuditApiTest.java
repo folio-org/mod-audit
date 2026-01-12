@@ -54,7 +54,6 @@ public class InventoryAuditApiTest extends ApiTestBase {
   private static final String INVENTORY_INSTANCE_AUDIT_PATH = "/audit-data/inventory/instance/";
   private static final String INVENTORY_HOLDINGS_AUDIT_PATH = "/audit-data/inventory/holdings/";
   private static final String INVENTORY_ITEM_AUDIT_PATH = "/audit-data/inventory/item/";
-  private static final Instant EVENT_DATE = Instant.parse("2025-02-15T13:07:10Z");
 
   @InjectMocks
   InstanceEventDao instanceEventDao;
@@ -88,7 +87,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
     var inventoryAuditEntity = new InventoryAuditEntity(
       UUID.randomUUID(),
-      Timestamp.from(EVENT_DATE),
+      Timestamp.from(Instant.now()),
       UUID.fromString(entityId),
       "CREATE",
       UUID.randomUUID(),
@@ -130,7 +129,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
 
       var inventoryAuditEntity = new InventoryAuditEntity(
         UUID.randomUUID(),
-        Timestamp.from(EVENT_DATE.plusSeconds(86400L * i)), // 1 day difference
+        Timestamp.from(Instant.now().plusSeconds(86400L * i)), // 1 day difference
         UUID.fromString(entityId),
         "CREATE",
         UUID.randomUUID(),
