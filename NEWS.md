@@ -1,3 +1,6 @@
+## 2.11.3 2026-01-14
+* [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Prepare sub-partitions on tenant init
+
 ## 2.11.2 2025-12-22
 * [MODAUD-282](https://folio-org.atlassian.net/browse/MODAUD-282) - Update to RMB 35.4.1, Vert.x 4.5.22
 
