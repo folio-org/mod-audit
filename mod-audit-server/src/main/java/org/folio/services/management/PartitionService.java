@@ -42,7 +42,6 @@ public class PartitionService {
     return partitionDao.getEmptySubPartitions(tenantId)
       .compose(subPartitions -> {
         var subPartitionsGroupedByDate = subPartitions.stream()
-          .filter(subPartition -> !subPartition.isCurrent(now))
           .collect(Collectors.groupingBy(subPartition -> subPartition.isBefore(now)));
         return partitionDao.deleteSubPartitions(tenantId, subPartitionsGroupedByDate.get(true))
           .compose(v -> createNewSubPartitions(tenantId, now, subPartitionsGroupedByDate.get(false)));
@@ -69,9 +68,9 @@ public class PartitionService {
   }
 
   /**
-   * Verify that feature is enabled for tenant and create sub partitions for tables which doesn't have them for the next quarter
+   * Verify that feature is enabled for tenant and create sub partitions for tables which doesn't have them for the quarter
    * */
-  private Future<Void> createSubPartitionsForSetting(String tenantId, Setting setting, int year, YearQuarter nextQuarter,
+  private Future<Void> createSubPartitionsForSetting(String tenantId, Setting setting, int year, YearQuarter quarter,
                                                      List<String> tableNames, List<DatabaseSubPartition> existingSubPartitions) {
     return configurationService.getSetting(setting, tenantId)
       .compose(settingValue -> {
@@ -83,11 +82,12 @@ public class PartitionService {
 
         var tableNamesWithoutSubPartitions = tableNames.stream()
           .filter(tableName -> existingSubPartitions.stream()
-            .noneMatch(subPartition -> subPartition.getTable().equals(tableName)))
+            .noneMatch(subPartition -> subPartition.getTable().equals(tableName)
+                                       && subPartition.getQuarter().equals(quarter)))
           .toList();
 
         var newSubPartitions = tableNamesWithoutSubPartitions.stream()
-          .map(tableName -> subPartitionsForTable(tableName, year, nextQuarter))
+          .map(tableName -> subPartitionsForTable(tableName, year, quarter))
           .flatMap(List::stream)
           .toList();
 
