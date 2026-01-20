@@ -42,7 +42,6 @@ public class PartitionService {
     return partitionDao.getEmptySubPartitions(tenantId)
       .compose(subPartitions -> {
         var subPartitionsGroupedByDate = subPartitions.stream()
-          .filter(subPartition -> !subPartition.isCurrent(now))
           .collect(Collectors.groupingBy(subPartition -> subPartition.isBefore(now)));
         return partitionDao.deleteSubPartitions(tenantId, subPartitionsGroupedByDate.get(true))
           .compose(v -> createNewSubPartitions(tenantId, now, subPartitionsGroupedByDate.get(false)));
@@ -83,7 +82,8 @@ public class PartitionService {
 
         var tableNamesWithoutSubPartitions = tableNames.stream()
           .filter(tableName -> existingSubPartitions.stream()
-            .noneMatch(subPartition -> subPartition.getTable().equals(tableName)))
+            .noneMatch(subPartition -> subPartition.getTable().equals(tableName)
+                                       && subPartition.getQuarter().equals(nextQuarter)))
           .toList();
 
         var newSubPartitions = tableNamesWithoutSubPartitions.stream()

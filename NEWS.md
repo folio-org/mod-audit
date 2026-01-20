@@ -1,3 +1,6 @@
+## 2.11.4 2026-01-20
+* [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Fix creating current quarter partitions
+
 ## 2.11.3 2026-01-14
 * [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Prepare sub-partitions on tenant init
 
