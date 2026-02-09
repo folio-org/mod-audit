@@ -7,7 +7,7 @@ public enum SettingGroup {
 
   AUTHORITY("audit.authority"),
   INVENTORY("audit.inventory"),
-  USER("audit.users");
+  USER("audit.user");
 
   private final String id;
 

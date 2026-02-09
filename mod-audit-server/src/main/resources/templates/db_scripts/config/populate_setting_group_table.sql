@@ -5,7 +5,7 @@ VALUES ('audit.inventory',
        ('audit.authority',
         'Authority Audit Configuration',
         'Group of configurations for audit of authority records'),
-       ('audit.users',
+       ('audit.user',
         'User Audit Configuration',
         'Group of configurations for audit of user records')
   ON CONFLICT (id) DO NOTHING;

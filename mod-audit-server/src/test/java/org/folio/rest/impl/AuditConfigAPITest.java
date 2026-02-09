@@ -46,8 +46,8 @@ public class AuditConfigAPITest extends ApiTestBase {
     "audit.config.groups.settings.audit.authority.collection.get"]""");
   private static final Header USER_PERMS_HEADER = new Header(XOkapiHeaders.PERMISSIONS, """
     ["audit.config.groups.settings.collection.get",
-    "audit.config.groups.settings.audit.users.enabled.item.put",
-    "audit.config.groups.settings.audit.users.collection.get"]""");
+    "audit.config.groups.settings.audit.user.enabled.item.put",
+    "audit.config.groups.settings.audit.user.collection.get"]""");
   private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers INVENTORY_HEADERS =
