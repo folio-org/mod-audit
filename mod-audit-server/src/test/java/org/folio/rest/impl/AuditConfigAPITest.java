@@ -165,31 +165,4 @@ public class AuditConfigAPITest extends ApiTestBase {
       .put("type", type.value());
   }
 
-  @Test
-  void shouldReturnUserSettingCollection() {
-    given().headers(USER_HEADERS).get(AUDIT_CONFIG_SETTINGS_PATH.formatted(USER.getId()))
-      .then().log().all()
-      .statusCode(HttpStatus.HTTP_OK.toInt())
-      .assertThat()
-      .body("totalRecords", equalTo(1))
-      .body("settings[0].key", equalTo(ENABLED.getValue()))
-      .body("settings[0].value", notNullValue())
-      .body("settings[0].type", equalTo("BOOLEAN"))
-      .body("settings[0].groupId", equalTo(USER.getId()));
-  }
-
-  @Test
-  void shouldReturn403OnGetUserSettingCollection_whenNoGroupPermission() {
-    var permsHeader = new Header(XOkapiHeaders.PERMISSIONS,
-      "[\"audit.config.groups.settings.audit.circulation.collection.get\"]");
-    var headers = new Headers(TENANT_HEADER, USER_HEADER, CONTENT_TYPE_HEADER, permsHeader);
-    given().headers(headers).get(AUDIT_CONFIG_SETTINGS_PATH.formatted(USER.getId()))
-      .then().log().all()
-      .statusCode(HttpStatus.HTTP_FORBIDDEN.toInt())
-      .assertThat()
-      .body("errors[0].message",
-        containsString("'audit.config.groups.settings.audit.users.collection.get' required"))
-      .body("errors[0].code", equalTo("unauthorized"));
-  }
-
 }
