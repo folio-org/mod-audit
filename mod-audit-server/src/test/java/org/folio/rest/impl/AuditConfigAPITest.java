@@ -6,6 +6,7 @@ import static org.folio.dao.configuration.SettingValueType.BOOLEAN;
 import static org.folio.dao.configuration.SettingValueType.INTEGER;
 import static org.folio.services.configuration.SettingGroup.AUTHORITY;
 import static org.folio.services.configuration.SettingGroup.INVENTORY;
+import static org.folio.services.configuration.SettingGroup.USER;
 import static org.folio.services.configuration.SettingKey.ENABLED;
 import static org.folio.services.configuration.SettingKey.RECORDS_PAGE_SIZE;
 import static org.folio.services.configuration.SettingKey.RETENTION_PERIOD;
@@ -43,12 +44,18 @@ public class AuditConfigAPITest extends ApiTestBase {
     "audit.config.groups.settings.audit.authority.records.page.size.item.put",
     "audit.config.groups.settings.audit.authority.records.retention.period.item.put",
     "audit.config.groups.settings.audit.authority.collection.get"]""");
+  private static final Header USER_PERMS_HEADER = new Header(XOkapiHeaders.PERMISSIONS, """
+    ["audit.config.groups.settings.collection.get",
+    "audit.config.groups.settings.audit.users.enabled.item.put",
+    "audit.config.groups.settings.audit.users.collection.get"]""");
   private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers INVENTORY_HEADERS =
     new Headers(TENANT_HEADER, INVENTORY_PERMS_HEADER, USER_HEADER, CONTENT_TYPE_HEADER);
   private static final Headers AUTHORITY_HEADERS =
     new Headers(TENANT_HEADER, AUTHORITY_PERMS_HEADER, USER_HEADER, CONTENT_TYPE_HEADER);
+  private static final Headers USER_HEADERS =
+    new Headers(TENANT_HEADER, USER_PERMS_HEADER, USER_HEADER, CONTENT_TYPE_HEADER);
   private static final String AUDIT_CONFIG_GROUPS_PATH = "/audit/config/groups";
   private static final String AUDIT_CONFIG_SETTINGS_PATH = "/audit/config/groups/%s/settings";
   private static final String AUDIT_CONFIG_SETTING_ENTRY_PATH = "/audit/config/groups/%s/settings/%s";
@@ -59,7 +66,7 @@ public class AuditConfigAPITest extends ApiTestBase {
       .then().log().all()
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .assertThat()
-      .body("totalRecords", equalTo(2))
+      .body("totalRecords", equalTo(3))
       .body("settingGroups[0].id", equalTo(AUTHORITY.getId()));
   }
 
@@ -145,7 +152,8 @@ public class AuditConfigAPITest extends ApiTestBase {
       Arguments.of(INVENTORY.getId(), RETENTION_PERIOD.getValue(), 1, INTEGER, INVENTORY_HEADERS),
       Arguments.of(AUTHORITY.getId(), RETENTION_PERIOD.getValue(), 3, INTEGER, AUTHORITY_HEADERS),
       Arguments.of(INVENTORY.getId(), ENABLED.getValue(), false, BOOLEAN, INVENTORY_HEADERS),
-      Arguments.of(AUTHORITY.getId(), ENABLED.getValue(), false, BOOLEAN, AUTHORITY_HEADERS)
+      Arguments.of(AUTHORITY.getId(), ENABLED.getValue(), false, BOOLEAN, AUTHORITY_HEADERS),
+      Arguments.of(USER.getId(), ENABLED.getValue(), true, BOOLEAN, USER_HEADERS)
     );
   }
 
@@ -155,6 +163,33 @@ public class AuditConfigAPITest extends ApiTestBase {
       .put("value", value)
       .put("groupId", groupId)
       .put("type", type.value());
+  }
+
+  @Test
+  void shouldReturnUserSettingCollection() {
+    given().headers(USER_HEADERS).get(AUDIT_CONFIG_SETTINGS_PATH.formatted(USER.getId()))
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .assertThat()
+      .body("totalRecords", equalTo(1))
+      .body("settings[0].key", equalTo(ENABLED.getValue()))
+      .body("settings[0].value", notNullValue())
+      .body("settings[0].type", equalTo("BOOLEAN"))
+      .body("settings[0].groupId", equalTo(USER.getId()));
+  }
+
+  @Test
+  void shouldReturn403OnGetUserSettingCollection_whenNoGroupPermission() {
+    var permsHeader = new Header(XOkapiHeaders.PERMISSIONS,
+      "[\"audit.config.groups.settings.audit.circulation.collection.get\"]");
+    var headers = new Headers(TENANT_HEADER, USER_HEADER, CONTENT_TYPE_HEADER, permsHeader);
+    given().headers(headers).get(AUDIT_CONFIG_SETTINGS_PATH.formatted(USER.getId()))
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_FORBIDDEN.toInt())
+      .assertThat()
+      .body("errors[0].message",
+        containsString("'audit.config.groups.settings.audit.users.collection.get' required"))
+      .body("errors[0].code", equalTo("unauthorized"));
   }
 
 }

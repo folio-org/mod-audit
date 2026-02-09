@@ -481,6 +481,16 @@
       "description": "Enable/disable audit authority records"
     },
     {
+      "permissionName": "audit.config.groups.settings.audit.users.collection.get",
+      "displayName": "Audit Configuration - get settings for audit users group",
+      "description": "Get settings for audit users group"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.users.enabled.item.put",
+      "displayName": "Audit Configuration - enable/disable audit user records",
+      "description": "Enable/disable audit user records"
+    },
+    {
       "permissionName": "audit.inventory.instance.collection.get",
       "displayName": "Inventory Audit - get instance events",
       "description": "Get inventory instance audit events"
