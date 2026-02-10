@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonObject;
 import org.folio.dao.configuration.SettingEntity;
 import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.inventory.InventoryAuditEntity;
+import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.domain.diff.ChangeType;
@@ -17,6 +18,8 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
+import org.folio.util.user.UserEvent;
+import org.folio.util.user.UserEventType;
 import org.folio.util.marc.EventMetadata;
 import org.folio.util.marc.MarcEventPayload;
 import org.folio.util.marc.Record;
@@ -313,6 +316,26 @@ public class EntityUtils {
     var newRecord = event.getEventPayload().getNewRecord();
     event.getEventPayload().setOld(newRecord);
     return event;
+  }
+
+  public static UserAuditEntity createUserAuditEntity() {
+    var changeRecordDto = new ChangeRecordDto();
+    changeRecordDto.setFieldChanges(List.of(new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new")));
+
+    return new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()), UUID.randomUUID(), "UPDATED",
+      UUID.randomUUID(), changeRecordDto);
+  }
+
+  public static UserEvent createUserEvent(String eventId, UserEventType type) {
+    return UserEvent.builder()
+      .id(eventId)
+      .type(type)
+      .tenant(TENANT_ID)
+      .timestamp(System.currentTimeMillis())
+      .userId(UUID.randomUUID().toString())
+      .newValue(Map.of("key", "newValue"))
+      .oldValue(Map.of("key", "oldValue"))
+      .build();
   }
 
   public static MarcAuditEntity createMarcAuditEntity() {
