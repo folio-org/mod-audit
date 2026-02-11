@@ -1,14 +1,15 @@
-package org.folio.services.diff;
+package org.folio.services.diff.inventory;
 
 import java.util.function.Supplier;
 import org.folio.rest.external.Dates;
 import org.folio.rest.external.Instance;
 import org.folio.rest.external.Tags__1;
+import org.folio.services.diff.DiffCalculator;
 import org.folio.util.inventory.InventoryResourceType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InstanceDiffCalculator extends DiffCalculator<Instance> {
+public class InstanceDiffCalculator extends DiffCalculator<Instance> implements InventoryDiffCalculator {
 
   @Override
   public InventoryResourceType getResourceType() {

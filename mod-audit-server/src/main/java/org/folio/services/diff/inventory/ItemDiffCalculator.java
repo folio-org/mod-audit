@@ -1,4 +1,4 @@
-package org.folio.services.diff;
+package org.folio.services.diff.inventory;
 
 import java.util.function.Supplier;
 import org.folio.rest.external.EffectiveCallNumberComponents;
@@ -6,11 +6,12 @@ import org.folio.rest.external.Item;
 import org.folio.rest.external.LastCheckIn;
 import org.folio.rest.external.Status;
 import org.folio.rest.external.Tags__2;
+import org.folio.services.diff.DiffCalculator;
 import org.folio.util.inventory.InventoryResourceType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ItemDiffCalculator extends DiffCalculator<Item> {
+public class ItemDiffCalculator extends DiffCalculator<Item> implements InventoryDiffCalculator {
 
   @Override
   public InventoryResourceType getResourceType() {

@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.folio.services.diff.InstanceDiffCalculator;
+import org.folio.services.diff.inventory.InstanceDiffCalculator;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
 import org.folio.util.inventory.InventoryResourceType;
