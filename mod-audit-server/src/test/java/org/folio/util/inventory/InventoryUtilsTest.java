@@ -2,12 +2,9 @@ package org.folio.util.inventory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.folio.CopilotGenerated;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
@@ -76,40 +73,6 @@ class InventoryUtilsTest {
 
     var payload = InventoryUtils.getEventPayload(event);
     assertEquals(newValue, payload);
-  }
-
-  @Test
-  void shouldGetMapValueByPath() {
-    var payload = new HashMap<String, Object>();
-    var metadata = new HashMap<String, Object>();
-    metadata.put("createdByUserId", "user123");
-    payload.put("metadata", metadata);
-
-    var value = InventoryUtils.getMapValueByPath("metadata.createdByUserId", payload);
-    assertEquals("user123", value);
-  }
-
-  @Test
-  void shouldReturnNullWhenPathNotPresent() {
-    var payload = new HashMap<String, Object>();
-
-    var value = InventoryUtils.getMapValueByPath("metadata.createdByUserId", payload);
-    assertNull(value);
-  }
-
-  @Test
-  void shouldGetMapValueByPathWithNestedMapsAndLists() {
-    var payload = Map.<String, Object>of(
-      "metadata", Map.of(
-        "users", List.of(
-          Map.of("id", "user1"),
-          Map.of("id", "user2")
-        )
-      )
-    );
-
-    var value = InventoryUtils.getMapValueByPath("metadata.users.id", payload);
-    assertEquals(List.of("user1", "user2"), value);
   }
 
   @ParameterizedTest

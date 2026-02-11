@@ -25,4 +25,10 @@ class KafkaUtilsTest {
     // Assert
     assertEquals("inventory.topic", topicName);
   }
+
+  @Test
+  void shouldFormatTopicPattern() {
+    var pattern = KafkaUtils.formatTopicPattern("env", "inventory.instance");
+    assertEquals("(env\\.)(.*\\.)inventory.instance", pattern);
+  }
 }

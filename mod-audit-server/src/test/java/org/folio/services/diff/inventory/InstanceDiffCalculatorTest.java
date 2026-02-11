@@ -1,4 +1,4 @@
-package org.folio.services.diff;
+package org.folio.services.diff.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -14,7 +14,6 @@ import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.CollectionItemChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
-import org.folio.util.inventory.InventoryResourceType;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
@@ -49,8 +48,6 @@ public abstract class DiffCalculator<T> {
     return convert(diff.getChanges());
   }
 
-  public abstract InventoryResourceType getResourceType();
-
   /**
    * Accessor for the object to be compared. May be useful to initialize some fields before comparison.
    */
@@ -77,6 +74,9 @@ public abstract class DiffCalculator<T> {
       }
     }
 
+    if (fieldChanges.isEmpty() && collectionChanges.isEmpty()) {
+      return null;
+    }
     result.setFieldChanges(fieldChanges);
     result.setCollectionChanges(collectionChanges);
     return result;

@@ -14,7 +14,6 @@ import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.Dates;
 import org.folio.rest.external.Instance;
 import org.folio.rest.external.Subject;
-import org.folio.util.inventory.InventoryResourceType;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,12 +29,6 @@ class DiffCalculatorTest {
       @Override
       protected Class<Instance> getType() {
         return Instance.class;
-      }
-
-
-      @Override
-      public InventoryResourceType getResourceType() {
-        return InventoryResourceType.INSTANCE;
       }
 
       @Override
@@ -60,9 +53,9 @@ class DiffCalculatorTest {
     var changeRecordDTO = diffCalculator.calculateDiff(oldInstance, newInstance);
 
     // then
-    assertThat(changeRecordDTO.getFieldChanges())
-      .as("Field changes should be empty")
-      .isEmpty();
+    assertThat(changeRecordDTO)
+      .as("Change record should be null when no schema-recognized changes exist")
+      .isNull();
   }
 
   @Test
