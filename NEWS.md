@@ -3,6 +3,7 @@
 * [MODAUD-265](https://folio-org.atlassian.net/browse/MODAUD-265) - Bump Inventory Item Storage API version from 10.1 to 11.0
 * [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Prepare sub-partitions on tenant init
 * [MODAUD-288](https://folio-org.atlassian.net/browse/MODAUD-288) - assertj: Upgrade from 3.27.3 to 3.27.7, change scope from compile to test
+* [MODAUD-296](https://folio-org.atlassian.net/browse/MODAUD-296) - Implement User Audit Enabled Setting
 * [MODAUD-298](https://folio-org.atlassian.net/browse/MODAUD-298) - Extract shared utilities and decouple DiffCalculator from inventory types
 
 ## 2.11.1 2025-04-15 
