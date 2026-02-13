@@ -34,6 +34,8 @@ public class UserEventDaoImpl implements UserEventDao {
       WHERE user_id = $1
     """;
 
+  private static final String DELETE_ALL_SQL = "DELETE FROM %s";
+
   private final PostgresClientFactory pgClientFactory;
 
   public UserEventDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -58,6 +60,15 @@ public class UserEventDaoImpl implements UserEventDao {
     var table = formatDBTableName(tenantId, tableName());
     var query = DELETE_BY_USER_ID_SQL.formatted(table);
     return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(userId))
+      .mapEmpty();
+  }
+
+  @Override
+  public Future<Void> deleteAll(String tenantId) {
+    LOGGER.debug("deleteAll:: Deleting all user audit records with [tenantId: {}]", tenantId);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = DELETE_ALL_SQL.formatted(table);
+    return pgClientFactory.createInstance(tenantId).execute(query)
       .mapEmpty();
   }
 

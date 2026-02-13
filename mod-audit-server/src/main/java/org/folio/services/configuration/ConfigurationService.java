@@ -5,6 +5,8 @@ import static org.folio.util.ListUtils.mapItems;
 import io.vertx.core.Future;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ConfigurationService {
   private final SettingGroupDao settingGroupDao;
   private final SettingMappers settingMappers;
   private final SettingValidationService validationService;
+  private final List<SettingChangeHandler> changeHandlers;
 
   public Future<SettingGroupCollection> getAllSettingGroups(String tenantId) {
     return settingGroupDao.getAll(tenantId)
@@ -49,8 +52,12 @@ public class ConfigurationService {
     var settingId = entity.getId();
     return settingDao.exists(settingId, tenantId)
       .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
-      .compose(o -> settingDao.update(settingId, entity, tenantId))
-      .mapEmpty();
+      .compose(o -> settingDao.getById(settingId, tenantId))
+      .compose(oldEntity -> {
+        var oldValue = oldEntity.getValue();
+        return settingDao.update(settingId, entity, tenantId)
+          .compose(o -> notifyHandlers(groupId, settingKey, oldValue, entity.getValue(), tenantId));
+      });
   }
 
   public Future<Setting> getSetting(org.folio.services.configuration.Setting setting, String tenantId) {
@@ -75,5 +82,16 @@ public class ConfigurationService {
     return exists
            ? Future.succeededFuture(null)
            : Future.failedFuture(new NotFoundException(settingKey));
+  }
+
+  private Future<Void> notifyHandlers(String groupId, String settingKey,
+                                      Object oldValue, Object newValue, String tenantId) {
+    if (Objects.equals(oldValue, newValue) || changeHandlers.isEmpty()) {
+      return Future.succeededFuture();
+    }
+    var futures = changeHandlers.stream()
+      .map(handler -> handler.onSettingChanged(groupId, settingKey, oldValue, newValue, tenantId))
+      .toList();
+    return Future.all(futures).mapEmpty();
   }
 }

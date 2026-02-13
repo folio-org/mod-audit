@@ -11,5 +11,7 @@ public interface UserEventDao {
 
   Future<Void> deleteByUserId(UUID userId, String tenantId);
 
+  Future<Void> deleteAll(String tenantId);
+
   String tableName();
 }

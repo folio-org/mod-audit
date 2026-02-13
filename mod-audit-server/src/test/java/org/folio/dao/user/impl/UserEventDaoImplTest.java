@@ -90,6 +90,18 @@ class UserEventDaoImplTest {
   }
 
   @Test
+  void shouldDeleteAll(VertxTestContext ctx) {
+    doReturn(Future.succeededFuture())
+      .when(postgresClient).execute(anyString());
+
+    userEventDao.deleteAll(TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(postgresClient, times(1)).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
   void shouldReturnCorrectTableName() {
     assertEquals("user_audit", userEventDao.tableName());
   }
