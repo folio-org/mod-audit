@@ -6,4 +6,5 @@ CREATE TABLE IF NOT EXISTS user_audit (
     performed_by UUID,
     diff         JSONB
 );
-CREATE INDEX IF NOT EXISTS idx_user_audit_user_id ON user_audit USING BTREE (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_audit_user_id_event_date ON user_audit USING BTREE (user_id, event_date DESC);
+CREATE INDEX IF NOT EXISTS idx_user_audit_event_date ON user_audit USING BTREE (event_date);
