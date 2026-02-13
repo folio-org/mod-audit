@@ -2,6 +2,7 @@ package org.folio.services.diff.user;
 
 import java.util.function.Supplier;
 import org.folio.rest.external.CustomFields;
+import org.javers.core.diff.changetype.map.MapChange;
 import org.folio.rest.external.Metadata;
 import org.folio.rest.external.Personal__1;
 import org.folio.rest.external.Tags__3;
@@ -29,6 +30,11 @@ public class UserDiffCalculator extends DiffCalculator<User> {
       }
       return value;
     };
+  }
+
+  @Override
+  protected boolean shouldProcessMapChange(MapChange mapChange) {
+    return mapChange.getPropertyNameWithPath().startsWith("customFields.");
   }
 
   @Override
