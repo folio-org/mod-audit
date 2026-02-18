@@ -5,6 +5,7 @@
       "name": "Patron Cancelled",
       "description": "Cancelled at patron’s request",
       "requiresAdditionalInformation": false,
+      "source": "consortium",
       "metadata": {
         "createdDate": "2020-11-10T03:18:45.399+00:00",
         "updatedDate": "2020-11-10T03:18:45.399+00:00"

@@ -23,6 +23,10 @@
       "description" : "Requires additional information",
       "type": "boolean"
     },
+    "source": {
+      "description" : "Label indicating where the record originates from, e.g. 'consortium' for shared cancellation reasons",
+      "type": "string"
+    },
     "metadata": {
       "$ref": "../../raml-util/schemas/metadata.schema",
       "readonly": true
