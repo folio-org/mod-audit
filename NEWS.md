@@ -6,6 +6,7 @@
 * [MODAUD-296](https://folio-org.atlassian.net/browse/MODAUD-296) - Implement User Audit Enabled Setting
 * [MODAUD-298](https://folio-org.atlassian.net/browse/MODAUD-298) - Extract shared utilities and decouple DiffCalculator from inventory types
 * [MODAUD-271](https://folio-org.atlassian.net/browse/MODAUD-271) - Fix cancellation reason deserialization with consortium source field
+* [MODAUD-257](https://folio-org.atlassian.net/browse/MODAUD-257) - Replace EOL net.mguenther.kafka:kafka-junit with testcontainers KafkaContainer
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked

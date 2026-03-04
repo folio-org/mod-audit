@@ -82,7 +82,6 @@ public class TestSuite {
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
     DeploymentOptions options = new DeploymentOptions();
-
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
     options.setThreadingModel(ThreadingModel.WORKER);
 
