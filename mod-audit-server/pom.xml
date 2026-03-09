@@ -63,24 +63,10 @@
       <version>${mapstruct.version}</version>
     </dependency>
     <dependency>
-      <groupId>net.mguenther.kafka</groupId>
-      <artifactId>kafka-junit</artifactId>
-      <version>3.6.0</version>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>kafka</artifactId>
+      <version>1.20.5</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.module</groupId>
-          <artifactId>jackson-module-scala_2.13</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>

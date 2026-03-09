@@ -1,8 +1,5 @@
 package org.folio;
 
-import static net.mguenther.kafka.junit.EmbeddedKafkaCluster.provisionWith;
-import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
-
 import io.restassured.RestAssured;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.ThreadingModel;
@@ -14,7 +11,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+
+import lombok.Getter;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 import org.folio.builder.service.CheckInRecordBuilderTest;
 import org.folio.builder.service.CheckOutRecordBuilderTest;
 import org.folio.builder.service.FeeFineRecordBuilderTest;
@@ -68,8 +68,9 @@ public class TestSuite {
 
   public static boolean isInitialized = false;
   public static final int port = Integer.parseInt(System.getProperty("port", "8081"));
-  public static EmbeddedKafkaCluster kafkaCluster;
+  public static KafkaContainer kafkaContainer;
 
+  @Getter
   private static Vertx vertx;
 
   @BeforeAll
@@ -81,14 +82,12 @@ public class TestSuite {
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
     DeploymentOptions options = new DeploymentOptions();
-
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
     options.setThreadingModel(ThreadingModel.WORKER);
 
     startKafkaMockServer();
-    String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
-    System.setProperty(KAFKA_HOST, hostAndPort[0]);
-    System.setProperty(KAFKA_PORT, hostAndPort[1]);
+    System.setProperty(KAFKA_HOST, kafkaContainer.getHost());
+    System.setProperty(KAFKA_PORT, kafkaContainer.getFirstMappedPort().toString());
     System.setProperty(KAFKA_ENV, KAFKA_ENV_VALUE);
 
     startVerticle(options);
@@ -107,12 +106,13 @@ public class TestSuite {
   }
 
   private static void startKafkaMockServer() {
-    kafkaCluster = provisionWith(defaultClusterConfig());
-    kafkaCluster.start();
+    kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
+      .withStartupAttempts(3);
+    kafkaContainer.start();
   }
 
   private static void closeKafkaMockServer() {
-    kafkaCluster.stop();
+    kafkaContainer.stop();
   }
 
   private static void startVerticle(DeploymentOptions options)
@@ -129,10 +129,6 @@ public class TestSuite {
       }
     });
     deploymentComplete.get(60, TimeUnit.SECONDS);
-  }
-
-  public static Vertx getVertx() {
-    return vertx;
   }
 
   @Nested
