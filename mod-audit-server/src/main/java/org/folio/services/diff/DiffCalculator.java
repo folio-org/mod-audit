@@ -26,6 +26,11 @@ import org.javers.core.diff.changetype.container.CollectionChange;
 import org.javers.core.diff.changetype.container.ElementValueChange;
 import org.javers.core.diff.changetype.container.ValueAddOrRemove;
 import org.javers.core.diff.changetype.container.ValueAdded;
+import org.javers.core.diff.changetype.map.EntryAdded;
+import org.javers.core.diff.changetype.map.EntryChange;
+import org.javers.core.diff.changetype.map.EntryRemoved;
+import org.javers.core.diff.changetype.map.EntryValueChange;
+import org.javers.core.diff.changetype.map.MapChange;
 import org.javers.core.metamodel.object.ValueObjectId;
 
 public abstract class DiffCalculator<T> {
@@ -71,6 +76,10 @@ public abstract class DiffCalculator<T> {
         fieldChanges.add(processValueChange(valueChange));
       } else if (change instanceof CollectionChange<?> collectionChange) {
         collectionChanges.add(processCollectionChange(collectionChange, groupedChanges));
+      // MapChanges are skipped by default to filter out noise from JSON schema additionalProperties.
+      // Subclasses opt in for map properties that carry real data (see UserDiffCalculator).
+      } else if (change instanceof MapChange mapChange && shouldProcessMapChange(mapChange)) {
+        fieldChanges.addAll(processMapChange(mapChange));
       }
     }
 
@@ -127,6 +136,48 @@ public abstract class DiffCalculator<T> {
       elementValueChange.getLeftValue(),
       elementValueChange.getRightValue()
     );
+  }
+
+  /**
+   * Determines whether a {@link MapChange} should be processed and included in the diff output.
+   *
+   * <p>JSON schema-generated models include an {@code additionalProperties} catch-all map that
+   * Javers treats as a real property, producing spurious {@link MapChange} events for every entity.
+   * The default implementation returns {@code false} to suppress these.
+   *
+   * <p>Subclasses should override this when the entity has map-type properties that carry real
+   * semantic data (e.g., {@code CustomFields} in the User model, whose values are stored in the
+   * underlying {@code additionalProperties} map).
+   *
+   * @param mapChange the map change reported by Javers
+   * @return {@code true} to include this change in the diff, {@code false} to skip it
+   */
+  protected boolean shouldProcessMapChange(MapChange mapChange) {
+    return false;
+  }
+
+  private List<FieldChangeDto> processMapChange(MapChange mapChange) {
+    var result = new ArrayList<FieldChangeDto>();
+    String basePath = mapChange.getPropertyNameWithPath();
+    String propName = mapChange.getPropertyName();
+    String prefix = basePath.endsWith(propName)
+      ? basePath.substring(0, basePath.length() - propName.length())
+      : "";
+
+    for (var entry : mapChange.getEntryChanges()) {
+      EntryChange entryChange = (EntryChange) entry;
+      String key = String.valueOf(entryChange.getKey());
+      String fullPath = prefix + key;
+
+      if (entryChange instanceof EntryValueChange evc) {
+        result.add(FieldChangeDto.modified(key, fullPath, evc.getLeftValue(), evc.getRightValue()));
+      } else if (entryChange instanceof EntryAdded ea) {
+        result.add(FieldChangeDto.added(key, fullPath, ea.getValue()));
+      } else if (entryChange instanceof EntryRemoved er) {
+        result.add(FieldChangeDto.removed(key, fullPath, er.getValue()));
+      }
+    }
+    return result;
   }
 
   private FieldChangeDto processValueChange(ValueChange valueChange) {
