@@ -120,7 +120,7 @@ public class InventoryAuditApiTest extends ApiTestBase {
       .build();
 
     var entityId = UUID.randomUUID().toString();
-    settingDao.update(settingEntity.getId(), settingEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    updateSetting(settingEntity);
 
     // Create InventoryAuditEntity entities with a day date difference
     for (int i = 0; i < 5; i++) {
@@ -180,6 +180,13 @@ public class InventoryAuditApiTest extends ApiTestBase {
       .then().log().all()
       .statusCode(HttpStatus.HTTP_BAD_REQUEST.toInt())
       .body("errors[0].message", containsString("Invalid UUID string"));
+  }
+
+  @SneakyThrows
+  private void updateSetting(SettingEntity settingEntity) {
+    postgresClientFactory.createInstance(TENANT_ID)
+      .withTrans(conn -> settingDao.update(settingEntity.getId(), settingEntity, conn, TENANT_ID))
+      .toCompletionStage().toCompletableFuture().get();
   }
 
   private static Stream<Arguments> provideResourceTypeAndPath() {

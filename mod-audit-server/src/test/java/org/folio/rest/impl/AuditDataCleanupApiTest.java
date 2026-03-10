@@ -134,7 +134,9 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
       .type(SettingValueType.INTEGER)
       .groupId(settingGroup.getId())
       .build();
-    settingDao.update(settingEntity.getId(), settingEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    postgresClientFactory.createInstance(TENANT_ID)
+      .withTrans(conn -> settingDao.update(settingEntity.getId(), settingEntity, conn, TENANT_ID))
+      .toCompletionStage().toCompletableFuture().get();
   }
 
   @SneakyThrows

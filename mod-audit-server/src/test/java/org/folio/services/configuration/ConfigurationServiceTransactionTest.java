@@ -125,7 +125,8 @@ public class ConfigurationServiceTransactionTest extends ApiTestBase {
       .type(SettingValueType.BOOLEAN)
       .groupId(GROUP_ID)
       .build();
-    settingDao.update(entity.getId(), entity, TENANT_ID)
+    postgresClientFactory.createInstance(TENANT_ID)
+      .withTrans(conn -> settingDao.update(entity.getId(), entity, conn, TENANT_ID))
       .toCompletionStage().toCompletableFuture().get();
   }
 

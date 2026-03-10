@@ -70,15 +70,6 @@ public class SettingDao {
     return promise.future().map(rowSet -> settingMapper().apply(rowSet.iterator().next()));
   }
 
-  public Future<Void> update(String settingId, SettingEntity entity, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
-    var query = prepareSql(UPDATE_SQL, tenantId).replace(TYPE_CAST_PLACEHOLDER, getTypeCast(entity.getType()));
-    var params = Tuple.of(entity.getKey(), entity.getValue(), entity.getType().value(), entity.getDescription(),
-      entity.getUpdatedByUserId(), entity.getUpdatedDate(), settingId);
-    pgClientFactory.createInstance(tenantId).execute(query, params, promise);
-    return promise.future().mapEmpty();
-  }
-
   public Future<Void> update(String settingId, SettingEntity entity, Conn conn, String tenantId) {
     var query = prepareSql(UPDATE_SQL, tenantId).replace(TYPE_CAST_PLACEHOLDER, getTypeCast(entity.getType()));
     var params = Tuple.of(entity.getKey(), entity.getValue(), entity.getType().value(), entity.getDescription(),

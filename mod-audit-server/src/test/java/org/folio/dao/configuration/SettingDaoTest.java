@@ -49,14 +49,6 @@ class SettingDaoTest {
   @InjectMocks
   private SettingDao settingDao;
 
-  private static Stream<Arguments> updateTestData() {
-    return Stream.of(
-      Arguments.of(1, SettingValueType.INTEGER, "integer"),
-      Arguments.of("string", SettingValueType.STRING, "text"),
-      Arguments.of(true, SettingValueType.BOOLEAN, "boolean")
-    );
-  }
-
   @BeforeEach
   public void setUp() {
     lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
@@ -117,27 +109,18 @@ class SettingDaoTest {
       }));
   }
 
-  @SuppressWarnings("unchecked")
-  @Test
-  void update_withConn_positive() {
-    // given
-    var entity = new SettingEntity("group.key", "key", "value", SettingValueType.STRING, "description", "group",
-      LocalDateTime.now(), UUID.randomUUID(), LocalDateTime.now(), UUID.randomUUID());
-    var conn = mock(Conn.class);
-    when(conn.execute(anyString(), any(Tuple.class)))
-      .thenReturn(Future.succeededFuture(mock(RowSet.class)));
-
-    // when
-    var result = settingDao.update(entity.getId(), entity, conn, TENANT_ID);
-
-    // then
-    assertTrue(result.succeeded());
-    verify(conn).execute(anyString(), any(Tuple.class));
+  private static Stream<Arguments> updateTestData() {
+    return Stream.of(
+      Arguments.of(1, SettingValueType.INTEGER, "integer"),
+      Arguments.of("string", SettingValueType.STRING, "text"),
+      Arguments.of(true, SettingValueType.BOOLEAN, "boolean")
+    );
   }
 
+  @SuppressWarnings("unchecked")
   @ParameterizedTest
   @MethodSource("updateTestData")
-  void update_positive(Object value, SettingValueType type, String typeValue) {
+  void update_withConn_bindsCorrectParameters(Object value, SettingValueType type, String typeValue) {
     // given
     var entity = new SettingEntity("group.key", "key", value, type, "description", "group",
       LocalDateTime.now(), UUID.randomUUID(), LocalDateTime.now(), UUID.randomUUID());
@@ -150,13 +133,16 @@ class SettingDaoTest {
         updated_by = $5,
         updated_date = $6
       WHERE id = $7""".formatted(typeValue);
+    var conn = mock(Conn.class);
     var captor = ArgumentCaptor.forClass(Tuple.class);
-    mockPostgresExecutionSuccess(2).when(postgresClient).execute(eq(query), captor.capture(), any());
+    when(conn.execute(eq(query), captor.capture()))
+      .thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
     // when
-    settingDao.update(entity.getId(), entity, TENANT_ID);
+    var result = settingDao.update(entity.getId(), entity, conn, TENANT_ID);
 
     // then
+    assertTrue(result.succeeded());
     var captorValue = captor.getValue();
     assertEquals(entity.getKey(), captorValue.getString(0));
     assertEquals(entity.getValue(), captorValue.getValue(1));
