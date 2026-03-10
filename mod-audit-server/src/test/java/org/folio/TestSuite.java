@@ -54,6 +54,7 @@ import org.folio.services.OrderAuditEventsServiceTest;
 import org.folio.services.OrderLineAuditEventsServiceTest;
 import org.folio.services.OrganizationAuditEventsServiceTest;
 import org.folio.services.PieceAuditEventsServiceTest;
+import org.folio.services.configuration.ConfigurationServiceTransactionTest;
 import org.folio.services.marc.impl.MarcAuditServiceTest;
 import org.folio.util.marc.MarcUtilTest;
 import org.junit.jupiter.api.AfterAll;
@@ -281,5 +282,9 @@ public class TestSuite {
 
   @Nested
   class AuditDataCleanupApiNestedTest extends AuditDataCleanupApiTest {
+  }
+
+  @Nested
+  class ConfigurationServiceTransactionNestedTest extends ConfigurationServiceTransactionTest {
   }
 }
