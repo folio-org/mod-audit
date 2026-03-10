@@ -28,9 +28,7 @@ public class UserAuditPurgeHandler implements SettingChangeHandler {
   public Future<Void> onSettingChanged(Object newValue, Conn conn, String tenantId) {
     if (Boolean.FALSE.equals(newValue)) {
       LOGGER.info("onSettingChanged:: User audit disabled, deleting all user audit records [tenantId: {}]", tenantId);
-      return userEventDao.deleteAll(conn, tenantId)
-        .onFailure(e -> LOGGER.error("onSettingChanged:: Failed to delete user audit records [tenantId: {}]",
-          tenantId, e));
+      return userEventDao.deleteAll(conn, tenantId);
     }
     return Future.succeededFuture();
   }
