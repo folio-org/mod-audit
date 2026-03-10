@@ -1,6 +1,7 @@
 package org.folio.services.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 import io.vertx.core.Future;
@@ -97,7 +98,8 @@ public class ConfigurationServiceTransactionTest extends ApiTestBase {
     var result = service.updateSetting(GROUP_ID, SETTING_KEY, buildSettingPayload(false), null, TENANT_ID)
       .toCompletionStage().toCompletableFuture();
 
-    assertThat(result).isCompletedExceptionally();
+    assertThatThrownBy(result::get)
+      .hasMessageContaining("simulated handler failure");
 
     // then: setting is still true (rolled back) and records still exist
     assertThat(getEnabledValue()).isEqualTo(true);

@@ -22,13 +22,10 @@ public class UserAuditCleanupService implements SettingChangeHandler {
   @Override
   public Future<Void> onSettingChanged(String groupId, String settingKey,
                                        Object oldValue, Object newValue, Conn conn, String tenantId) {
-    if (!SettingGroup.USER.getId().equals(groupId)) {
+    if (!SettingGroup.USER.getId().equals(groupId) || !SettingKey.ENABLED.getValue().equals(settingKey)) {
       return Future.succeededFuture();
     }
-    if (SettingKey.ENABLED.getValue().equals(settingKey)) {
-      return handleEnabledChange(oldValue, newValue, conn, tenantId);
-    }
-    return Future.succeededFuture();
+    return handleEnabledChange(oldValue, newValue, conn, tenantId);
   }
 
   private Future<Void> handleEnabledChange(Object oldValue, Object newValue, Conn conn, String tenantId) {

@@ -10,6 +10,7 @@ import io.vertx.core.Future;
 import org.folio.dao.user.UserEventDao;
 import org.folio.rest.persist.Conn;
 import org.folio.services.configuration.SettingGroup;
+import org.folio.services.configuration.SettingKey;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UserAuditCleanupServiceTest {
 
   private static final String USER_GROUP_ID = SettingGroup.USER.getId();
+  private static final String ENABLED_KEY = SettingKey.ENABLED.getValue();
+  private static final String PAGE_SIZE_KEY = SettingKey.RECORDS_PAGE_SIZE.getValue();
 
   @Mock
   private UserEventDao userEventDao;
@@ -34,7 +37,7 @@ class UserAuditCleanupServiceTest {
   void onSettingChanged_shouldDeleteAll_whenEnabledChangedFromTrueToFalse() {
     when(userEventDao.deleteAll(conn, TENANT_ID)).thenReturn(Future.succeededFuture());
 
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, false, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, ENABLED_KEY, true, false, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao).deleteAll(conn, TENANT_ID);
@@ -42,7 +45,7 @@ class UserAuditCleanupServiceTest {
 
   @Test
   void onSettingChanged_shouldNotDelete_whenEnabledChangedFromFalseToTrue() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", false, true, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, ENABLED_KEY, false, true, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
@@ -50,7 +53,7 @@ class UserAuditCleanupServiceTest {
 
   @Test
   void onSettingChanged_shouldNotDelete_whenEnabledRemainsEnabled() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, true, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, ENABLED_KEY, true, true, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
@@ -58,7 +61,7 @@ class UserAuditCleanupServiceTest {
 
   @Test
   void onSettingChanged_shouldNotDelete_whenEnabledRemainsDisabled() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", false, false, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, ENABLED_KEY, false, false, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
@@ -66,7 +69,7 @@ class UserAuditCleanupServiceTest {
 
   @Test
   void onSettingChanged_shouldIgnoreNonEnabledSettingKey() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "records.page.size", 10, 20, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, PAGE_SIZE_KEY, 10, 20, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
@@ -74,7 +77,7 @@ class UserAuditCleanupServiceTest {
 
   @Test
   void onSettingChanged_shouldIgnoreNonUserGroup() {
-    var result = cleanupService.onSettingChanged("audit.inventory", "enabled", true, false, conn, TENANT_ID);
+    var result = cleanupService.onSettingChanged(SettingGroup.INVENTORY.getId(), ENABLED_KEY, true, false, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao, never()).deleteAll(conn, TENANT_ID);

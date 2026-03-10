@@ -94,10 +94,12 @@ public class ConfigurationService {
     if (Objects.equals(oldValue, newValue)) {
       return Future.succeededFuture();
     }
-    var result = Future.<Void>succeededFuture();
-    for (var handler : changeHandlers) {
-      result = result.compose(ignored -> handler.onSettingChanged(groupId, settingKey, oldValue, newValue, conn, tenantId));
-    }
-    return result;
+    return changeHandlers.stream()
+      .reduce(
+        Future.succeededFuture(),
+        (chain, handler) -> chain.compose(ignored ->
+          handler.onSettingChanged(groupId, settingKey, oldValue, newValue, conn, tenantId)),
+        (a, b) -> a.compose(ignored -> b)
+      );
   }
 }
