@@ -119,26 +119,6 @@ class SettingDaoTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  void getById_withConn_positive() {
-    // given
-    var settingId = "settingId";
-    var conn = mock(Conn.class);
-    var settingEntity = createSettingEntity();
-    var rowSet = mockRowSet(settingEntity);
-    when(conn.execute(anyString(), any(Tuple.class)))
-      .thenReturn(Future.succeededFuture(rowSet));
-
-    // when
-    var result = settingDao.getById(settingId, conn, TENANT_ID);
-
-    // then
-    assertTrue(result.succeeded());
-    assertEquals(10, result.result().getValue());
-    verify(conn).execute(anyString(), any(Tuple.class));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
   void update_withConn_positive() {
     // given
     var entity = new SettingEntity("group.key", "key", "value", SettingValueType.STRING, "description", "group",

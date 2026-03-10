@@ -75,6 +75,7 @@ class ConfigurationServiceTest {
     lenient().when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
     lenient().doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn))
       .when(postgresClient).withTrans(any());
+    lenient().when(changeHandler.isResponsible(GROUP_ID, SETTING_KEY)).thenReturn(true);
   }
 
   @Test
@@ -107,13 +108,11 @@ class ConfigurationServiceTest {
     var setting = getSetting();
     var argumentCaptor = ArgumentCaptor.forClass(SettingEntity.class);
     var userId = UUID.randomUUID();
-    var oldEntity = SettingEntity.builder().value("oldValue").build();
     when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
     when(settingDao.update(anyString(), argumentCaptor.capture(), any(Conn.class), anyString()))
       .thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
-    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID))
+    when(changeHandler.onSettingChanged("value", conn, TENANT_ID))
       .thenReturn(Future.succeededFuture());
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, userId.toString(), TENANT_ID);
@@ -131,35 +130,31 @@ class ConfigurationServiceTest {
 
     verify(validationService).validateSetting(setting, GROUP_ID, SETTING_KEY);
     verify(settingDao).exists(SETTING_ID, conn, TENANT_ID);
-    verify(settingDao).getById(SETTING_ID, conn, TENANT_ID);
     verify(settingDao).update(eq(SETTING_ID), any(), eq(conn), eq(TENANT_ID));
-    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID);
+    verify(changeHandler).onSettingChanged("value", conn, TENANT_ID);
   }
 
   @Test
-  void updateSetting_shouldNotNotifyHandlers_whenValueUnchanged() {
+  void updateSetting_shouldNotNotifyHandlers_whenNoHandlerIsResponsible() {
     var setting = getSetting();
-    var oldEntity = SettingEntity.builder().value("value").build();
     when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
     when(settingDao.update(anyString(), any(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
+    when(changeHandler.isResponsible(GROUP_ID, SETTING_KEY)).thenReturn(false);
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, null, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(changeHandler, never()).onSettingChanged(any(), any(), any(), any(), any(Conn.class), any());
+    verify(changeHandler, never()).onSettingChanged(any(), any(Conn.class), any());
   }
 
   @Test
   void updateSetting_shouldFailWhenHandlerFails() {
     var setting = getSetting();
-    var oldEntity = SettingEntity.builder().value("oldValue").build();
     when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
     when(settingDao.update(anyString(), any(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
-    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID))
+    when(changeHandler.onSettingChanged("value", conn, TENANT_ID))
       .thenReturn(Future.failedFuture(new RuntimeException("handler error")));
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, null, TENANT_ID);
@@ -167,7 +162,7 @@ class ConfigurationServiceTest {
     assertTrue(result.failed());
     assertEquals("handler error", result.cause().getMessage());
     verify(settingDao).update(eq(SETTING_ID), any(), eq(conn), eq(TENANT_ID));
-    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID);
+    verify(changeHandler).onSettingChanged("value", conn, TENANT_ID);
   }
 
   @Test

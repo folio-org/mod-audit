@@ -6,7 +6,6 @@ import io.vertx.core.Future;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -56,12 +55,8 @@ public class ConfigurationService {
     return pgClientFactory.createInstance(tenantId).withTrans(conn ->
       settingDao.exists(settingId, conn, tenantId)
         .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
-        .compose(ignored -> settingDao.getById(settingId, conn, tenantId))
-        .compose(oldEntity -> {
-          var oldValue = oldEntity.getValue();
-          return settingDao.update(settingId, entity, conn, tenantId)
-            .compose(ignored -> notifyHandlers(groupId, settingKey, oldValue, entity.getValue(), conn, tenantId));
-        })
+        .compose(ignored -> settingDao.update(settingId, entity, conn, tenantId))
+        .compose(ignored -> notifyHandlers(groupId, settingKey, entity.getValue(), conn, tenantId))
     );
   }
 
@@ -90,16 +85,13 @@ public class ConfigurationService {
   }
 
   private Future<Void> notifyHandlers(String groupId, String settingKey,
-                                      Object oldValue, Object newValue, Conn conn, String tenantId) {
-    if (Objects.equals(oldValue, newValue)) {
-      return Future.succeededFuture();
+                                      Object newValue, Conn conn, String tenantId) {
+    var result = Future.<Void>succeededFuture();
+    for (var handler : changeHandlers) {
+      if (handler.isResponsible(groupId, settingKey)) {
+        result = result.compose(ignored -> handler.onSettingChanged(newValue, conn, tenantId));
+      }
     }
-    return changeHandlers.stream()
-      .reduce(
-        Future.succeededFuture(),
-        (chain, handler) -> chain.compose(ignored ->
-          handler.onSettingChanged(groupId, settingKey, oldValue, newValue, conn, tenantId)),
-        (a, b) -> a.compose(ignored -> b)
-      );
+    return result;
   }
 }

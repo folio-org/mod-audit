@@ -18,11 +18,12 @@ import org.folio.dao.configuration.SettingValueType;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.impl.UserEventDaoImpl;
 import org.folio.mapper.configuration.SettingEntityMapper;
+import org.folio.rest.persist.Conn;
 import org.folio.mapper.configuration.SettingGroupMapper;
 import org.folio.mapper.configuration.SettingMapper;
 import org.folio.mapper.configuration.SettingMappers;
 import org.folio.rest.impl.ApiTestBase;
-import org.folio.services.user.UserAuditCleanupService;
+import org.folio.services.user.UserAuditPurgeHandler;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,7 @@ public class ConfigurationServiceTransactionTest extends ApiTestBase {
     assertThat(countUserAuditRecords()).isGreaterThan(0);
 
     // when: disable audit via ConfigurationService with real cleanup handler
-    var cleanupHandler = new UserAuditCleanupService(userEventDao);
+    var cleanupHandler = new UserAuditPurgeHandler(userEventDao);
     var service = new ConfigurationService(settingDao, settingGroupDao, settingMappers,
       validationService, List.of(cleanupHandler), postgresClientFactory);
 
@@ -89,8 +90,17 @@ public class ConfigurationServiceTransactionTest extends ApiTestBase {
     assertThat(recordsBefore).isGreaterThan(0);
 
     // when: disable audit with a handler that fails
-    SettingChangeHandler failingHandler = (groupId, settingKey, oldValue, newValue, conn, tenantId) ->
-      Future.failedFuture(new RuntimeException("simulated handler failure"));
+    SettingChangeHandler failingHandler = new SettingChangeHandler() {
+      @Override
+      public boolean isResponsible(String groupId, String settingKey) {
+        return true;
+      }
+
+      @Override
+      public Future<Void> onSettingChanged(Object newValue, Conn conn, String tenantId) {
+        return Future.failedFuture(new RuntimeException("simulated handler failure"));
+      }
+    };
 
     var service = new ConfigurationService(settingDao, settingGroupDao, settingMappers,
       validationService, List.of(failingHandler), postgresClientFactory);
