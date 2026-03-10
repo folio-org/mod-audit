@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.util.UUID;
+import org.folio.rest.persist.Conn;
 
 public interface UserEventDao {
 
@@ -11,7 +12,7 @@ public interface UserEventDao {
 
   Future<Void> deleteByUserId(UUID userId, String tenantId);
 
-  Future<Void> deleteAll(String tenantId);
+  Future<Void> deleteAll(Conn conn, String tenantId);
 
   String tableName();
 }

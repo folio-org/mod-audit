@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
+import org.folio.rest.persist.Conn;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Repository;
 
@@ -64,12 +65,11 @@ public class UserEventDaoImpl implements UserEventDao {
   }
 
   @Override
-  public Future<Void> deleteAll(String tenantId) {
+  public Future<Void> deleteAll(Conn conn, String tenantId) {
     LOGGER.debug("deleteAll:: Deleting all user audit records with [tenantId: {}]", tenantId);
     var table = formatDBTableName(tenantId, tableName());
     var query = DELETE_ALL_SQL.formatted(table);
-    return pgClientFactory.createInstance(tenantId).execute(query)
-      .mapEmpty();
+    return conn.execute(query).mapEmpty();
   }
 
   @Override

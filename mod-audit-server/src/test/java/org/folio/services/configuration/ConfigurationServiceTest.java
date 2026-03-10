@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,7 @@ import io.vertx.core.Future;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.ws.rs.NotFoundException;
 import org.folio.dao.configuration.SettingDao;
 import org.folio.dao.configuration.SettingEntity;
@@ -27,6 +29,9 @@ import org.folio.mapper.configuration.SettingGroupMapper;
 import org.folio.mapper.configuration.SettingMapper;
 import org.folio.mapper.configuration.SettingMappers;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.persist.Conn;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.util.PostgresClientFactory;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,13 +59,22 @@ class ConfigurationServiceTest {
   private SettingValidationService validationService;
   @Mock
   private SettingChangeHandler changeHandler;
+  @Mock
+  private PostgresClientFactory pgClientFactory;
+  @Mock
+  private PostgresClient postgresClient;
+  @Mock
+  private Conn conn;
 
   private ConfigurationService configurationService;
 
   @BeforeEach
   void setUp() {
     configurationService = new ConfigurationService(settingDao, settingGroupDao, settingMappers,
-      validationService, List.of(changeHandler));
+      validationService, List.of(changeHandler), pgClientFactory);
+    lenient().when(pgClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
+    lenient().doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn))
+      .when(postgresClient).withTrans(any());
   }
 
   @Test
@@ -94,11 +108,12 @@ class ConfigurationServiceTest {
     var argumentCaptor = ArgumentCaptor.forClass(SettingEntity.class);
     var userId = UUID.randomUUID();
     var oldEntity = SettingEntity.builder().value("oldValue").build();
-    when(settingDao.exists(anyString(), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
-    when(settingDao.update(anyString(), argumentCaptor.capture(), anyString())).thenReturn(Future.succeededFuture());
+    when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
+    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
+    when(settingDao.update(anyString(), argumentCaptor.capture(), any(Conn.class), anyString()))
+      .thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
-    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", TENANT_ID))
+    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID))
       .thenReturn(Future.succeededFuture());
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, userId.toString(), TENANT_ID);
@@ -115,50 +130,50 @@ class ConfigurationServiceTest {
     assertNotNull(settingEntity.getUpdatedDate());
 
     verify(validationService).validateSetting(setting, GROUP_ID, SETTING_KEY);
-    verify(settingDao).exists(SETTING_ID, TENANT_ID);
-    verify(settingDao).getById(SETTING_ID, TENANT_ID);
-    verify(settingDao).update(eq(SETTING_ID), any(), eq(TENANT_ID));
-    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", TENANT_ID);
+    verify(settingDao).exists(SETTING_ID, conn, TENANT_ID);
+    verify(settingDao).getById(SETTING_ID, conn, TENANT_ID);
+    verify(settingDao).update(eq(SETTING_ID), any(), eq(conn), eq(TENANT_ID));
+    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID);
   }
 
   @Test
   void updateSetting_shouldNotNotifyHandlers_whenValueUnchanged() {
     var setting = getSetting();
     var oldEntity = SettingEntity.builder().value("value").build();
-    when(settingDao.exists(anyString(), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
-    when(settingDao.update(anyString(), any(), anyString())).thenReturn(Future.succeededFuture());
+    when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
+    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
+    when(settingDao.update(anyString(), any(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, null, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(changeHandler, never()).onSettingChanged(any(), any(), any(), any(), any());
+    verify(changeHandler, never()).onSettingChanged(any(), any(), any(), any(), any(Conn.class), any());
   }
 
   @Test
   void updateSetting_shouldFailWhenHandlerFails() {
     var setting = getSetting();
     var oldEntity = SettingEntity.builder().value("oldValue").build();
-    when(settingDao.exists(anyString(), anyString())).thenReturn(Future.succeededFuture(true));
-    when(settingDao.getById(SETTING_ID, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
-    when(settingDao.update(anyString(), any(), anyString())).thenReturn(Future.succeededFuture());
+    when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(true));
+    when(settingDao.getById(SETTING_ID, conn, TENANT_ID)).thenReturn(Future.succeededFuture(oldEntity));
+    when(settingDao.update(anyString(), any(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture());
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
-    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", TENANT_ID))
+    when(changeHandler.onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID))
       .thenReturn(Future.failedFuture(new RuntimeException("handler error")));
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, null, TENANT_ID);
 
     assertTrue(result.failed());
     assertEquals("handler error", result.cause().getMessage());
-    verify(settingDao).update(eq(SETTING_ID), any(), eq(TENANT_ID));
-    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", TENANT_ID);
+    verify(settingDao).update(eq(SETTING_ID), any(), eq(conn), eq(TENANT_ID));
+    verify(changeHandler).onSettingChanged(GROUP_ID, SETTING_KEY, "oldValue", "value", conn, TENANT_ID);
   }
 
   @Test
   void updateSetting_shouldThrowNotFoundException_whenSettingDoesNotExist() {
     var setting = getSetting();
-    when(settingDao.exists(anyString(), anyString())).thenReturn(Future.succeededFuture(false));
+    when(settingDao.exists(anyString(), any(Conn.class), anyString())).thenReturn(Future.succeededFuture(false));
     when(settingMappers.getSettingEntityMapper()).thenReturn(new SettingEntityMapper());
 
     var result = configurationService.updateSetting(GROUP_ID, SETTING_KEY, setting, null, TENANT_ID);
@@ -166,7 +181,7 @@ class ConfigurationServiceTest {
     assertTrue(result.failed());
     assertEquals(NotFoundException.class, result.cause().getClass());
     verify(validationService).validateSetting(setting, GROUP_ID, SETTING_KEY);
-    verify(settingDao).exists(SETTING_ID, TENANT_ID);
+    verify(settingDao).exists(SETTING_ID, conn, TENANT_ID);
   }
 
   @Test

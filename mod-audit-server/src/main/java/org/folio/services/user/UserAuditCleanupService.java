@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserEventDao;
+import org.folio.rest.persist.Conn;
 import org.folio.services.configuration.SettingChangeHandler;
 import org.folio.services.configuration.SettingGroup;
 import org.folio.services.configuration.SettingKey;
@@ -20,21 +21,21 @@ public class UserAuditCleanupService implements SettingChangeHandler {
 
   @Override
   public Future<Void> onSettingChanged(String groupId, String settingKey,
-                                       Object oldValue, Object newValue, String tenantId) {
+                                       Object oldValue, Object newValue, Conn conn, String tenantId) {
     if (!SettingGroup.USER.getId().equals(groupId)) {
       return Future.succeededFuture();
     }
     if (SettingKey.ENABLED.getValue().equals(settingKey)) {
-      return handleEnabledChange(oldValue, newValue, tenantId);
+      return handleEnabledChange(oldValue, newValue, conn, tenantId);
     }
     return Future.succeededFuture();
   }
 
-  private Future<Void> handleEnabledChange(Object oldValue, Object newValue, String tenantId) {
+  private Future<Void> handleEnabledChange(Object oldValue, Object newValue, Conn conn, String tenantId) {
     if (Boolean.TRUE.equals(oldValue) && Boolean.FALSE.equals(newValue)) {
       LOGGER.info("handleEnabledChange:: User audit disabled, deleting all user audit records for [tenantId: {}]",
         tenantId);
-      return userEventDao.deleteAll(tenantId);
+      return userEventDao.deleteAll(conn, tenantId);
     }
     return Future.succeededFuture();
   }

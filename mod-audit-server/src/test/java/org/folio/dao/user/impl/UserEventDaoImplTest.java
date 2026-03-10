@@ -10,13 +10,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
 import org.folio.utils.UnitTest;
@@ -89,14 +93,15 @@ class UserEventDaoImplTest {
       }));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void shouldDeleteAll(VertxTestContext ctx) {
-    doReturn(Future.succeededFuture())
-      .when(postgresClient).execute(anyString());
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
-    userEventDao.deleteAll(TENANT_ID)
+    userEventDao.deleteAll(conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(postgresClient, times(1)).execute(anyString());
+        verify(conn, times(1)).execute(anyString());
         ctx.completeNow();
       }));
   }

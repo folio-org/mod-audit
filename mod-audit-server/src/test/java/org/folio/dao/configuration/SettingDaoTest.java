@@ -4,12 +4,16 @@ import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createSettingEntity;
 import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.vertx.core.Future;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.Row;
@@ -18,6 +22,7 @@ import io.vertx.sqlclient.Tuple;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
 import org.folio.utils.MockUtils;
@@ -42,7 +47,7 @@ class SettingDaoTest {
   @Mock
   private PostgresClient postgresClient;
   @InjectMocks
-  private SettingDao instanceEventDao;
+  private SettingDao settingDao;
 
   private static Stream<Arguments> updateTestData() {
     return Stream.of(
@@ -54,7 +59,7 @@ class SettingDaoTest {
 
   @BeforeEach
   public void setUp() {
-    when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
+    lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
   }
 
   @Test
@@ -66,27 +71,30 @@ class SettingDaoTest {
     mockPostgresExecutionSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
 
     // when
-    instanceEventDao.getAllByGroupId(groupId, TENANT_ID);
+    settingDao.getAllByGroupId(groupId, TENANT_ID);
 
     // then
     assertEquals(groupId, captor.getValue().getString(0));
     verify(postgresClient).select(eq(query), any(Tuple.class), any());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void exists_positive() {
     // given
     var settingId = "settingId";
-    var query = "SELECT 1 FROM diku_mod_audit.setting WHERE id = $1";
-    var captor = ArgumentCaptor.forClass(Tuple.class);
-    mockPostgresExecutionSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
+    var conn = mock(Conn.class);
+    var rowSet = mock(RowSet.class);
+    when(rowSet.iterator()).thenReturn(MockUtils.mockRowIterator(mock(Row.class)));
+    when(conn.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(rowSet));
 
     // when
-    instanceEventDao.exists(settingId, TENANT_ID);
+    var result = settingDao.exists(settingId, conn, TENANT_ID);
 
     // then
-    assertEquals(settingId, captor.getValue().getString(0));
-    verify(postgresClient).select(eq(query), any(Tuple.class), any());
+    assertTrue(result.succeeded());
+    assertTrue(result.result());
+    verify(conn).execute(anyString(), any(Tuple.class));
   }
 
   @Test
@@ -101,12 +109,50 @@ class SettingDaoTest {
       .when(postgresClient).select(eq(query), captor.capture(), any());
 
     // when
-    instanceEventDao.getById(settingId, TENANT_ID)
+    settingDao.getById(settingId, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
         assertEquals(settingId, captor.getValue().getString(0));
         assertEquals(10, result.getValue());
         ctx.completeNow();
       }));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void getById_withConn_positive() {
+    // given
+    var settingId = "settingId";
+    var conn = mock(Conn.class);
+    var settingEntity = createSettingEntity();
+    var rowSet = mockRowSet(settingEntity);
+    when(conn.execute(anyString(), any(Tuple.class)))
+      .thenReturn(Future.succeededFuture(rowSet));
+
+    // when
+    var result = settingDao.getById(settingId, conn, TENANT_ID);
+
+    // then
+    assertTrue(result.succeeded());
+    assertEquals(10, result.result().getValue());
+    verify(conn).execute(anyString(), any(Tuple.class));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void update_withConn_positive() {
+    // given
+    var entity = new SettingEntity("group.key", "key", "value", SettingValueType.STRING, "description", "group",
+      LocalDateTime.now(), UUID.randomUUID(), LocalDateTime.now(), UUID.randomUUID());
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString(), any(Tuple.class)))
+      .thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    // when
+    var result = settingDao.update(entity.getId(), entity, conn, TENANT_ID);
+
+    // then
+    assertTrue(result.succeeded());
+    verify(conn).execute(anyString(), any(Tuple.class));
   }
 
   @ParameterizedTest
@@ -128,7 +174,7 @@ class SettingDaoTest {
     mockPostgresExecutionSuccess(2).when(postgresClient).execute(eq(query), captor.capture(), any());
 
     // when
-    instanceEventDao.update(entity.getId(), entity, TENANT_ID);
+    settingDao.update(entity.getId(), entity, TENANT_ID);
 
     // then
     var captorValue = captor.getValue();

@@ -33,6 +33,7 @@ import org.folio.dao.marc.impl.MarcAuditDaoTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.impl.AuditConfigAPITest;
+import org.folio.services.configuration.ConfigurationServiceTransactionTest;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataCleanupApiTest;
 import org.folio.rest.impl.AuditDataImplApiTest;
@@ -281,5 +282,9 @@ public class TestSuite {
 
   @Nested
   class AuditDataCleanupApiNestedTest extends AuditDataCleanupApiTest {
+  }
+
+  @Nested
+  class ConfigurationServiceTransactionNestedTest extends ConfigurationServiceTransactionTest {
   }
 }

@@ -16,6 +16,8 @@ import org.folio.mapper.configuration.SettingMappers;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.model.SettingGroupCollection;
+import org.folio.rest.persist.Conn;
+import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +29,7 @@ public class ConfigurationService {
   private final SettingMappers settingMappers;
   private final SettingValidationService validationService;
   private final List<SettingChangeHandler> changeHandlers;
+  private final PostgresClientFactory pgClientFactory;
 
   public Future<SettingGroupCollection> getAllSettingGroups(String tenantId) {
     return settingGroupDao.getAll(tenantId)
@@ -50,14 +53,16 @@ public class ConfigurationService {
     entity.setUpdatedDate(LocalDateTime.now(ZoneOffset.UTC));
     entity.setUpdatedByUserId(userId == null ? null : UUID.fromString(userId));
     var settingId = entity.getId();
-    return settingDao.exists(settingId, tenantId)
-      .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
-      .compose(o -> settingDao.getById(settingId, tenantId))
-      .compose(oldEntity -> {
-        var oldValue = oldEntity.getValue();
-        return settingDao.update(settingId, entity, tenantId)
-          .compose(o -> notifyHandlers(groupId, settingKey, oldValue, entity.getValue(), tenantId));
-      });
+    return pgClientFactory.createInstance(tenantId).withTrans(conn ->
+      settingDao.exists(settingId, conn, tenantId)
+        .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
+        .compose(ignored -> settingDao.getById(settingId, conn, tenantId))
+        .compose(oldEntity -> {
+          var oldValue = oldEntity.getValue();
+          return settingDao.update(settingId, entity, conn, tenantId)
+            .compose(ignored -> notifyHandlers(groupId, settingKey, oldValue, entity.getValue(), conn, tenantId));
+        })
+    );
   }
 
   public Future<Setting> getSetting(org.folio.services.configuration.Setting setting, String tenantId) {
@@ -85,13 +90,14 @@ public class ConfigurationService {
   }
 
   private Future<Void> notifyHandlers(String groupId, String settingKey,
-                                      Object oldValue, Object newValue, String tenantId) {
-    if (Objects.equals(oldValue, newValue) || changeHandlers.isEmpty()) {
+                                      Object oldValue, Object newValue, Conn conn, String tenantId) {
+    if (Objects.equals(oldValue, newValue)) {
       return Future.succeededFuture();
     }
-    var futures = changeHandlers.stream()
-      .map(handler -> handler.onSettingChanged(groupId, settingKey, oldValue, newValue, tenantId))
-      .toList();
-    return Future.all(futures).mapEmpty();
+    var result = Future.<Void>succeededFuture();
+    for (var handler : changeHandlers) {
+      result = result.compose(ignored -> handler.onSettingChanged(groupId, settingKey, oldValue, newValue, conn, tenantId));
+    }
+    return result;
   }
 }

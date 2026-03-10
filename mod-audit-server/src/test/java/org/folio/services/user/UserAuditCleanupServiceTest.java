@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
 import org.folio.dao.user.UserEventDao;
+import org.folio.rest.persist.Conn;
 import org.folio.services.configuration.SettingGroup;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.Test;
@@ -24,48 +25,58 @@ class UserAuditCleanupServiceTest {
 
   @Mock
   private UserEventDao userEventDao;
+  @Mock
+  private Conn conn;
   @InjectMocks
   private UserAuditCleanupService cleanupService;
 
   @Test
   void onSettingChanged_shouldDeleteAll_whenEnabledChangedFromTrueToFalse() {
-    when(userEventDao.deleteAll(TENANT_ID)).thenReturn(Future.succeededFuture());
+    when(userEventDao.deleteAll(conn, TENANT_ID)).thenReturn(Future.succeededFuture());
 
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, false, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, false, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(userEventDao).deleteAll(TENANT_ID);
+    verify(userEventDao).deleteAll(conn, TENANT_ID);
   }
 
   @Test
   void onSettingChanged_shouldNotDelete_whenEnabledChangedFromFalseToTrue() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", false, true, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", false, true, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(userEventDao, never()).deleteAll(TENANT_ID);
+    verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
   }
 
   @Test
-  void onSettingChanged_shouldNotDelete_whenEnabledUnchanged() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, true, TENANT_ID);
+  void onSettingChanged_shouldNotDelete_whenEnabledRemainsEnabled() {
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", true, true, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(userEventDao, never()).deleteAll(TENANT_ID);
+    verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
+  }
+
+  @Test
+  void onSettingChanged_shouldNotDelete_whenEnabledRemainsDisabled() {
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "enabled", false, false, conn, TENANT_ID);
+
+    assertTrue(result.succeeded());
+    verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
   }
 
   @Test
   void onSettingChanged_shouldIgnoreNonEnabledSettingKey() {
-    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "records.page.size", 10, 20, TENANT_ID);
+    var result = cleanupService.onSettingChanged(USER_GROUP_ID, "records.page.size", 10, 20, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(userEventDao, never()).deleteAll(TENANT_ID);
+    verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
   }
 
   @Test
   void onSettingChanged_shouldIgnoreNonUserGroup() {
-    var result = cleanupService.onSettingChanged("audit.inventory", "enabled", true, false, TENANT_ID);
+    var result = cleanupService.onSettingChanged("audit.inventory", "enabled", true, false, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
-    verify(userEventDao, never()).deleteAll(TENANT_ID);
+    verify(userEventDao, never()).deleteAll(conn, TENANT_ID);
   }
 }
