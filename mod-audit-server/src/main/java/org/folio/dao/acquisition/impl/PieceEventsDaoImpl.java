@@ -139,7 +139,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, PieceAuditEvent pieceAuditEvent, String tenantId) {
-    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
+    LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(pieceAuditEvent.getId(),
           pieceAuditEvent.getAction(),

@@ -73,7 +73,7 @@ public class InvoiceLineEventsDaoImpl implements InvoiceLineEventsDao {
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, InvoiceLineAuditEvent invoiceLineAuditEvent, String tenantId) {
-    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
+    LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
       return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(invoiceLineAuditEvent.getId(),
         invoiceLineAuditEvent.getAction(),

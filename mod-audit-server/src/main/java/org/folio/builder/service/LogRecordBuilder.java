@@ -61,7 +61,7 @@ public abstract class LogRecordBuilder {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private static final String OKAPI_URL = "x-okapi-url";
-  private static final String EXCEPTION_CALLING_ENDPOINT_MSG = "Exception calling {} {}";
+  private static final String EXCEPTION_CALLING_ENDPOINT_MSG = "Exception calling {} endpoint";
 
   public static final String SEARCH_PARAMS = "?limit=%s&offset=%s%s";
   public static final String ID = "id";
@@ -85,7 +85,7 @@ public abstract class LogRecordBuilder {
   }
 
   private CompletableFuture<JsonObject> handleGetRequest(String endpoint) {
-    LOGGER.debug("handleGetRequest:: handling Get Request with endpoint : {}", endpoint);
+    LOGGER.debug("handleGetRequest:: Handling GET request");
     CompletableFuture<JsonObject> future = new CompletableFuture<>();
 
     final String okapiURL = okapiHeaders.getOrDefault(OKAPI_URL, "");
@@ -93,11 +93,11 @@ public abstract class LogRecordBuilder {
     HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
     try {
-      LOGGER.debug("handleGetRequest::Calling GET {}", endpoint);
+      LOGGER.debug("handleGetRequest:: Calling GET endpoint");
       httpClient.request(HttpMethod.GET, endpoint, okapiHeaders)
         .whenComplete((response, throwable) -> {
           if (Objects.nonNull(throwable)) {
-            LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
+            LOGGER.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET);
             future.completeExceptionally(throwable);
           } else {
             future.complete(verifyAndExtractBody(response));
@@ -105,7 +105,7 @@ public abstract class LogRecordBuilder {
           httpClient.closeClient();
         });
     } catch (Exception e) {
-      LOGGER.warn(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint);
+      LOGGER.warn(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET);
       future.completeExceptionally(e);
       httpClient.closeClient();
     }
@@ -113,9 +113,9 @@ public abstract class LogRecordBuilder {
   }
 
   public <T> CompletableFuture<T> getEntitiesByQuery(String url, Class<T> collection, int limit, int offset, String query) {
-    LOGGER.debug("getEntitiesByQuery:: Getting Entities By Query : {}", query);
+    LOGGER.debug("getEntitiesByQuery:: Getting entities by query");
     String endpoint = String.format(url + SEARCH_PARAMS, limit, offset, buildQuery(query));
-    LOGGER.debug("getEntitiesByQuery:: Entities successfully retrieved from endpoint: {}", endpoint);
+    LOGGER.debug("getEntitiesByQuery:: Entities successfully retrieved");
     return handleGetRequest(endpoint).thenApply(response -> response.mapTo(collection));
   }
 
@@ -152,23 +152,23 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchUserDetails(JsonObject payload, String userId) {
-    LOGGER.debug("fetchUserDetails:: Fetching user details for user Id : {}", userId);
+    LOGGER.debug("fetchUserDetails:: Fetching user details");
     return getEntitiesByIds(USERS_URL, UserCollection.class, 1, 0, userId)
       .thenCompose(users -> {
         users.getUsers()
           .stream()
           .findFirst()
           .ifPresent(user -> updatePayload(payload, userId, user));
-        LOGGER.debug("fetchUserDetails:: Fetched user details for user Id : {}", userId);
+        LOGGER.debug("fetchUserDetails:: Fetched user details");
         return CompletableFuture.completedFuture(payload);
       });
   }
 
   private void updatePayload(JsonObject payload, String userId, User user) {
-    LOGGER.debug("updatePayload:: Updating payload with details for user ID {}", userId);
+    LOGGER.debug("updatePayload:: Updating payload with user details");
     if (nonNull(user)) {
       if (userId.equals(getProperty(payload, USER_ID))) {
-        LOGGER.debug("updatePayload:: Updating user id to payload because user id : {} matched with user id from payload", userId);
+        LOGGER.debug("updatePayload:: Updating user id in payload to match existing payload user id");
         payload.put(USER_BARCODE.value(), user.getBarcode());
       }
       fetchUserPersonal(payload, user);
@@ -176,7 +176,7 @@ public abstract class LogRecordBuilder {
   }
 
   public CompletableFuture<JsonObject> fetchUserAndSourceDetails(JsonObject payload, String userId, String sourceId) {
-    LOGGER.debug("fetchUserAndSourceDetails:: Fetching user details for user Id : {} and source ID {}", userId, sourceId);
+    LOGGER.debug("fetchUserAndSourceDetails:: Fetching user and source details");
     return getEntitiesByIds(USERS_URL, UserCollection.class, 2, 0, userId, sourceId)
       .thenCompose(users -> {
       Map<String, User> usersGroupedById = StreamEx.of(users.getUsers()).collect(toMap(User::getId, identity()));
@@ -190,24 +190,24 @@ public abstract class LogRecordBuilder {
           payload.put(SOURCE.value(),
             buildPersonalName(source.getPersonal().getFirstName(), source.getPersonal().getLastName()));
         }
-        LOGGER.info("fetchUserAndSourceDetails:: Fetched user details for user Id : {} and source ID {}", userId, sourceId);
+        LOGGER.info("fetchUserAndSourceDetails:: Fetched user and source details");
         return completedFuture(payload);
     });
   }
 
   public CompletableFuture<JsonObject> fetchUserDetailsByUserBarcode(JsonObject payload, String userBarcode) {
-    LOGGER.debug("fetchUserDetailsByUserBarcode:: Fetching user details by user barcode {}", userBarcode);
+    LOGGER.debug("fetchUserDetailsByUserBarcode:: Fetching user details by user barcode");
     return getEntitiesByQuery(USERS_URL, UserCollection.class, 1, 0, "barcode==" + userBarcode)
       .thenCompose(users -> {
         var user = users.getUsers().get(0);
         if (nonNull(user)) {
           if (userBarcode.equals(getProperty(payload, USER_BARCODE))) {
-            LOGGER.info("fetchUserDetailsByUserBarcode:: Adding user id to payload because user barcode : {} matched with user barcode from payload", userBarcode);
+            LOGGER.info("fetchUserDetailsByUserBarcode:: Adding user id to payload because user barcode matched payload");
             payload.put(USER_ID.value(), user.getId());
           }
           fetchUserPersonal(payload, user);
         }
-        LOGGER.info("fetchUserDetailsByUserBarcode:: Fetched user details by user barcode {}", userBarcode);
+        LOGGER.info("fetchUserDetailsByUserBarcode:: Fetched user details by user barcode");
         return completedFuture(payload);
       });
   }
@@ -242,12 +242,12 @@ public abstract class LogRecordBuilder {
    * @return URL encoded string
    */
   private String encodeQuery(String query) {
-    LOGGER.debug("encodeQuery:: Encoding Query : {}", query );
+    LOGGER.debug("encodeQuery:: Encoding query");
     try {
       LOGGER.debug("Encoded query");
       return URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {
-      LOGGER.warn("Error happened while attempting to encode '{}'", query);
+      LOGGER.warn("Error happened while attempting to encode query");
       throw new CompletionException(e);
     }
   }
@@ -314,14 +314,12 @@ public abstract class LogRecordBuilder {
 
   private static JsonObject verifyAndExtractBody(Response response) {
     LOGGER.debug("verifyAndExtractBody:: Verifying and Extracting Body");
-    var endpoint = response.getEndpoint();
     var code = response.getCode();
-    var body = response.getBody();
     if (!Response.isSuccess(code)) {
-      LOGGER.warn("Error calling {} with code {}, response body: {}", endpoint, code, body);
+      LOGGER.warn("Error calling downstream endpoint with code {}", code);
       return null;
     }
-    LOGGER.debug("verifyAndExtractBody:: The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+    LOGGER.debug("verifyAndExtractBody:: Response body received for GET request");
     LOGGER.info("verifyAndExtractBody:: Verifying and Extracting Body completed");
     return response.getBody();
   }
@@ -342,15 +340,15 @@ public abstract class LogRecordBuilder {
   }
 
   String buildPersonalName(String firstName, String lastName) {
-    LOGGER.debug("buildPersonalName:: Building Personal Name with firstname : {} and lastname : {}", firstName, lastName);
+    LOGGER.debug("buildPersonalName:: Building personal name");
     if (isNotEmpty(firstName) && isNotEmpty(lastName)) {
-      LOGGER.debug("buildPersonalName:: Built Personal Name with firstname : {} and lastname : {}", firstName, lastName);
+      LOGGER.debug("buildPersonalName:: Built personal name from first and last name");
       return lastName + ", " + firstName;
     } else if (isEmpty(firstName) && isNotEmpty(lastName)) {
-      LOGGER.debug("buildPersonalName:: Built Personal Name with lastname : {}", lastName);
+      LOGGER.debug("buildPersonalName:: Built personal name from last name");
       return lastName;
     } else if (isNotEmpty(firstName) && isEmpty(lastName)) {
-      LOGGER.debug("buildPersonalName:: Built Personal Name with firstname : {}", firstName);
+      LOGGER.debug("buildPersonalName:: Built personal name from first name");
       return firstName;
     } else {
       LOGGER.debug("buildPersonalName:: Error building personal name because there is no firstname and lastname");
