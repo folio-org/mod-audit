@@ -44,6 +44,13 @@ public class UserEventServiceImpl implements UserEventService {
   }
 
   @Override
+  public Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan) {
+    LOGGER.debug("expireRecords:: Expiring user audit records older than [tenantId: {}, expireOlderThan: {}]",
+      tenantId, expireOlderThan);
+    return userEventDao.deleteOlderThanDate(expireOlderThan, tenantId);
+  }
+
+  @Override
   public Future<String> processEvent(UserEvent event, String tenantId) {
     LOGGER.debug("processEvent:: Trying to process UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
       tenantId, event.getId(), event.getUserId());

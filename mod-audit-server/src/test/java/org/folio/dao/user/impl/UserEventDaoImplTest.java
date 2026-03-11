@@ -20,6 +20,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import java.sql.Timestamp;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
@@ -102,6 +103,35 @@ class UserEventDaoImplTest {
     userEventDao.deleteAll(conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
         verify(conn, times(1)).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldDeleteOlderThanDate(VertxTestContext ctx) {
+    var tenDaysAgo = new Timestamp(System.currentTimeMillis() - 10L * 24 * 60 * 60 * 1000);
+
+    doReturn(Future.succeededFuture())
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
+
+    userEventDao.deleteOlderThanDate(tenDaysAgo, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        ctx.completeNow();
+      }));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldDeleteOlderThanDateWithConn(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    var tenDaysAgo = new Timestamp(System.currentTimeMillis() - 10L * 24 * 60 * 60 * 1000);
+
+    when(conn.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.deleteOlderThanDate(tenDaysAgo, conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn, times(1)).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }
