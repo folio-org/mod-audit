@@ -59,6 +59,28 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
+  // Keep in sync with UserEventServiceImpl.ANONYMIZED_PATHS
+  private static final String ANONYMIZE_ALL_SQL = """
+    UPDATE %s SET
+      performed_by = NULL,
+      diff = CASE WHEN diff IS NOT NULL THEN
+        (SELECT CASE
+           WHEN (filtered IS NULL OR filtered = '[]'::jsonb)
+                AND (diff->'collectionChanges' IS NULL OR diff->'collectionChanges' = '[]'::jsonb)
+           THEN NULL
+           ELSE jsonb_set(diff, '{fieldChanges}', COALESCE(filtered, '[]'::jsonb))
+         END
+         FROM (SELECT jsonb_agg(elem) AS filtered
+               FROM jsonb_array_elements(
+                 CASE WHEN jsonb_typeof(diff->'fieldChanges') = 'array'
+                      THEN diff->'fieldChanges' ELSE '[]'::jsonb END) elem
+               WHERE elem->>'fullPath' NOT IN ('metadata.createdByUserId', 'metadata.updatedByUserId')
+         ) sub)
+        ELSE NULL END
+    WHERE performed_by IS NOT NULL
+       OR diff @? '$.fieldChanges[*] ? (@.fullPath == "metadata.createdByUserId" || @.fullPath == "metadata.updatedByUserId")'
+    """;
+
   private final PostgresClientFactory pgClientFactory;
 
   public UserEventDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -112,6 +134,14 @@ public class UserEventDaoImpl implements UserEventDao {
     LOGGER.debug("deleteAll:: Deleting all user audit records with [tenantId: {}]", tenantId);
     var table = formatDBTableName(tenantId, tableName());
     var query = DELETE_ALL_SQL.formatted(table);
+    return conn.execute(query).mapEmpty();
+  }
+
+  @Override
+  public Future<Void> anonymizeAll(Conn conn, String tenantId) {
+    LOGGER.info("anonymizeAll:: Anonymizing all user audit records [tenantId: {}]", tenantId);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = ANONYMIZE_ALL_SQL.formatted(table);
     return conn.execute(query).mapEmpty();
   }
 

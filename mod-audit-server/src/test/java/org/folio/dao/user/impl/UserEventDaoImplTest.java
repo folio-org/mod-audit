@@ -106,6 +106,19 @@ class UserEventDaoImplTest {
       }));
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldAnonymizeAll(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.anonymizeAll(conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn, times(1)).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
   @Test
   void shouldReturnCorrectTableName() {
     assertEquals("user_audit", userEventDao.tableName());

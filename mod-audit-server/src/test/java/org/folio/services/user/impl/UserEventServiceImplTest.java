@@ -1,5 +1,6 @@
 package org.folio.services.user.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
+import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.domain.diff.FieldChangeDto;
 import org.folio.exception.ValidationException;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.mapper.user.UserEventToEntityMapper;
@@ -40,6 +43,7 @@ import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -71,6 +75,7 @@ class UserEventServiceImplTest {
   void shouldSaveCreatedEventSuccessfully(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.CREATED);
     mockAuditEnabled(true);
+    mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
         UUID.randomUUID(), UserEventType.CREATED.name(), null, null));
@@ -126,9 +131,126 @@ class UserEventServiceImplTest {
   }
 
   @Test
+  void shouldAnonymizePerformedByAndMetadataFields(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var performedBy = UUID.randomUUID();
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("username", "username", "old", "new"),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockAnonymize(true);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), performedBy, diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.performedBy()).isNull();
+        assertThat(saved.diff().getFieldChanges()).hasSize(1);
+        assertThat(saved.diff().getFieldChanges().get(0).getFullPath()).isEqualTo("username");
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSkipUpdateEventWhenAnonymizationRemovesAllChanges(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("createdByUserId", "metadata.createdByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockAnonymize(true);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldAnonymizePerformedByForCreatedEvent(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.CREATED);
+    var performedBy = UUID.randomUUID();
+    mockAuditEnabled(true);
+    mockAnonymize(true);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.CREATED.name(), performedBy, null));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.performedBy()).isNull();
+        assertThat(saved.diff()).isNull();
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldCollapseEmptyDiffToNullWhenFieldChangesIsNull(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(null, null);
+    mockAuditEnabled(true);
+    mockAnonymize(true);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldNotAnonymizeWhenAnonymizeSettingIsFalse(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var performedBy = UUID.randomUUID();
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("username", "username", "old", "new"),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), performedBy, diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.performedBy()).isEqualTo(performedBy);
+        assertThat(saved.diff().getFieldChanges()).hasSize(2);
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
   void shouldHandleDuplicateEvent(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.CREATED);
     mockAuditEnabled(true);
+    mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
         UUID.randomUUID(), UserEventType.CREATED.name(), null, null));
@@ -240,7 +362,14 @@ class UserEventServiceImplTest {
   }
 
   private void mockAuditEnabled(boolean value) {
-    when(configurationService.getSetting(any(), eq(TENANT_ID)))
+    when(configurationService.getSetting(
+      eq(org.folio.services.configuration.Setting.USER_RECORDS_ENABLED), eq(TENANT_ID)))
+      .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
+  }
+
+  private void mockAnonymize(boolean value) {
+    when(configurationService.getSetting(
+      eq(org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE), eq(TENANT_ID)))
       .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
   }
 }

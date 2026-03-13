@@ -8,7 +8,8 @@ public enum SettingKey {
 
   ENABLED("enabled"),
   RECORDS_PAGE_SIZE("records.page.size"),
-  RETENTION_PERIOD("records.retention.period");
+  RETENTION_PERIOD("records.retention.period"),
+  ANONYMIZE("anonymize");
 
   private final String value;
 

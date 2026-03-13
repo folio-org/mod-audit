@@ -514,6 +514,11 @@
       "description": "Update setting for audit user records page size"
     },
     {
+      "permissionName": "audit.config.groups.settings.audit.user.anonymize.item.put",
+      "displayName": "Audit Configuration - anonymize editing person for user audit records",
+      "description": "Anonymize editing person for user audit records"
+    },
+    {
       "permissionName": "audit.inventory.instance.collection.get",
       "displayName": "Inventory Audit - get instance events",
       "description": "Get inventory instance audit events"

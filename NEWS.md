@@ -9,6 +9,7 @@
 * [MODAUD-257](https://folio-org.atlassian.net/browse/MODAUD-257) - Replace EOL net.mguenther.kafka:kafka-junit with testcontainers KafkaContainer
 * [MODAUD-297](https://folio-org.atlassian.net/browse/MODAUD-297) - Consume user domain events and store audit history
 * [MODAUD-299](https://folio-org.atlassian.net/browse/MODAUD-299) - Delete user audit records on disable
+* [MODAUD-294](https://folio-org.atlassian.net/browse/MODAUD-294) - Add anonymization of editing person for user audit log
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked

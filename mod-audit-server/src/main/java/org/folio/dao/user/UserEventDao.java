@@ -51,6 +51,8 @@ public interface UserEventDao {
 
   Future<Void> deleteAll(Conn conn, String tenantId);
 
+  Future<Void> anonymizeAll(Conn conn, String tenantId);
+
   /**
    * Returns audit table name
    *
