@@ -283,6 +283,18 @@ class DiffCalculatorTest {
       );
   }
 
+  @Test
+  void shouldIgnoreAdditionalProperties() {
+    var oldInstance = getMap(new Instance().withId("1").withAdditionalProperty("junk", "old"));
+    var newInstance = getMap(new Instance().withId("1").withAdditionalProperty("junk", "new"));
+
+    var diff = diffCalculator.calculateDiff(oldInstance, newInstance);
+
+    assertThat(diff)
+      .as("Changes to additionalProperties should be ignored by default")
+      .isNull();
+  }
+
   private static Map<String, Object> getMap(Instance obj) {
     return new JsonObject(Json.encode(obj)).getMap();
   }

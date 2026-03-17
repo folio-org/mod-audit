@@ -84,7 +84,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderLineAuditEvent orderLineAuditEvent, String tenantId) {
-    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
+    LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(orderLineAuditEvent.getId(),
         orderLineAuditEvent.getAction(),
