@@ -6,6 +6,7 @@ import io.vertx.sqlclient.RowSet;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
+import org.folio.rest.persist.Conn;
 
 public interface UserEventDao {
 
@@ -47,6 +48,8 @@ public interface UserEventDao {
    * @return Void future
    */
   Future<Void> deleteByUserId(UUID userId, String tenantId);
+
+  Future<Void> deleteAll(Conn conn, String tenantId);
 
   /**
    * Returns audit table name

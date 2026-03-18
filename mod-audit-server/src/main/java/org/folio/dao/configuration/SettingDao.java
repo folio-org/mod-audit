@@ -20,6 +20,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.util.List;
 import java.util.function.Function;
+import org.folio.rest.persist.Conn;
 import org.folio.util.DbUtils;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Repository;
@@ -56,11 +57,10 @@ public class SettingDao {
     return promise.future().map(this::mapToSettingList);
   }
 
-  public Future<Boolean> exists(String settingId, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
+  public Future<Boolean> exists(String settingId, Conn conn, String tenantId) {
     var query = prepareSql(EXIST_BY_ID_SQL, tenantId);
-    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(settingId), promise);
-    return promise.future().map(rowSet -> rowSet.iterator().hasNext());
+    return conn.execute(query, Tuple.of(settingId))
+      .map(rowSet -> rowSet.iterator().hasNext());
   }
 
   public Future<SettingEntity> getById(String settingId, String tenantId) {
@@ -70,13 +70,11 @@ public class SettingDao {
     return promise.future().map(rowSet -> settingMapper().apply(rowSet.iterator().next()));
   }
 
-  public Future<Void> update(String settingId, SettingEntity entity, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
+  public Future<Void> update(String settingId, SettingEntity entity, Conn conn, String tenantId) {
     var query = prepareSql(UPDATE_SQL, tenantId).replace(TYPE_CAST_PLACEHOLDER, getTypeCast(entity.getType()));
     var params = Tuple.of(entity.getKey(), entity.getValue(), entity.getType().value(), entity.getDescription(),
       entity.getUpdatedByUserId(), entity.getUpdatedDate(), settingId);
-    pgClientFactory.createInstance(tenantId).execute(query, params, promise);
-    return promise.future().mapEmpty();
+    return conn.execute(query, params).mapEmpty();
   }
 
   private String prepareSql(String sql, String tenantId) {

@@ -5,6 +5,7 @@ import static org.folio.util.ListUtils.mapItems;
 import io.vertx.core.Future;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.folio.mapper.configuration.SettingMappers;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.model.SettingGroupCollection;
+import org.folio.rest.persist.Conn;
+import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +27,8 @@ public class ConfigurationService {
   private final SettingGroupDao settingGroupDao;
   private final SettingMappers settingMappers;
   private final SettingValidationService validationService;
+  private final List<SettingChangeHandler> changeHandlers;
+  private final PostgresClientFactory pgClientFactory;
 
   public Future<SettingGroupCollection> getAllSettingGroups(String tenantId) {
     return settingGroupDao.getAll(tenantId)
@@ -47,10 +52,12 @@ public class ConfigurationService {
     entity.setUpdatedDate(LocalDateTime.now(ZoneOffset.UTC));
     entity.setUpdatedByUserId(userId == null ? null : UUID.fromString(userId));
     var settingId = entity.getId();
-    return settingDao.exists(settingId, tenantId)
-      .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
-      .compose(o -> settingDao.update(settingId, entity, tenantId))
-      .mapEmpty();
+    return pgClientFactory.createInstance(tenantId).withTrans(conn ->
+      settingDao.exists(settingId, conn, tenantId)
+        .compose(exists -> failSettingIfNotExist(groupId, settingKey, exists))
+        .compose(ignored -> settingDao.update(settingId, entity, conn, tenantId))
+        .compose(ignored -> notifyHandlers(groupId, settingKey, entity.getValue(), conn, tenantId))
+    );
   }
 
   public Future<Setting> getSetting(org.folio.services.configuration.Setting setting, String tenantId) {
@@ -75,5 +82,16 @@ public class ConfigurationService {
     return exists
            ? Future.succeededFuture(null)
            : Future.failedFuture(new NotFoundException(settingKey));
+  }
+
+  private Future<Void> notifyHandlers(String groupId, String settingKey,
+                                      Object newValue, Conn conn, String tenantId) {
+    var result = Future.<Void>succeededFuture();
+    for (var handler : changeHandlers) {
+      if (handler.isResponsible(groupId, settingKey)) {
+        result = result.compose(ignored -> handler.onSettingChanged(newValue, conn, tenantId));
+      }
+    }
+    return result;
   }
 }

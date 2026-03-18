@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
 import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.rest.persist.Conn;
 import org.folio.util.PostgresClientFactory;
 import org.springframework.stereotype.Repository;
 
@@ -44,6 +45,8 @@ public class UserEventDaoImpl implements UserEventDao {
     DELETE FROM %s
       WHERE user_id = $1
     """;
+
+  private static final String DELETE_ALL_SQL = "DELETE FROM %s";
 
   private static final String SELECT_SQL = """
     SELECT * FROM %s
@@ -102,6 +105,14 @@ public class UserEventDaoImpl implements UserEventDao {
     var query = DELETE_BY_USER_ID_SQL.formatted(table);
     return pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(userId))
       .mapEmpty();
+  }
+
+  @Override
+  public Future<Void> deleteAll(Conn conn, String tenantId) {
+    LOGGER.debug("deleteAll:: Deleting all user audit records with [tenantId: {}]", tenantId);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = DELETE_ALL_SQL.formatted(table);
+    return conn.execute(query).mapEmpty();
   }
 
   @Override
