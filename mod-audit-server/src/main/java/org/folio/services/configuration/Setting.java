@@ -11,7 +11,8 @@ public enum Setting {
   INVENTORY_RECORDS_RETENTION_PERIOD(SettingGroup.INVENTORY, SettingKey.RETENTION_PERIOD),
   INVENTORY_RECORDS_ENABLED(SettingGroup.INVENTORY, SettingKey.ENABLED),
   AUTHORITY_RECORDS_ENABLED(SettingGroup.AUTHORITY, SettingKey.ENABLED),
-  USER_RECORDS_ENABLED(SettingGroup.USER, SettingKey.ENABLED);
+  USER_RECORDS_ENABLED(SettingGroup.USER, SettingKey.ENABLED),
+  USER_RECORDS_PAGE_SIZE(SettingGroup.USER, SettingKey.RECORDS_PAGE_SIZE);
 
   private final SettingGroup group;
   private final SettingKey key;

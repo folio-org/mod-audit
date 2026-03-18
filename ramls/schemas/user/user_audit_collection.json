@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "User audit collection",
+  "type": "object",
+  "properties": {
+    "userAuditItems": {
+      "description": "List of user audit items",
+      "type": "array",
+      "id": "userAuditItems",
+      "items": {
+        "type": "object",
+        "$ref": "user_audit_item.json"
+      }
+    },
+    "totalRecords": {
+      "description": "Total number of records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "userAuditItems"
+  ],
+  "additionalProperties": false
+}

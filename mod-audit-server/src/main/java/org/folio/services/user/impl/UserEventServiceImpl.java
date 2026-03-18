@@ -3,12 +3,16 @@ package org.folio.services.user.impl;
 import static org.folio.util.ErrorUtils.handleFailures;
 
 import io.vertx.core.Future;
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
+import org.folio.exception.ValidationException;
+import org.folio.rest.jaxrs.model.UserAuditCollection;
 import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.Setting;
 import org.folio.services.user.UserEventService;
@@ -25,13 +29,16 @@ public class UserEventServiceImpl implements UserEventService {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private final Function<UserEvent, UserAuditEntity> eventToEntityMapper;
+  private final Function<List<UserAuditEntity>, UserAuditCollection> entitiesToCollectionMapper;
   private final ConfigurationService configurationService;
   private final UserEventDao userEventDao;
 
   public UserEventServiceImpl(Function<UserEvent, UserAuditEntity> eventToEntityMapper,
+                               Function<List<UserAuditEntity>, UserAuditCollection> entitiesToCollectionMapper,
                                ConfigurationService configurationService,
                                UserEventDao userEventDao) {
     this.eventToEntityMapper = eventToEntityMapper;
+    this.entitiesToCollectionMapper = entitiesToCollectionMapper;
     this.configurationService = configurationService;
     this.userEventDao = userEventDao;
   }
@@ -84,5 +91,35 @@ public class UserEventServiceImpl implements UserEventService {
       tenantId, userId);
     return userEventDao.deleteByUserId(userId, tenantId)
       .map(event.getId());
+  }
+
+  @Override
+  public Future<UserAuditCollection> getEvents(String userId, String eventTs, String tenantId) {
+    LOGGER.debug("getEvents:: Trying to retrieve user events with [tenantId: {}, userId: {}, eventTs: {}]",
+      tenantId, userId, eventTs);
+    UUID userUUID;
+    Timestamp eventTsTimestamp;
+    try {
+      userUUID = UUID.fromString(userId);
+      eventTsTimestamp = eventTs == null ? null : new Timestamp(Long.parseLong(eventTs));
+    } catch (IllegalArgumentException e) {
+      LOGGER.error("getEvents:: Could not parse userId or eventTs [tenantId: {}, userId: {}, eventTs: {}]",
+        tenantId, userId, eventTs, e);
+      return Future.failedFuture(new ValidationException(e.getMessage()));
+    }
+
+    return userEventDao.count(userUUID, tenantId)
+      .compose(count -> {
+        if (count == 0) {
+          LOGGER.debug("getEvents:: No user events found for [tenantId: {}, userId: {}, eventTs: {}]",
+            tenantId, userId, eventTs);
+          return Future.succeededFuture(new UserAuditCollection().withTotalRecords(0));
+        }
+        return configurationService.getSetting(Setting.USER_RECORDS_PAGE_SIZE, tenantId)
+          .map(setting -> (Integer) setting.getValue())
+          .compose(limit -> userEventDao.get(userUUID, eventTsTimestamp, limit, tenantId))
+          .map(entitiesToCollectionMapper)
+          .map(userAuditCollection -> userAuditCollection.withTotalRecords(count));
+      });
   }
 }
