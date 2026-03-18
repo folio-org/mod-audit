@@ -363,13 +363,13 @@ class UserEventServiceImplTest {
 
   private void mockAuditEnabled(boolean value) {
     when(configurationService.getSetting(
-      eq(org.folio.services.configuration.Setting.USER_RECORDS_ENABLED), eq(TENANT_ID)))
+      org.folio.services.configuration.Setting.USER_RECORDS_ENABLED, TENANT_ID))
       .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
   }
 
   private void mockAnonymize(boolean value) {
     when(configurationService.getSetting(
-      eq(org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE), eq(TENANT_ID)))
+      org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE, TENANT_ID))
       .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
   }
 }
