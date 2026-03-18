@@ -70,7 +70,7 @@ public abstract class AbstractNoticeRecordBuilder extends LogRecordBuilder {
     LOGGER.debug("fetchUserDetails:: Fetching User Details");
     String userBarcode = getProperty(payload, USER_BARCODE);
 
-    LOGGER.info("fetchUserDetails:: Fetched User Details with user barcode : {}", userBarcode);
+    LOGGER.info("fetchUserDetails:: Fetched user details");
     return userBarcode != null
       ? fetchUserDetailsByUserBarcode(payload, userBarcode)
       : fetchUserDetails(payload, getProperty(payload, USER_ID));

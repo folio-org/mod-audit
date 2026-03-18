@@ -123,7 +123,7 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, InventoryAuditEntity event, String tenantId) {
-    LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
+    LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(event.eventId(),
           LocalDateTime.ofInstant(event.eventDate().toInstant(),  ZoneId.systemDefault()),

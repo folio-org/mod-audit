@@ -33,7 +33,7 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
   @Validate
   public void postAuditHandlersLogRecord(String entity, Map<String, String> okapiHeaders,
                                          Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    LOGGER.debug("postAuditHandlersLogRecord:: Trying to Save AuditHandlersLogRecord request with entity: {}", entity);
+    LOGGER.debug("postAuditHandlersLogRecord:: Trying to save AuditHandlersLogRecord request");
     try {
       JsonObject payload = new JsonObject(entity);
       LogRecordBuilder builder = LogRecordBuilderResolver.getBuilder(payload.getString(LOG_EVENT_TYPE.value()), okapiHeaders, vertxContext);
@@ -41,11 +41,11 @@ public class AuditHandlersService extends BaseService implements AuditHandlers {
         .thenCompose(logRecords -> processAnonymize(logRecords, okapiHeaders, vertxContext))
         .thenCompose(logRecords -> saveLogRecords(logRecords, okapiHeaders, vertxContext))
         .exceptionally(throwable -> {
-          LOGGER.warn("Error saving log event : {} due to : {}", entity, throwable.getLocalizedMessage());
+          LOGGER.warn("Error saving log event due to: {}", throwable.getLocalizedMessage());
           return null;
         });
     } catch (Exception e) {
-      LOGGER.warn("Error saving log event for entity {} due to {} ", entity, e.getMessage());
+      LOGGER.warn("Error saving log event due to {}", e.getMessage());
     } finally {
       asyncResultHandler.handle(succeededFuture(PostAuditHandlersLogRecordResponse.respond204()));
     }

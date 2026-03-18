@@ -26,7 +26,7 @@ public class AuditDataImpl implements AuditData {
   public void getAuditData(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
-    LOGGER.debug("getAuditData:: Retrieving audit data with query: {}", query);
+    LOGGER.debug("getAuditData:: Retrieving audit data");
     PgUtil.get(DB_TAB_AUDIT, Audit.class, AuditCollection.class, query, offset, limit, okapiHeaders, vertxContext,
         GetAuditDataResponse.class, asyncResultHandler);
   }
