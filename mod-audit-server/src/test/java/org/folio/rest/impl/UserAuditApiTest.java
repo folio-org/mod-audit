@@ -89,7 +89,9 @@ public class UserAuditApiTest extends ApiTestBase {
       .build();
 
     var userId = UUID.randomUUID().toString();
-    settingDao.update(settingEntity.getId(), settingEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    postgresClientFactory.createInstance(TENANT_ID)
+      .withTrans(conn -> settingDao.update(settingEntity.getId(), settingEntity, conn, TENANT_ID))
+      .toCompletionStage().toCompletableFuture().get();
 
     for (int i = 0; i < 5; i++) {
       var changeRecordDto = new ChangeRecordDto();
