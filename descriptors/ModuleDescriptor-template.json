@@ -302,6 +302,19 @@
       ]
     },
     {
+      "id": "audit-user",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/audit-data/user/{userId}",
+          "permissionsRequired": [
+            "audit.user.collection.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "audit-marc",
       "version": "1.0",
       "handlers": [
@@ -491,6 +504,16 @@
       "description": "Enable/disable audit user records"
     },
     {
+      "permissionName": "audit.user.collection.get",
+      "displayName": "User Audit - get user events",
+      "description": "Get user audit events"
+    },
+    {
+      "permissionName": "audit.config.groups.settings.audit.user.records.page.size.item.put",
+      "displayName": "Audit Configuration - update setting for audit user records page size",
+      "description": "Update setting for audit user records page size"
+    },
+    {
       "permissionName": "audit.inventory.instance.collection.get",
       "displayName": "Inventory Audit - get instance events",
       "description": "Get inventory instance audit events"
@@ -536,6 +559,7 @@
         "audit.inventory.instance.collection.get",
         "audit.inventory.holdings.collection.get",
         "audit.inventory.item.collection.get",
+        "audit.user.collection.get",
         "audit.marc.bib.collection.get",
         "audit.marc.authority.collection.get"
       ]

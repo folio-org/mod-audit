@@ -36,6 +36,8 @@ public class AuditEventDBConstants {
 
   public static final String DIFF_FIELD = "diff";
 
+  public static final String PERFORMED_BY_FIELD = "performed_by";
+
   public static final String ORIGIN_FIELD = "origin";
 
   public static final String ORDER_BY_PATTERN = "ORDER BY %s %s";
