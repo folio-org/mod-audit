@@ -32,8 +32,6 @@ import org.folio.dao.marc.impl.MarcAuditDaoImpl;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.impl.UserEventDaoImpl;
 import org.folio.services.configuration.Setting;
-import org.folio.services.configuration.SettingGroup;
-import org.folio.services.configuration.SettingKey;
 import org.folio.services.management.DatabaseSubPartition;
 import org.folio.services.management.YearQuarter;
 import org.folio.util.PostgresClientFactory;
