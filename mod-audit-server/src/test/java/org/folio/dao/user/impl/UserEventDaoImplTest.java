@@ -55,7 +55,7 @@ class UserEventDaoImplTest {
     userEventDao.save(entity, TENANT_ID)
       .onComplete(ctx.succeeding(result -> ctx.completeNow()));
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    verify(postgresClientFactory).createInstance(TENANT_ID);
   }
 
   @Test
@@ -88,7 +88,7 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteByUserId(userId, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        verify(postgresClient).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }
@@ -101,7 +101,33 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteAll(conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(conn, times(1)).execute(anyString());
+        verify(conn).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldAnonymizeAll(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.anonymizeAll(conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldDeleteEmptyUpdateRecords(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn).execute(anyString());
         ctx.completeNow();
       }));
   }

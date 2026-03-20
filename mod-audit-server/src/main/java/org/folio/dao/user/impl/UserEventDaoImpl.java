@@ -59,6 +59,30 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
+  private static final String ANONYMIZE_ALL_SQL = """
+    UPDATE %s SET
+      performed_by = NULL,
+      diff = CASE WHEN diff IS NOT NULL THEN
+        (SELECT CASE
+           WHEN (filtered IS NULL OR filtered = '[]'::jsonb)
+                AND (diff->>'collectionChanges' IS NULL OR diff->'collectionChanges' = '[]'::jsonb)
+           THEN NULL
+           ELSE jsonb_set(diff, '{fieldChanges}', COALESCE(filtered, '[]'::jsonb))
+         END
+         FROM (SELECT jsonb_agg(elem) AS filtered
+               FROM jsonb_array_elements(
+                 CASE WHEN jsonb_typeof(diff->'fieldChanges') = 'array'
+                      THEN diff->'fieldChanges' ELSE '[]'::jsonb END) elem
+               WHERE elem->>'fullPath' NOT IN ('metadata.createdByUserId', 'metadata.updatedByUserId')
+         ) sub)
+        ELSE NULL END
+    WHERE performed_by IS NOT NULL
+       OR diff @? '$.fieldChanges[*] ? (@.fullPath == "metadata.createdByUserId" || @.fullPath == "metadata.updatedByUserId")'
+    """;
+
+  private static final String DELETE_EMPTY_UPDATE_RECORDS_SQL =
+    "DELETE FROM %s WHERE action = 'UPDATED' AND diff IS NULL";
+
   private final PostgresClientFactory pgClientFactory;
 
   public UserEventDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -116,8 +140,28 @@ public class UserEventDaoImpl implements UserEventDao {
   }
 
   @Override
+  public Future<Void> anonymizeAll(Conn conn, String tenantId) {
+    LOGGER.info("anonymizeAll:: Anonymizing all user audit records [tenantId: {}]", tenantId);
+    return conn.execute(buildAnonymizeAllQuery(tenantId)).mapEmpty();
+  }
+
+  @Override
+  public Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId) {
+    LOGGER.info("deleteEmptyUpdateRecords:: Deleting UPDATE records with null diff [tenantId: {}]", tenantId);
+    return conn.execute(buildDeleteEmptyUpdateRecordsQuery(tenantId)).mapEmpty();
+  }
+
+  @Override
   public String tableName() {
     return USER_AUDIT_TABLE;
+  }
+
+  private String buildAnonymizeAllQuery(String tenantId) {
+    return ANONYMIZE_ALL_SQL.formatted(formatDBTableName(tenantId, tableName()));
+  }
+
+  private String buildDeleteEmptyUpdateRecordsQuery(String tenantId) {
+    return DELETE_EMPTY_UPDATE_RECORDS_SQL.formatted(formatDBTableName(tenantId, tableName()));
   }
 
   private void makeSaveCall(Promise<RowSet<Row>> promise, String query, UserAuditEntity event, String tenantId) {
