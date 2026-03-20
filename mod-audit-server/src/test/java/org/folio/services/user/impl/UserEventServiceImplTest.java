@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -83,7 +82,7 @@ class UserEventServiceImplTest {
 
     eventService.processEvent(event, TENANT_ID)
       .onComplete(ctx.succeeding(r -> {
-        verify(userEventDao, times(1)).save(any(), anyString());
+        verify(userEventDao).save(any(), anyString());
         ctx.completeNow();
       }));
   }
@@ -109,7 +108,7 @@ class UserEventServiceImplTest {
 
     eventService.processEvent(event, TENANT_ID)
       .onComplete(ctx.succeeding(r -> {
-        verify(userEventDao, times(1)).deleteByUserId(any(UUID.class), anyString());
+        verify(userEventDao).deleteByUserId(any(UUID.class), anyString());
         verify(userEventDao, never()).save(any(), anyString());
         ctx.completeNow();
       }));
@@ -119,6 +118,7 @@ class UserEventServiceImplTest {
   void shouldNotSaveUpdateEventWhenDiffIsNull(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.UPDATED);
     mockAuditEnabled(true);
+    mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
         UUID.randomUUID(), UserEventType.UPDATED.name(), null, null));
@@ -203,7 +203,7 @@ class UserEventServiceImplTest {
   }
 
   @Test
-  void shouldCollapseEmptyDiffToNullWhenFieldChangesIsNull(VertxTestContext ctx) {
+  void shouldSkipUpdateEvent_whenDiffIsEmptyAfterProcessing(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.UPDATED);
     var diff = new ChangeRecordDto(null, null);
     mockAuditEnabled(true);
@@ -321,7 +321,6 @@ class UserEventServiceImplTest {
         assertEquals(0, result.getTotalRecords());
         verify(userEventDao).count(userUUID, TENANT_ID);
         verifyNoMoreInteractions(userEventDao);
-        verifyNoInteractions(configurationService);
         verifyNoInteractions(entitiesToCollectionMapper);
         ctx.completeNow();
       }));

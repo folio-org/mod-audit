@@ -49,9 +49,34 @@ public interface UserEventDao {
    */
   Future<Void> deleteByUserId(UUID userId, String tenantId);
 
+  /**
+   * Deletes all user audit records within a transaction.
+   *
+   * @param conn     transaction connection
+   * @param tenantId tenant id
+   * @return Void future
+   */
   Future<Void> deleteAll(Conn conn, String tenantId);
 
+  /**
+   * Anonymizes all user audit records by nullifying performed_by and removing
+   * anonymized field paths from diff within a transaction.
+   *
+   * @param conn     transaction connection
+   * @param tenantId tenant id
+   * @return Void future
+   */
   Future<Void> anonymizeAll(Conn conn, String tenantId);
+
+  /**
+   * Deletes UPDATE records that have a null diff (e.g. after retroactive anonymization
+   * removed all meaningful field changes).
+   *
+   * @param conn     transaction connection
+   * @param tenantId tenant id
+   * @return Void future
+   */
+  Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId);
 
   /**
    * Returns audit table name

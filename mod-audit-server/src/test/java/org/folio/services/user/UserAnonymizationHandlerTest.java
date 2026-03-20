@@ -41,11 +41,13 @@ class UserAnonymizationHandlerTest {
   @Test
   void onSettingChanged_shouldAnonymizeAll_whenSetToTrue() {
     when(userEventDao.anonymizeAll(conn, TENANT_ID)).thenReturn(Future.succeededFuture());
+    when(userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID)).thenReturn(Future.succeededFuture());
 
     var result = anonymizationHandler.onSettingChanged(true, conn, TENANT_ID);
 
     assertTrue(result.succeeded());
     verify(userEventDao).anonymizeAll(conn, TENANT_ID);
+    verify(userEventDao).deleteEmptyUpdateRecords(conn, TENANT_ID);
   }
 
   @Test

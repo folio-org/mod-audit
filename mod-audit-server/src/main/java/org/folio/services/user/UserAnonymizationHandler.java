@@ -34,7 +34,8 @@ public class UserAnonymizationHandler implements SettingChangeHandler {
     if (Boolean.TRUE.equals(newValue)) {
       LOGGER.info("onSettingChanged:: Anonymization enabled, anonymizing all user audit records [tenantId: {}]",
         tenantId);
-      return userEventDao.anonymizeAll(conn, tenantId);
+      return userEventDao.anonymizeAll(conn, tenantId)
+        .compose(v -> userEventDao.deleteEmptyUpdateRecords(conn, tenantId));
     }
     return Future.succeededFuture();
   }

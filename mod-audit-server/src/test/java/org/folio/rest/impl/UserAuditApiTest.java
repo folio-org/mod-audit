@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.services.configuration.Setting.USER_RECORDS_PAGE_SIZE;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -24,7 +25,10 @@ import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.impl.UserEventDaoImpl;
 import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.domain.diff.ChangeType;
+import org.folio.domain.diff.CollectionChangeDto;
+import org.folio.domain.diff.CollectionItemChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +45,11 @@ public class UserAuditApiTest extends ApiTestBase {
   private static final Header PERMS_HEADER = new Header("X-Okapi-Permissions", "audit.all");
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
+  private static final Header CONFIG_PERMS_HEADER = new Header(XOkapiHeaders.PERMISSIONS, """
+    ["audit.config.groups.settings.audit.user.anonymize.item.put"]""");
+  private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
+  private static final Headers CONFIG_HEADERS =
+    new Headers(TENANT_HEADER, CONFIG_PERMS_HEADER, USER_HEADER, CONTENT_TYPE_HEADER);
   private static final String USER_AUDIT_PATH = "/audit-data/user/";
 
   @InjectMocks
@@ -136,6 +145,83 @@ public class UserAuditApiTest extends ApiTestBase {
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .body("userAuditItems", hasSize(0))
       .body("totalRecords", equalTo(0));
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldAnonymizeExistingRecordsWhenAnonymizeSettingEnabled() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record A: UPDATE with username + metadata.updatedByUserId changes
+    var diffA = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    var recordA = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(300)),
+      userId, "UPDATED", performedBy, diffA);
+
+    // Record B: UPDATE with only metadata.createdByUserId change
+    var diffB = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "createdByUserId", "metadata.createdByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    var recordB = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(200)),
+      userId, "UPDATED", performedBy, diffB);
+
+    // Record C: CREATED with no diff
+    var recordC = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(100)),
+      userId, "CREATED", performedBy, null);
+
+    // Record D: UPDATE with only anonymized fieldChanges BUT non-empty collectionChanges — should survive
+    var diffD = new ChangeRecordDto(
+      List.of(new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())),
+      List.of(new CollectionChangeDto("departments", List.of(
+        CollectionItemChangeDto.added("dept-new")))));
+    var recordD = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(50)),
+      userId, "UPDATED", performedBy, diffD);
+
+    userEventDao.save(recordA, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordB, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordC, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordD, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // Enable anonymization via config API
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"anonymize","value":true,"groupId":"audit.user","type":"BOOLEAN"}""")
+      .put("/audit/config/groups/audit.user/settings/anonymize")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    // Fetch user audit records
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    // Record B deleted (empty UPDATE after anonymization), A/C/D remain
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(3);
+    var items = response.jsonPath().getList("userAuditItems");
+    assertThat(items).hasSize(3);
+
+    // Record D (most recent, UPDATED): performedBy null, fieldChanges stripped, collectionChanges preserved
+    assertThat(response.jsonPath().getString("userAuditItems[0].performedBy")).isNull();
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).isEmpty();
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.collectionChanges")).hasSize(1);
+
+    // Record C (CREATED): performedBy null, diff null
+    assertThat(response.jsonPath().getString("userAuditItems[1].performedBy")).isNull();
+    assertThat((Object) response.jsonPath().get("userAuditItems[1].diff")).isNull();
+
+    // Record A (oldest UPDATED): performedBy null, only username field change remains
+    assertThat(response.jsonPath().getString("userAuditItems[2].performedBy")).isNull();
+    var fieldChanges = response.jsonPath().getList("userAuditItems[2].diff.fieldChanges");
+    assertThat(fieldChanges).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[2].diff.fieldChanges[0].fullPath")).isEqualTo("username");
   }
 
   @Test

@@ -1,11 +1,11 @@
 package org.folio.services.user.impl;
 
+import static org.folio.dao.user.UserAuditConstants.ANONYMIZED_FIELD_PATHS;
 import static org.folio.util.ErrorUtils.handleFailures;
 
 import io.vertx.core.Future;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -29,9 +29,6 @@ import org.springframework.stereotype.Service;
 public class UserEventServiceImpl implements UserEventService {
 
   private static final Logger LOGGER = LogManager.getLogger();
-  // Keep in sync with UserEventDaoImpl.ANONYMIZE_ALL_SQL
-  private static final Set<String> ANONYMIZED_PATHS =
-    Set.of("metadata.createdByUserId", "metadata.updatedByUserId");
 
   private final Function<UserEvent, UserAuditEntity> eventToEntityMapper;
   private final Function<List<UserAuditEntity>, UserAuditCollection> entitiesToCollectionMapper;
@@ -72,31 +69,34 @@ public class UserEventServiceImpl implements UserEventService {
     if (UserEventType.DELETED.equals(event.getType())) {
       return deleteAll(event, tenantId);
     }
-    return save(event, tenantId);
+    return configurationService.getSetting(Setting.USER_RECORDS_ANONYMIZE, tenantId)
+      .compose(setting -> save(event, Boolean.TRUE.equals(setting.getValue()), tenantId));
   }
 
-  private Future<String> save(UserEvent event, String tenantId) {
+  private Future<String> save(UserEvent event, boolean anonymize, String tenantId) {
     var eventId = event.getId();
     LOGGER.debug("save:: Trying to save UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
       tenantId, eventId, event.getUserId());
 
     var entity = eventToEntityMapper.apply(event);
-    if (UserEventType.UPDATED.equals(event.getType()) && entity.diff() == null) {
+    if (isUpdateWithNoDiff(event, entity)) {
       LOGGER.debug("save:: No diff calculated for UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
         tenantId, eventId, event.getUserId());
       return Future.succeededFuture(eventId);
     }
 
-    return configurationService.getSetting(Setting.USER_RECORDS_ANONYMIZE, tenantId)
-      .compose(setting -> {
-        var toSave = Boolean.TRUE.equals(setting.getValue()) ? anonymize(entity) : entity;
-        if (UserEventType.UPDATED.equals(event.getType()) && toSave.diff() == null) {
-          LOGGER.debug("save:: No diff after anonymization for UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
-            tenantId, eventId, event.getUserId());
-          return Future.succeededFuture(eventId);
-        }
-        return userEventDao.save(toSave, tenantId).map(eventId);
-      });
+    var toSave = anonymize ? anonymize(entity) : entity;
+    if (isUpdateWithNoDiff(event, toSave)) {
+      LOGGER.debug("save:: No diff after anonymization for UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
+        tenantId, eventId, event.getUserId());
+      return Future.succeededFuture(eventId);
+    }
+
+    return userEventDao.save(toSave, tenantId).map(eventId);
+  }
+
+  private boolean isUpdateWithNoDiff(UserEvent event, UserAuditEntity entity) {
+    return UserEventType.UPDATED.equals(event.getType()) && entity.diff() == null;
   }
 
   private UserAuditEntity anonymize(UserAuditEntity entity) {
@@ -118,7 +118,7 @@ public class UserEventServiceImpl implements UserEventService {
       return (diff.getCollectionChanges() == null || diff.getCollectionChanges().isEmpty()) ? null : diff;
     }
     var remaining = fieldChanges.stream()
-      .filter(fc -> !ANONYMIZED_PATHS.contains(fc.getFullPath()))
+      .filter(fc -> !ANONYMIZED_FIELD_PATHS.contains(fc.getFullPath()))
       .toList();
     if (remaining.isEmpty() && (diff.getCollectionChanges() == null || diff.getCollectionChanges().isEmpty())) {
       return null;
@@ -156,7 +156,8 @@ public class UserEventServiceImpl implements UserEventService {
             tenantId, userId, eventTs);
           return Future.succeededFuture(new UserAuditCollection().withTotalRecords(0));
         }
-        return configurationService.getSetting(Setting.USER_RECORDS_PAGE_SIZE, tenantId)
+        return configurationService.getSetting(
+            org.folio.services.configuration.Setting.USER_RECORDS_PAGE_SIZE, tenantId)
           .map(setting -> (Integer) setting.getValue())
           .compose(limit -> userEventDao.get(userUUID, eventTsTimestamp, limit, tenantId))
           .map(entitiesToCollectionMapper)
