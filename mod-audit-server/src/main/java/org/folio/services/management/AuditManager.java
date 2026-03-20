@@ -2,6 +2,7 @@ package org.folio.services.management;
 
 import io.vertx.core.Future;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +11,7 @@ import org.folio.services.configuration.SettingGroup;
 import org.folio.services.configuration.SettingKey;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.services.marc.MarcAuditService;
+import org.folio.services.user.UserEventService;
 import org.folio.util.marc.SourceRecordType;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +24,16 @@ public class AuditManager {
   private final InventoryEventService inventoryService;
   private final MarcAuditService marcService;
   private final PartitionService partitionService;
+  private final UserEventService userEventService;
 
   public AuditManager(ConfigurationService configurationService, InventoryEventService inventoryService,
-                      MarcAuditService marcService, PartitionService partitionService) {
+                      MarcAuditService marcService, PartitionService partitionService,
+                      UserEventService userEventService) {
     this.configurationService = configurationService;
     this.inventoryService = inventoryService;
     this.marcService = marcService;
     this.partitionService = partitionService;
+    this.userEventService = userEventService;
   }
 
   public Future<Void> executeDatabaseCleanup(String tenantId) {
@@ -46,6 +51,8 @@ public class AuditManager {
       deleteExpiredRecordsForSettingGroup(tenantId, SettingGroup.AUTHORITY, currentTime,
         (tenant, expireOlderThan) ->
           marcService.expireRecords(tenant, expireOlderThan, SourceRecordType.MARC_AUTHORITY)),
+      deleteExpiredRecordsForSettingGroup(tenantId, SettingGroup.USER, currentTime,
+        userEventService::expireRecords),
       partitionService.cleanUpAndCreateSubPartitions(tenantId)
     ).mapEmpty();
   }
@@ -90,6 +97,6 @@ public class AuditManager {
    * @return Timestamp
    * */
   private Timestamp getExpireOlderThan(long currentTime, int retentionPeriod) {
-    return new Timestamp(currentTime - retentionPeriod * 24 * 60 * 60 * 1000L);
+    return new Timestamp(currentTime - TimeUnit.DAYS.toMillis(retentionPeriod));
   }
 }
