@@ -69,34 +69,34 @@ public class UserEventServiceImpl implements UserEventService {
     if (UserEventType.DELETED.equals(event.getType())) {
       return deleteAll(event, tenantId);
     }
-    return configurationService.getSetting(Setting.USER_RECORDS_ANONYMIZE, tenantId)
-      .compose(setting -> save(event, Boolean.TRUE.equals(setting.getValue()), tenantId));
-  }
-
-  private Future<String> save(UserEvent event, boolean anonymize, String tenantId) {
-    var eventId = event.getId();
-    LOGGER.debug("save:: Trying to save UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
-      tenantId, eventId, event.getUserId());
-
     var entity = eventToEntityMapper.apply(event);
-    if (isUpdateWithNoDiff(event, entity)) {
-      LOGGER.debug("save:: No diff calculated for UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
-        tenantId, eventId, event.getUserId());
-      return Future.succeededFuture(eventId);
-    }
+    var anonymizeSetting = configurationService.getSetting(Setting.USER_RECORDS_ANONYMIZE, tenantId);
 
-    var toSave = anonymize ? anonymize(entity) : entity;
-    if (isUpdateWithNoDiff(event, toSave)) {
-      LOGGER.debug("save:: No diff after anonymization for UserEvent with [tenantId: {}, eventId: {}, userId: {}]",
-        tenantId, eventId, event.getUserId());
-      return Future.succeededFuture(eventId);
-    }
-
-    return userEventDao.save(toSave, tenantId).map(eventId);
+    return Future.all(List.of(anonymizeSetting))
+      .map(cf -> {
+        var result = entity;
+        if (Boolean.TRUE.equals(anonymizeSetting.result().getValue())) {
+          result = anonymize(result);
+        }
+        return result;
+      })
+      .compose(transformed -> save(transformed, tenantId))
+      .map(event.getId());
   }
 
-  private boolean isUpdateWithNoDiff(UserEvent event, UserAuditEntity entity) {
-    return UserEventType.UPDATED.equals(event.getType()) && entity.diff() == null;
+  private Future<Void> save(UserAuditEntity entity, String tenantId) {
+    if (isUpdateWithNoDiff(entity)) {
+      LOGGER.debug("save:: No diff for UserAuditEntity [tenantId: {}, eventId: {}, userId: {}]",
+        tenantId, entity.eventId(), entity.userId());
+      return Future.succeededFuture();
+    }
+    LOGGER.debug("save:: Saving UserAuditEntity [tenantId: {}, eventId: {}, userId: {}]",
+      tenantId, entity.eventId(), entity.userId());
+    return userEventDao.save(entity, tenantId).mapEmpty();
+  }
+
+  private boolean isUpdateWithNoDiff(UserAuditEntity entity) {
+    return UserEventType.UPDATED.name().equals(entity.action()) && entity.diff() == null;
   }
 
   private UserAuditEntity anonymize(UserAuditEntity entity) {
