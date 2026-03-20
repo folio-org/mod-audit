@@ -2,6 +2,7 @@ package org.folio.services.management;
 
 import io.vertx.core.Future;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,6 +97,6 @@ public class AuditManager {
    * @return Timestamp
    * */
   private Timestamp getExpireOlderThan(long currentTime, int retentionPeriod) {
-    return new Timestamp(currentTime - retentionPeriod * 24 * 60 * 60 * 1000L);
+    return new Timestamp(currentTime - TimeUnit.DAYS.toMillis(retentionPeriod));
   }
 }

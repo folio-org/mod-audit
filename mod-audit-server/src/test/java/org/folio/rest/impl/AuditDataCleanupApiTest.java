@@ -29,6 +29,8 @@ import org.folio.dao.inventory.impl.ItemEventDao;
 import org.folio.dao.management.PartitionDao;
 import org.folio.dao.marc.MarcAuditEntity;
 import org.folio.dao.marc.impl.MarcAuditDaoImpl;
+import org.folio.dao.user.UserAuditEntity;
+import org.folio.dao.user.impl.UserEventDaoImpl;
 import org.folio.services.configuration.Setting;
 import org.folio.services.configuration.SettingGroup;
 import org.folio.services.configuration.SettingKey;
@@ -63,6 +65,8 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
   @InjectMocks
   MarcAuditDaoImpl marcAuditDao;
   @InjectMocks
+  UserEventDaoImpl userEventDaoImpl;
+  @InjectMocks
   SettingDao settingDao;
   @InjectMocks
   PartitionDao partitionDao;
@@ -83,8 +87,10 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
   @Test
   void shouldCleanupExpiredRecordsAndManagePartitions() {
     // Prepare retention settings
-    setRetentionToOneDay(Setting.INVENTORY_RECORDS_RETENTION_PERIOD, SettingGroup.INVENTORY);
-    setRetentionToOneDay(Setting.AUTHORITY_RECORDS_RETENTION_PERIOD, SettingGroup.AUTHORITY);
+    updateSettingDirectly(Setting.INVENTORY_RECORDS_RETENTION_PERIOD, 1, SettingValueType.INTEGER);
+    updateSettingDirectly(Setting.AUTHORITY_RECORDS_RETENTION_PERIOD, 1, SettingValueType.INTEGER);
+    updateSettingDirectly(Setting.USER_RECORDS_ENABLED, true, SettingValueType.BOOLEAN);
+    updateSettingDirectly(Setting.USER_RECORDS_RETENTION_PERIOD, 1, SettingValueType.INTEGER);
 
     // Create 2 audit records for each type
     var entityId = UUID.randomUUID();
@@ -93,6 +99,7 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
     var oneDayAfter = Timestamp.from(now.plusSeconds(24 * 60 * 60));
     var twoDaysAfter = Timestamp.from(now.plusSeconds(2 * 24 * 60 * 60));
     createAuditRecords(entityId, oneDayBefore, oneDayAfter);
+    createUserAuditEntities(entityId, oneDayBefore, oneDayAfter);
 
     // Prepare partitions
     var currentDate = LocalDateTime.ofInstant(now,  ZoneId.systemDefault());
@@ -120,19 +127,20 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
 
     // Verify that one record for each type is deleted and one remains
     verifyRemainingRecords(entityId, twoDaysAfter);
+    verifyRemainingUserRecords(entityId, twoDaysAfter);
 
     // Verify partitions
     verifyPartitions(tableNames, yearForPreviousQuarter, previousQuarter, yearForNextQuarter, nextQuarter);
   }
 
   @SneakyThrows
-  private void setRetentionToOneDay(Setting setting, SettingGroup settingGroup) {
+  private void updateSettingDirectly(Setting setting, Object value, SettingValueType type) {
     var settingEntity = SettingEntity.builder()
       .id(setting.getSettingId())
-      .key(SettingKey.RETENTION_PERIOD.getValue())
-      .value(1)
-      .type(SettingValueType.INTEGER)
-      .groupId(settingGroup.getId())
+      .key(setting.getKey().getValue())
+      .value(value)
+      .type(type)
+      .groupId(setting.getGroup().getId())
       .build();
     postgresClientFactory.createInstance(TENANT_ID)
       .withTrans(conn -> settingDao.update(settingEntity.getId(), settingEntity, conn, TENANT_ID))
@@ -185,6 +193,22 @@ public class AuditDataCleanupApiTest extends ApiTestBase {
   @SneakyThrows
   private void verifyRemainingMarcRecords(SourceRecordType recordType, UUID entityId, Timestamp twoDaysAfter) {
     var remainingRecords = marcAuditDao.get(entityId, recordType, TENANT_ID, twoDaysAfter.toLocalDateTime(), 10).toCompletionStage().toCompletableFuture().get();
+    assertThat(remainingRecords).hasSize(1);
+  }
+
+  @SneakyThrows
+  private void createUserAuditEntities(UUID entityId, Timestamp oneDayBefore, Timestamp oneDayAfter) {
+    var beforeEntity = new UserAuditEntity(UUID.randomUUID(), oneDayBefore, entityId, "CREATE", null, null);
+    var afterEntity = new UserAuditEntity(UUID.randomUUID(), oneDayAfter, entityId, "CREATE", null, null);
+
+    userEventDaoImpl.save(beforeEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDaoImpl.save(afterEntity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+  }
+
+  @SneakyThrows
+  private void verifyRemainingUserRecords(UUID userId, Timestamp twoDaysAfter) {
+    var remainingRecords = userEventDaoImpl.get(userId, twoDaysAfter, 10, TENANT_ID)
+      .toCompletionStage().toCompletableFuture().get();
     assertThat(remainingRecords).hasSize(1);
   }
 

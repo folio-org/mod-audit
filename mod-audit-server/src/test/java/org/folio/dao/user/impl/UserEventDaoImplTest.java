@@ -56,7 +56,7 @@ class UserEventDaoImplTest {
     userEventDao.save(entity, TENANT_ID)
       .onComplete(ctx.succeeding(result -> ctx.completeNow()));
 
-    verify(postgresClientFactory, times(1)).createInstance(TENANT_ID);
+    verify(postgresClientFactory).createInstance(TENANT_ID);
   }
 
   @Test
@@ -89,7 +89,7 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteByUserId(userId, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        verify(postgresClient).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }
@@ -102,7 +102,7 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteAll(conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(conn, times(1)).execute(anyString());
+        verify(conn).execute(anyString());
         ctx.completeNow();
       }));
   }
@@ -116,7 +116,7 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteOlderThanDate(tenDaysAgo, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(postgresClient, times(1)).execute(anyString(), any(Tuple.class));
+        verify(postgresClient).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }
@@ -131,7 +131,7 @@ class UserEventDaoImplTest {
 
     userEventDao.deleteOlderThanDate(tenDaysAgo, conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(conn, times(1)).execute(anyString(), any(Tuple.class));
+        verify(conn).execute(anyString(), any(Tuple.class));
         ctx.completeNow();
       }));
   }

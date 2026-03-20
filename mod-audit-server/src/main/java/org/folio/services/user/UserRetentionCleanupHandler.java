@@ -2,6 +2,7 @@ package org.folio.services.user;
 
 import io.vertx.core.Future;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,14 +29,18 @@ public class UserRetentionCleanupHandler implements SettingChangeHandler {
 
   @Override
   public Future<Void> onSettingChanged(Object newValue, Conn conn, String tenantId) {
-    var retentionPeriod = (Integer) newValue;
-    if (retentionPeriod == null || retentionPeriod <= 0) {
+    if (!(newValue instanceof Integer retentionPeriod)) {
+      LOGGER.warn("onSettingChanged:: Unexpected value type for retention period setting [type: {}, tenantId: {}]",
+        newValue == null ? "null" : newValue.getClass().getSimpleName(), tenantId);
+      return Future.succeededFuture();
+    }
+    if (retentionPeriod <= 0) {
       LOGGER.debug("onSettingChanged:: Retention period is non-positive, skipping cleanup [retentionPeriod: {}, tenantId: {}]",
         retentionPeriod, tenantId);
       return Future.succeededFuture();
     }
     var expireOlderThan = new Timestamp(
-      System.currentTimeMillis() - retentionPeriod * 24L * 60 * 60 * 1000);
+      System.currentTimeMillis() - TimeUnit.DAYS.toMillis(retentionPeriod));
     LOGGER.info("onSettingChanged:: Retention period set to {} days, deleting user audit records older than {} [tenantId: {}]",
       retentionPeriod, expireOlderThan, tenantId);
     return userEventDao.deleteOlderThanDate(expireOlderThan, conn, tenantId);

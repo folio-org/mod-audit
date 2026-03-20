@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -78,7 +77,7 @@ class UserEventServiceImplTest {
 
     eventService.processEvent(event, TENANT_ID)
       .onComplete(ctx.succeeding(r -> {
-        verify(userEventDao, times(1)).save(any(), anyString());
+        verify(userEventDao).save(any(), anyString());
         ctx.completeNow();
       }));
   }
@@ -104,7 +103,7 @@ class UserEventServiceImplTest {
 
     eventService.processEvent(event, TENANT_ID)
       .onComplete(ctx.succeeding(r -> {
-        verify(userEventDao, times(1)).deleteByUserId(any(UUID.class), anyString());
+        verify(userEventDao).deleteByUserId(any(UUID.class), anyString());
         verify(userEventDao, never()).save(any(), anyString());
         ctx.completeNow();
       }));
@@ -234,7 +233,7 @@ class UserEventServiceImplTest {
 
     eventService.expireRecords(TENANT_ID, tenDaysAgo)
       .onComplete(ctx.succeeding(result -> {
-        verify(userEventDao, times(1)).deleteOlderThanDate(tenDaysAgo, TENANT_ID);
+        verify(userEventDao).deleteOlderThanDate(tenDaysAgo, TENANT_ID);
         ctx.completeNow();
       }));
   }

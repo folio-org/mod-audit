@@ -53,6 +53,22 @@ class UserRetentionCleanupHandlerTest {
   }
 
   @Test
+  void onSettingChanged_shouldNotDelete_whenValueIsNull() {
+    var result = cleanupHandler.onSettingChanged(null, conn, TENANT_ID);
+
+    assertTrue(result.succeeded());
+    verify(userEventDao, never()).deleteOlderThanDate(any(Timestamp.class), any(Conn.class), any());
+  }
+
+  @Test
+  void onSettingChanged_shouldNotDelete_whenValueIsNotInteger() {
+    var result = cleanupHandler.onSettingChanged("not-an-integer", conn, TENANT_ID);
+
+    assertTrue(result.succeeded());
+    verify(userEventDao, never()).deleteOlderThanDate(any(Timestamp.class), any(Conn.class), any());
+  }
+
+  @Test
   void onSettingChanged_shouldNotDelete_whenNegativeRetention() {
     var result = cleanupHandler.onSettingChanged(-1, conn, TENANT_ID);
 
