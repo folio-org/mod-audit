@@ -1,4 +1,4 @@
-package org.folio.services.user;
+package org.folio.services.user.handler;
 
 import io.vertx.core.Future;
 import java.sql.Timestamp;
