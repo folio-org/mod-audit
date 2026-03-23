@@ -1,4 +1,4 @@
-package org.folio.services.user;
+package org.folio.services.user.handler;
 
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;

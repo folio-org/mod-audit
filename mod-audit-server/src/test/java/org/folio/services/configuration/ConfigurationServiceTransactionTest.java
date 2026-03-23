@@ -23,7 +23,7 @@ import org.folio.mapper.configuration.SettingGroupMapper;
 import org.folio.mapper.configuration.SettingMapper;
 import org.folio.mapper.configuration.SettingMappers;
 import org.folio.rest.impl.ApiTestBase;
-import org.folio.services.user.UserAuditPurgeHandler;
+import org.folio.services.user.handler.UserAuditPurgeHandler;
 import org.folio.util.PostgresClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

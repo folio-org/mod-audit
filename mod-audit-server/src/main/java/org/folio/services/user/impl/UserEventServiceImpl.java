@@ -156,8 +156,7 @@ public class UserEventServiceImpl implements UserEventService {
             tenantId, userId, eventTs);
           return Future.succeededFuture(new UserAuditCollection().withTotalRecords(0));
         }
-        return configurationService.getSetting(
-            org.folio.services.configuration.Setting.USER_RECORDS_PAGE_SIZE, tenantId)
+        return configurationService.getSetting(Setting.USER_RECORDS_PAGE_SIZE, tenantId)
           .map(setting -> (Integer) setting.getValue())
           .compose(limit -> userEventDao.get(userUUID, eventTsTimestamp, limit, tenantId))
           .map(entitiesToCollectionMapper)
