@@ -1,6 +1,7 @@
 package org.folio.services.user;
 
 import io.vertx.core.Future;
+import java.sql.Timestamp;
 import org.folio.rest.jaxrs.model.UserAuditCollection;
 import org.folio.util.user.UserEvent;
 
@@ -24,4 +25,6 @@ public interface UserEventService {
    * @return Future with UserAuditCollection
    */
   Future<UserAuditCollection> getEvents(String userId, String eventTs, String tenantId);
+
+  Future<Void> expireRecords(String tenantId, Timestamp expireOlderThan);
 }

@@ -59,6 +59,11 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private static final String SEEK_BY_DATE_CLAUSE = "AND event_date < $3";
 
+  private static final String DELETE_OLDER_THAN_DATE_SQL = """
+    DELETE FROM %s
+      WHERE event_date < $1
+    """;
+
   private final PostgresClientFactory pgClientFactory;
 
   public UserEventDaoImpl(PostgresClientFactory pgClientFactory) {
@@ -116,6 +121,31 @@ public class UserEventDaoImpl implements UserEventDao {
   }
 
   @Override
+  public Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId) {
+    LOGGER.debug("deleteOlderThanDate:: Deleting records without transaction [tenantId: {}, eventDate: {}]",
+      tenantId, eventDate);
+    return pgClientFactory.createInstance(tenantId)
+      .execute(buildDeleteOlderThanQuery(tenantId), Tuple.of(toLocalDateTime(eventDate)))
+      .mapEmpty();
+  }
+
+  @Override
+  public Future<Void> deleteOlderThanDate(Timestamp eventDate, Conn conn, String tenantId) {
+    LOGGER.debug("deleteOlderThanDate:: Deleting records within transaction [tenantId: {}, eventDate: {}]",
+      tenantId, eventDate);
+    return conn.execute(buildDeleteOlderThanQuery(tenantId), Tuple.of(toLocalDateTime(eventDate)))
+      .mapEmpty();
+  }
+
+  private String buildDeleteOlderThanQuery(String tenantId) {
+    return DELETE_OLDER_THAN_DATE_SQL.formatted(formatDBTableName(tenantId, tableName()));
+  }
+
+  private LocalDateTime toLocalDateTime(Timestamp timestamp) {
+    return LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault());
+  }
+
+  @Override
   public String tableName() {
     return USER_AUDIT_TABLE;
   }
@@ -124,7 +154,7 @@ public class UserEventDaoImpl implements UserEventDao {
     LOGGER.debug("makeSaveCall:: Making save call with query : {} and tenant id : {}", query, tenantId);
     try {
       pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(event.eventId(),
-          LocalDateTime.ofInstant(event.eventDate().toInstant(), ZoneId.systemDefault()),
+          toLocalDateTime(event.eventDate()),
           event.userId(),
           event.action(),
           event.performedBy(),

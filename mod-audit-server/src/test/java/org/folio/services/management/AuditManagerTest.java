@@ -21,6 +21,7 @@ import org.folio.services.configuration.SettingGroup;
 import org.folio.services.configuration.SettingKey;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.services.marc.MarcAuditService;
+import org.folio.services.user.UserEventService;
 import org.folio.util.marc.SourceRecordType;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,12 +44,15 @@ class AuditManagerTest {
   private MarcAuditService marcService;
   @Mock
   private PartitionService partitionService;
+  @Mock
+  private UserEventService userEventService;
 
   private AuditManager auditManager;
 
   @BeforeEach
   void setUp() {
-    auditManager = new AuditManager(configurationService, inventoryService, marcService, partitionService);
+    auditManager = new AuditManager(configurationService, inventoryService, marcService, partitionService,
+      userEventService);
   }
 
   @Test
@@ -64,12 +68,16 @@ class AuditManagerTest {
       .thenReturn(Future.succeededFuture(settingCollection));
     when(configurationService.getAllSettingsByGroupId(SettingGroup.AUTHORITY.getId(), TENANT_ID))
       .thenReturn(Future.succeededFuture(settingCollection));
+    when(configurationService.getAllSettingsByGroupId(SettingGroup.USER.getId(), TENANT_ID))
+      .thenReturn(Future.succeededFuture(settingCollection));
 
     when(inventoryService.expireRecords(eq(TENANT_ID), any(Timestamp.class)))
       .thenReturn(Future.succeededFuture());
     when(marcService.expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_BIB)))
       .thenReturn(Future.succeededFuture());
     when(marcService.expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_AUTHORITY)))
+      .thenReturn(Future.succeededFuture());
+    when(userEventService.expireRecords(eq(TENANT_ID), any(Timestamp.class)))
       .thenReturn(Future.succeededFuture());
     when(partitionService.cleanUpAndCreateSubPartitions(TENANT_ID))
       .thenReturn(Future.succeededFuture());
@@ -82,6 +90,7 @@ class AuditManagerTest {
     verify(inventoryService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture());
     verify(marcService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture(), eq(SourceRecordType.MARC_BIB));
     verify(marcService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture(), eq(SourceRecordType.MARC_AUTHORITY));
+    verify(userEventService, times(1)).expireRecords(eq(TENANT_ID), timestampCaptor.capture());
     verify(partitionService).cleanUpAndCreateSubPartitions(TENANT_ID);
 
     var capturedTimestamps = timestampCaptor.getAllValues();
@@ -99,10 +108,14 @@ class AuditManagerTest {
     var authoritySettingCollection = new SettingCollection().withSettings(List.of(disabledSetting));
     var inventorySettingCollection = new SettingCollection().withSettings(List.of(negativeRetentionSetting));
 
+    var userDisabledSettingCollection = new SettingCollection().withSettings(List.of(disabledSetting));
+
     when(configurationService.getAllSettingsByGroupId(SettingGroup.AUTHORITY.getId(), TENANT_ID))
       .thenReturn(Future.succeededFuture(authoritySettingCollection));
     when(configurationService.getAllSettingsByGroupId(SettingGroup.INVENTORY.getId(), TENANT_ID))
       .thenReturn(Future.succeededFuture(inventorySettingCollection));
+    when(configurationService.getAllSettingsByGroupId(SettingGroup.USER.getId(), TENANT_ID))
+      .thenReturn(Future.succeededFuture(userDisabledSettingCollection));
     when(partitionService.cleanUpAndCreateSubPartitions(TENANT_ID))
       .thenReturn(Future.succeededFuture());
 
@@ -112,6 +125,7 @@ class AuditManagerTest {
     verify(inventoryService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class));
     verify(marcService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_BIB));
     verify(marcService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class), eq(SourceRecordType.MARC_AUTHORITY));
+    verify(userEventService, never()).expireRecords(eq(TENANT_ID), any(Timestamp.class));
     verify(partitionService).cleanUpAndCreateSubPartitions(TENANT_ID);
   }
 }

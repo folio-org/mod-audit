@@ -514,6 +514,11 @@
       "description": "Update setting for audit user records page size"
     },
     {
+      "permissionName": "audit.config.groups.settings.audit.user.records.retention.period.item.put",
+      "displayName": "Audit Configuration - update setting for audit user records retention period",
+      "description": "Update setting for audit user records retention period"
+    },
+    {
       "permissionName": "audit.inventory.instance.collection.get",
       "displayName": "Inventory Audit - get instance events",
       "description": "Get inventory instance audit events"

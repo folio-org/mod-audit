@@ -52,6 +52,17 @@ public interface UserEventDao {
   Future<Void> deleteAll(Conn conn, String tenantId);
 
   /**
+   * Deletes all audit records older than the given date
+   *
+   * @param eventDate date threshold
+   * @param tenantId  tenant id
+   * @return Void future
+   */
+  Future<Void> deleteOlderThanDate(Timestamp eventDate, String tenantId);
+
+  Future<Void> deleteOlderThanDate(Timestamp eventDate, Conn conn, String tenantId);
+
+  /**
    * Returns audit table name
    *
    * @return table name
