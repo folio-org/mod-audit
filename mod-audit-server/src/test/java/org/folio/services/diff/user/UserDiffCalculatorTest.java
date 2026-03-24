@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import java.util.List;
 import java.util.Map;
+import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.CustomFields;
 import org.folio.rest.external.Personal__1;
@@ -153,6 +155,19 @@ class UserDiffCalculatorTest {
     var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
 
     assertThat(diff).isNull();
+  }
+
+  @Test
+  void shouldPopulateFullPathOnCollectionChanges() {
+    var oldUser = getMap(new User().withId("1").withProxyFor(List.of("user-1")));
+    var newUser = getMap(new User().withId("1").withProxyFor(List.of("user-2")));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getFullPath)
+      .containsExactly("proxyFor");
   }
 
   private static Map<String, Object> getMap(User obj) {

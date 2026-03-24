@@ -285,6 +285,212 @@ public class UserAuditApiTest extends ApiTestBase {
     assertThat(response.jsonPath().getString("userAuditItems[1].diff.fieldChanges[0].fullPath")).isEqualTo("username");
   }
 
+  @SneakyThrows
+  @Test
+  void shouldExcludeCollectionChangesFromExistingRecords() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record A: UPDATE with field change + collection change (departments)
+    var diffA = new ChangeRecordDto(
+      List.of(new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new")),
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept1"))))
+    );
+    var recordA = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(300)),
+      userId, "UPDATED", performedBy, diffA);
+
+    // Record B: UPDATE with only collection change — should be deleted after exclusion
+    var diffB = new ChangeRecordDto(null,
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept2"))))
+    );
+    var recordB = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(200)),
+      userId, "UPDATED", performedBy, diffB);
+
+    userEventDao.save(recordA, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordB, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"departments\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    // Record B deleted (empty UPDATE), Record A survives with username field only
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].action")).isEqualTo("UPDATED");
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].diff.fieldChanges[0].fullPath")).isEqualTo("username");
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.collectionChanges")).isEmpty();
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldExcludeFieldsByPrefixMatching() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record with customFields.myField and customFields.otherField + username
+    var diff = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "myField", "customFields.myField", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "otherField", "customFields.otherField", "old", "new")
+    ), null);
+    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "UPDATED", performedBy, diff);
+
+    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // Exclude "customFields" — should match customFields.myField and customFields.otherField by prefix
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"customFields\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    var fieldChanges = response.jsonPath().getList("userAuditItems[0].diff.fieldChanges");
+    assertThat(fieldChanges).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].diff.fieldChanges[0].fullPath")).isEqualTo("username");
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldExcludeMixedFieldAndCollectionChanges() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record with field changes (username, personal.email) + collection change (departments)
+    var diff = new ChangeRecordDto(
+      List.of(
+        new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+        new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "old@t.com", "new@t.com")
+      ),
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept1"))))
+    );
+    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "UPDATED", performedBy, diff);
+
+    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // Exclude personal.email and departments — username should survive
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\",\\"departments\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].diff.fieldChanges[0].fullPath")).isEqualTo("username");
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.collectionChanges")).isEmpty();
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldNotAffectRecordsWhenExcludedFieldsNotPresent() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    var diff = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "barcode", "barcode", "111", "222")
+    ), null);
+    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "UPDATED", performedBy, diff);
+
+    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // Exclude "personal.email" which is not present in the record
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    // Record unchanged — both field changes survive
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).hasSize(2);
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldApplyBothExclusionAndAnonymizationOnExistingRecords() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record with username + personal.email + metadata.updatedByUserId
+    var diff = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "old@t.com", "new@t.com"),
+      new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "UPDATED", performedBy, diff);
+
+    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // First exclude personal.email
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    // Then enable anonymization
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"anonymize","value":true,"groupId":"audit.user","type":"BOOLEAN"}""")
+      .put("/audit/config/groups/audit.user/settings/anonymize")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    // personal.email excluded, metadata.updatedByUserId anonymized, performedBy nullified
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].performedBy")).isNull();
+    var fieldChanges = response.jsonPath().getList("userAuditItems[0].diff.fieldChanges");
+    assertThat(fieldChanges).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].diff.fieldChanges[0].fullPath")).isEqualTo("username");
+  }
+
   @Test
   void shouldReturn400ForInvalidUserId() {
     given().headers(HEADERS)

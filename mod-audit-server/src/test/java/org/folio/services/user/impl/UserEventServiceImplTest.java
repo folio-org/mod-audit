@@ -349,6 +349,45 @@ class UserEventServiceImplTest {
   }
 
   @Test
+  void shouldSaveCreatedEventWithExclusionEnabled(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.CREATED);
+    mockAuditEnabled(true);
+    mockExcludedFields("[\"personal.email\"]");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.CREATED.name(), UUID.randomUUID(), null));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.diff()).isNull();
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldDeleteAllRecordsOnDeleteEventRegardlessOfExclusion(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.DELETED);
+    mockAuditEnabled(true);
+    when(userEventDao.deleteByUserId(any(UUID.class), anyString())).thenReturn(Future.succeededFuture());
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao).deleteByUserId(any(UUID.class), anyString());
+        verify(userEventDao, never()).save(any(), anyString());
+        verify(configurationService, never()).getSetting(
+          eq(org.folio.services.configuration.Setting.USER_RECORDS_EXCLUDED_FIELDS), anyString());
+        verify(configurationService, never()).getSetting(
+          eq(org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
   void shouldRetrieveEventsSuccessfully(VertxTestContext ctx) {
     var userId = UUID.randomUUID().toString();
     var eventTs = "1672531200000";

@@ -165,6 +165,31 @@ class UserFieldExclusionFilterTest {
   }
 
   @Test
+  void applyExclusion_shouldFilterSomeFieldsAndSomeCollections() {
+    var diff = new ChangeRecordDto(
+      List.of(
+        FieldChangeDto.modified("username", "username", "old", "new"),
+        FieldChangeDto.modified("barcode", "barcode", "old", "new"),
+        FieldChangeDto.modified("email", "personal.email", "old@test.com", "new@test.com")
+      ),
+      List.of(
+        new CollectionChangeDto("departments", "departments",
+          List.of(CollectionItemChangeDto.added("dept1"))),
+        new CollectionChangeDto("personal.addresses", "addresses",
+          List.of(CollectionItemChangeDto.added("addr1")))
+      )
+    );
+
+    var result = UserFieldExclusionFilter.applyExclusion(diff, Set.of("barcode", "personal"));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getFieldChanges()).hasSize(1);
+    assertThat(result.getFieldChanges().get(0).getFullPath()).isEqualTo("username");
+    assertThat(result.getCollectionChanges()).hasSize(1);
+    assertThat(result.getCollectionChanges().get(0).getFullPath()).isEqualTo("departments");
+  }
+
+  @Test
   void applyExclusion_shouldNotExcludePartialPrefixMatch() {
     var diff = new ChangeRecordDto(List.of(
       FieldChangeDto.modified("barcodeExtra", "barcodeExtra", "old", "new")
