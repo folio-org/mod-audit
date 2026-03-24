@@ -13,7 +13,8 @@ public enum Setting {
   AUTHORITY_RECORDS_ENABLED(SettingGroup.AUTHORITY, SettingKey.ENABLED),
   USER_RECORDS_ENABLED(SettingGroup.USER, SettingKey.ENABLED),
   USER_RECORDS_PAGE_SIZE(SettingGroup.USER, SettingKey.RECORDS_PAGE_SIZE),
-  USER_RECORDS_ANONYMIZE(SettingGroup.USER, SettingKey.ANONYMIZE);
+  USER_RECORDS_ANONYMIZE(SettingGroup.USER, SettingKey.ANONYMIZE),
+  USER_RECORDS_RETENTION_PERIOD(SettingGroup.USER, SettingKey.RETENTION_PERIOD);
 
   private final SettingGroup group;
   private final SettingKey key;

@@ -348,6 +348,18 @@ class UserEventServiceImplTest {
       }));
   }
 
+  @Test
+  void shouldExpireRecordsSuccessfully(VertxTestContext ctx) {
+    var tenDaysAgo = new Timestamp(System.currentTimeMillis() - 10L * 24 * 60 * 60 * 1000);
+    when(userEventDao.deleteOlderThanDate(tenDaysAgo, TENANT_ID)).thenReturn(Future.succeededFuture());
+
+    eventService.expireRecords(TENANT_ID, tenDaysAgo)
+      .onComplete(ctx.succeeding(result -> {
+        verify(userEventDao).deleteOlderThanDate(tenDaysAgo, TENANT_ID);
+        ctx.completeNow();
+      }));
+  }
+
   private UserEvent createUserEvent(UserEventType type) {
     return UserEvent.builder()
       .id(UUID.randomUUID().toString())

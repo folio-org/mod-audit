@@ -49,6 +49,8 @@ public class AuditConfigAPITest extends ApiTestBase {
     ["audit.config.groups.settings.collection.get",
     "audit.config.groups.settings.audit.user.enabled.item.put",
     "audit.config.groups.settings.audit.user.anonymize.item.put",
+    "audit.config.groups.settings.audit.user.records.retention.period.item.put",
+    "audit.config.groups.settings.audit.user.records.page.size.item.put",
     "audit.config.groups.settings.audit.user.collection.get"]""");
   private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
@@ -156,7 +158,9 @@ public class AuditConfigAPITest extends ApiTestBase {
       Arguments.of(INVENTORY.getId(), ENABLED.getValue(), false, BOOLEAN, INVENTORY_HEADERS),
       Arguments.of(AUTHORITY.getId(), ENABLED.getValue(), false, BOOLEAN, AUTHORITY_HEADERS),
       Arguments.of(USER.getId(), ENABLED.getValue(), true, BOOLEAN, USER_HEADERS),
-      Arguments.of(USER.getId(), ANONYMIZE.getValue(), true, BOOLEAN, USER_HEADERS)
+      Arguments.of(USER.getId(), ANONYMIZE.getValue(), true, BOOLEAN, USER_HEADERS),
+      Arguments.of(USER.getId(), RETENTION_PERIOD.getValue(), 1, INTEGER, USER_HEADERS),
+      Arguments.of(USER.getId(), RECORDS_PAGE_SIZE.getValue(), 25, INTEGER, USER_HEADERS)
     );
   }
 
