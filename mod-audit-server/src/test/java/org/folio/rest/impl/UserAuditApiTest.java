@@ -46,7 +46,8 @@ public class UserAuditApiTest extends ApiTestBase {
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
   private static final Headers HEADERS = new Headers(TENANT_HEADER, PERMS_HEADER, CONTENT_TYPE_HEADER);
   private static final Header CONFIG_PERMS_HEADER = new Header(XOkapiHeaders.PERMISSIONS, """
-    ["audit.config.groups.settings.audit.user.anonymize.item.put"]""");
+    ["audit.config.groups.settings.audit.user.anonymize.item.put",
+    "audit.config.groups.settings.audit.user.excluded.fields.item.put"]""");
   private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
   private static final Headers CONFIG_HEADERS =
     new Headers(TENANT_HEADER, CONFIG_PERMS_HEADER, USER_HEADER, CONTENT_TYPE_HEADER);
@@ -178,7 +179,7 @@ public class UserAuditApiTest extends ApiTestBase {
     var diffD = new ChangeRecordDto(
       List.of(new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
         UUID.randomUUID().toString(), UUID.randomUUID().toString())),
-      List.of(new CollectionChangeDto("departments", List.of(
+      List.of(new CollectionChangeDto("departments", "departments", List.of(
         CollectionItemChangeDto.added("dept-new")))));
     var recordD = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(50)),
       userId, "UPDATED", performedBy, diffD);
@@ -222,6 +223,66 @@ public class UserAuditApiTest extends ApiTestBase {
     var fieldChanges = response.jsonPath().getList("userAuditItems[2].diff.fieldChanges");
     assertThat(fieldChanges).hasSize(1);
     assertThat(response.jsonPath().getString("userAuditItems[2].diff.fieldChanges[0].fullPath")).isEqualTo("username");
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldExcludeFieldsFromExistingRecordsWhenExcludedFieldsSettingUpdated() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Record A: UPDATE with username + personal.email changes
+    var diffA = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
+      new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "old@test.com", "new@test.com")
+    ), null);
+    var recordA = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(300)),
+      userId, "UPDATED", performedBy, diffA);
+
+    // Record B: UPDATE with only personal.email change — should be deleted after exclusion
+    var diffB = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "a@test.com", "b@test.com")
+    ), null);
+    var recordB = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(200)),
+      userId, "UPDATED", performedBy, diffB);
+
+    // Record C: CREATED with no diff — should be unaffected
+    var recordC = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(100)),
+      userId, "CREATED", performedBy, null);
+
+    userEventDao.save(recordA, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordB, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordC, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    // Update excluded fields via config API
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    // Fetch user audit records
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    // Record B deleted (empty UPDATE after exclusion), A/C remain
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(2);
+    var items = response.jsonPath().getList("userAuditItems");
+    assertThat(items).hasSize(2);
+
+    // Record C (most recent, CREATED): unaffected
+    assertThat(response.jsonPath().getString("userAuditItems[0].action")).isEqualTo("CREATED");
+    assertThat((Object) response.jsonPath().get("userAuditItems[0].diff")).isNull();
+
+    // Record A (oldest UPDATED): only username field change remains, personal.email excluded
+    assertThat(response.jsonPath().getString("userAuditItems[1].action")).isEqualTo("UPDATED");
+    var fieldChanges = response.jsonPath().getList("userAuditItems[1].diff.fieldChanges");
+    assertThat(fieldChanges).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[1].diff.fieldChanges[0].fullPath")).isEqualTo("username");
   }
 
   @Test

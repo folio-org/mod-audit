@@ -338,7 +338,7 @@ public class MarcUtil {
     var itemChanges = new ArrayList<CollectionItemChangeDto>();
     removedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.removed(item)));
     addedSet.forEach(item -> itemChanges.add(CollectionItemChangeDto.added(item)));
-    repeatable.add(new CollectionChangeDto(key, itemChanges));
+    repeatable.add(new CollectionChangeDto(key, key, itemChanges));
   }
 
   /**
@@ -410,7 +410,7 @@ public class MarcUtil {
     List<CollectionItemChangeDto> itemChanges = targetSet.stream()
       .map(changeMapper)
       .toList();
-    repeatable.add(new CollectionChangeDto(key, itemChanges));
+    repeatable.add(new CollectionChangeDto(key, key, itemChanges));
   }
 
   /**

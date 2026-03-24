@@ -6,18 +6,19 @@ import static org.folio.util.ErrorUtils.handleFailures;
 import io.vertx.core.Future;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
-import org.folio.domain.diff.ChangeRecordDto;
 import org.folio.exception.ValidationException;
 import org.folio.rest.jaxrs.model.UserAuditCollection;
 import org.folio.services.configuration.ConfigurationService;
 import org.folio.services.configuration.Setting;
 import org.folio.services.user.UserEventService;
+import org.folio.services.user.UserFieldExclusionFilter;
 import org.folio.util.user.UserEvent;
 import org.folio.util.user.UserEventType;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -78,10 +79,13 @@ public class UserEventServiceImpl implements UserEventService {
     }
     var entity = eventToEntityMapper.apply(event);
     var anonymizeSetting = configurationService.getSetting(Setting.USER_RECORDS_ANONYMIZE, tenantId);
+    var excludedFieldsSetting = configurationService.getSetting(Setting.USER_RECORDS_EXCLUDED_FIELDS, tenantId);
 
-    return Future.all(List.of(anonymizeSetting))
+    return Future.all(List.of(anonymizeSetting, excludedFieldsSetting))
       .map(cf -> {
         var result = entity;
+        result = applyExclusion(result,
+          UserFieldExclusionFilter.parseExcludedFields(excludedFieldsSetting.result().getValue()));
         if (Boolean.TRUE.equals(anonymizeSetting.result().getValue())) {
           result = anonymize(result);
         }
@@ -106,6 +110,16 @@ public class UserEventServiceImpl implements UserEventService {
     return UserEventType.UPDATED.name().equals(entity.action()) && entity.diff() == null;
   }
 
+  private UserAuditEntity applyExclusion(UserAuditEntity entity, Set<String> excludedPaths) {
+    if (excludedPaths.isEmpty() || entity.diff() == null) {
+      return entity;
+    }
+    var filteredDiff = UserFieldExclusionFilter.applyExclusion(entity.diff(), excludedPaths);
+    return new UserAuditEntity(
+      entity.eventId(), entity.eventDate(), entity.userId(),
+      entity.action(), entity.performedBy(), filteredDiff);
+  }
+
   private UserAuditEntity anonymize(UserAuditEntity entity) {
     return new UserAuditEntity(
       entity.eventId(),
@@ -113,24 +127,7 @@ public class UserEventServiceImpl implements UserEventService {
       entity.userId(),
       entity.action(),
       null,
-      anonymizeDiff(entity.diff()));
-  }
-
-  private ChangeRecordDto anonymizeDiff(ChangeRecordDto diff) {
-    if (diff == null) {
-      return null;
-    }
-    var fieldChanges = diff.getFieldChanges();
-    if (fieldChanges == null) {
-      return (diff.getCollectionChanges() == null || diff.getCollectionChanges().isEmpty()) ? null : diff;
-    }
-    var remaining = fieldChanges.stream()
-      .filter(fc -> !ANONYMIZED_FIELD_PATHS.contains(fc.getFullPath()))
-      .toList();
-    if (remaining.isEmpty() && (diff.getCollectionChanges() == null || diff.getCollectionChanges().isEmpty())) {
-      return null;
-    }
-    return new ChangeRecordDto(remaining, diff.getCollectionChanges());
+      UserFieldExclusionFilter.applyExclusion(entity.diff(), ANONYMIZED_FIELD_PATHS));
   }
 
   private Future<String> deleteAll(UserEvent event, String tenantId) {

@@ -20,6 +20,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,6 +87,40 @@ public class UserEventDaoImpl implements UserEventDao {
   private static final String DELETE_OLDER_THAN_DATE_SQL = """
     DELETE FROM %s
       WHERE event_date < $1
+    """;
+
+  // $1 = text[] of excluded paths (used for both fieldChanges and collectionChanges fullPath filtering)
+  private static final String EXCLUDE_FIELDS_SQL = """
+    UPDATE %s SET diff =
+      CASE WHEN diff IS NOT NULL THEN
+        (WITH paths AS (SELECT unnest($1::text[]) AS p),
+              fc_filtered AS (
+                SELECT jsonb_agg(elem) AS result
+                FROM jsonb_array_elements(
+                  CASE WHEN jsonb_typeof(diff->'fieldChanges') = 'array'
+                       THEN diff->'fieldChanges' ELSE '[]'::jsonb END) elem
+                WHERE NOT (elem->>'fullPath' = ANY($1::text[]))
+                  AND NOT EXISTS (SELECT 1 FROM paths WHERE starts_with(elem->>'fullPath', p || '.'))
+              ),
+              cc_filtered AS (
+                SELECT jsonb_agg(elem) AS result
+                FROM jsonb_array_elements(
+                  CASE WHEN jsonb_typeof(diff->'collectionChanges') = 'array'
+                       THEN diff->'collectionChanges' ELSE '[]'::jsonb END) elem
+                WHERE NOT (elem->>'fullPath' = ANY($1::text[]))
+                  AND NOT EXISTS (SELECT 1 FROM paths WHERE starts_with(elem->>'fullPath', p || '.'))
+              )
+         SELECT CASE
+           WHEN (fc_filtered.result IS NULL OR fc_filtered.result = '[]'::jsonb)
+                AND (cc_filtered.result IS NULL OR cc_filtered.result = '[]'::jsonb)
+           THEN NULL
+           ELSE jsonb_set(jsonb_set(diff,
+             '{fieldChanges}', COALESCE(fc_filtered.result, '[]'::jsonb)),
+             '{collectionChanges}', COALESCE(cc_filtered.result, '[]'::jsonb))
+         END
+         FROM fc_filtered, cc_filtered)
+      ELSE NULL END
+    WHERE diff IS NOT NULL
     """;
 
 
@@ -180,6 +215,16 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private LocalDateTime toLocalDateTime(Timestamp timestamp) {
     return LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault());
+  }
+
+  @Override
+  public Future<Void> excludeFieldsFromAll(Set<String> excludedPaths, Conn conn, String tenantId) {
+    LOGGER.info("excludeFieldsFromAll:: Excluding fields from all user audit records [tenantId: {}, paths: {}]",
+      tenantId, excludedPaths);
+    var table = formatDBTableName(tenantId, tableName());
+    var query = EXCLUDE_FIELDS_SQL.formatted(table);
+    return conn.execute(query, Tuple.of(excludedPaths.toArray(String[]::new)))
+      .mapEmpty();
   }
 
   @Override

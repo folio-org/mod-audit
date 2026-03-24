@@ -4,11 +4,13 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dao.configuration.SettingValueType.BOOLEAN;
 import static org.folio.dao.configuration.SettingValueType.INTEGER;
+import static org.folio.dao.configuration.SettingValueType.STRING;
 import static org.folio.services.configuration.SettingGroup.AUTHORITY;
 import static org.folio.services.configuration.SettingGroup.INVENTORY;
 import static org.folio.services.configuration.SettingGroup.USER;
 import static org.folio.services.configuration.SettingKey.ANONYMIZE;
 import static org.folio.services.configuration.SettingKey.ENABLED;
+import static org.folio.services.configuration.SettingKey.EXCLUDED_FIELDS;
 import static org.folio.services.configuration.SettingKey.RECORDS_PAGE_SIZE;
 import static org.folio.services.configuration.SettingKey.RETENTION_PERIOD;
 import static org.hamcrest.Matchers.containsString;
@@ -51,6 +53,7 @@ public class AuditConfigAPITest extends ApiTestBase {
     "audit.config.groups.settings.audit.user.anonymize.item.put",
     "audit.config.groups.settings.audit.user.records.retention.period.item.put",
     "audit.config.groups.settings.audit.user.records.page.size.item.put",
+    "audit.config.groups.settings.audit.user.excluded.fields.item.put",
     "audit.config.groups.settings.audit.user.collection.get"]""");
   private static final Header USER_HEADER = new Header(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
   private static final Header CONTENT_TYPE_HEADER = new Header("Content-Type", "application/json");
@@ -160,7 +163,8 @@ public class AuditConfigAPITest extends ApiTestBase {
       Arguments.of(USER.getId(), ENABLED.getValue(), true, BOOLEAN, USER_HEADERS),
       Arguments.of(USER.getId(), ANONYMIZE.getValue(), true, BOOLEAN, USER_HEADERS),
       Arguments.of(USER.getId(), RETENTION_PERIOD.getValue(), 1, INTEGER, USER_HEADERS),
-      Arguments.of(USER.getId(), RECORDS_PAGE_SIZE.getValue(), 25, INTEGER, USER_HEADERS)
+      Arguments.of(USER.getId(), RECORDS_PAGE_SIZE.getValue(), 25, INTEGER, USER_HEADERS),
+      Arguments.of(USER.getId(), EXCLUDED_FIELDS.getValue(), "[\"personal.email\"]", STRING, USER_HEADERS)
     );
   }
 
