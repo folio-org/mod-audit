@@ -107,6 +107,32 @@ class UserEventDaoImplTest {
       }));
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldAnonymizeAll(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.anonymizeAll(conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldDeleteEmptyUpdateRecords(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        verify(conn).execute(anyString());
+        ctx.completeNow();
+      }));
+  }
+
   @Test
   void shouldDeleteOlderThanDate(VertxTestContext ctx) {
     var tenDaysAgo = new Timestamp(System.currentTimeMillis() - 10L * 24 * 60 * 60 * 1000);
