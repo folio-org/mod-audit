@@ -344,10 +344,10 @@ public class UserAuditApiTest extends ApiTestBase {
       new FieldChangeDto(ChangeType.MODIFIED, "myField", "customFields.myField", "old", "new"),
       new FieldChangeDto(ChangeType.MODIFIED, "otherField", "customFields.otherField", "old", "new")
     ), null);
-    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+    var entity = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
       userId, "UPDATED", performedBy, diff);
 
-    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(entity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // Exclude "customFields" — should match customFields.myField and customFields.otherField by prefix
     given().headers(CONFIG_HEADERS)
@@ -384,10 +384,10 @@ public class UserAuditApiTest extends ApiTestBase {
       List.of(new CollectionChangeDto("departments", "departments",
         List.of(CollectionItemChangeDto.added("dept1"))))
     );
-    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+    var entity = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
       userId, "UPDATED", performedBy, diff);
 
-    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(entity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // Exclude personal.email and departments — username should survive
     given().headers(CONFIG_HEADERS)
@@ -419,10 +419,10 @@ public class UserAuditApiTest extends ApiTestBase {
       new FieldChangeDto(ChangeType.MODIFIED, "username", "username", "old", "new"),
       new FieldChangeDto(ChangeType.MODIFIED, "barcode", "barcode", "111", "222")
     ), null);
-    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+    var entity = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
       userId, "UPDATED", performedBy, diff);
 
-    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(entity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // Exclude "personal.email" which is not present in the record
     given().headers(CONFIG_HEADERS)
@@ -456,10 +456,10 @@ public class UserAuditApiTest extends ApiTestBase {
       new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
         UUID.randomUUID().toString(), UUID.randomUUID().toString())
     ), null);
-    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+    var entity = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
       userId, "UPDATED", performedBy, diff);
 
-    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(entity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // First exclude personal.email
     given().headers(CONFIG_HEADERS)
