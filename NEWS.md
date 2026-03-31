@@ -11,6 +11,7 @@
 * [MODAUD-299](https://folio-org.atlassian.net/browse/MODAUD-299) - Delete user audit records on disable
 * [MODAUD-294](https://folio-org.atlassian.net/browse/MODAUD-294) - Add anonymization of editing person for user audit log
 * [MODAUD-290](https://folio-org.atlassian.net/browse/MODAUD-290) - Add user audit log retention period
+* [MODAUD-295](https://folio-org.atlassian.net/browse/MODAUD-295) - Add user audit log field exclusion
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked

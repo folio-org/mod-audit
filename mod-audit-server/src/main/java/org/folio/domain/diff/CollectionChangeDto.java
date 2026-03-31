@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CollectionChangeDto {
+  private String fullPath;
   private String collectionName;
   private List<CollectionItemChangeDto> itemChanges;
 }

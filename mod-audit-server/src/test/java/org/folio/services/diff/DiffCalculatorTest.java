@@ -185,6 +185,10 @@ class DiffCalculatorTest {
       .extracting(CollectionChangeDto::getCollectionName)
       .containsExactly("languages");
 
+    assertThat(changeRecordDTO.getCollectionChanges().get(0).getFullPath())
+      .as("Collection change fullPath should be populated")
+      .isEqualTo("languages");
+
     assertThat(changeRecordDTO.getCollectionChanges().get(0).getItemChanges())
       .as("Field changes should contain changes in inner collection")
       .hasSize(3)

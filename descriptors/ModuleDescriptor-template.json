@@ -519,6 +519,11 @@
       "description": "Anonymize editing person for user audit records"
     },
     {
+      "permissionName": "audit.config.groups.settings.audit.user.excluded.fields.item.put",
+      "displayName": "Audit Configuration - update setting for audit user excluded fields",
+      "description": "Update setting for audit user excluded fields"
+    },
+    {
       "permissionName": "audit.config.groups.settings.audit.user.records.retention.period.item.put",
       "displayName": "Audit Configuration - update setting for audit user records retention period",
       "description": "Update setting for audit user records retention period"

@@ -74,6 +74,7 @@ class UserEventServiceImplTest {
   void shouldSaveCreatedEventSuccessfully(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.CREATED);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -118,6 +119,7 @@ class UserEventServiceImplTest {
   void shouldNotSaveUpdateEventWhenDiffIsNull(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.UPDATED);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -140,6 +142,7 @@ class UserEventServiceImplTest {
         UUID.randomUUID().toString(), UUID.randomUUID().toString())
     ), null);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(true);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -168,6 +171,7 @@ class UserEventServiceImplTest {
         UUID.randomUUID().toString(), UUID.randomUUID().toString())
     ), null);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(true);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -185,6 +189,7 @@ class UserEventServiceImplTest {
     var event = createUserEvent(UserEventType.CREATED);
     var performedBy = UUID.randomUUID();
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(true);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -207,6 +212,7 @@ class UserEventServiceImplTest {
     var event = createUserEvent(UserEventType.UPDATED);
     var diff = new ChangeRecordDto(null, null);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(true);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -229,6 +235,7 @@ class UserEventServiceImplTest {
         UUID.randomUUID().toString(), UUID.randomUUID().toString())
     ), null);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -250,6 +257,7 @@ class UserEventServiceImplTest {
   void shouldHandleDuplicateEvent(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.CREATED);
     mockAuditEnabled(true);
+    mockExcludedFields("");
     mockAnonymize(false);
     when(eventToEntityMapper.apply(event)).thenReturn(
       new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
@@ -260,6 +268,121 @@ class UserEventServiceImplTest {
     eventService.processEvent(event, TENANT_ID)
       .onComplete(ctx.failing(cause -> {
         assertInstanceOf(DuplicateEventException.class, cause);
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldExcludeFieldsBeforeSaving(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("username", "username", "old", "new"),
+      FieldChangeDto.modified("email", "personal.email", "old@test.com", "new@test.com")
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("[\"personal.email\"]");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.diff().getFieldChanges()).hasSize(1);
+        assertThat(saved.diff().getFieldChanges().get(0).getFullPath()).isEqualTo("username");
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldNotSaveWhenExclusionRemovesAllChanges(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("email", "personal.email", "old@test.com", "new@test.com")
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("[\"personal.email\"]");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldApplyBothExclusionAndAnonymization(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var performedBy = UUID.randomUUID();
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("username", "username", "old", "new"),
+      FieldChangeDto.modified("email", "personal.email", "old@test.com", "new@test.com"),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("[\"personal.email\"]");
+    mockAnonymize(true);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), performedBy, diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.performedBy()).isNull();
+        assertThat(saved.diff().getFieldChanges()).hasSize(1);
+        assertThat(saved.diff().getFieldChanges().get(0).getFullPath()).isEqualTo("username");
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSaveCreatedEventWithExclusionEnabled(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.CREATED);
+    mockAuditEnabled(true);
+    mockExcludedFields("[\"personal.email\"]");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.CREATED.name(), UUID.randomUUID(), null));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        assertThat(saved.diff()).isNull();
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldDeleteAllRecordsOnDeleteEventRegardlessOfExclusion(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.DELETED);
+    mockAuditEnabled(true);
+    when(userEventDao.deleteByUserId(any(UUID.class), anyString())).thenReturn(Future.succeededFuture());
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao).deleteByUserId(any(UUID.class), anyString());
+        verify(userEventDao, never()).save(any(), anyString());
+        verify(configurationService, never()).getSetting(
+          eq(org.folio.services.configuration.Setting.USER_RECORDS_EXCLUDED_FIELDS), anyString());
+        verify(configurationService, never()).getSetting(
+          eq(org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE), anyString());
         ctx.completeNow();
       }));
   }
@@ -381,6 +504,12 @@ class UserEventServiceImplTest {
   private void mockAnonymize(boolean value) {
     when(configurationService.getSetting(
       org.folio.services.configuration.Setting.USER_RECORDS_ANONYMIZE, TENANT_ID))
+      .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
+  }
+
+  private void mockExcludedFields(String value) {
+    when(configurationService.getSetting(
+      org.folio.services.configuration.Setting.USER_RECORDS_EXCLUDED_FIELDS, TENANT_ID))
       .thenReturn(Future.succeededFuture(new Setting().withValue(value)));
   }
 }

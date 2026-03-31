@@ -1,5 +1,6 @@
 package org.folio.dao.user.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createUserAuditEntity;
 import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
@@ -21,6 +22,7 @@ import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.sql.Timestamp;
+import java.util.Set;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
@@ -28,6 +30,7 @@ import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -161,6 +164,24 @@ class UserEventDaoImplTest {
         ctx.completeNow();
       }));
   }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  void shouldExcludeFieldsFromAll(VertxTestContext ctx) {
+    var conn = mock(Conn.class);
+    var paths = Set.of("personal.email", "barcode");
+    when(conn.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+
+    userEventDao.excludeFieldsFromAll(paths, conn, TENANT_ID)
+      .onComplete(ctx.succeeding(result -> {
+        var tupleCaptor = ArgumentCaptor.forClass(Tuple.class);
+        verify(conn, times(1)).execute(anyString(), tupleCaptor.capture());
+        var boundPaths = Set.of((String[]) tupleCaptor.getValue().getArrayOfStrings(0));
+        assertThat(boundPaths).containsExactlyInAnyOrder("personal.email", "barcode");
+        ctx.completeNow();
+      }));
+  }
+
 
   @Test
   void shouldReturnCorrectTableName() {

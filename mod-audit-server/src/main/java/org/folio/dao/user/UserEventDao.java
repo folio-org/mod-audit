@@ -5,6 +5,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.folio.rest.persist.Conn;
 
@@ -67,6 +68,18 @@ public interface UserEventDao {
    * @return Void future
    */
   Future<Void> anonymizeAll(Conn conn, String tenantId);
+
+  /**
+   * Removes excluded field paths from all user audit record diffs within a transaction.
+   * Both fieldChanges and collectionChanges matching the given paths (or nested under them)
+   * are stripped. Records whose diff becomes empty are set to null.
+   *
+   * @param excludedPaths set of dot-delimited field paths to exclude
+   * @param conn          transaction connection
+   * @param tenantId      tenant id
+   * @return Void future
+   */
+  Future<Void> excludeFieldsFromAll(Set<String> excludedPaths, Conn conn, String tenantId);
 
   /**
    * Deletes UPDATE records that have a null diff (e.g. after retroactive anonymization

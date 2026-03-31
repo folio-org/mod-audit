@@ -103,7 +103,8 @@ public abstract class DiffCalculator<T> {
       }
     });
 
-    return new CollectionChangeDto(collectionChange.getPropertyName(), new ArrayList<>(itemChanges));
+    return new CollectionChangeDto(collectionChange.getPropertyNameWithPath(),
+      collectionChange.getPropertyName(), new ArrayList<>(itemChanges));
   }
 
   private Optional<CollectionItemChangeDto> processValueAddOrRemove(ValueAddOrRemove valueAddOrRemove,

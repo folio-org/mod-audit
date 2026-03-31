@@ -9,7 +9,8 @@ public enum SettingKey {
   ENABLED("enabled"),
   RECORDS_PAGE_SIZE("records.page.size"),
   RETENTION_PERIOD("records.retention.period"),
-  ANONYMIZE("anonymize");
+  ANONYMIZE("anonymize"),
+  EXCLUDED_FIELDS("excluded.fields");
 
   private final String value;
 
