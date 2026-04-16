@@ -1,17 +1,39 @@
-## 3.0.0-SNAPSHOT 2025-mm-dd
-* [MODAUD-264](https://folio-org.atlassian.net/browse/MODAUD-264) - Respect tenant timezone when showing loan due date in log record
-* [MODAUD-265](https://folio-org.atlassian.net/browse/MODAUD-265) - Bump Inventory Item Storage API version from 10.1 to 11.0
-* [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Prepare sub-partitions on tenant init
-* [MODAUD-288](https://folio-org.atlassian.net/browse/MODAUD-288) - assertj: Upgrade from 3.27.3 to 3.27.7, change scope from compile to test
-* [MODAUD-296](https://folio-org.atlassian.net/browse/MODAUD-296) - Implement User Audit Enabled Setting
-* [MODAUD-298](https://folio-org.atlassian.net/browse/MODAUD-298) - Extract shared utilities and decouple DiffCalculator from inventory types
-* [MODAUD-271](https://folio-org.atlassian.net/browse/MODAUD-271) - Fix cancellation reason deserialization with consortium source field
-* [MODAUD-257](https://folio-org.atlassian.net/browse/MODAUD-257) - Replace EOL net.mguenther.kafka:kafka-junit with testcontainers KafkaContainer
-* [MODAUD-297](https://folio-org.atlassian.net/browse/MODAUD-297) - Consume user domain events and store audit history
-* [MODAUD-299](https://folio-org.atlassian.net/browse/MODAUD-299) - Delete user audit records on disable
-* [MODAUD-294](https://folio-org.atlassian.net/browse/MODAUD-294) - Add anonymization of editing person for user audit log
-* [MODAUD-290](https://folio-org.atlassian.net/browse/MODAUD-290) - Add user audit log retention period
-* [MODAUD-295](https://folio-org.atlassian.net/browse/MODAUD-295) - Add user audit log field exclusion
+## 3.0.0 2026-04-16
+
+### New APIs versions
+* Provides `audit-user v1.0`
+* Provides `audit-config v1.3`
+* Requires `item-storage v10.1 v11.0`
+
+### Features
+* Add GET endpoint for user audit logs ([MODAUD-291](https://folio-org.atlassian.net/browse/MODAUD-291))
+* Implement User Audit Enabled Setting ([MODAUD-296](https://folio-org.atlassian.net/browse/MODAUD-296))
+* Consume user domain events and store audit history ([MODAUD-297](https://folio-org.atlassian.net/browse/MODAUD-297))
+* Delete user audit records on disable ([MODAUD-299](https://folio-org.atlassian.net/browse/MODAUD-299))
+* Add user audit log retention period ([MODAUD-290](https://folio-org.atlassian.net/browse/MODAUD-290))
+* Add anonymization of editing person for user audit log ([MODAUD-294](https://folio-org.atlassian.net/browse/MODAUD-294))
+* Add user audit log field exclusion ([MODAUD-295](https://folio-org.atlassian.net/browse/MODAUD-295))
+* Add new action types for loans in circulation log ([MODAUD-261](https://folio-org.atlassian.net/browse/MODAUD-261))
+* Add additionalCallNumbers to version history of item and holding-record ([MODAUD-277](https://folio-org.atlassian.net/browse/MODAUD-277))
+
+### Bug fixes
+* Fix cancellation reason deserialization with consortium source field ([MODAUD-271](https://folio-org.atlassian.net/browse/MODAUD-271))
+* Fix creating current quarter partitions ([MODAUD-285](https://folio-org.atlassian.net/browse/MODAUD-285))
+* Disabled enable_indexscan for circ log fetch ([MODAUD-252](https://folio-org.atlassian.net/browse/MODAUD-252))
+* Respect tenant timezone when showing Loan dates in Log Record description field ([MODAUD-264](https://folio-org.atlassian.net/browse/MODAUD-264))
+* Remove user barcode from log ([MODAUD-227](https://folio-org.atlassian.net/browse/MODAUD-227))
+
+### Tech Dept
+* Extract shared utilities and decouple DiffCalculator from inventory types ([MODAUD-298](https://folio-org.atlassian.net/browse/MODAUD-298))
+* Prepare sub-partitions on tenant init ([MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284))
+* Replace EOL net.mguenther.kafka:kafka-junit with testcontainers KafkaContainer ([MODAUD-257](https://folio-org.atlassian.net/browse/MODAUD-257))
+* Add documentation for Audit Configuration APIs ([MODAUD-254](https://folio-org.atlassian.net/browse/MODAUD-254))
+* Migrate to GitHub Actions Maven workflow
+
+### Dependencies
+* Bump `assertj` from `3.27.3` to `3.27.7`
+
+---
 
 ## 2.11.1 2025-04-15 
 * [MODAUD-250](https://folio-org.atlassian.net/browse/MODAUD-250) - Version history of "MARC" records is not tracked
