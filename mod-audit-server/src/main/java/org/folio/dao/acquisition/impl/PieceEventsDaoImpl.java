@@ -96,10 +96,7 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
-        if (ar.succeeded()) promise.complete(ar.result());
-        else promise.fail(ar.cause());
-      });
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise::handle);
     } catch (Exception e) {
       LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
       promise.fail(e);

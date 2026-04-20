@@ -69,10 +69,7 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
-        if (ar.succeeded()) promise.complete(ar.result());
-        else promise.fail(ar.cause());
-      });
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise::handle);
     } catch (Exception e) {
       LOGGER.warn("Error getting order audit events by order id: {}", orderId, e);
       promise.fail(e);

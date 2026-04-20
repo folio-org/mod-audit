@@ -162,10 +162,7 @@ public class InitAPIs implements InitAPI {
     DeploymentOptions deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
       .setInstances(instancesNumber).setWorkerPoolSize(poolSize);
     vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions)
-      .onComplete(ar -> {
-        if (ar.succeeded()) eventsConsumer.complete(ar.result());
-        else eventsConsumer.fail(ar.cause());
-      });
+      .onComplete(eventsConsumer::handle);
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

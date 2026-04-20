@@ -39,10 +39,7 @@ public class SettingGroupDao {
   public Future<Boolean> exists(String groupId, String tenantId) {
     var query = prepareSql(EXIST_BY_ID_SQL, tenantId);
     var promise = Promise.<RowSet<Row>>promise();
-    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), ar -> {
-      if (ar.succeeded()) promise.complete(ar.result());
-      else promise.fail(ar.cause());
-    });
+    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), promise::handle);
     return promise.future().map(rowSet -> rowSet.iterator().hasNext());
   }
 

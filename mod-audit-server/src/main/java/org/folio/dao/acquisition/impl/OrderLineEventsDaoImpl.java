@@ -71,10 +71,7 @@ public class OrderLineEventsDaoImpl implements OrderLineEventsDao {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ORDER_LINE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderLineId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
-        if (ar.succeeded()) promise.complete(ar.result());
-        else promise.fail(ar.cause());
-      });
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise::handle);
     } catch (Exception e) {
       LOGGER.warn("Error getting order line audit events by order line id: {}", orderLineId, e);
       promise.fail(e);
