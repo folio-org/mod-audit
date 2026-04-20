@@ -12,7 +12,6 @@ import io.vertx.core.spi.VerticleFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticle.SpringVerticleFactory;
@@ -143,7 +142,7 @@ public class InitAPIs implements InitAPI {
     deployVerticle(vertx, verticleFactory, UserConsumersVerticle.class, userConsumerInstancesNumber, userConsumerPoolSize, userEventsConsumer);
 
     LOGGER.info("deployConsumersVerticles:: All consumer verticles were successfully deployed");
-    return GenericCompositeFuture.all(Arrays.asList(
+    return Future.all(Arrays.asList(
       orderEventsConsumer.future(),
       orderLineEventsConsumer.future(),
       pieceEventsConsumer.future(),
@@ -162,7 +161,11 @@ public class InitAPIs implements InitAPI {
                                   int instancesNumber, int poolSize, Promise<String> eventsConsumer) {
     DeploymentOptions deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
       .setInstances(instancesNumber).setWorkerPoolSize(poolSize);
-    vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions, eventsConsumer);
+    vertx.deployVerticle(getVerticleName(verticleFactory, consumerClass), deploymentOptions)
+      .onComplete(ar -> {
+        if (ar.succeeded()) eventsConsumer.complete(ar.result());
+        else eventsConsumer.fail(ar.cause());
+      });
   }
 
   private <T> String getVerticleName(VerticleFactory verticleFactory, Class<T> clazz) {

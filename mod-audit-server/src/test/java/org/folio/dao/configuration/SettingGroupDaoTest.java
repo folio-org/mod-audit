@@ -1,13 +1,17 @@
 package org.folio.dao.configuration;
 
 import static org.folio.utils.EntityUtils.TENANT_ID;
-import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
+import static org.folio.utils.MockUtils.mockPostgresHandlerSuccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.vertx.core.Future;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
@@ -36,17 +40,18 @@ class SettingGroupDaoTest {
     when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void getAll_positive() {
     // given
     var query = "SELECT * FROM diku_mod_audit.setting_group ORDER BY id";
-    mockPostgresExecutionSuccess(1).when(postgresClient).select(eq(query), any());
+    when(postgresClient.select(eq(query))).thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
     // when
     settingGroupDao.getAll(TENANT_ID);
 
     // then
-    verify(postgresClient).select(eq(query), any());
+    verify(postgresClient).select(eq(query));
   }
 
   @Test
@@ -55,7 +60,7 @@ class SettingGroupDaoTest {
     var groupId = "groupId";
     var query = "SELECT 1 FROM diku_mod_audit.setting_group WHERE id = $1";
     var captor = ArgumentCaptor.forClass(Tuple.class);
-    mockPostgresExecutionSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
+    mockPostgresHandlerSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
 
     // when
     settingGroupDao.exists(groupId, TENANT_ID);

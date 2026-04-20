@@ -4,6 +4,9 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
@@ -15,20 +18,20 @@ import org.mockito.stubbing.Stubber;
 @UtilityClass
 public class MockUtils {
 
-  public static Stubber mockPostgresExecutionSuccess(int futureIndex) {
+  public static Stubber mockPostgresHandlerSuccess(int handlerIndex) {
     return lenient().doAnswer(invocation -> {
       @SuppressWarnings("unchecked")
-      var future = (Promise<RowSet<Row>>) invocation.getArgument(futureIndex);
-      future.complete();
+      Handler<AsyncResult<RowSet<Row>>> handler = invocation.getArgument(handlerIndex);
+      handler.handle(Future.succeededFuture());
       return null;
     });
   }
 
-  public static Stubber mockPostgresExecutionSuccess(int futureIndex, RowSet<Row> rowSet) {
+  public static Stubber mockPostgresHandlerSuccess(int handlerIndex, RowSet<Row> rowSet) {
     return lenient().doAnswer(invocation -> {
       @SuppressWarnings("unchecked")
-      var future = (Promise<RowSet<Row>>) invocation.getArgument(futureIndex);
-      future.complete(rowSet);
+      Handler<AsyncResult<RowSet<Row>>> handler = invocation.getArgument(handlerIndex);
+      handler.handle(Future.succeededFuture(rowSet));
       return null;
     });
   }

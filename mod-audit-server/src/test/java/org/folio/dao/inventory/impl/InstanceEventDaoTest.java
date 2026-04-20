@@ -2,7 +2,6 @@ package org.folio.dao.inventory.impl;
 
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createInventoryAuditEntity;
-import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +51,8 @@ class InstanceEventDaoTest {
   @BeforeEach
   void setUp() {
     lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
-    mockPostgresExecutionSuccess(2).when(postgresClient).execute(anyString(), any(Tuple.class), any());
+    lenient().doReturn(Future.succeededFuture(mock(RowSet.class)))
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
   }
 
   @Test
@@ -69,9 +69,9 @@ class InstanceEventDaoTest {
   void shouldHandleException(VertxTestContext ctx) {
     var inventoryAuditEvent = createInventoryAuditEntity();
 
-    mockPostgresExecutionSuccess(2)
-      .doThrow(new IllegalStateException("Error"))
-      .when(postgresClient).execute(anyString(), any(Tuple.class), any());
+    doReturn(Future.succeededFuture(mock(RowSet.class)))
+      .doReturn(Future.failedFuture(new IllegalStateException("Error")))
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
 
     instanceEventDao.save(inventoryAuditEvent, TENANT_ID)
       .onComplete(ctx.succeeding(result ->

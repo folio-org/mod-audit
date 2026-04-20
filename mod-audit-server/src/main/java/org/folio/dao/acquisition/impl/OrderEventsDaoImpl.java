@@ -54,12 +54,10 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
   @Override
   public Future<RowSet<Row>> save(OrderAuditEvent event, String tenantId) {
     LOGGER.debug("save:: Saving Order AuditEvent with order id: {}", event.getOrderId());
-    Promise<RowSet<Row>> promise = Promise.promise();
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, event, tenantId);
     LOGGER.info("save:: Saved Order AuditEvent with order id : {}", event.getOrderId());
-    return promise.future();
+    return makeSaveCall(query, event, tenantId);
   }
 
   @Override
@@ -71,7 +69,10 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
       String logTable = formatDBTableName(tenantId, TABLE_NAME);
       String query = format(GET_BY_ORDER_ID_SQL, logTable, logTable,  format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(orderId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
+        if (ar.succeeded()) promise.complete(ar.result());
+        else promise.fail(ar.cause());
+      });
     } catch (Exception e) {
       LOGGER.warn("Error getting order audit events by order id: {}", orderId, e);
       promise.fail(e);
@@ -80,21 +81,24 @@ public class OrderEventsDaoImpl implements OrderEventsDao {
     return promise.future().map(this::mapRowToListOfOrderEvent);
   }
 
-  private void makeSaveCall(Promise<RowSet<Row>> promise, String query, OrderAuditEvent orderAuditEvent, String tenantId) {
+  private Future<RowSet<Row>> makeSaveCall(String query, OrderAuditEvent orderAuditEvent, String tenantId) {
     LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
+    LOGGER.info("makeSaveCall:: Trying to make save call for tenant id : {}", tenantId);
     try {
-      LOGGER.info("makeSaveCall:: Trying to make save call for tenant id : {}", tenantId);
-      pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(orderAuditEvent.getId(),
+      var params = Tuple.of(orderAuditEvent.getId(),
         orderAuditEvent.getAction(),
         orderAuditEvent.getOrderId(),
         orderAuditEvent.getUserId(),
         LocalDateTime.ofInstant(orderAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
         LocalDateTime.ofInstant(orderAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
-        JsonObject.mapFrom(orderAuditEvent.getOrderSnapshot())), promise);
+        JsonObject.mapFrom(orderAuditEvent.getOrderSnapshot()));
+      return pgClientFactory.createInstance(tenantId).execute(query, params)
+        .onFailure(e -> LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
+          orderAuditEvent.getId(), orderAuditEvent.getOrderId(), TABLE_NAME, e));
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
         orderAuditEvent.getId(), orderAuditEvent.getOrderId(), TABLE_NAME, e);
-      promise.fail(e);
+      return Future.failedFuture(e);
     }
   }
 
