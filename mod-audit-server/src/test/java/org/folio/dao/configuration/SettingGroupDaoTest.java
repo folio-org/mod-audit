@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
-import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import org.folio.rest.persist.PostgresClient;
@@ -45,13 +44,13 @@ class SettingGroupDaoTest {
   void getAll_positive() {
     // given
     var query = "SELECT * FROM diku_mod_audit.setting_group ORDER BY id";
-    when(postgresClient.select(eq(query))).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+    when(postgresClient.select(query)).thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
     // when
     settingGroupDao.getAll(TENANT_ID);
 
     // then
-    verify(postgresClient).select(eq(query));
+    verify(postgresClient).select(query);
   }
 
   @Test
