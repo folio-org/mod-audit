@@ -77,11 +77,24 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   @Override
   public Future<PieceAuditEventCollection> getAuditEventsByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByOrderId:: Trying to retrieve AuditEvent with piece id : {}", pieceId);
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
+    return executeSelectQuery(query, pieceId, limit, offset, tenantId);
+  }
+
+  @Override
+  public Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
+    LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
+    return executeSelectQuery(query, pieceId, limit, offset, tenantId);
+  }
+
+  private Future<PieceAuditEventCollection> executeSelectQuery(String query, String pieceId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
       pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
         if (ar.succeeded()) promise.complete(ar.result());
@@ -91,28 +104,6 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
       promise.fail(e);
     }
-    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(this::mapRowToListOfPieceEvent);
-  }
-
-  @Override
-  public Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
-    LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
-    Promise<RowSet<Row>> promise = Promise.promise();
-    try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
-      Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, ar -> {
-        if (ar.succeeded()) promise.complete(ar.result());
-        else promise.fail(ar.cause());
-      });
-    } catch (Exception e) {
-      LOGGER.warn("Error getting order audit events by piece id: {}", pieceId, e);
-      promise.fail(e);
-    }
-    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
     return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
