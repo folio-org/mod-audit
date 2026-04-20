@@ -132,6 +132,18 @@ class InstanceEventDaoTest {
   }
 
   @Test
+  void shouldReturnFailedFutureWhenSynchronousExceptionOccurs() {
+    var entity = createInventoryAuditEntity();
+    when(postgresClientFactory.createInstance(TENANT_ID)).thenThrow(new RuntimeException("db error"));
+
+    var result = instanceEventDao.save(entity, TENANT_ID);
+
+    assertTrue(result.failed());
+    assertInstanceOf(RuntimeException.class, result.cause());
+    assertEquals("db error", result.cause().getMessage());
+  }
+
+  @Test
   void shouldReturnCorrectTableName() {
     var expectedTableName = "instance_audit";
     var actualTableName = instanceEventDao.tableName();

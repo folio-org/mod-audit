@@ -184,6 +184,18 @@ class UserEventDaoImplTest {
 
 
   @Test
+  void shouldReturnFailedFutureWhenSynchronousExceptionOccurs() {
+    var entity = createUserAuditEntity();
+    when(postgresClientFactory.createInstance(TENANT_ID)).thenThrow(new RuntimeException("db error"));
+
+    var result = userEventDao.save(entity, TENANT_ID);
+
+    assertTrue(result.failed());
+    assertInstanceOf(RuntimeException.class, result.cause());
+    assertEquals("db error", result.cause().getMessage());
+  }
+
+  @Test
   void shouldReturnCorrectTableName() {
     assertEquals("user_audit", userEventDao.tableName());
   }
