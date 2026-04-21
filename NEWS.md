@@ -1,3 +1,6 @@
+## 2.11.5 2026-04-21
+* [MODAUD-252](https://folio-org.atlassian.net/browse/MODAUD-252) - Improve performance of circulation log queries
+
 ## 2.11.4 2026-01-20
 * [MODAUD-284](https://folio-org.atlassian.net/browse/MODAUD-284) - Fix creating current quarter partitions
 
