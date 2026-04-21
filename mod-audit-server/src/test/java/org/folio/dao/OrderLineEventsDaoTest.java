@@ -4,6 +4,8 @@ import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createOrderLineAuditEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -74,6 +76,17 @@ public class OrderLineEventsDaoTest {
       assertEquals(OrderAuditEvent.Action.CREATE.value(), orderLineAuditEventList.get(0).getAction().value());
     });
     verify(postgresClientFactory, times(2)).createInstance(TENANT_ID);
+  }
+  @Test
+  void shouldReturnFailedFutureWhenSynchronousExceptionOccurs() {
+    var event = createOrderLineAuditEvent(UUID.randomUUID().toString());
+    doThrow(new RuntimeException("db error")).when(postgresClientFactory).createInstance(TENANT_ID);
+
+    var result = orderLineEventsDao.save(event, TENANT_ID);
+
+    assertTrue(result.failed());
+    assertInstanceOf(RuntimeException.class, result.cause());
+    assertEquals("db error", result.cause().getMessage());
   }
 }
 

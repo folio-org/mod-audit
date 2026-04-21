@@ -122,14 +122,14 @@ public class TestSuite {
 
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
-    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if (res.succeeded()) {
-        deploymentComplete.complete(res.result());
-      }
-      else {
-        deploymentComplete.completeExceptionally(res.cause());
-      }
-    });
+    vertx.deployVerticle(RestVerticle.class.getName(), options)
+      .onComplete(res -> {
+        if (res.succeeded()) {
+          deploymentComplete.complete(res.result());
+        } else {
+          deploymentComplete.completeExceptionally(res.cause());
+        }
+      });
     deploymentComplete.get(60, TimeUnit.SECONDS);
   }
 

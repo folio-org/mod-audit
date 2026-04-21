@@ -2,7 +2,7 @@ package org.folio.dao.configuration;
 
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createSettingEntity;
-import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
+import static org.folio.utils.MockUtils.mockPostgresHandlerSuccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +60,7 @@ class SettingDaoTest {
     var groupId = "groupId";
     var query = "SELECT * FROM diku_mod_audit.setting WHERE group_id = $1 ORDER BY key";
     var captor = ArgumentCaptor.forClass(Tuple.class);
-    mockPostgresExecutionSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
+    mockPostgresHandlerSuccess(2).when(postgresClient).select(eq(query), captor.capture(), any());
 
     // when
     settingDao.getAllByGroupId(groupId, TENANT_ID);
@@ -97,7 +97,7 @@ class SettingDaoTest {
     var settingEntity = createSettingEntity();
     var captor = ArgumentCaptor.forClass(Tuple.class);
 
-    mockPostgresExecutionSuccess(2, mockRowSet(settingEntity))
+    mockPostgresHandlerSuccess(2, mockRowSet(settingEntity))
       .when(postgresClient).select(eq(query), captor.capture(), any());
 
     // when

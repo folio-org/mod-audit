@@ -11,7 +11,6 @@ import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaConsumerWrapper;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.SubscriptionDefinition;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.processing.events.utils.PomReaderUtil;
 import org.folio.rest.tools.utils.ModuleName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
         constructModuleName() + "_" + getClass().getSimpleName()));
     });
 
-    GenericCompositeFuture.all(futures).onComplete(ar -> startPromise.complete());
+    Future.all(futures).onComplete(ar -> startPromise.complete());
   }
 
   @Override
@@ -64,7 +63,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
     LOGGER.info("stop:: Stopping {} verticle", getClass().getSimpleName());
     List<Future<Void>> futures = new ArrayList<>();
     consumerWrappers.forEach(consumerWrapper -> futures.add(consumerWrapper.stop()));
-    GenericCompositeFuture.all(futures).onComplete(ar -> stopPromise.complete());
+    Future.all(futures).onComplete(ar -> stopPromise.complete());
   }
 
   protected SubscriptionDefinition subscriptionDefinition(String event, KafkaConfig kafkaConfiguration) {

@@ -31,16 +31,15 @@ public class SettingGroupDao {
   }
 
   public Future<List<SettingGroupEntity>> getAll(String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
     var query = prepareSql(SELECT_ALL_SQL, tenantId);
-    pgClientFactory.createInstance(tenantId).select(query, promise);
-    return promise.future().map(this::mapToSettingGroupList);
+    return pgClientFactory.createInstance(tenantId).select(query)
+      .map(this::mapToSettingGroupList);
   }
 
   public Future<Boolean> exists(String groupId, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
     var query = prepareSql(EXIST_BY_ID_SQL, tenantId);
-    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), promise);
+    var promise = Promise.<RowSet<Row>>promise();
+    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), promise::handle);
     return promise.future().map(rowSet -> rowSet.iterator().hasNext());
   }
 
