@@ -48,7 +48,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
     logger.info("Get circulation audit log records: no filter");
     given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(26));
+      .assertThat().body("totalRecords", equalTo(29));
   }
 
   @Test
@@ -163,5 +163,11 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
       .log().all()
       .statusCode(200)
       .assertThat().body("totalRecords", equalTo(expectedNumberOfRecords));
+  }
+
+  @Test
+  void getCirculationAuditLogRecordsWithDisabledIndexScan() {
+    logger.info("Get circulation audit log records with disabled index scan");
+    verifyNumberOfLogRecords("(items=9625254808725) sortby date/sort.descending", 3);
   }
 }
