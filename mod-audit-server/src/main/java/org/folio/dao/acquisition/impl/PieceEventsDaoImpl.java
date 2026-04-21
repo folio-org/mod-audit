@@ -68,47 +68,39 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
   @Override
   public Future<RowSet<Row>> save(PieceAuditEvent event, String tenantId) {
     LOGGER.debug("save:: Trying to save Piece AuditEvent with piece id : {}", event.getPieceId());
-    Promise<RowSet<Row>> promise = Promise.promise();
     String logTable = formatDBTableName(tenantId, TABLE_NAME);
     String query = format(INSERT_SQL, logTable);
-    makeSaveCall(promise, query, event, tenantId);
     LOGGER.info("save:: Saved Piece AuditEvent for pieceId={} in tenant id={}", event.getPieceId(), tenantId);
-    return promise.future();
+    return makeSaveCall(query, event, tenantId);
   }
 
   @Override
   public Future<PieceAuditEventCollection> getAuditEventsByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByOrderId:: Trying to retrieve AuditEvent with piece id : {}", pieceId);
-    Promise<RowSet<Row>> promise = Promise.promise();
-    try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
-      Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
-    } catch (Exception e) {
-      LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
-      promise.fail(e);
-    }
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_BY_PIECE_ID_SQL, logTable, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
     LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id : {}", pieceId);
-    return promise.future().map(this::mapRowToListOfPieceEvent);
+    return executeSelectQuery(query, pieceId, limit, offset, tenantId);
   }
 
   @Override
   public Future<PieceAuditEventCollection> getAuditEventsWithStatusChangesByPieceId(String pieceId, String sortBy, String sortOrder, int limit, int offset, String tenantId) {
     LOGGER.debug("getAuditEventsByOrderId:: Retrieving AuditEvent with piece id : {}", pieceId);
+    String logTable = formatDBTableName(tenantId, TABLE_NAME);
+    String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
+    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
+    return executeSelectQuery(query, pieceId, limit, offset, tenantId);
+  }
+
+  private Future<PieceAuditEventCollection> executeSelectQuery(String query, String pieceId, int limit, int offset, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      LOGGER.debug("formatDBTableName:: Formatting DB Table Name with tenant id : {}", tenantId);
-      String logTable = formatDBTableName(tenantId, TABLE_NAME);
-      String query = format(GET_STATUS_CHANGE_HISTORY_BY_PIECE_ID_SQL, logTable, format(ORDER_BY_PATTERN, sortBy, sortOrder));
       Tuple queryParams = Tuple.of(UUID.fromString(pieceId), limit, offset);
-      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise);
+      pgClientFactory.createInstance(tenantId).selectRead(query, queryParams, promise::handle);
     } catch (Exception e) {
-      LOGGER.warn("Error getting order audit events by piece id: {}", pieceId, e);
+      LOGGER.warn("Error getting piece audit events by piece id: {}", pieceId, e);
       promise.fail(e);
     }
-    LOGGER.info("getAuditEventsByOrderId:: Retrieved AuditEvent with piece id: {}", pieceId);
     return promise.future().map(this::mapRowToListOfPieceEvent);
   }
 
@@ -138,21 +130,23 @@ public class PieceEventsDaoImpl implements PieceEventsDao {
       .withPieceSnapshot(JsonObject.mapFrom(row.getValue(MODIFIED_CONTENT_FIELD)));
   }
 
-  private void makeSaveCall(Promise<RowSet<Row>> promise, String query, PieceAuditEvent pieceAuditEvent, String tenantId) {
+  private Future<RowSet<Row>> makeSaveCall(String query, PieceAuditEvent pieceAuditEvent, String tenantId) {
     LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
-      pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(pieceAuditEvent.getId(),
-          pieceAuditEvent.getAction(),
-          pieceAuditEvent.getPieceId(),
-          pieceAuditEvent.getUserId(),
-          LocalDateTime.ofInstant(pieceAuditEvent.getEventDate().toInstant(),  ZoneId.systemDefault()),
-          LocalDateTime.ofInstant(pieceAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
-          JsonObject.mapFrom(pieceAuditEvent.getPieceSnapshot())),
-        promise);
+      var params = Tuple.of(pieceAuditEvent.getId(),
+        pieceAuditEvent.getAction(),
+        pieceAuditEvent.getPieceId(),
+        pieceAuditEvent.getUserId(),
+        LocalDateTime.ofInstant(pieceAuditEvent.getEventDate().toInstant(), ZoneId.systemDefault()),
+        LocalDateTime.ofInstant(pieceAuditEvent.getActionDate().toInstant(), ZoneId.systemDefault()),
+        JsonObject.mapFrom(pieceAuditEvent.getPieceSnapshot()));
+      return pgClientFactory.createInstance(tenantId).execute(query, params)
+        .onFailure(e -> LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
+          pieceAuditEvent.getId(), pieceAuditEvent.getPieceId(), TABLE_NAME, e));
     } catch (Exception e) {
       LOGGER.error("Failed to save record with id: {} for order id: {} in to table {}",
         pieceAuditEvent.getId(), pieceAuditEvent.getPieceId(), TABLE_NAME, e);
-      promise.fail(e);
+      return Future.failedFuture(e);
     }
   }
 }

@@ -51,9 +51,9 @@ public class SettingDao {
   }
 
   public Future<List<SettingEntity>> getAllByGroupId(String groupId, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
     var query = prepareSql(SELECT_BY_GROUP_ID_SQL, tenantId);
-    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), promise);
+    var promise = Promise.<RowSet<Row>>promise();
+    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(groupId), promise::handle);
     return promise.future().map(this::mapToSettingList);
   }
 
@@ -64,9 +64,9 @@ public class SettingDao {
   }
 
   public Future<SettingEntity> getById(String settingId, String tenantId) {
-    var promise = Promise.<RowSet<Row>>promise();
     var query = prepareSql(SELECT_BY_ID_SQL, tenantId);
-    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(settingId), promise);
+    var promise = Promise.<RowSet<Row>>promise();
+    pgClientFactory.createInstance(tenantId).select(query, Tuple.of(settingId), promise::handle);
     return promise.future().map(rowSet -> settingMapper().apply(rowSet.iterator().next()));
   }
 
