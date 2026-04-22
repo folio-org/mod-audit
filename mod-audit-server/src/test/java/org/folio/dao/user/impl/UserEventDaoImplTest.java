@@ -3,7 +3,6 @@ package org.folio.dao.user.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.utils.EntityUtils.TENANT_ID;
 import static org.folio.utils.EntityUtils.createUserAuditEntity;
-import static org.folio.utils.MockUtils.mockPostgresExecutionSuccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,7 +48,8 @@ class UserEventDaoImplTest {
   @BeforeEach
   void setUp() {
     lenient().when(postgresClientFactory.createInstance(TENANT_ID)).thenReturn(postgresClient);
-    mockPostgresExecutionSuccess(2).when(postgresClient).execute(anyString(), any(Tuple.class), any());
+    lenient().doReturn(Future.succeededFuture(mock(RowSet.class)))
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
   }
 
   @Test
@@ -66,9 +66,9 @@ class UserEventDaoImplTest {
   void shouldHandleExceptionOnSave(VertxTestContext ctx) {
     var entity = createUserAuditEntity();
 
-    mockPostgresExecutionSuccess(2)
-      .doThrow(new IllegalStateException("Error"))
-      .when(postgresClient).execute(anyString(), any(Tuple.class), any());
+    doReturn(Future.succeededFuture(mock(RowSet.class)))
+      .doReturn(Future.failedFuture(new IllegalStateException("Error")))
+      .when(postgresClient).execute(anyString(), any(Tuple.class));
 
     userEventDao.save(entity, TENANT_ID)
       .onComplete(ctx.succeeding(result ->
@@ -182,6 +182,18 @@ class UserEventDaoImplTest {
       }));
   }
 
+
+  @Test
+  void shouldReturnFailedFutureWhenSynchronousExceptionOccurs() {
+    var entity = createUserAuditEntity();
+    when(postgresClientFactory.createInstance(TENANT_ID)).thenThrow(new RuntimeException("db error"));
+
+    var result = userEventDao.save(entity, TENANT_ID);
+
+    assertTrue(result.failed());
+    assertInstanceOf(RuntimeException.class, result.cause());
+    assertEquals("db error", result.cause().getMessage());
+  }
 
   @Test
   void shouldReturnCorrectTableName() {

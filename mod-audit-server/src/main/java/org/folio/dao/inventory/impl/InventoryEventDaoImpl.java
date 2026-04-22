@@ -10,7 +10,6 @@ import static org.folio.util.AuditEventDBConstants.USER_ID_FIELD;
 import static org.folio.util.DbUtils.formatDBTableName;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -69,11 +68,9 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
   public Future<RowSet<Row>> save(InventoryAuditEntity event, String tenantId) {
     LOGGER.debug("save:: Trying to save InventoryAuditEntity with [tenantId: {}, eventId: {}, entityId: {}]",
       tenantId, event.eventId(), event.entityId());
-    var promise = Promise.<RowSet<Row>>promise();
     var table = formatDBTableName(tenantId, tableName());
     var query = format(INSERT_SQL, table);
-    makeSaveCall(promise, query, event, tenantId);
-    return promise.future();
+    return makeSaveCall(query, event, tenantId);
   }
 
   @Override
@@ -122,22 +119,24 @@ public abstract class InventoryEventDaoImpl implements InventoryEventDao {
     return INVENTORY_AUDIT_TABLE.formatted(resourceType().getType());
   }
 
-  private void makeSaveCall(Promise<RowSet<Row>> promise, String query, InventoryAuditEntity event, String tenantId) {
+  private Future<RowSet<Row>> makeSaveCall(String query, InventoryAuditEntity event, String tenantId) {
     LOGGER.debug("makeSaveCall:: Making save call for tenant id : {}", tenantId);
     try {
-      pgClientFactory.createInstance(tenantId).execute(query, Tuple.of(event.eventId(),
-          LocalDateTime.ofInstant(event.eventDate().toInstant(),  ZoneId.systemDefault()),
-          event.entityId(),
-          event.action(),
-          event.userId(),
-          JsonObject.mapFrom(event.diff())),
-        promise);
-      LOGGER.info("makeSaveCall:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
-        tenantId, event.eventId(), event.entityId());
+      var params = Tuple.of(event.eventId(),
+        LocalDateTime.ofInstant(event.eventDate().toInstant(), ZoneId.systemDefault()),
+        event.entityId(),
+        event.action(),
+        event.userId(),
+        JsonObject.mapFrom(event.diff()));
+      return pgClientFactory.createInstance(tenantId).execute(query, params)
+        .onSuccess(v -> LOGGER.info("makeSaveCall:: Saved InventoryAuditEntity with [tenantId: {}, eventId:{}, entityId:{}]",
+          tenantId, event.eventId(), event.entityId()))
+        .onFailure(e -> LOGGER.error("Failed to save record with [eventId:{}, entityId:{}, tableName: {}]",
+          event.eventId(), event.entityId(), tableName(), e));
     } catch (Exception e) {
       LOGGER.error("Failed to save record with [eventId:{}, entityId:{}, tableName: {}]",
         event.eventId(), event.entityId(), tableName(), e);
-      promise.fail(e);
+      return Future.failedFuture(e);
     }
   }
 
