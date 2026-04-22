@@ -1,8 +1,9 @@
-## 3.1.0 In progress
+## 3.0.1 2026-04-22
 
 ### Tech Dept
 * Upgrade to Vert.x v5 ([MODAUD-305](https://folio-org.atlassian.net/browse/MODAUD-305))
 
+---
 
 ## 3.0.0 2026-04-16
 
