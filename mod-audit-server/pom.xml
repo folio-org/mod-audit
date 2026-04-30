@@ -25,10 +25,10 @@
     <awaitility.version>4.3.0</awaitility.version>
     <argLine />
     <mapstruct.version>1.6.3</mapstruct.version>
-    <lombok.version>1.18.36</lombok.version>
+    <lombok.version>1.18.46</lombok.version>
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     <assertj.version>3.27.7</assertj.version>
-    <javers.version>7.8.0</javers.version>
+    <javers.version>7.11.0</javers.version>
   </properties>
 
   <dependencies>
@@ -162,7 +162,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.0</version>
+        <version>3.15.0</version>
         <configuration>
           <release>21</release>
           <encoding>UTF-8</encoding>
@@ -292,7 +292,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -403,7 +403,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.3.1</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
