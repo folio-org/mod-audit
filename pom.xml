@@ -23,7 +23,7 @@
     <vertx.version>5.0.10</vertx.version>
     <wiremock.version>3.0.1</wiremock.version>
     <junit.jupiter.version>5.12.0</junit.jupiter.version>
-    <rest-assured.version>5.5.1</rest-assured.version>
+    <rest-assured.version>6.0.0</rest-assured.version>
     <pubsub.client.version>2.17.0</pubsub.client.version>
     <streamx.version>0.7.3</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
@@ -114,7 +114,7 @@
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0</version>
+        <version>1.0.1</version>
         <inherited>false</inherited>
         <executions>
           <execution>
@@ -154,7 +154,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>3.5.5</version>
         <configuration>
           <argLine>@{argLine} -Duser.language=en -Duser.region=US</argLine>
           <!-- TODO: update to version 3.0.0 and remove useSystemClassLoader
@@ -186,7 +186,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>3.5.5</version>
         <executions>
           <execution>
             <goals>
