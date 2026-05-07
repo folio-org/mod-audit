@@ -139,6 +139,16 @@
         "preferredContactTypeId": {
           "description": "Id of user's preferred contact type",
           "type": "string"
+        },
+        "pronouns": {
+          "description": "The user's pronouns",
+          "type": "string",
+          "maxLength": 300
+        },
+        "profilePictureLink": {
+          "description": "Link to the profile picture, or only the id of the /users/profile-picture entry",
+          "type": "string",
+          "format": "uri"
         }
       },
       "additionalProperties": true,
@@ -155,6 +165,16 @@
       "description": "The date for when the user becomes inactive",
       "type": "string",
       "format": "date-time"
+    },
+    "preferredEmailCommunication": {
+      "description": "Preferred email communication types",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["Support", "Programs", "Services"]
+      },
+      "maxItems": 3,
+      "uniqueItems": true
     },
     "createdDate": {
       "description": "Deprecated",
