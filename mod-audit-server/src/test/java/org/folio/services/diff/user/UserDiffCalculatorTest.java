@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import org.folio.domain.diff.CollectionChangeDto;
@@ -47,6 +48,48 @@ class UserDiffCalculatorTest {
     assertThat(diff.getFieldChanges())
       .hasSize(1)
       .containsExactly(FieldChangeDto.modified("firstName", "personal.firstName", "John", "Jane"));
+  }
+
+  @Test
+  void shouldDetectPronounsChange() {
+    var oldUser = getMap(new User().withId("1").withPersonal(new Personal__1().withPronouns("she/her")));
+    var newUser = getMap(new User().withId("1").withPersonal(new Personal__1().withPronouns("they/them")));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getFieldChanges())
+      .hasSize(1)
+      .containsExactly(FieldChangeDto.modified("pronouns", "personal.pronouns", "she/her", "they/them"));
+  }
+
+  @Test
+  void shouldDetectProfilePictureLinkChange() {
+    var oldUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withProfilePictureLink(URI.create("https://example.com/old.png"))));
+    var newUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withProfilePictureLink(URI.create("https://example.com/new.png"))));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getFieldChanges())
+      .hasSize(1)
+      .containsExactly(FieldChangeDto.modified(
+        "profilePictureLink", "personal.profilePictureLink",
+        "https://example.com/old.png", "https://example.com/new.png"));
+  }
+
+  @Test
+  void shouldDetectPreferredEmailCommunicationChange() {
+    var oldUser = getMap(new User().withId("1"));
+    var newUser = getMap(new User().withId("1"));
+    newUser.put("preferredEmailCommunication", List.of("Support"));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getFullPath)
+      .containsExactly("preferredEmailCommunication");
   }
 
   @Test
