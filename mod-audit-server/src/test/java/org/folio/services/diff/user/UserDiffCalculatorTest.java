@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.CustomFields;
@@ -71,11 +72,13 @@ class UserDiffCalculatorTest {
 
     var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
 
-    assertThat(diff.getFieldChanges())
-      .hasSize(1)
-      .containsExactly(FieldChangeDto.modified(
-        "profilePictureLink", "personal.profilePictureLink",
-        "https://example.com/old.png", "https://example.com/new.png"));
+    assertThat(diff.getFieldChanges()).hasSize(1);
+    var change = diff.getFieldChanges().get(0);
+    assertThat(change.getChangeType()).isEqualTo(ChangeType.MODIFIED);
+    assertThat(change.getFieldName()).isEqualTo("profilePictureLink");
+    assertThat(change.getFullPath()).isEqualTo("personal.profilePictureLink");
+    assertThat(change.getOldValue()).hasToString("https://example.com/old.png");
+    assertThat(change.getNewValue()).hasToString("https://example.com/new.png");
   }
 
   @Test
