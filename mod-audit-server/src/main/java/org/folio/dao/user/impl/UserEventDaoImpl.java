@@ -214,7 +214,7 @@ public class UserEventDaoImpl implements UserEventDao {
       tenantId);
     var metadataPaths = INTERNAL_METADATA_FIELD_PATHS.toArray(String[]::new);
     var query = DELETE_METADATA_ONLY_UPDATE_RECORDS_SQL.formatted(formatDBTableName(tenantId, tableName()));
-    return conn.execute(query, Tuple.of((Object) metadataPaths)).mapEmpty();
+    return conn.execute(query, Tuple.of(metadataPaths)).mapEmpty();
   }
 
   @Override
