@@ -1,5 +1,6 @@
 package org.folio.dao.user.impl;
 
+import static org.folio.dao.user.UserAuditConstants.INTERNAL_METADATA_FIELD_PATHS;
 import static org.folio.util.AuditEventDBConstants.ACTION_FIELD;
 import static org.folio.util.AuditEventDBConstants.DIFF_FIELD;
 import static org.folio.util.AuditEventDBConstants.EVENT_DATE_FIELD;
@@ -82,6 +83,24 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private static final String DELETE_EMPTY_UPDATE_RECORDS_SQL =
     "DELETE FROM %s WHERE action = 'UPDATED' AND diff IS NULL";
+
+  // $1 = text[] of internal metadata field full-paths
+  private static final String DELETE_METADATA_ONLY_UPDATE_RECORDS_SQL = """
+    DELETE FROM %s
+    WHERE action = 'UPDATED' AND diff IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM jsonb_array_elements(
+          CASE WHEN jsonb_typeof(diff->'fieldChanges') = 'array'
+               THEN diff->'fieldChanges' ELSE '[]'::jsonb END
+        ) AS fc WHERE NOT (fc->>'fullPath' = ANY($1::text[]))
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM jsonb_array_elements(
+          CASE WHEN jsonb_typeof(diff->'collectionChanges') = 'array'
+               THEN diff->'collectionChanges' ELSE '[]'::jsonb END
+        ) AS cc WHERE NOT (cc->>'fullPath' = ANY($1::text[]))
+      )
+    """;
 
   private static final String DELETE_OLDER_THAN_DATE_SQL = """
     DELETE FROM %s
@@ -187,6 +206,15 @@ public class UserEventDaoImpl implements UserEventDao {
   public Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId) {
     LOGGER.info("deleteEmptyUpdateRecords:: Deleting UPDATE records with null diff [tenantId: {}]", tenantId);
     return conn.execute(buildDeleteEmptyUpdateRecordsQuery(tenantId)).mapEmpty();
+  }
+
+  @Override
+  public Future<Void> deleteMetadataOnlyUpdateRecords(Conn conn, String tenantId) {
+    LOGGER.info("deleteMetadataOnlyUpdateRecords:: Deleting UPDATE records containing only internal metadata changes [tenantId: {}]",
+      tenantId);
+    var metadataPaths = INTERNAL_METADATA_FIELD_PATHS.toArray(String[]::new);
+    var query = DELETE_METADATA_ONLY_UPDATE_RECORDS_SQL.formatted(formatDBTableName(tenantId, tableName()));
+    return conn.execute(query, Tuple.of((Object) metadataPaths)).mapEmpty();
   }
 
   @Override

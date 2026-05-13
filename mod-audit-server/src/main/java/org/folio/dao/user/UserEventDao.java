@@ -92,6 +92,16 @@ public interface UserEventDao {
   Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId);
 
   /**
+   * Deletes UPDATE records whose diff contains only internal metadata fields
+   * (e.g. createdDate, updatedDate, metadata.*) and no user-visible field changes.
+   *
+   * @param conn     transaction connection
+   * @param tenantId tenant id
+   * @return Void future
+   */
+  Future<Void> deleteMetadataOnlyUpdateRecords(Conn conn, String tenantId);
+
+  /**
    * Deletes all audit records older than the given date
    *
    * @param eventDate date threshold
