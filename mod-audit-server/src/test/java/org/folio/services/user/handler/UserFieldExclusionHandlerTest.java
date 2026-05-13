@@ -42,10 +42,12 @@ class UserFieldExclusionHandlerTest {
   private UserFieldExclusionHandler exclusionHandler;
 
   @Test
-  void onSettingChanged_shouldExcludeFieldsAndDeleteEmptyRecords_whenValidListProvided() {
+  void onSettingChanged_shouldExcludeFieldsAndDeleteEmptyAndMetadataOnlyRecords_whenValidListProvided() {
     when(userEventDao.excludeFieldsFromAll(any(), any(), any()))
       .thenReturn(Future.succeededFuture());
     when(userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID))
+      .thenReturn(Future.succeededFuture());
+    when(userEventDao.deleteMetadataOnlyUpdateRecords(conn, TENANT_ID))
       .thenReturn(Future.succeededFuture());
 
     var result = exclusionHandler.onSettingChanged("[\"personal.email\",\"barcode\"]", conn, TENANT_ID);
@@ -53,6 +55,7 @@ class UserFieldExclusionHandlerTest {
     assertThat(result.succeeded()).isTrue();
     verify(userEventDao).excludeFieldsFromAll(Set.of("personal.email", "barcode"), conn, TENANT_ID);
     verify(userEventDao).deleteEmptyUpdateRecords(conn, TENANT_ID);
+    verify(userEventDao).deleteMetadataOnlyUpdateRecords(conn, TENANT_ID);
   }
 
   @ParameterizedTest

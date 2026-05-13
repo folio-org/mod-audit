@@ -1,5 +1,8 @@
 ## 3.1.0 In progress
 
+### Features
+* Skip storing user audit events that contain only internal metadata changes ([MODAUD-310](https://folio-org.atlassian.net/browse/MODAUD-310))
+
 ### Bug fixes
 * Track `personal.pronouns`, `personal.profilePictureLink`, and top-level `preferredEmailCommunication` in user version history ([MODAUD-308](https://folio-org.atlassian.net/browse/MODAUD-308))
 

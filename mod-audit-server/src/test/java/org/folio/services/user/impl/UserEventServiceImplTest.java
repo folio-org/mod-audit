@@ -299,6 +299,56 @@ class UserEventServiceImplTest {
   }
 
   @Test
+  void shouldNotSaveUpdateEventWhenDiffContainsOnlyMetadataFields(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("updatedDate", "metadata.updatedDate", "2024-01-01", "2024-01-02"),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSaveUpdateEventAndPreserveMetadataFieldsWhenRealFieldsPresent(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified("username", "username", "old", "new"),
+      FieldChangeDto.modified("updatedDate", "metadata.updatedDate", "2024-01-01", "2024-01-02"),
+      FieldChangeDto.modified("updatedByUserId", "metadata.updatedByUserId",
+        UUID.randomUUID().toString(), UUID.randomUUID().toString())
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        var captor = ArgumentCaptor.forClass(UserAuditEntity.class);
+        verify(userEventDao).save(captor.capture(), eq(TENANT_ID));
+        var saved = captor.getValue();
+        // metadata fields are not stripped from the stored diff — only pure-metadata events are discarded
+        assertThat(saved.diff().getFieldChanges()).hasSize(3);
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
   void shouldNotSaveWhenExclusionRemovesAllChanges(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.UPDATED);
     var diff = new ChangeRecordDto(List.of(
