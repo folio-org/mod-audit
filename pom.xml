@@ -158,7 +158,6 @@
         <configuration>
           <argLine>@{argLine} -Duser.language=en -Duser.region=US</argLine>
           <groups>unit</groups>
-          <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>
       <plugin>

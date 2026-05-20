@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.function.Function;
 import org.folio.dao.inventory.InventoryAuditEntity;
 import org.folio.rest.jaxrs.model.InventoryAuditItem;
+import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 class InventoryEntitiesToAuditCollectionMapperTest {
 
   private InventoryEntitiesToAuditCollectionMapper mapper;
