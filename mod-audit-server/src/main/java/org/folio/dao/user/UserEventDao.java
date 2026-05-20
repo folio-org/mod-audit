@@ -82,18 +82,8 @@ public interface UserEventDao {
   Future<Void> excludeFieldsFromAll(Set<String> excludedPaths, Conn conn, String tenantId);
 
   /**
-   * Deletes UPDATE records that have a null diff (e.g. after retroactive anonymization
-   * removed all meaningful field changes).
-   *
-   * @param conn     transaction connection
-   * @param tenantId tenant id
-   * @return Void future
-   */
-  Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId);
-
-  /**
-   * Deletes UPDATE records whose diff contains only internal metadata fields
-   * (e.g. createdDate, updatedDate, metadata.*) and no user-visible field changes.
+   * Deletes UPDATE records with no user-visible changes: null diff or diff containing only
+   * internal metadata fields (e.g. createdDate, updatedDate, metadata.*).
    *
    * @param conn     transaction connection
    * @param tenantId tenant id

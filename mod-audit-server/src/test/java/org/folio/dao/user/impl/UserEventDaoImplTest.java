@@ -126,19 +126,6 @@ class UserEventDaoImplTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  void shouldDeleteEmptyUpdateRecords(VertxTestContext ctx) {
-    var conn = mock(Conn.class);
-    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
-
-    userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID)
-      .onComplete(ctx.succeeding(result -> {
-        verify(conn).execute(anyString());
-        ctx.completeNow();
-      }));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
   void shouldDeleteMetadataOnlyUpdateRecords(VertxTestContext ctx) {
     var conn = mock(Conn.class);
     when(conn.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mock(RowSet.class)));

@@ -321,6 +321,24 @@ class UserEventServiceImplTest {
   }
 
   @Test
+  void shouldNotSaveUpdateEventWhenDiffHasEmptyChangeLists(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(), List.of());
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
   void shouldSaveUpdateEventAndPreserveMetadataFieldsWhenRealFieldsPresent(VertxTestContext ctx) {
     var event = createUserEvent(UserEventType.UPDATED);
     var diff = new ChangeRecordDto(List.of(

@@ -163,31 +163,22 @@ public class UserAuditApiTest extends ApiTestBase {
     var recordA = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(300)),
       userId, "UPDATED", performedBy, diffA);
 
-    // Record B: UPDATE with only metadata.createdByUserId change
-    var diffB = new ChangeRecordDto(List.of(
-      new FieldChangeDto(ChangeType.MODIFIED, "createdByUserId", "metadata.createdByUserId",
-        UUID.randomUUID().toString(), UUID.randomUUID().toString())
-    ), null);
+    // Record B: CREATED with no diff
     var recordB = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(200)),
-      userId, "UPDATED", performedBy, diffB);
-
-    // Record C: CREATED with no diff
-    var recordC = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(100)),
       userId, "CREATED", performedBy, null);
 
-    // Record D: UPDATE with only anonymized fieldChanges BUT non-empty collectionChanges — should survive
-    var diffD = new ChangeRecordDto(
+    // Record C: UPDATE with metadata.updatedByUserId in fieldChanges BUT non-empty collectionChanges — should survive
+    var diffC = new ChangeRecordDto(
       List.of(new FieldChangeDto(ChangeType.MODIFIED, "updatedByUserId", "metadata.updatedByUserId",
         UUID.randomUUID().toString(), UUID.randomUUID().toString())),
       List.of(new CollectionChangeDto("departments", "departments", List.of(
         CollectionItemChangeDto.added("dept-new")))));
-    var recordD = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(50)),
-      userId, "UPDATED", performedBy, diffD);
+    var recordC = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(50)),
+      userId, "UPDATED", performedBy, diffC);
 
     userEventDao.save(recordA, TENANT_ID).toCompletionStage().toCompletableFuture().get();
     userEventDao.save(recordB, TENANT_ID).toCompletionStage().toCompletableFuture().get();
     userEventDao.save(recordC, TENANT_ID).toCompletionStage().toCompletableFuture().get();
-    userEventDao.save(recordD, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // Enable anonymization via config API
     given().headers(CONFIG_HEADERS)
@@ -204,17 +195,16 @@ public class UserAuditApiTest extends ApiTestBase {
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .extract().response();
 
-    // Record B deleted (empty UPDATE after anonymization), A/C/D remain
     assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(3);
     var items = response.jsonPath().getList("userAuditItems");
     assertThat(items).hasSize(3);
 
-    // Record D (most recent, UPDATED): performedBy null, fieldChanges stripped, collectionChanges preserved
+    // Record C (most recent, UPDATED): performedBy null, fieldChanges stripped, collectionChanges preserved
     assertThat(response.jsonPath().getString("userAuditItems[0].performedBy")).isNull();
     assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).isEmpty();
     assertThat(response.jsonPath().getList("userAuditItems[0].diff.collectionChanges")).hasSize(1);
 
-    // Record C (CREATED): performedBy null, diff null
+    // Record B (CREATED): performedBy null, diff null
     assertThat(response.jsonPath().getString("userAuditItems[1].performedBy")).isNull();
     assertThat((Object) response.jsonPath().get("userAuditItems[1].diff")).isNull();
 
@@ -239,7 +229,7 @@ public class UserAuditApiTest extends ApiTestBase {
     var recordA = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(300)),
       userId, "UPDATED", performedBy, diffA);
 
-    // Record B: UPDATE with only personal.email change — should be deleted after exclusion
+    // Record B: UPDATE with only personal.email change — diff becomes null after exclusion, should be deleted
     var diffB = new ChangeRecordDto(List.of(
       new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "a@test.com", "b@test.com")
     ), null);
@@ -250,9 +240,18 @@ public class UserAuditApiTest extends ApiTestBase {
     var recordC = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(100)),
       userId, "CREATED", performedBy, null);
 
+    // Record D: UPDATE with personal.email + metadata.updatedDate — after exclusion becomes metadata-only, should be deleted
+    var diffD = new ChangeRecordDto(List.of(
+      new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "a@test.com", "b@test.com"),
+      new FieldChangeDto(ChangeType.MODIFIED, "updatedDate", "metadata.updatedDate", "2024-01-01", "2024-01-02")
+    ), null);
+    var recordD = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(50)),
+      userId, "UPDATED", performedBy, diffD);
+
     userEventDao.save(recordA, TENANT_ID).toCompletionStage().toCompletableFuture().get();
     userEventDao.save(recordB, TENANT_ID).toCompletionStage().toCompletableFuture().get();
     userEventDao.save(recordC, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(recordD, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     // Update excluded fields via config API
     given().headers(CONFIG_HEADERS)
@@ -269,7 +268,7 @@ public class UserAuditApiTest extends ApiTestBase {
       .statusCode(HttpStatus.HTTP_OK.toInt())
       .extract().response();
 
-    // Record B deleted (empty UPDATE after exclusion), A/C remain
+    // Records B (null diff) and D (metadata-only diff) deleted after exclusion; A/C remain
     assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(2);
     var items = response.jsonPath().getList("userAuditItems");
     assertThat(items).hasSize(2);

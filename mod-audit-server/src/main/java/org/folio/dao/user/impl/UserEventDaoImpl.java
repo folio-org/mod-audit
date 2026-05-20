@@ -81,13 +81,10 @@ public class UserEventDaoImpl implements UserEventDao {
        OR diff @? '$.fieldChanges[*] ? (@.fullPath == "metadata.createdByUserId" || @.fullPath == "metadata.updatedByUserId")'
     """;
 
-  private static final String DELETE_EMPTY_UPDATE_RECORDS_SQL =
-    "DELETE FROM %s WHERE action = 'UPDATED' AND diff IS NULL";
-
   // $1 = text[] of internal metadata field full-paths
   private static final String DELETE_METADATA_ONLY_UPDATE_RECORDS_SQL = """
     DELETE FROM %s
-    WHERE action = 'UPDATED' AND diff IS NOT NULL
+    WHERE action = 'UPDATED'
       AND NOT EXISTS (
         SELECT 1 FROM jsonb_array_elements(
           CASE WHEN jsonb_typeof(diff->'fieldChanges') = 'array'
@@ -203,12 +200,6 @@ public class UserEventDaoImpl implements UserEventDao {
   }
 
   @Override
-  public Future<Void> deleteEmptyUpdateRecords(Conn conn, String tenantId) {
-    LOGGER.info("deleteEmptyUpdateRecords:: Deleting UPDATE records with null diff [tenantId: {}]", tenantId);
-    return conn.execute(buildDeleteEmptyUpdateRecordsQuery(tenantId)).mapEmpty();
-  }
-
-  @Override
   public Future<Void> deleteMetadataOnlyUpdateRecords(Conn conn, String tenantId) {
     LOGGER.info("deleteMetadataOnlyUpdateRecords:: Deleting UPDATE records containing only internal metadata changes [tenantId: {}]",
       tenantId);
@@ -259,10 +250,6 @@ public class UserEventDaoImpl implements UserEventDao {
 
   private String buildAnonymizeAllQuery(String tenantId) {
     return ANONYMIZE_ALL_SQL.formatted(formatDBTableName(tenantId, tableName()));
-  }
-
-  private String buildDeleteEmptyUpdateRecordsQuery(String tenantId) {
-    return DELETE_EMPTY_UPDATE_RECORDS_SQL.formatted(formatDBTableName(tenantId, tableName()));
   }
 
   private Future<RowSet<Row>> makeSaveCall(String query, UserAuditEntity event, String tenantId) {
