@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import org.folio.domain.diff.ChangeType;
 import org.folio.domain.diff.CollectionChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.CustomFields;
