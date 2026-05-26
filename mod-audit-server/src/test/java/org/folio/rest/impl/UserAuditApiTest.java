@@ -502,10 +502,10 @@ public class UserAuditApiTest extends ApiTestBase {
       List.of(new CollectionChangeDto("departments", "departments",
         List.of(CollectionItemChangeDto.added("dept-new"))))
     );
-    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+    var entity = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
       userId, "UPDATED", performedBy, diff);
 
-    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(entity, TENANT_ID).toCompletionStage().toCompletableFuture().get();
 
     given().headers(CONFIG_HEADERS)
       .body("""
