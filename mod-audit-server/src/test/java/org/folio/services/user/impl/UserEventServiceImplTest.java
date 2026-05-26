@@ -28,7 +28,11 @@ import java.util.function.Function;
 import org.folio.dao.user.UserAuditEntity;
 import org.folio.dao.user.UserEventDao;
 import org.folio.domain.diff.ChangeRecordDto;
+import org.folio.domain.diff.CollectionChangeDto;
+import org.folio.domain.diff.CollectionItemChangeDto;
 import org.folio.domain.diff.FieldChangeDto;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.folio.exception.ValidationException;
 import org.folio.kafka.exception.DuplicateEventException;
 import org.folio.mapper.user.UserEventToEntityMapper;
@@ -362,6 +366,96 @@ class UserEventServiceImplTest {
         var saved = captor.getValue();
         // metadata fields are not stripped from the stored diff — only pure-metadata events are discarded
         assertThat(saved.diff().getFieldChanges()).hasSize(3);
+        ctx.completeNow();
+      }));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "createdDate", "updatedDate",
+    "metadata.createdDate", "metadata.updatedDate",
+    "metadata.createdByUserId", "metadata.updatedByUserId"
+  })
+  void shouldNotSaveUpdateEventWhenDiffContainsSingleInternalMetadataPath(String fullPath, VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var fieldName = fullPath.contains(".") ? fullPath.substring(fullPath.lastIndexOf('.') + 1) : fullPath;
+    var diff = new ChangeRecordDto(List.of(
+      FieldChangeDto.modified(fieldName, fullPath, "old-value", "new-value")
+    ), null);
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao, never()).save(any(), anyString());
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSaveUpdateEventWhenDiffContainsOnlyCollectionChanges(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(List.of(),
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept-new")))));
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao).save(any(), eq(TENANT_ID));
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSaveUpdateEventWhenNullFieldChangesAndRealCollectionChanges(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(null,
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept-new")))));
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao).save(any(), eq(TENANT_ID));
+        ctx.completeNow();
+      }));
+  }
+
+  @Test
+  void shouldSaveUpdateEventWhenMetadataFieldChangesAndRealCollectionChanges(VertxTestContext ctx) {
+    var event = createUserEvent(UserEventType.UPDATED);
+    var diff = new ChangeRecordDto(
+      List.of(FieldChangeDto.modified("updatedDate", "metadata.updatedDate", "2024-01-01", "2024-01-02")),
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept-new")))));
+    mockAuditEnabled(true);
+    mockExcludedFields("");
+    mockAnonymize(false);
+    when(eventToEntityMapper.apply(event)).thenReturn(
+      new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+        UUID.randomUUID(), UserEventType.UPDATED.name(), UUID.randomUUID(), diff));
+    when(userEventDao.save(any(), anyString())).thenReturn(Future.succeededFuture(rowSet));
+
+    eventService.processEvent(event, TENANT_ID)
+      .onComplete(ctx.succeeding(r -> {
+        verify(userEventDao).save(any(), eq(TENANT_ID));
         ctx.completeNow();
       }));
   }

@@ -490,6 +490,75 @@ public class UserAuditApiTest extends ApiTestBase {
     assertThat(response.jsonPath().getString("userAuditItems[0].diff.fieldChanges[0].fullPath")).isEqualTo("username");
   }
 
+  @SneakyThrows
+  @Test
+  void shouldNotDeleteRecordWhenExclusionLeavesOnlyCollectionChanges() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // personal.email is excluded, but departments collection change must survive
+    var diff = new ChangeRecordDto(
+      List.of(new FieldChangeDto(ChangeType.MODIFIED, "email", "personal.email", "a@t.com", "b@t.com")),
+      List.of(new CollectionChangeDto("departments", "departments",
+        List.of(CollectionItemChangeDto.added("dept-new"))))
+    );
+    var record = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "UPDATED", performedBy, diff);
+
+    userEventDao.save(record, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.fieldChanges")).isEmpty();
+    assertThat(response.jsonPath().getList("userAuditItems[0].diff.collectionChanges")).hasSize(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].diff.collectionChanges[0].collectionName"))
+      .isEqualTo("departments");
+  }
+
+  @SneakyThrows
+  @Test
+  void shouldDeletePreExistingNullDiffUpdateRecordWhenExclusionSettingUpdated() {
+    var userId = UUID.randomUUID();
+    var performedBy = UUID.randomUUID();
+
+    // Simulates a null-diff UPDATED record left over from before this feature existed
+    var nullDiffRecord = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now().minusSeconds(100)),
+      userId, "UPDATED", performedBy, null);
+    var createdRecord = new UserAuditEntity(UUID.randomUUID(), Timestamp.from(Instant.now()),
+      userId, "CREATED", performedBy, null);
+
+    userEventDao.save(nullDiffRecord, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+    userEventDao.save(createdRecord, TENANT_ID).toCompletionStage().toCompletableFuture().get();
+
+    given().headers(CONFIG_HEADERS)
+      .body("""
+        {"key":"excluded.fields","value":"[\\"personal.email\\"]","groupId":"audit.user","type":"STRING"}""")
+      .put("/audit/config/groups/audit.user/settings/excluded.fields")
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_NO_CONTENT.toInt());
+
+    var response = given().headers(HEADERS)
+      .get(USER_AUDIT_PATH + userId)
+      .then().log().all()
+      .statusCode(HttpStatus.HTTP_OK.toInt())
+      .extract().response();
+
+    assertThat(response.jsonPath().getInt("totalRecords")).isEqualTo(1);
+    assertThat(response.jsonPath().getString("userAuditItems[0].action")).isEqualTo("CREATED");
+  }
+
   @Test
   void shouldReturn400ForInvalidUserId() {
     given().headers(HEADERS)
