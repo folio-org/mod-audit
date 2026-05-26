@@ -75,7 +75,8 @@ class UserDiffCalculatorTest {
       .hasSize(1)
       .containsExactly(FieldChangeDto.modified(
         "profilePictureLink", "personal.profilePictureLink",
-        "https://example.com/old.png", "https://example.com/new.png"));
+        URI.create("https://example.com/old.png"),
+        URI.create("https://example.com/new.png")));
   }
 
   @Test
