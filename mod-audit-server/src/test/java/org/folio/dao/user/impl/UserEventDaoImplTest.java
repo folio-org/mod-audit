@@ -22,6 +22,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.sql.Timestamp;
 import java.util.Set;
+import org.folio.dao.user.UserAuditConstants;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.util.PostgresClientFactory;
@@ -125,13 +126,16 @@ class UserEventDaoImplTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  void shouldDeleteEmptyUpdateRecords(VertxTestContext ctx) {
+  void shouldDeleteMetadataOnlyUpdateRecords(VertxTestContext ctx) {
     var conn = mock(Conn.class);
-    when(conn.execute(anyString())).thenReturn(Future.succeededFuture(mock(RowSet.class)));
+    when(conn.execute(anyString(), any(Tuple.class))).thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
-    userEventDao.deleteEmptyUpdateRecords(conn, TENANT_ID)
+    userEventDao.deleteMetadataOnlyUpdateRecords(conn, TENANT_ID)
       .onComplete(ctx.succeeding(result -> {
-        verify(conn).execute(anyString());
+        var tupleCaptor = ArgumentCaptor.forClass(Tuple.class);
+        verify(conn).execute(anyString(), tupleCaptor.capture());
+        var boundPaths = Set.of((String[]) tupleCaptor.getValue().getArrayOfStrings(0));
+        assertThat(boundPaths).containsExactlyInAnyOrderElementsOf(UserAuditConstants.INTERNAL_METADATA_FIELD_PATHS);
         ctx.completeNow();
       }));
   }

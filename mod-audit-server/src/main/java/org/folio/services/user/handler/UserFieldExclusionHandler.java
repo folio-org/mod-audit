@@ -35,6 +35,6 @@ public class UserFieldExclusionHandler implements SettingChangeHandler {
     LOGGER.info("onSettingChanged:: Excluded fields updated, applying to existing records [excludedPaths: {}, tenantId: {}]",
       excludedPaths, tenantId);
     return userEventDao.excludeFieldsFromAll(excludedPaths, conn, tenantId)
-      .compose(v -> userEventDao.deleteEmptyUpdateRecords(conn, tenantId));
+      .compose(v -> userEventDao.deleteMetadataOnlyUpdateRecords(conn, tenantId));
   }
 }

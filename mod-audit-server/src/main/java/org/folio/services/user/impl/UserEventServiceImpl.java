@@ -1,6 +1,7 @@
 package org.folio.services.user.impl;
 
 import static org.folio.dao.user.UserAuditConstants.ANONYMIZED_FIELD_PATHS;
+import static org.folio.dao.user.UserAuditConstants.INTERNAL_METADATA_FIELD_PATHS;
 import static org.folio.util.ErrorUtils.handleFailures;
 
 import io.vertx.core.Future;
@@ -12,6 +13,8 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.user.UserAuditEntity;
+import org.folio.domain.diff.CollectionChangeDto;
+import org.folio.domain.diff.FieldChangeDto;
 import org.folio.dao.user.UserEventDao;
 import org.folio.exception.ValidationException;
 import org.folio.rest.jaxrs.model.UserAuditCollection;
@@ -96,8 +99,8 @@ public class UserEventServiceImpl implements UserEventService {
   }
 
   private Future<Void> save(UserAuditEntity entity, String tenantId) {
-    if (isUpdateWithNoDiff(entity)) {
-      LOGGER.debug("save:: No diff for UserAuditEntity [tenantId: {}, eventId: {}, userId: {}]",
+    if (isUpdateWithNoDiff(entity) || isUpdateWithOnlyMetadataChanges(entity)) {
+      LOGGER.debug("save:: Skipping UserAuditEntity with no user-visible changes [tenantId: {}, eventId: {}, userId: {}]",
         tenantId, entity.eventId(), entity.userId());
       return Future.succeededFuture();
     }
@@ -108,6 +111,18 @@ public class UserEventServiceImpl implements UserEventService {
 
   private boolean isUpdateWithNoDiff(UserAuditEntity entity) {
     return UserEventType.UPDATED.name().equals(entity.action()) && entity.diff() == null;
+  }
+
+  private boolean isUpdateWithOnlyMetadataChanges(UserAuditEntity entity) {
+    if (!UserEventType.UPDATED.name().equals(entity.action()) || entity.diff() == null) {
+      return false;
+    }
+    var diff = entity.diff();
+    List<FieldChangeDto> fieldChanges = diff.getFieldChanges() != null ? diff.getFieldChanges() : List.of();
+    List<CollectionChangeDto> collectionChanges = diff.getCollectionChanges() != null ? diff.getCollectionChanges() : List.of();
+
+    return fieldChanges.stream().allMatch(fc -> INTERNAL_METADATA_FIELD_PATHS.contains(fc.getFullPath()))
+      && collectionChanges.stream().allMatch(cc -> INTERNAL_METADATA_FIELD_PATHS.contains(cc.getFullPath()));
   }
 
   private UserAuditEntity applyExclusion(UserAuditEntity entity, Set<String> excludedPaths) {

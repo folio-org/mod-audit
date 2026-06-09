@@ -12,4 +12,11 @@ public class UserAuditConstants {
    */
   public static final Set<String> ANONYMIZED_FIELD_PATHS =
     Set.of("metadata.createdByUserId", "metadata.updatedByUserId");
+
+  // events containing only these paths are discarded as noise if there are no other changes
+  public static final Set<String> INTERNAL_METADATA_FIELD_PATHS = Set.of(
+    "createdDate", "updatedDate",
+    "metadata.createdDate", "metadata.updatedDate",
+    "metadata.createdByUserId", "metadata.updatedByUserId"
+  );
 }
