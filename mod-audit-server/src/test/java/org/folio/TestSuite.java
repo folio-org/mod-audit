@@ -108,7 +108,7 @@ public class TestSuite {
   }
 
   private static void startKafkaMockServer() {
-    kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
+    kafkaContainer = new KafkaContainer(DockerImageName.parse("apache/kafka-native:4.2.1"))
       .withStartupAttempts(3);
     kafkaContainer.start();
   }
