@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderLineEventsHandlerMockTest {
 

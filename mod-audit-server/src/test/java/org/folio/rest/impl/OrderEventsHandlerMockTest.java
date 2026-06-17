@@ -26,7 +26,7 @@ import java.util.UUID;
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.utils.EntityUtils.createOrderAuditEvent;
 import static org.folio.utils.EntityUtils.createOrderAuditEventWithoutSnapshot;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderEventsHandlerMockTest {
 
