@@ -38,6 +38,11 @@
       "description": "Full snapshot of the invoice line",
       "type": "object",
       "javaType": "java.lang.Object"
+    },
+    "originalInvoiceLineSnapshot": {
+      "description": "Snapshot of the invoice line prior to the edit. Populated only for Edit actions.",
+      "type": "object",
+      "javaType": "org.folio.rest.jaxrs.model.InvoiceLine"
     }
   },
   "additionalProperties": true
