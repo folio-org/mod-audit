@@ -34,6 +34,11 @@
       "description": "Full snapshot of the organization",
       "type": "object",
       "javaType": "java.lang.Object"
+    },
+    "originalOrganizationSnapshot": {
+      "description": "Snapshot of the organization prior to the edit. Populated only for Edit actions.",
+      "type": "object",
+      "javaType": "org.folio.rest.jaxrs.model.Organization"
     }
   },
   "additionalProperties": true
