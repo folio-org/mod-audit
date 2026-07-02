@@ -34,6 +34,11 @@
       "description": "Full snapshot of the piece",
       "type": "object",
       "javaType": "java.lang.Object"
+    },
+    "originalPieceSnapshot": {
+      "description": "Full snapshot of the piece before the EDIT action",
+      "type": "object",
+      "javaType": "java.lang.Object"
     }
   },
   "additionalProperties": false
