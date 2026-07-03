@@ -38,6 +38,11 @@
       "description": "Full snapshot of the order line",
       "type": "object",
       "javaType": "java.lang.Object"
+    },
+    "originalOrderLineSnapshot": {
+      "description": "Full snapshot of the order line before the EDIT action",
+      "type": "object",
+      "javaType": "java.lang.Object"
     }
   },
   "additionalProperties": false
