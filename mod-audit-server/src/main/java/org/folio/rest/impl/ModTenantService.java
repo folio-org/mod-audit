@@ -5,23 +5,28 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.kafka.services.KafkaAdminClientService;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.services.management.AuditManager;
+import org.folio.spring.SpringContextUtil;
+import org.folio.util.AuditKafkaTopic;
+import org.folio.util.pubsub.PubSubClientUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import org.folio.services.management.AuditManager;
-import org.folio.spring.SpringContextUtil;
-import org.folio.util.pubsub.PubSubClientUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class ModTenantService extends TenantAPI {
   private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private AuditManager auditManager;
+
+  @Autowired
+  private KafkaAdminClientService kafkaAdminClientService;
 
   public ModTenantService() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -30,12 +35,22 @@ public class ModTenantService extends TenantAPI {
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context context) {
     log.debug("loadData:: Starting loadData");
-    Promise<Integer> promise = Promise.promise();
-    registerModuleToPubSub(headers, context.owner())
-      .thenAccept(p -> promise.complete(0));
-    log.info("loadData:: Started Loading Data");
-    return promise.future()
+    return createKafkaTopics(tenantId)
+      .compose(v -> {
+        Promise<Integer> promise = Promise.promise();
+        registerModuleToPubSub(headers, context.owner())
+          .thenAccept(p -> promise.complete(0));
+        log.info("loadData:: Started Loading Data");
+        return promise.future();
+      })
       .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
+  }
+
+  private Future<Void> createKafkaTopics(String tenantId) {
+    log.debug("createKafkaTopics:: Creating Kafka topics for tenant {}", tenantId);
+    return kafkaAdminClientService.createKafkaTopics(AuditKafkaTopic.values(), tenantId)
+      .onSuccess(v -> log.info("createKafkaTopics:: Kafka topics created successfully for tenant {}", tenantId))
+      .onFailure(t -> log.warn("createKafkaTopics:: Failed to create Kafka topics for tenant {}: {}", tenantId, t.getMessage()));
   }
 
   private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
