@@ -15,12 +15,12 @@ class AuditKafkaTopicTest {
 
   @Test
   void logRecordTopicTopicNameReturnsLogRecord() {
-    assertThat(AuditKafkaTopic.LOG_RECORD.topicName()).isEqualTo("log_record");
+    assertThat(AuditKafkaTopic.LOG_RECORD.topicName()).isEqualTo("LOG_RECORD");
   }
 
   @Test
   void logRecordTopicModuleTopicNameReturnsDotSeparated() {
-    assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("circulation.log_record");
+    assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("circulation.LOG_RECORD");
   }
 
   @Test
@@ -31,7 +31,7 @@ class AuditKafkaTopicTest {
     assertThat(fullName)
       .contains(tenantId)
       .contains("circulation")
-      .contains("log_record");
+      .contains("LOG_RECORD");
   }
 
   @Test
