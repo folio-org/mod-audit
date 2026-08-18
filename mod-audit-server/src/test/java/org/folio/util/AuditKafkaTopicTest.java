@@ -9,22 +9,22 @@ import org.junit.jupiter.api.Test;
 class AuditKafkaTopicTest {
 
   @Test
-  void logRecordTopic_moduleName_returnsCirculation() {
+  void logRecordTopicModuleNameReturnsCirculation() {
     assertThat(AuditKafkaTopic.LOG_RECORD.moduleName()).isEqualTo("circulation");
   }
 
   @Test
-  void logRecordTopic_topicName_returnsLogRecord() {
+  void logRecordTopicTopicNameReturnsLogRecord() {
     assertThat(AuditKafkaTopic.LOG_RECORD.topicName()).isEqualTo("log_record");
   }
 
   @Test
-  void logRecordTopic_moduleTopicName_returnsDotSeparated() {
+  void logRecordTopicModuleTopicNameReturnsDotSeparated() {
     assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("circulation.log_record");
   }
 
   @Test
-  void logRecordTopic_fullTopicName_containsEnvAndTenant() {
+  void logRecordTopicFullTopicNameContainsEnvAndTenant() {
     String tenantId = "test-tenant";
     String fullName = AuditKafkaTopic.LOG_RECORD.fullTopicName(tenantId);
 
@@ -34,7 +34,7 @@ class AuditKafkaTopicTest {
   }
 
   @Test
-  void values_containsAllExpectedTopics() {
+  void valuesContainsAllExpectedTopics() {
     assertThat(AuditKafkaTopic.values()).hasSize(1);
     assertThat(AuditKafkaTopic.values()).contains(AuditKafkaTopic.LOG_RECORD);
   }
