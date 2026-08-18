@@ -25,9 +25,6 @@ public class ModTenantService extends TenantAPI {
   @Autowired
   private AuditManager auditManager;
 
-  @Autowired
-  private KafkaAdminClientService kafkaAdminClientService;
-
   public ModTenantService() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
@@ -35,7 +32,7 @@ public class ModTenantService extends TenantAPI {
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context context) {
     log.debug("loadData:: Starting loadData");
-    return createKafkaTopics(tenantId)
+    return createKafkaTopics(context.owner(), tenantId)
       .compose(v -> {
         Promise<Integer> promise = Promise.promise();
         registerModuleToPubSub(headers, context.owner())
@@ -46,9 +43,9 @@ public class ModTenantService extends TenantAPI {
       .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
-  private Future<Void> createKafkaTopics(String tenantId) {
+  private Future<Void> createKafkaTopics(Vertx vertx, String tenantId) {
     log.debug("createKafkaTopics:: Creating Kafka topics for tenant {}", tenantId);
-    return kafkaAdminClientService.createKafkaTopics(AuditKafkaTopic.values(), tenantId)
+    return new KafkaAdminClientService(vertx).createKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("createKafkaTopics:: Kafka topics created successfully for tenant {}", tenantId))
       .onFailure(t -> log.warn("createKafkaTopics:: Failed to create Kafka topics for tenant {}: {}", tenantId, t.getMessage()));
   }

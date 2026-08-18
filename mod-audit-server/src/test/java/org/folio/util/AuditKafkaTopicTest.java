@@ -28,9 +28,10 @@ class AuditKafkaTopicTest {
     String tenantId = "test-tenant";
     String fullName = AuditKafkaTopic.LOG_RECORD.fullTopicName(tenantId);
 
-    assertThat(fullName).contains(tenantId);
-    assertThat(fullName).contains("circulation");
-    assertThat(fullName).contains("log_record");
+    assertThat(fullName)
+      .contains(tenantId)
+      .contains("circulation")
+      .contains("log_record");
   }
 
   @Test

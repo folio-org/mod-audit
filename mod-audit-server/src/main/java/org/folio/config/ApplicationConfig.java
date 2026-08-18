@@ -1,10 +1,8 @@
 package org.folio.config;
 
-import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.KafkaConfig;
-import org.folio.kafka.services.KafkaAdminClientService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,11 +39,6 @@ public class ApplicationConfig {
 
     LOGGER.info("KafkaConfig: {}", kafkaConfig);
     return kafkaConfig;
-  }
-
-  @Bean
-  public KafkaAdminClientService kafkaAdminClientService() {
-    return new KafkaAdminClientService(Vertx.currentContext().owner());
   }
 
 }
