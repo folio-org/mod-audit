@@ -47,7 +47,7 @@ class ModTenantServiceTest {
   private Vertx vertx;
 
   @Test
-  void loadDataCreatesKafkaTopicsForTenant() {
+  void loadDataCreatesKafkaTopicsOnTenantEnable() {
     when(context.owner()).thenReturn(vertx);
     when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
 
@@ -59,8 +59,7 @@ class ModTenantServiceTest {
       pubSubMock.when(() -> PubSubClientUtils.registerModule(any(OkapiConnectionParams.class)))
         .thenReturn(CompletableFuture.completedFuture(true));
 
-      var service = new ModTenantService(auditManager);
-      service.loadData(new TenantAttributes(), TENANT_ID, Map.of(), context);
+      new ModTenantService(auditManager).loadData(new TenantAttributes(), TENANT_ID, Map.of(), context);
 
       assertThat(construction.constructed()).hasSize(1);
       verify(construction.constructed().get(0)).createKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
@@ -68,7 +67,28 @@ class ModTenantServiceTest {
   }
 
   @Test
-  void loadDataCreatesKafkaAdminClientServiceWithVertxFromContext() {
+  void loadDataDeletesKafkaTopicsOnTenantDisable() {
+    when(context.owner()).thenReturn(vertx);
+    when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
+
+    try (var pubSubMock = mockStatic(PubSubClientUtils.class);
+         var construction = mockConstruction(KafkaAdminClientService.class,
+           (mock, ctx) -> when(mock.deleteKafkaTopics(any(), anyString()))
+             .thenReturn(Future.succeededFuture()))) {
+
+      pubSubMock.when(() -> PubSubClientUtils.unregisterModule(any(OkapiConnectionParams.class)))
+        .thenReturn(CompletableFuture.completedFuture(true));
+
+      var attributes = new TenantAttributes().withPurge(Boolean.TRUE);
+      new ModTenantService(auditManager).loadData(attributes, TENANT_ID, Map.of(), context);
+
+      assertThat(construction.constructed()).hasSize(1);
+      verify(construction.constructed().get(0)).deleteKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
+    }
+  }
+
+  @Test
+  void loadDataConstructsKafkaAdminClientServiceWithVertxFromContext() {
     when(context.owner()).thenReturn(vertx);
     when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
 
@@ -84,8 +104,7 @@ class ModTenantServiceTest {
       pubSubMock.when(() -> PubSubClientUtils.registerModule(any(OkapiConnectionParams.class)))
         .thenReturn(CompletableFuture.completedFuture(true));
 
-      var service = new ModTenantService(auditManager);
-      service.loadData(new TenantAttributes(), TENANT_ID, Map.of(), context);
+      new ModTenantService(auditManager).loadData(new TenantAttributes(), TENANT_ID, Map.of(), context);
 
       assertThat(capturedConstructorArgs).hasSize(1);
       assertThat(capturedConstructorArgs.get(0)).hasSize(1);
