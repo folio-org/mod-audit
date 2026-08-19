@@ -14,23 +14,28 @@ public enum AuditKafkaTopic implements KafkaTopic {
    * These events are produced by circulation modules (mod-circulation, etc.) and consumed by mod-audit
    * to persist circulation audit logs.
    */
-  LOG_RECORD("circulation", "LOG_RECORD");
+  LOG_RECORD("LOG_RECORD", 10);
 
-  private final String moduleName;
   private final String topicName;
+  private final int numPartitions;
 
-  AuditKafkaTopic(String moduleName, String topicName) {
-    this.moduleName = moduleName;
+  AuditKafkaTopic(String topicName, int numPartitions) {
     this.topicName = topicName;
+    this.numPartitions = numPartitions;
   }
 
   @Override
   public String moduleName() {
-    return moduleName;
+    return "audit";
   }
 
   @Override
   public String topicName() {
     return topicName;
+  }
+
+  @Override
+  public int numPartitions() {
+    return numPartitions;
   }
 }

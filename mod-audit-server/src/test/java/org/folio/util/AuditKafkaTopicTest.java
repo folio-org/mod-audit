@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 class AuditKafkaTopicTest {
 
   @Test
-  void logRecordTopicModuleNameReturnsCirculation() {
-    assertThat(AuditKafkaTopic.LOG_RECORD.moduleName()).isEqualTo("circulation");
+  void logRecordTopicModuleNameReturnsAudit() {
+    assertThat(AuditKafkaTopic.LOG_RECORD.moduleName()).isEqualTo("audit");
   }
 
   @Test
@@ -20,7 +20,7 @@ class AuditKafkaTopicTest {
 
   @Test
   void logRecordTopicModuleTopicNameReturnsDotSeparated() {
-    assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("circulation.LOG_RECORD");
+    assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("audit.LOG_RECORD");
   }
 
   @Test
@@ -30,8 +30,13 @@ class AuditKafkaTopicTest {
 
     assertThat(fullName)
       .contains(tenantId)
-      .contains("circulation")
+      .contains("audit")
       .contains("LOG_RECORD");
+  }
+
+  @Test
+  void logRecordTopicNumPartitionsReturnsTen() {
+    assertThat(AuditKafkaTopic.LOG_RECORD.numPartitions()).isEqualTo(10);
   }
 
   @Test
