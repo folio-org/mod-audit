@@ -49,11 +49,13 @@ class ModTenantServiceTest {
 
   @Test
   void kafkaTopicsActionCreatesTopicsOnTenantEnable() {
+    var attributes = new TenantAttributes().withModuleTo("1.0.0");
+
     try (var construction = mockConstruction(KafkaAdminClientService.class,
         (mock, ctx) -> when(mock.createKafkaTopics(any(), anyString()))
           .thenReturn(Future.succeededFuture()))) {
 
-      new ModTenantService(auditManager).kafkaTopicsAction(new TenantAttributes(), vertx, TENANT_ID);
+      new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
 
       assertThat(construction.constructed()).hasSize(1);
       verify(construction.constructed().get(0)).createKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
@@ -62,7 +64,8 @@ class ModTenantServiceTest {
 
   @Test
   void kafkaTopicsActionDeletesTopicsOnTenantDisable() {
-    var attributes = new TenantAttributes().withPurge(Boolean.TRUE);
+    // moduleTo == null signals module removal
+    var attributes = new TenantAttributes();
 
     try (var construction = mockConstruction(KafkaAdminClientService.class,
         (mock, ctx) -> when(mock.deleteKafkaTopics(any(), anyString()))
@@ -77,6 +80,7 @@ class ModTenantServiceTest {
 
   @Test
   void kafkaTopicsActionConstructsKafkaAdminClientServiceWithVertxFromContext() {
+    var attributes = new TenantAttributes().withModuleTo("1.0.0");
     List<List<?>> capturedConstructorArgs = new ArrayList<>();
 
     try (var construction = mockConstruction(KafkaAdminClientService.class,
@@ -85,7 +89,7 @@ class ModTenantServiceTest {
           when(mock.createKafkaTopics(any(), anyString())).thenReturn(Future.succeededFuture());
         })) {
 
-      new ModTenantService(auditManager).kafkaTopicsAction(new TenantAttributes(), vertx, TENANT_ID);
+      new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
 
       assertThat(capturedConstructorArgs).hasSize(1);
       assertThat(capturedConstructorArgs.get(0)).hasSize(1);
@@ -95,12 +99,13 @@ class ModTenantServiceTest {
 
   @Test
   void kafkaTopicsActionSucceedsWhenTopicsAlreadyExist() {
+    var attributes = new TenantAttributes().withModuleTo("1.0.0");
+
     try (var ignored = mockConstruction(KafkaAdminClientService.class,
         (mock, ctx) -> when(mock.createKafkaTopics(any(), anyString()))
           .thenReturn(Future.failedFuture(new TopicExistsException("topic already exists"))))) {
 
-      var result = new ModTenantService(auditManager)
-        .kafkaTopicsAction(new TenantAttributes(), vertx, TENANT_ID);
+      var result = new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
 
       assertThat(result.succeeded()).isTrue();
     }
@@ -108,14 +113,14 @@ class ModTenantServiceTest {
 
   @Test
   void kafkaTopicsActionFailsWhenTopicCreationFailsWithUnexpectedError() {
+    var attributes = new TenantAttributes().withModuleTo("1.0.0");
     var error = new RuntimeException("kafka unavailable");
 
     try (var ignored = mockConstruction(KafkaAdminClientService.class,
         (mock, ctx) -> when(mock.createKafkaTopics(any(), anyString()))
           .thenReturn(Future.failedFuture(error)))) {
 
-      var result = new ModTenantService(auditManager)
-        .kafkaTopicsAction(new TenantAttributes(), vertx, TENANT_ID);
+      var result = new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
 
       assertThat(result.failed()).isTrue();
       assertThat(result.cause()).isEqualTo(error);

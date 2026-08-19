@@ -58,13 +58,13 @@ public class ModTenantService extends TenantAPI {
   }
 
   Future<Void> kafkaTopicsAction(TenantAttributes attributes, Vertx vertx, String tenantId) {
-    return Boolean.TRUE.equals(attributes.getPurge())
+    return attributes.getModuleTo() == null
       ? deleteKafkaTopics(vertx, tenantId)
       : createKafkaTopics(vertx, tenantId);
   }
 
   private Future<Void> createKafkaTopics(Vertx vertx, String tenantId) {
-    log.debug("createKafkaTopics:: Creating Kafka topics for tenant {}", tenantId);
+    log.info("createKafkaTopics:: Creating Kafka topics for tenant {}", tenantId);
 
     return new KafkaAdminClientService(vertx).createKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("createKafkaTopics:: Kafka topics created successfully for tenant {}", tenantId))
@@ -96,7 +96,7 @@ public class ModTenantService extends TenantAPI {
     log.info("loadData:: Started Loading Data");
 
     return promise.future()
-      .compose(count -> auditManager.executeDatabaseCleanup(tenantId).map(count));
+      .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
   private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
