@@ -1,12 +1,17 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.services.KafkaAdminClientService;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.management.AuditManager;
 import org.folio.spring.SpringContextUtil;
@@ -14,9 +19,14 @@ import org.folio.util.AuditKafkaTopic;
 import org.folio.util.pubsub.PubSubClientUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+
+import javax.ws.rs.core.Response;
 
 public class ModTenantService extends TenantAPI {
   private static final Logger log = LogManager.getLogger();
@@ -28,49 +38,65 @@ public class ModTenantService extends TenantAPI {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
-  // package-private: used by unit tests to inject dependencies without a Spring context
   ModTenantService(AuditManager auditManager) {
     this.auditManager = auditManager;
   }
 
-  /**
-   * Phase 1: PubSub and Kafka run in parallel.
-   * <ul>
-   *   <li>tenant enable → register with PubSub + create Kafka topics</li>
-   *   <li>tenant disable ({@code purge=true}) → unregister from PubSub + delete Kafka topics</li>
-   * </ul>
-   */
   @Override
-  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context context) {
-    log.debug("loadData:: Starting loadData");
+  public void postTenant(TenantAttributes attributes, Map<String, String> headers,
+    Handler<AsyncResult<Response>> handler, Context context) {
+
+    String tenantId = TenantTool.tenantId(headers);
     Vertx vertx = context.owner();
+    kafkaTopicsAction(attributes, vertx, tenantId)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.warn("postTenant:: Kafka topics operation failed for tenant {}", tenantId, ar.cause());
+        }
+        super.postTenant(attributes, headers, handler, context);
+      });
+  }
 
-    if (Boolean.TRUE.equals(attributes.getPurge())) {
-      unregisterModuleFromPubSub(headers, vertx);
-      return deleteKafkaTopics(vertx, tenantId)
-        .map(v -> 0)
-        .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
-    }
-
-    registerModuleToPubSub(headers, vertx);
-    log.info("loadData:: Started Loading Data");
-    return createKafkaTopics(vertx, tenantId)
-      .map(v -> 0)
-      .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
+  Future<Void> kafkaTopicsAction(TenantAttributes attributes, Vertx vertx, String tenantId) {
+    return Boolean.TRUE.equals(attributes.getPurge())
+      ? deleteKafkaTopics(vertx, tenantId)
+      : createKafkaTopics(vertx, tenantId);
   }
 
   private Future<Void> createKafkaTopics(Vertx vertx, String tenantId) {
     log.debug("createKafkaTopics:: Creating Kafka topics for tenant {}", tenantId);
+
     return new KafkaAdminClientService(vertx).createKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("createKafkaTopics:: Kafka topics created successfully for tenant {}", tenantId))
-      .onFailure(t -> log.warn("createKafkaTopics:: Failed to create Kafka topics for tenant {}: {}", tenantId, t.getMessage()));
+      .recover(t -> {
+        if (t instanceof TopicExistsException || t.getCause() instanceof TopicExistsException) {
+          log.info("createKafkaTopics:: Topics already exist for tenant {}, skipping", tenantId);
+          return succeededFuture();
+        }
+        log.warn("createKafkaTopics:: Failed to create Kafka topics for tenant {}", tenantId, t);
+        return failedFuture(t);
+      });
   }
 
   private Future<Void> deleteKafkaTopics(Vertx vertx, String tenantId) {
     log.debug("deleteKafkaTopics:: Deleting Kafka topics for tenant {}", tenantId);
     return new KafkaAdminClientService(vertx).deleteKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("deleteKafkaTopics:: Kafka topics deleted successfully for tenant {}", tenantId))
-      .onFailure(t -> log.warn("deleteKafkaTopics:: Failed to delete Kafka topics for tenant {}: {}", tenantId, t.getMessage()));
+      .onFailure(t -> log.warn("deleteKafkaTopics:: Failed to delete Kafka topics for tenant {}", tenantId, t));
+  }
+
+  @Override
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId,
+    Map<String, String> headers, Context context) {
+
+    log.debug("loadData:: Starting loadData");
+    Promise<Integer> promise = Promise.promise();
+    registerModuleToPubSub(headers, context.owner())
+      .thenAccept(p -> promise.complete(0));
+    log.info("loadData:: Started Loading Data");
+
+    return promise.future()
+      .compose(count -> auditManager.executeDatabaseCleanup(tenantId).map(count));
   }
 
   private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
@@ -83,22 +109,6 @@ public class ModTenantService extends TenantAPI {
       })
       .exceptionally(throwable -> {
         log.warn("Error occurred while registering module: {}", throwable.getMessage());
-        future.completeExceptionally(throwable);
-        return null;
-      });
-    return future;
-  }
-
-  private CompletableFuture<Void> unregisterModuleFromPubSub(Map<String, String> headers, Vertx vertx) {
-    log.debug("unregisterModuleFromPubSub:: Unregistering module from PubSub");
-    CompletableFuture<Void> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> PubSubClientUtils.unregisterModule(new OkapiConnectionParams(headers, vertx)))
-      .thenAccept(unregistered -> {
-        log.info("unregisterModuleFromPubSub:: Module unregistered successfully");
-        future.complete(null);
-      })
-      .exceptionally(throwable -> {
-        log.warn("unregisterModuleFromPubSub:: Error unregistering module: {}", throwable.getMessage());
         future.completeExceptionally(throwable);
         return null;
       });
