@@ -79,7 +79,7 @@ public class ModTenantService extends TenantAPI {
   }
 
   private Future<Void> deleteKafkaTopics(Vertx vertx, String tenantId) {
-    log.debug("deleteKafkaTopics:: Deleting Kafka topics for tenant {}", tenantId);
+    log.info("deleteKafkaTopics:: Deleting Kafka topics for tenant {}", tenantId);
     return new KafkaAdminClientService(vertx).deleteKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("deleteKafkaTopics:: Kafka topics deleted successfully for tenant {}", tenantId))
       .onFailure(t -> log.warn("deleteKafkaTopics:: Failed to delete Kafka topics for tenant {}", tenantId, t));
