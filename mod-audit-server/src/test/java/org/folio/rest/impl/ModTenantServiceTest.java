@@ -35,8 +35,6 @@ import org.mockito.quality.Strictness;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
-// Lenient because stubs for auditManager and PubSubClientUtils live in async compose
-// steps that may not complete within the synchronous test execution.
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ModTenantServiceTest {
 
