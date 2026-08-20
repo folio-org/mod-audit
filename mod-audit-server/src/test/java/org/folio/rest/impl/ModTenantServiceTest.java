@@ -78,18 +78,15 @@ class ModTenantServiceTest {
   }
 
   @Test
-  void kafkaTopicsActionCreatesTopicsWhenModuleDisabledWithoutPurge() {
-    // moduleTo == null but purge == false: still create topics
+  void kafkaTopicsActionDoesNothingWhenModuleDisabledWithoutPurge() {
+    // moduleTo == null, purge == false: module disabled, topics untouched
     var attributes = new TenantAttributes();
 
-    try (var construction = mockConstruction(KafkaAdminClientService.class,
-        (mock, ctx) -> when(mock.createKafkaTopics(any(), anyString()))
-          .thenReturn(Future.succeededFuture()))) {
+    try (var construction = mockConstruction(KafkaAdminClientService.class)) {
+      var result = new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
 
-      new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
-
-      assertThat(construction.constructed()).hasSize(1);
-      verify(construction.constructed().get(0)).createKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
+      assertThat(result.succeeded()).isTrue();
+      assertThat(construction.constructed()).isEmpty();
     }
   }
 

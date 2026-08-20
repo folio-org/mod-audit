@@ -58,9 +58,13 @@ public class ModTenantService extends TenantAPI {
   }
 
   Future<Void> kafkaTopicsAction(TenantAttributes attributes, Vertx vertx, String tenantId) {
-    return attributes.getModuleTo() == null && Boolean.TRUE.equals(attributes.getPurge())
-      ? deleteKafkaTopics(vertx, tenantId)
-      : createKafkaTopics(vertx, tenantId);
+    if (attributes.getModuleTo() != null) {
+      return createKafkaTopics(vertx, tenantId);
+    }
+    if (Boolean.TRUE.equals(attributes.getPurge())) {
+      return deleteKafkaTopics(vertx, tenantId);
+    }
+    return succeededFuture();
   }
 
   private Future<Void> createKafkaTopics(Vertx vertx, String tenantId) {
