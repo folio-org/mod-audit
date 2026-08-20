@@ -63,9 +63,8 @@ class ModTenantServiceTest {
   }
 
   @Test
-  void kafkaTopicsActionDeletesTopicsOnTenantDisable() {
-    // moduleTo == null signals module removal
-    var attributes = new TenantAttributes();
+  void kafkaTopicsActionDeletesTopicsWhenModuleRemovedWithPurge() {
+    var attributes = new TenantAttributes().withPurge(Boolean.TRUE);
 
     try (var construction = mockConstruction(KafkaAdminClientService.class,
         (mock, ctx) -> when(mock.deleteKafkaTopics(any(), anyString()))
@@ -75,6 +74,22 @@ class ModTenantServiceTest {
 
       assertThat(construction.constructed()).hasSize(1);
       verify(construction.constructed().get(0)).deleteKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
+    }
+  }
+
+  @Test
+  void kafkaTopicsActionCreatesTopicsWhenModuleDisabledWithoutPurge() {
+    // moduleTo == null but purge == false: still create topics
+    var attributes = new TenantAttributes();
+
+    try (var construction = mockConstruction(KafkaAdminClientService.class,
+        (mock, ctx) -> when(mock.createKafkaTopics(any(), anyString()))
+          .thenReturn(Future.succeededFuture()))) {
+
+      new ModTenantService(auditManager).kafkaTopicsAction(attributes, vertx, TENANT_ID);
+
+      assertThat(construction.constructed()).hasSize(1);
+      verify(construction.constructed().get(0)).createKafkaTopics(AuditKafkaTopic.values(), TENANT_ID);
     }
   }
 
