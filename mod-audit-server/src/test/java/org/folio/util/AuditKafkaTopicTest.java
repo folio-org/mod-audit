@@ -1,7 +1,6 @@
 package org.folio.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import org.folio.utils.UnitTest;
@@ -12,37 +11,37 @@ class AuditKafkaTopicTest {
 
   @Test
   void logRecordTopicModuleNameReturnsAudit() {
-    assertEquals("audit", AuditKafkaTopic.LOG_RECORD.moduleName());
+    assertThat(AuditKafkaTopic.LOG_RECORD.moduleName()).isEqualTo("audit");
   }
 
   @Test
   void logRecordTopicTopicNameReturnsLogRecord() {
-    assertEquals("LOG_RECORD", AuditKafkaTopic.LOG_RECORD.topicName());
+    assertThat(AuditKafkaTopic.LOG_RECORD.topicName()).isEqualTo("LOG_RECORD");
   }
 
   @Test
   void logRecordTopicModuleTopicNameReturnsDotSeparated() {
-    assertEquals("audit.LOG_RECORD", AuditKafkaTopic.LOG_RECORD.moduleTopicName());
+    assertThat(AuditKafkaTopic.LOG_RECORD.moduleTopicName()).isEqualTo("audit.LOG_RECORD");
   }
 
   @Test
   void logRecordTopicFullTopicNameContainsEnvAndTenant() {
     String tenantId = "test-tenant";
     String fullTopicName = AuditKafkaTopic.LOG_RECORD.fullTopicName(tenantId);
-    assertTrue(fullTopicName.contains(tenantId), "Full topic name should contain tenant id");
-    assertTrue(fullTopicName.contains("audit"), "Full topic name should contain module name");
-    assertTrue(fullTopicName.contains("LOG_RECORD"), "Full topic name should contain topic name");
+    assertThat(fullTopicName)
+      .contains(tenantId)
+      .contains("audit")
+      .contains("LOG_RECORD");
   }
 
   @Test
   void logRecordTopicNumPartitionsReturnsTen() {
-    assertEquals(10, AuditKafkaTopic.LOG_RECORD.numPartitions());
+    assertThat(AuditKafkaTopic.LOG_RECORD.numPartitions()).isEqualTo(10);
   }
 
   @Test
   void valuesContainsAllExpectedTopics() {
-    var values = Arrays.asList(AuditKafkaTopic.values());
-    assertTrue(values.contains(AuditKafkaTopic.LOG_RECORD));
-    assertEquals(1, values.size());
+    assertThat(Arrays.asList(AuditKafkaTopic.values()))
+      .containsExactly(AuditKafkaTopic.LOG_RECORD);
   }
 }
