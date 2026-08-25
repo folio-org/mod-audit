@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -124,7 +125,7 @@ class ModTenantServiceTest {
   @Test
   void loadDataRegistersToPubSubAndRunsDatabaseCleanup() throws InterruptedException {
     var attributes = new TenantAttributes(); // moduleTo == null: no topic creation
-    var context = org.mockito.Mockito.mock(Context.class);
+    var context = mock(Context.class);
     when(context.owner()).thenReturn(vertx);
     when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
 
