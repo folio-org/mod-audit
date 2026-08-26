@@ -42,7 +42,8 @@ public class ModTenantService extends TenantAPI {
 
   @Override
   public void postTenant(TenantAttributes attributes, Map<String, String> headers,
-      Handler<AsyncResult<Response>> handler, Context context) {
+    Handler<AsyncResult<Response>> handler, Context context) {
+
     String tenantId = TenantTool.tenantId(headers);
     Vertx vertx = context.owner();
     deleteTopicsIfPurging(attributes, vertx, tenantId)
@@ -56,7 +57,8 @@ public class ModTenantService extends TenantAPI {
 
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId,
-      Map<String, String> headers, Context context) {
+    Map<String, String> headers, Context context) {
+
     log.debug("loadData:: Starting loadData");
     Vertx vertx = context.owner();
     Promise<Integer> promise = Promise.promise();
