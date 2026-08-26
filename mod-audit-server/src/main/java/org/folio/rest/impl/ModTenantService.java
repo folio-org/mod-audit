@@ -66,7 +66,12 @@ public class ModTenantService extends TenantAPI {
           log.warn("loadData:: Kafka topics creation failed for tenant {}", tenantId, kafkaAr.cause());
         }
         registerModuleToPubSub(headers, vertx)
-          .thenAccept(p -> promise.complete(0));
+          .thenAccept(v -> promise.complete(0))
+          .exceptionally(t -> {
+            log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t);
+            promise.fail(t);
+            return null;
+          });
       });
     log.info("loadData:: Started Loading Data");
     return promise.future()
@@ -109,19 +114,9 @@ public class ModTenantService extends TenantAPI {
   }
 
   private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
-    log.debug("registerModuleToPubSub:: Registering ModuleToPubSub");
-    CompletableFuture<Void> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
-      .thenAccept(registered -> {
-        log.info("registerModuleToPubSub:: Module registered successfully");
-        future.complete(null);
-      })
-      .exceptionally(throwable -> {
-        log.warn("Error occurred while registering module: {}", throwable.getMessage());
-        future.completeExceptionally(throwable);
-        return null;
-      });
-    log.info("registerModuleToPubSub:: Registered ModuleToPubSub Successfully");
-    return future;
+    log.debug("registerModuleToPubSub:: Registering module to PubSub");
+    return CompletableFuture
+      .supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
+      .thenAccept(registered -> log.info("registerModuleToPubSub:: Module registered successfully"));
   }
 }

@@ -1,8 +1,7 @@
 package org.folio.rest.impl;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -41,6 +40,8 @@ class ModTenantServiceTest {
   private AuditManager auditManager;
   @Mock
   private Vertx vertx;
+  @Mock
+  private Context context;
 
   private ModTenantService service;
 
@@ -55,7 +56,7 @@ class ModTenantServiceTest {
     try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
         when(mock.createKafkaTopics(any(), any())).thenReturn(Future.succeededFuture()))) {
       Future<Void> result = service.createTopicsIfEnabled(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
+      assertThat(result.succeeded()).isTrue();
       verify(mocked.constructed().get(0)).createKafkaTopics(any(), any());
     }
   }
@@ -65,8 +66,8 @@ class ModTenantServiceTest {
     var attributes = new TenantAttributes();
     try (var mocked = mockConstruction(KafkaAdminClientService.class)) {
       Future<Void> result = service.createTopicsIfEnabled(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
-      assertTrue(mocked.constructed().isEmpty());
+      assertThat(result.succeeded()).isTrue();
+      assertThat(mocked.constructed()).isEmpty();
     }
   }
 
@@ -77,7 +78,7 @@ class ModTenantServiceTest {
     try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
         when(mock.createKafkaTopics(any(), any())).thenReturn(Future.failedFuture(topicExistsException)))) {
       Future<Void> result = service.createTopicsIfEnabled(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
+      assertThat(result.succeeded()).isTrue();
     }
   }
 
@@ -87,7 +88,7 @@ class ModTenantServiceTest {
     try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
         when(mock.createKafkaTopics(any(), any())).thenReturn(Future.failedFuture(new RuntimeException("boom"))))) {
       Future<Void> result = service.createTopicsIfEnabled(attributes, vertx, TENANT_ID);
-      assertTrue(result.failed());
+      assertThat(result.failed()).isTrue();
     }
   }
 
@@ -97,7 +98,7 @@ class ModTenantServiceTest {
     try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
         when(mock.deleteKafkaTopics(any(), any())).thenReturn(Future.succeededFuture()))) {
       Future<Void> result = service.deleteTopicsIfPurging(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
+      assertThat(result.succeeded()).isTrue();
       verify(mocked.constructed().get(0)).deleteKafkaTopics(any(), any());
     }
   }
@@ -107,8 +108,8 @@ class ModTenantServiceTest {
     var attributes = new TenantAttributes();
     try (var mocked = mockConstruction(KafkaAdminClientService.class)) {
       Future<Void> result = service.deleteTopicsIfPurging(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
-      assertTrue(mocked.constructed().isEmpty());
+      assertThat(result.succeeded()).isTrue();
+      assertThat(mocked.constructed()).isEmpty();
     }
   }
 
@@ -117,15 +118,14 @@ class ModTenantServiceTest {
     var attributes = new TenantAttributes().withModuleTo("1.0.0").withPurge(Boolean.TRUE);
     try (var mocked = mockConstruction(KafkaAdminClientService.class)) {
       Future<Void> result = service.deleteTopicsIfPurging(attributes, vertx, TENANT_ID);
-      assertTrue(result.succeeded());
-      assertTrue(mocked.constructed().isEmpty());
+      assertThat(result.succeeded()).isTrue();
+      assertThat(mocked.constructed()).isEmpty();
     }
   }
 
   @Test
   void loadDataRegistersToPubSubAndRunsDatabaseCleanup() throws InterruptedException {
     var attributes = new TenantAttributes(); // moduleTo == null: no topic creation
-    var context = mock(Context.class);
     when(context.owner()).thenReturn(vertx);
     when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
 
@@ -137,7 +137,7 @@ class ModTenantServiceTest {
       service.loadData(attributes, TENANT_ID, Map.of(), context)
         .onComplete(ar -> latch.countDown());
 
-      assertTrue(latch.await(2, TimeUnit.SECONDS));
+      assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
       verify(auditManager).executeDatabaseCleanup(TENANT_ID);
     }
   }
