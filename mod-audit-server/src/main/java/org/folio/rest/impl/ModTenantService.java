@@ -13,18 +13,15 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.Response;
 import org.apache.kafka.common.errors.TopicExistsException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.kafka.services.KafkaAdminClientService;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
-
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import org.folio.services.management.AuditManager;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.AuditKafkaTopic;
 import org.folio.util.pubsub.PubSubClientUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,6 +34,10 @@ public class ModTenantService extends TenantAPI {
 
   public ModTenantService() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
+
+  ModTenantService(AuditManager auditManager) {
+    this.auditManager = auditManager;
   }
 
   @Override
