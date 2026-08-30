@@ -19,11 +19,11 @@
 
   <properties>
     <aspectj.version>1.9.25.1</aspectj.version>
-    <raml-module-builder.version>36.0.0</raml-module-builder.version>
+    <raml-module-builder.version>36.0.1</raml-module-builder.version>
     <vertx.version>5.1.2</vertx.version>
     <wiremock.version>3.0.1</wiremock.version>
     <junit.jupiter.version>6.1.0</junit.jupiter.version>
-    <rest-assured.version>6.0.0</rest-assured.version>
+    <rest-assured.version>6.0.1</rest-assured.version>
     <pubsub.client.version>2.17.0</pubsub.client.version>
     <streamx.version>0.8.4</streamx.version>
     <main.basedir>${project.basedir}</main.basedir>
