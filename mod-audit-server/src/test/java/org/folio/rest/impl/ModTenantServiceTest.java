@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.folio.kafka.services.KafkaAdminClientService;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.management.AuditManager;
@@ -48,6 +51,14 @@ class ModTenantServiceTest {
   @BeforeEach
   void setUp() {
     service = new ModTenantService(auditManager);
+  }
+
+  @Test
+  void postTenantKeepsRmbValidation() throws NoSuchMethodException {
+    var postTenant = ModTenantService.class.getMethod("postTenant",
+      TenantAttributes.class, Map.class, Handler.class, Context.class);
+
+    assertThat(postTenant.isAnnotationPresent(Validate.class)).isTrue();
   }
 
   @Test
@@ -89,6 +100,22 @@ class ModTenantServiceTest {
         when(mock.createKafkaTopics(any(), any())).thenReturn(Future.failedFuture(new RuntimeException("boom"))))) {
       Future<Void> result = service.createTopicsIfEnabled(attributes, vertx, TENANT_ID);
       assertThat(result.failed()).isTrue();
+    }
+  }
+
+  @Test
+  void loadDataFailsWhenKafkaTopicsCreationFails() {
+    var attributes = new TenantAttributes().withModuleTo("1.0.0");
+    var failure = new RuntimeException("boom");
+    when(context.owner()).thenReturn(vertx);
+
+    try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
+        when(mock.createKafkaTopics(any(), any())).thenReturn(Future.failedFuture(failure)))) {
+      Future<Integer> result = service.loadData(attributes, TENANT_ID, Map.of(), context);
+
+      assertThat(result.failed()).isTrue();
+      assertThat(result.cause()).isSameAs(failure);
+      verify(auditManager, never()).executeDatabaseCleanup(TENANT_ID);
     }
   }
 

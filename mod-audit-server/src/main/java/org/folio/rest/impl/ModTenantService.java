@@ -7,7 +7,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +15,7 @@ import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.services.KafkaAdminClientService;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.util.OkapiConnectionParams;
@@ -41,6 +41,7 @@ public class ModTenantService extends TenantAPI {
   }
 
   @Override
+  @Validate
   public void postTenant(TenantAttributes attributes, Map<String, String> headers,
     Handler<AsyncResult<Response>> handler, Context context) {
 
@@ -61,22 +62,11 @@ public class ModTenantService extends TenantAPI {
 
     log.debug("loadData:: Starting loadData");
     Vertx vertx = context.owner();
-    Promise<Integer> promise = Promise.promise();
-    createTopicsIfEnabled(attributes, vertx, tenantId)
-      .onComplete(kafkaAr -> {
-        if (kafkaAr.failed()) {
-          log.warn("loadData:: Kafka topics creation failed for tenant {}", tenantId, kafkaAr.cause());
-        }
-        registerModuleToPubSub(headers, vertx)
-          .thenAccept(v -> promise.complete(0))
-          .exceptionally(t -> {
-            log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t);
-            promise.fail(t);
-            return null;
-          });
-      });
     log.info("loadData:: Started Loading Data");
-    return promise.future()
+    return createTopicsIfEnabled(attributes, vertx, tenantId)
+      .compose(v -> Future.fromCompletionStage(registerModuleToPubSub(headers, vertx))
+        .onFailure(t -> log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t)))
+      .map(0)
       .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
