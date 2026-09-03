@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static java.lang.Boolean.TRUE;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -47,12 +48,23 @@ public class ModTenantService extends TenantAPI {
 
     String tenantId = TenantTool.tenantId(headers);
     Vertx vertx = context.owner();
-    deleteTopicsIfPurging(attributes, vertx, tenantId)
-      .onComplete(ar -> {
-        if (ar.failed()) {
-          log.warn("postTenant:: Kafka topics deletion failed for tenant {}", tenantId, ar.cause());
+    if (isTenantDisable(attributes)) {
+      attributes.withModuleTo(null);
+    }
+
+    Future<Response> postTenantFuture = postTenantSync(attributes, headers, context);
+    postTenantFuture
+      .compose(response -> updateKafkaTopics(attributes, vertx, tenantId).map(response))
+      .onSuccess(response -> {
+        log.info("postTenant:: Tenant operation completed successfully for tenant {}", tenantId);
+        handler.handle(succeededFuture(response));
+      })
+      .onFailure(t -> {
+        if (postTenantFuture.failed()) {
+          handler.handle(failedFuture(t));
+          return;
         }
-        super.postTenant(attributes, headers, handler, context);
+        handlePostTenantFailure(t, handler);
       });
   }
 
@@ -63,23 +75,22 @@ public class ModTenantService extends TenantAPI {
     log.debug("loadData:: Starting loadData");
     Vertx vertx = context.owner();
     log.info("loadData:: Started Loading Data");
-    return createTopicsIfEnabled(attributes, vertx, tenantId)
-      .compose(v -> Future.fromCompletionStage(registerModuleToPubSub(headers, vertx))
-        .onFailure(t -> log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t)))
+    return Future.fromCompletionStage(registerModuleToPubSub(headers, vertx))
+      .onFailure(t -> log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t))
       .map(0)
       .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
-  Future<Void> createTopicsIfEnabled(TenantAttributes attributes, Vertx vertx, String tenantId) {
-    if (attributes.getModuleTo() != null) {
-      return createKafkaTopics(vertx, tenantId);
+  Future<Void> updateKafkaTopics(TenantAttributes attributes, Vertx vertx, String tenantId) {
+    if (isPurgeRequested(attributes)) {
+      return deleteKafkaTopics(vertx, tenantId);
     }
-    return succeededFuture();
+    return createTopicsIfEnabled(attributes, vertx, tenantId);
   }
 
-  Future<Void> deleteTopicsIfPurging(TenantAttributes attributes, Vertx vertx, String tenantId) {
-    if (attributes.getModuleTo() == null && Boolean.TRUE.equals(attributes.getPurge())) {
-      return deleteKafkaTopics(vertx, tenantId);
+  Future<Void> createTopicsIfEnabled(TenantAttributes attributes, Vertx vertx, String tenantId) {
+    if (isConfigured(attributes.getModuleTo())) {
+      return createKafkaTopics(vertx, tenantId);
     }
     return succeededFuture();
   }
@@ -110,5 +121,22 @@ public class ModTenantService extends TenantAPI {
     return CompletableFuture
       .supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
       .thenAccept(registered -> log.info("registerModuleToPubSub:: Module registered successfully"));
+  }
+
+  private static boolean isTenantDisable(TenantAttributes attributes) {
+    return isConfigured(attributes.getModuleFrom()) && !isConfigured(attributes.getModuleTo());
+  }
+
+  private static boolean isPurgeRequested(TenantAttributes attributes) {
+    return TRUE.equals(attributes.getPurge());
+  }
+
+  private static boolean isConfigured(String value) {
+    return value != null && !value.isBlank();
+  }
+
+  private static void handlePostTenantFailure(Throwable throwable, Handler<AsyncResult<Response>> handler) {
+    log.error("postTenant:: Tenant operation failed", throwable);
+    handler.handle(succeededFuture(PostTenantResponse.respond500WithTextPlain(throwable.getLocalizedMessage())));
   }
 }
