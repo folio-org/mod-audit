@@ -88,7 +88,7 @@ class ModTenantServiceTest {
   void postTenantDeletesKafkaTopicsAfterTenantSyncWhenDisablingWithPurge() throws InterruptedException {
     var tenantResponse = PostTenantResponse.respond204();
     var tenantService = new TestModTenantService(auditManager, Future.succeededFuture((Response) tenantResponse));
-    var attributes = new TenantAttributes().withModuleFrom("1.0.0").withModuleTo("").withPurge(Boolean.TRUE);
+    var attributes = new TenantAttributes().withModuleFrom("1.0.0").withPurge(Boolean.TRUE);
     when(context.owner()).thenReturn(vertx);
 
     try (var mocked = mockConstruction(KafkaAdminClientService.class, (mock, ctx) ->
@@ -124,7 +124,7 @@ class ModTenantServiceTest {
   void postTenantDoesNotDeleteKafkaTopicsWhenDisablingWithoutPurge() throws InterruptedException {
     var tenantResponse = PostTenantResponse.respond204();
     var tenantService = new TestModTenantService(auditManager, Future.succeededFuture((Response) tenantResponse));
-    var attributes = new TenantAttributes().withModuleFrom("1.0.0").withModuleTo("");
+    var attributes = new TenantAttributes().withModuleFrom("1.0.0");
     when(context.owner()).thenReturn(vertx);
 
     try (var mocked = mockConstruction(KafkaAdminClientService.class)) {
@@ -167,6 +167,19 @@ class ModTenantServiceTest {
       assertThat(result.cause()).isSameAs(failure);
       assertThat(mocked.constructed()).isEmpty();
     }
+  }
+
+  @Test
+  void postTenantPassesBlankModuleToUnchangedToRmb() throws InterruptedException {
+    var failure = new RuntimeException("tenant sync failed");
+    var tenantService = new TestModTenantService(auditManager, Future.failedFuture(failure));
+    var attributes = new TenantAttributes().withModuleFrom("1.0.0").withModuleTo("");
+    when(context.owner()).thenReturn(vertx);
+
+    var result = postTenant(tenantService, attributes);
+
+    assertThat(result.failed()).isTrue();
+    assertThat(tenantService.postTenantSyncAttributes.getModuleTo()).isEmpty();
   }
 
   @Test

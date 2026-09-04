@@ -48,9 +48,6 @@ public class ModTenantService extends TenantAPI {
 
     String tenantId = TenantTool.tenantId(headers);
     Vertx vertx = context.owner();
-    if (isTenantDisable(attributes)) {
-      attributes.withModuleTo(null);
-    }
 
     postTenantSync(attributes, headers, context)
       .compose(response -> Future.<Void>succeededFuture()
@@ -116,10 +113,6 @@ public class ModTenantService extends TenantAPI {
     return CompletableFuture
       .supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
       .thenAccept(registered -> log.info("registerModuleToPubSub:: Module registered successfully"));
-  }
-
-  private static boolean isTenantDisable(TenantAttributes attributes) {
-    return isConfigured(attributes.getModuleFrom()) && !isConfigured(attributes.getModuleTo());
   }
 
   private static boolean isPurgeRequested(TenantAttributes attributes) {
