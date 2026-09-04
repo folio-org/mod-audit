@@ -52,20 +52,15 @@ public class ModTenantService extends TenantAPI {
       attributes.withModuleTo(null);
     }
 
-    Future<Response> postTenantFuture = postTenantSync(attributes, headers, context);
-    postTenantFuture
-      .compose(response -> updateKafkaTopics(attributes, vertx, tenantId).map(response))
-      .onSuccess(response -> {
-        log.info("postTenant:: Tenant operation completed successfully for tenant {}", tenantId);
-        handler.handle(succeededFuture(response));
-      })
-      .onFailure(t -> {
-        if (postTenantFuture.failed()) {
-          handler.handle(failedFuture(t));
-          return;
-        }
-        handlePostTenantFailure(t, handler);
-      });
+    postTenantSync(attributes, headers, context)
+      .compose(response -> Future.<Void>succeededFuture()
+        .compose(v -> updateKafkaTopics(attributes, vertx, tenantId))
+        .map(v -> {
+          log.info("postTenant:: Tenant operation completed successfully for tenant {}", tenantId);
+          return response;
+        })
+        .recover(ModTenantService::recoverPostTenantFailure))
+      .onComplete(handler);
   }
 
   @Override
@@ -135,8 +130,8 @@ public class ModTenantService extends TenantAPI {
     return value != null && !value.isBlank();
   }
 
-  private static void handlePostTenantFailure(Throwable throwable, Handler<AsyncResult<Response>> handler) {
+  private static Future<Response> recoverPostTenantFailure(Throwable throwable) {
     log.error("postTenant:: Tenant operation failed", throwable);
-    handler.handle(succeededFuture(PostTenantResponse.respond500WithTextPlain(throwable.getLocalizedMessage())));
+    return succeededFuture(PostTenantResponse.respond500WithTextPlain(throwable.getLocalizedMessage()));
   }
 }
