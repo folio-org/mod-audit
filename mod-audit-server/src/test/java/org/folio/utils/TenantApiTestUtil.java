@@ -1,6 +1,7 @@
 package org.folio.utils;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.folio.HttpStatus.HTTP_NO_CONTENT;
 import static org.folio.TestSuite.port;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -114,8 +115,18 @@ public class TenantApiTestUtil {
         if (event.failed()) {
           future.completeExceptionally(event.cause());
         } else {
-          TenantJob tenantJob = event.result()
-            .bodyAsJson(TenantJob.class);
+          var response = event.result();
+          if (response.statusCode() == HTTP_NO_CONTENT.toInt()) {
+            future.complete(null);
+            return;
+          }
+          if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            future.completeExceptionally(new IllegalStateException(
+              "Tenant operation failed with status " + response.statusCode() + ": " + response.bodyAsString()));
+            return;
+          }
+
+          TenantJob tenantJob = response.bodyAsJson(TenantJob.class);
           tClient.getTenantByOperationId(tenantJob.getId(), TENANT_OP_WAITINGTIME, result -> {
             if (result.failed()) {
               future.completeExceptionally(result.cause());
