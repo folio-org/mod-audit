@@ -36,7 +36,6 @@ import org.folio.rest.impl.AuditConfigAPITest;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataCleanupApiTest;
 import org.folio.rest.impl.AuditDataImplApiTest;
-import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
 import org.folio.rest.impl.InventoryAuditApiTest;
 import org.folio.rest.impl.InventoryEventHandlerMockTest;
@@ -135,10 +134,6 @@ public class TestSuite {
 
   @Nested
   class AuditDataAcquisitionAPINestedTest extends AuditDataAcquisitionAPITest {
-  }
-
-  @Nested
-  class AuditHandlersImplApiTestNested extends AuditHandlersImplApiTest {
   }
 
   @Nested
