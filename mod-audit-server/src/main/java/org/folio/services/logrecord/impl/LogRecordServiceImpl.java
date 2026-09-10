@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.builder.LogRecordBuilderResolver;
 import org.folio.cql2pgjson.CQL2PgJSON;
+import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
@@ -108,7 +109,7 @@ public class LogRecordServiceImpl implements LogRecordService {
       .mapEmpty();
   }
 
-  private CQLWrapper buildCqlWrapper(String query, int limit, int offset) throws Exception {
+  private CQLWrapper buildCqlWrapper(String query, int limit, int offset) throws FieldException {
     LOGGER.debug("buildCqlWrapper:: Creating CQL wrapper");
     CQL2PgJSON cql2PgJSON = new CQL2PgJSON(LOGS_TABLE_NAME + ".jsonb");
     return new CQLWrapper(cql2PgJSON, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));

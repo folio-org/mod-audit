@@ -1,7 +1,7 @@
 package org.folio.services.logrecord.impl;
 
 import static org.folio.rest.impl.CirculationLogsService.LOGS_TABLE_NAME;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,7 +68,7 @@ class LogRecordServiceImplTest {
     var logRecord = new LogRecord().withAction(LogRecord.Action.CHECKED_IN);
     var builder = mockBuilderReturning(payload, List.of(logRecord));
 
-    when(postgresClient.upsertBatch(eq(LOGS_TABLE_NAME), eq(List.of(logRecord))))
+    when(postgresClient.upsertBatch(LOGS_TABLE_NAME, List.of(logRecord)))
       .thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
     try (var resolver = mockStatic(LogRecordBuilderResolver.class)) {
@@ -78,7 +78,7 @@ class LogRecordServiceImplTest {
       var future = logRecordService.processLogRecord(LOG_EVENT_TYPE, payload, okapiHeaders, null);
 
       future.onComplete(ctx.succeeding(result -> {
-        verify(postgresClient, times(1)).upsertBatch(eq(LOGS_TABLE_NAME), eq(List.of(logRecord)));
+        verify(postgresClient, times(1)).upsertBatch(LOGS_TABLE_NAME, List.of(logRecord));
         verify(postgresClient, never()).get(any(), any(), any(String[].class), any(), anyBoolean(), anyBoolean(), any(Handler.class));
         ctx.completeNow();
       }));
@@ -107,7 +107,7 @@ class LogRecordServiceImplTest {
       return null;
     }).when(postgresClient).get(eq(LOGS_TABLE_NAME), eq(LogRecord.class), any(String[].class), any(), eq(false), eq(false), any(Handler.class));
 
-    when(postgresClient.upsertBatch(eq(LOGS_TABLE_NAME), eq(List.of(anonymizeRecord, relatedRecord))))
+    when(postgresClient.upsertBatch(LOGS_TABLE_NAME, List.of(anonymizeRecord, relatedRecord)))
       .thenReturn(Future.succeededFuture(mock(RowSet.class)));
 
     try (var resolver = mockStatic(LogRecordBuilderResolver.class)) {
@@ -117,10 +117,10 @@ class LogRecordServiceImplTest {
       var future = logRecordService.processLogRecord(LOG_EVENT_TYPE, payload, okapiHeaders, null);
 
       future.onComplete(ctx.succeeding(result -> {
-        assertTrue(relatedRecord.getUserBarcode() == null);
-        assertTrue(relatedRecord.getLinkToIds().getUserId() == null);
+        assertNull(relatedRecord.getUserBarcode());
+        assertNull(relatedRecord.getLinkToIds().getUserId());
         verify(postgresClient, times(1)).get(eq(LOGS_TABLE_NAME), eq(LogRecord.class), any(String[].class), any(), eq(false), eq(false), any(Handler.class));
-        verify(postgresClient, times(1)).upsertBatch(eq(LOGS_TABLE_NAME), eq(List.of(anonymizeRecord, relatedRecord)));
+        verify(postgresClient, times(1)).upsertBatch(LOGS_TABLE_NAME, List.of(anonymizeRecord, relatedRecord));
         ctx.completeNow();
       }));
     }
@@ -132,7 +132,7 @@ class LogRecordServiceImplTest {
     var logRecord = new LogRecord().withAction(LogRecord.Action.CHECKED_IN);
     var builder = mockBuilderReturning(payload, List.of(logRecord));
 
-    when(postgresClient.upsertBatch(eq(LOGS_TABLE_NAME), eq(List.of(logRecord))))
+    when(postgresClient.upsertBatch(LOGS_TABLE_NAME, List.of(logRecord)))
       .thenReturn(Future.failedFuture(new RuntimeException("db error")));
 
     try (var resolver = mockStatic(LogRecordBuilderResolver.class)) {
@@ -147,7 +147,7 @@ class LogRecordServiceImplTest {
 
   private LogRecordBuilder mockBuilderReturning(JsonObject payload, List<LogRecord> logRecords) {
     var builder = mock(LogRecordBuilder.class);
-    when(builder.buildLogRecord(eq(payload))).thenReturn(CompletableFuture.completedFuture(logRecords));
+    when(builder.buildLogRecord(payload)).thenReturn(CompletableFuture.completedFuture(logRecords));
     return builder;
   }
 }

@@ -39,10 +39,10 @@ public class KafkaTestProducerUtil {
     var topic = AuditKafkaTopic.LOG_RECORD.fullTopicName(tenantId);
     var producer = KafkaProducer.<String, String>createShared(vertx, "test-log-record-producer", kafkaConfig.getProducerProps());
 
-    KafkaProducerRecord<String, String> record = KafkaProducerRecord.create(topic, UUID.randomUUID().toString(), payloadJson);
-    record.addHeader(RestVerticle.OKAPI_HEADER_TENANT, tenantId);
+    KafkaProducerRecord<String, String> producerRecord = KafkaProducerRecord.create(topic, UUID.randomUUID().toString(), payloadJson);
+    producerRecord.addHeader(RestVerticle.OKAPI_HEADER_TENANT, tenantId);
 
-    sendAndAwait(producer, record);
+    sendAndAwait(producer, producerRecord);
   }
 
   /**

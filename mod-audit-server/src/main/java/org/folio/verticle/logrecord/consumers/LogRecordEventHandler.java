@@ -2,7 +2,6 @@ package org.folio.verticle.logrecord.consumers;
 
 import static org.folio.util.LogEventPayloadField.LOG_EVENT_TYPE;
 
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
