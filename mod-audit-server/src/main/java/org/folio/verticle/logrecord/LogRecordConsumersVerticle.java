@@ -10,9 +10,12 @@ import org.folio.verticle.AbstractConsumersVerticle;
 import org.folio.verticle.logrecord.consumers.LogRecordEventHandler;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LogRecordConsumersVerticle extends AbstractConsumersVerticle {
 
   private final ObjectFactory<LogRecordEventHandler> recordHandlerProvider;
