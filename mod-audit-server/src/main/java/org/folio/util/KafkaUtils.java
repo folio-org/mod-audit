@@ -35,19 +35,19 @@ public class KafkaUtils {
    * @return resolved tenant id, or {@code TenantTool}'s default if not present
    */
   public static String getTenantId(KafkaConsumerRecord<?, ?> consumerRecord) {
-    var headers = new CaseInsensitiveMap<>(KafkaHeaderUtils.kafkaHeadersToMap(consumerRecord.headers()));
+    var headers = getConsumerRecordHeaders(consumerRecord);
     return TenantTool.tenantId(headers);
   }
 
   /**
    * Converts a Kafka consumer record's headers into a case-insensitive
    * {@code Map<String, String>}, suitable for passing to code (such as
-   * {@code LogRecordBuilder}) that expects an RMB-style okapiHeaders map.
+   * {@code LogRecordBuilder}) that expects an RMB-style headers map.
    *
    * @param consumerRecord the Kafka consumer record to extract headers from
-   * @return case-insensitive map of okapi headers
+   * @return case-insensitive map of consumer record headers
    */
-  public static Map<String, String> getOkapiHeaders(KafkaConsumerRecord<?, ?> consumerRecord) {
+  public static Map<String, String> getConsumerRecordHeaders(KafkaConsumerRecord<?, ?> consumerRecord) {
     return new CaseInsensitiveMap<>(KafkaHeaderUtils.kafkaHeadersToMap(consumerRecord.headers()));
   }
 }

@@ -42,16 +42,16 @@ public class LogRecordEventHandler implements AsyncRecordHandler<String, String>
       payload = new JsonObject(kafkaConsumerRecord.value());
       logEventType = payload.getString(LOG_EVENT_TYPE.value());
     } catch (Exception e) {
-      LOGGER.warn("handle:: Failed to parse LOG_RECORD event [key: {}] due to: {}", recordKey, e.getMessage());
+      LOGGER.warn("handle:: Failed to parse LOG_RECORD event [key: {}]", recordKey, e);
       result.complete(recordKey);
       return result.future();
     }
 
-    var okapiHeaders = KafkaUtils.getOkapiHeaders(kafkaConsumerRecord);
+    var consumerRecordHeaders = KafkaUtils.getConsumerRecordHeaders(kafkaConsumerRecord);
     var vertxContext = vertx.getOrCreateContext();
 
     LOGGER.info("handle:: Starting processing of LOG_RECORD event [key: {}, logEventType: {}]", recordKey, logEventType);
-    logRecordService.processLogRecord(logEventType, payload, okapiHeaders, vertxContext)
+    logRecordService.processLogRecord(logEventType, payload, consumerRecordHeaders, vertxContext)
       .onSuccess(ar -> {
         LOGGER.info("handle:: LOG_RECORD event [key: {}, logEventType: {}] has been processed", recordKey, logEventType);
         result.complete(recordKey);
