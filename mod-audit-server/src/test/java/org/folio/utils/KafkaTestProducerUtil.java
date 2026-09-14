@@ -57,9 +57,9 @@ public class KafkaTestProducerUtil {
     payloadJsons.forEach(payloadJson -> publishLogRecordEvent(vertx, tenantId, payloadJson));
   }
 
-  private static void sendAndAwait(KafkaProducer<String, String> producer, KafkaProducerRecord<String, String> record) {
+  private static void sendAndAwait(KafkaProducer<String, String> producer, KafkaProducerRecord<String, String> producerRecord) {
     CompletableFuture<RecordMetadata> future = new CompletableFuture<>();
-    producer.send(record)
+    producer.send(producerRecord)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           future.complete(ar.result());
