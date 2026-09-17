@@ -1,6 +1,7 @@
 package org.folio.services.diff.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -91,6 +92,36 @@ class UserDiffCalculatorTest {
       .hasSize(1)
       .extracting(CollectionChangeDto::getFullPath)
       .containsExactly("preferredEmailCommunication");
+  }
+
+  @Test
+  void shouldDetectPreferredContactTypeIdsChange() {
+    var oldUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002"))));
+    var newUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002", "003"))));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getFullPath, CollectionChangeDto::getCollectionName)
+      .containsExactly(tuple("personal.preferredContactTypeIds", "preferredContactTypeIds"));
+  }
+
+  @Test
+  void shouldDetectAddedPreferredContactTypeIds() {
+    var oldUser = getMap(new User().withId("1").withPersonal(new Personal__1().withLastName("Doe")));
+    var newUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002"))));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff).isNotNull();
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getCollectionName)
+      .containsExactly("preferredContactTypeIds");
   }
 
   @Test

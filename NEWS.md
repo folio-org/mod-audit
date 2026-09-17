@@ -5,6 +5,7 @@
 
 ### Bug fixes
 * Track `personal.pronouns`, `personal.profilePictureLink`, and top-level `preferredEmailCommunication` in user version history ([MODAUD-308](https://folio-org.atlassian.net/browse/MODAUD-308))
+* Track `personal.preferredContactTypeIds` in user version history ([MODAUD-326](https://folio-org.atlassian.net/browse/MODAUD-326))
 
 ### Tech Dept
 * Upgrade to Vert.x v5 ([MODAUD-305](https://folio-org.atlassian.net/browse/MODAUD-305))
