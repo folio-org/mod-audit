@@ -537,6 +537,20 @@
       ]
     }
   ],
+  "metadata": {
+    "user": {
+      "type": "system",
+      "permissions": [
+        "users.item.get",
+        "users.collection.get",
+        "templates.item.get",
+        "inventory.items.item.get",
+        "inventory-storage.holdings.item.get",
+        "circulation-storage.cancellation-reasons.collection.get",
+        "circulation-item.item.get"
+      ]
+    }
+  },
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",
     "dockerPull": false,
