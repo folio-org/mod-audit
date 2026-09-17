@@ -43,10 +43,13 @@ public class LogRecordServiceImpl implements LogRecordService {
   public Future<Void> processLogRecord(String logEventType, JsonObject payload, Map<String, String> okapiHeaders,
     Context vertxContext) {
     LOGGER.debug("processLogRecord:: Processing log record for logEventType: {}", logEventType);
-    var builder = LogRecordBuilderResolver.getBuilder(logEventType, okapiHeaders, vertxContext);
     var tenantId = TenantTool.tenantId(okapiHeaders);
 
-    return Future.fromCompletionStage(builder.buildLogRecord(payload))
+    return Future.succeededFuture()
+      .compose(v -> {
+        var builder = LogRecordBuilderResolver.getBuilder(logEventType, okapiHeaders, vertxContext);
+        return Future.fromCompletionStage(builder.buildLogRecord(payload));
+      })
       .compose(logRecords -> processAnonymize(logRecords, tenantId))
       .compose(logRecords -> saveLogRecords(logRecords, tenantId));
   }
