@@ -1,5 +1,8 @@
 ## 3.1.0 In progress
 
+### Breaking changes
+* Implement Kafka LOG_RECORD Event Processing, remove PubSub infrastructure ([MODAUD-163](https://folio-org.atlassian.net/browse/MODAUD-163))
+
 ### Features
 * Skip storing user audit events that contain only internal metadata changes ([MODAUD-310](https://folio-org.atlassian.net/browse/MODAUD-310))
 
