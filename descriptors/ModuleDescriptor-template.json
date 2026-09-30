@@ -3,22 +3,6 @@
   "name": "Audit Module",
   "requires": [
     {
-      "id": "pubsub-event-types",
-      "version": "0.1"
-    },
-    {
-      "id": "pubsub-publishers",
-      "version": "0.1"
-    },
-    {
-      "id": "pubsub-subscribers",
-      "version": "0.1"
-    },
-    {
-      "id": "pubsub-publish",
-      "version": "0.1"
-    },
-    {
       "id": "users",
       "version": "16.4"
     },
@@ -220,28 +204,6 @@
       ]
     },
     {
-      "id": "audit-data-event-handlers",
-      "version": "1.1",
-      "handlers": [
-        {
-          "methods": ["POST"],
-          "pathPattern": "/audit/handlers/log-record",
-          "permissionsRequired": [
-            "audit.pub-sub-handlers.log-record-event.post"
-          ],
-          "modulePermissions": [
-            "users.item.get",
-            "users.collection.get",
-            "templates.item.get",
-            "inventory.items.item.get",
-            "inventory-storage.holdings.item.get",
-            "circulation-storage.cancellation-reasons.collection.get",
-            "circulation-item.item.get"
-          ]
-        }
-      ]
-    },
-    {
       "id": "audit-config",
       "version": "1.0",
       "handlers": [
@@ -342,12 +304,7 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/_/tenant",
-          "modulePermissions": [
-            "pubsub.event-types.post",
-            "pubsub.publishers.post",
-            "pubsub.subscribers.post"
-          ]
+          "pathPattern": "/_/tenant"
         },
         {
           "methods": [
@@ -580,6 +537,20 @@
       ]
     }
   ],
+  "metadata": {
+    "user": {
+      "type": "system",
+      "permissions": [
+        "users.item.get",
+        "users.collection.get",
+        "templates.item.get",
+        "inventory.items.item.get",
+        "inventory-storage.holdings.item.get",
+        "circulation-storage.cancellation-reasons.collection.get",
+        "circulation-item.item.get"
+      ]
+    }
+  },
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",
     "dockerPull": false,

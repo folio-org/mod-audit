@@ -19,7 +19,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.dao.acquisition.impl.PieceEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.acquisition.PieceAuditEventsService;
 import org.folio.services.acquisition.impl.PieceAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
@@ -38,8 +38,6 @@ public class PieceEventsHandlerMockTest {
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
   @Spy
-  private Vertx vertx = Vertx.vertx();
-  @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @Mock
@@ -54,7 +52,7 @@ public class PieceEventsHandlerMockTest {
     MockitoAnnotations.openMocks(this).close();
     pieceEventsDao = new PieceEventsDaoImpl(postgresClientFactory);
     pieceAuditEventsService = new PieceAuditEventsServiceImpl(pieceEventsDao);
-    pieceEventsHandler = new PieceEventsHandler(vertx, pieceAuditEventsService);
+    pieceEventsHandler = new PieceEventsHandler(pieceAuditEventsService);
   }
 
   @Test
@@ -83,7 +81,7 @@ public class PieceEventsHandlerMockTest {
 
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, PieceAuditEvent event) {
     ConsumerRecord<String, String> consumer = new ConsumerRecord<>("folio", 0, 0, topic, Json.encode(event));
-    consumer.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumer.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumer.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("https://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumer.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, TOKEN.getBytes(StandardCharsets.UTF_8)));
     return consumer;

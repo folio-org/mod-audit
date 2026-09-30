@@ -29,7 +29,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
   private KafkaConfig kafkaConfig;
 
   @Value("${srm.kafka.DataImportConsumer.loadLimit:5}")
-  private int loadLimit;
+  private int defaultLoadLimit;
 
   private final List<KafkaConsumerWrapper<String, String>> consumerWrappers = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
         .context(context)
         .vertx(vertx)
         .kafkaConfig(kafkaConfig)
-        .loadLimit(loadLimit)
+        .loadLimit(getLoadLimit())
         .globalLoadSensor(globalLoadSensor)
         .subscriptionDefinition(subscriptionDefinition)
         .build();
@@ -76,6 +76,18 @@ public abstract class AbstractConsumersVerticle extends AbstractVerticle {
   private String constructModuleName() {
     return PomReaderUtil.INSTANCE.constructModuleVersionAndVersion(ModuleName.getModuleName(),
       ModuleName.getModuleVersion());
+  }
+
+  /**
+   * Max number of concurrently in-flight records this consumer will process before pausing.
+   * Subclasses whose event volume/burst profile differs from the shared default should override
+   * this to inject their own domain-specific {@code @Value}-configured limit instead of relying on
+   * the shared {@code srm.kafka.DataImportConsumer.loadLimit} default.
+   *
+   * @return load limit to pass to {@link KafkaConsumerWrapper}
+   */
+  protected int getLoadLimit() {
+    return defaultLoadLimit;
   }
 
   /**

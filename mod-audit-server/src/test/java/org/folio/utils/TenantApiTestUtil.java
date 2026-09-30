@@ -2,7 +2,6 @@ package org.folio.utils;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.HttpStatus.HTTP_NO_CONTENT;
-import static org.folio.TestSuite.port;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -18,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
+import org.folio.TestSuite;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -31,8 +31,6 @@ public class TenantApiTestUtil {
 
   public static final String LOAD_SYNC_PARAMETER = "loadSync";
   private static final int TENANT_OP_WAITINGTIME = 60000;
-  public static final Header X_OKAPI_URL = new Header("X-Okapi-Url", "http://localhost:" + port);
-  public static final Header X_OKAPI_URL_TO = new Header("X-Okapi-Url-To", "http://localhost:" + port);
 
   public static final String CHECK_IN_PAYLOAD_JSON = "payloads/check_in.json";
   public static final String DISABLE_INDEX_SCAN_PAYLOAD_JSON = "payloads/disable_index_scan.json";
@@ -109,7 +107,7 @@ public class TenantApiTestUtil {
 
   public static TenantJob postTenant(Header tenantHeader, TenantAttributes tenantAttributes) {
     CompletableFuture<TenantJob> future = new CompletableFuture<>();
-    TenantClient tClient = new TenantClient(X_OKAPI_URL.getValue(), tenantHeader.getValue(), null);
+    TenantClient tClient = new TenantClient("http://localhost:" + TestSuite.port, tenantHeader.getValue(), null);
     try {
       tClient.postTenant(tenantAttributes, event -> {
         if (event.failed()) {
@@ -145,7 +143,7 @@ public class TenantApiTestUtil {
 
   public static void deleteTenantAndPurgeTables(Header tenantHeader) {
     CompletableFuture<Void> future = new CompletableFuture<>();
-    TenantClient tClient = new TenantClient(X_OKAPI_URL_TO.getValue(), tenantHeader.getValue(), null);
+    TenantClient tClient = new TenantClient("http://localhost:" + TestSuite.port, tenantHeader.getValue(), null);
     TenantAttributes tenantAttributes = prepareTenantBody(false, false).withPurge(true);
     try {
       tClient.postTenant(tenantAttributes, event -> {
@@ -162,7 +160,7 @@ public class TenantApiTestUtil {
   }
 
   public static void deleteTenant(TenantJob tenantJob, Header tenantHeader) {
-    TenantClient tenantClient = new TenantClient(X_OKAPI_URL_TO.getValue(), tenantHeader.getValue(), null);
+    TenantClient tenantClient = new TenantClient("http://localhost:" + TestSuite.port, tenantHeader.getValue(), null);
 
     if (tenantJob != null) {
       CompletableFuture<Void> completableFuture = new CompletableFuture<>();

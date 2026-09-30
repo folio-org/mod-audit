@@ -36,10 +36,10 @@ import org.folio.rest.impl.AuditConfigAPITest;
 import org.folio.rest.impl.AuditDataAcquisitionAPITest;
 import org.folio.rest.impl.AuditDataCleanupApiTest;
 import org.folio.rest.impl.AuditDataImplApiTest;
-import org.folio.rest.impl.AuditHandlersImplApiTest;
 import org.folio.rest.impl.CirculationLogsImplApiTest;
 import org.folio.rest.impl.InventoryAuditApiTest;
 import org.folio.rest.impl.InventoryEventHandlerMockTest;
+import org.folio.rest.impl.LogRecordBurstApiTest;
 import org.folio.rest.impl.UserAuditApiTest;
 import org.folio.rest.impl.InvoiceEventsHandlerMockTest;
 import org.folio.rest.impl.InvoiceLineEventsHandlerMockTest;
@@ -49,6 +49,7 @@ import org.folio.rest.impl.OrderEventsHandlerMockTest;
 import org.folio.rest.impl.OrderLineEventsHandlerMockTest;
 import org.folio.rest.impl.PieceEventsHandlerMockTest;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.InvoiceAuditEventsServiceTest;
 import org.folio.services.InvoiceLineAuditEventsServiceTest;
 import org.folio.services.OrderAuditEventsServiceTest;
@@ -69,7 +70,11 @@ public class TestSuite {
   private static final String KAFKA_ENV_VALUE = "test-env";
 
   public static boolean isInitialized = false;
-  public static final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  // Allocated dynamically in globalInitialize() rather than a fixed port (previously 8081): a fixed
+  // port raced with the async, unawaited vertx.close() in globalTearDown() when the next @Nested
+  // test class's globalInitialize() rebinds before the previous HTTP listener fully releases it,
+  // causing a BindException. A fresh free port per suite run avoids the race entirely.
+  public static int port;
   public static KafkaContainer kafkaContainer;
 
   @Getter
@@ -82,6 +87,8 @@ public class TestSuite {
     vertx = Vertx.vertx();
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
+
+    port = NetworkUtils.nextFreePort();
 
     DeploymentOptions options = new DeploymentOptions();
     options.setConfig(new JsonObject().put("http.port", port).put("mock.httpclient", "true"));
@@ -135,10 +142,6 @@ public class TestSuite {
 
   @Nested
   class AuditDataAcquisitionAPINestedTest extends AuditDataAcquisitionAPITest {
-  }
-
-  @Nested
-  class AuditHandlersImplApiTestNested extends AuditHandlersImplApiTest {
   }
 
   @Nested
@@ -247,6 +250,10 @@ public class TestSuite {
 
   @Nested
   class CirculationLogsImplApiTestNested extends CirculationLogsImplApiTest {
+  }
+
+  @Nested
+  class LogRecordBurstApiTestNested extends LogRecordBurstApiTest {
   }
 
   @Nested

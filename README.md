@@ -12,6 +12,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
   - [Configuration API](#configuration-api)
     - [Permissions for working with audit configurations](#permissions-for-working-with-audit-configurations)
     - [Updating a configuration](#updating-a-configuration)
+- [Environment variables](#environment-variables)
 - [Additional information](#additional-information)
   - [Other documentation](#other-documentation)
   - [Issue tracker](#issue-tracker)
@@ -128,6 +129,18 @@ Here is an example of request body for updating the `records.retention.period` c
 }
 ``` 
 In general, the value for a configuration to be updated should be the valid value for the type of that configuration.
+
+## Environment variables
+
+The LOG_RECORD Kafka consumer, which persists circulation log events published by
+other modules, can be tuned via the
+following environment variables.
+
+| Environment variable                             | Default | Description                                                                                                                                                                                                                            |
+|:---------------------------------------------------|:--------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `AUDIT_LOG_RECORD_KAFKA_CONSUMER_INSTANCESNUMBER`  | `2`     | Number of consumer verticle instances deployed for the LOG_RECORD topic.                                                                                                                                                              |
+| `AUDIT_LOG_RECORD_KAFKA_CONSUMER_POOL_SIZE`        | `10`    | Worker pool size (thread pool) assigned to the LOG_RECORD consumer verticle.                                                                                                                                                          |
+| `AUDIT_LOG_RECORD_KAFKA_CONSUMER_LOADLIMIT`        | `10`    | Max number of in-flight (unacknowledged) LOG_RECORD messages the consumer will process before pausing to apply backpressure. Tune this if circulation-log ingestion falls behind during bulk operations (e.g. bulk loan renewal) or if consumer memory usage grows under burst load. |
 
 ## Additional information
 

@@ -4,16 +4,14 @@ import static org.folio.util.user.UserEventType.UNKNOWN;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
-import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.exception.DuplicateEventException;
-import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.user.UserEventService;
+import org.folio.util.KafkaUtils;
 import org.folio.util.user.UserEvent;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -26,18 +24,15 @@ public class UserEventHandler implements AsyncRecordHandler<String, String> {
   private static final Logger LOGGER = LogManager.getLogger();
 
   private final UserEventService userEventService;
-  private final Vertx vertx;
 
-  public UserEventHandler(Vertx vertx, UserEventService userEventService) {
-    this.vertx = vertx;
+  public UserEventHandler(UserEventService userEventService) {
     this.userEventService = userEventService;
   }
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
-    var kafkaHeaders = kafkaConsumerRecord.headers();
-    var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
+    var tenantId = KafkaUtils.getTenantId(kafkaConsumerRecord);
     var event = new JsonObject(kafkaConsumerRecord.value()).mapTo(UserEvent.class);
     event.setUserId(kafkaConsumerRecord.key());
 
@@ -49,7 +44,7 @@ public class UserEventHandler implements AsyncRecordHandler<String, String> {
     }
 
     LOGGER.info("handle:: Starting processing of User event with id: {} for user id: {}", event.getId(), event.getUserId());
-    userEventService.processEvent(event, okapiConnectionParams.getTenantId())
+    userEventService.processEvent(event, tenantId)
       .onSuccess(ar -> {
         LOGGER.info("handle:: User event with id: {} has been processed for user id: {}", event.getId(), event.getUserId());
         result.complete(event.getId());

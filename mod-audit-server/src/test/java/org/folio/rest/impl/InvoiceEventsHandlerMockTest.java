@@ -12,7 +12,7 @@ import org.folio.CopilotGenerated;
 import org.folio.dao.acquisition.impl.InvoiceEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.InvoiceAuditEvent;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.acquisition.InvoiceAuditEventsService;
 import org.folio.services.acquisition.impl.InvoiceAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
@@ -40,9 +40,6 @@ public class InvoiceEventsHandlerMockTest {
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
   @Spy
-  private Vertx vertx = Vertx.vertx();
-
-  @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @Mock
@@ -57,7 +54,7 @@ public class InvoiceEventsHandlerMockTest {
     MockitoAnnotations.openMocks(this);
     invoiceEventDao = new InvoiceEventsDaoImpl(postgresClientFactory);
     invoiceAuditEventServiceImpl = new InvoiceAuditEventsServiceImpl(invoiceEventDao);
-    invoiceEventsHandler = new InvoiceEventsHandler(vertx, invoiceAuditEventServiceImpl);
+    invoiceEventsHandler = new InvoiceEventsHandler(invoiceAuditEventServiceImpl);
   }
 
   @Test
@@ -86,7 +83,7 @@ public class InvoiceEventsHandlerMockTest {
 
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, InvoiceAuditEvent event) {
     ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>("folio", 0, 0, topic, Json.encode(event));
-    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, (TOKEN).getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;
