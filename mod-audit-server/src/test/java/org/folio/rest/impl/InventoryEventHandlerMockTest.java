@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
@@ -21,7 +22,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.CopilotGenerated;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.exception.DuplicateEventException;
-import org.folio.rest.RestVerticle;
+import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.util.inventory.InventoryEvent;
 import org.folio.util.inventory.InventoryEventType;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 @CopilotGenerated
 public class InventoryEventHandlerMockTest {
@@ -41,6 +43,9 @@ public class InventoryEventHandlerMockTest {
   public static final String OKAPI_TOKEN_HEADER = "x-okapi-token";
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
+  @Spy
+  private Vertx vertx = Vertx.vertx();
+
   @Mock
   private InventoryEventService inventoryEventService;
 
@@ -49,7 +54,7 @@ public class InventoryEventHandlerMockTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    inventoryEventHandler = new InventoryEventHandler(inventoryEventService);
+    inventoryEventHandler = new InventoryEventHandler(vertx, inventoryEventService);
   }
 
   @Test
@@ -135,7 +140,7 @@ public class InventoryEventHandlerMockTest {
 
   private ConsumerRecord<String, String> buildConsumerRecord(String topic, InventoryEvent event) {
     var consumerRecord = new ConsumerRecord<>("folio", 0, 0, topic, Json.encode(event));
-    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, TOKEN.getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;

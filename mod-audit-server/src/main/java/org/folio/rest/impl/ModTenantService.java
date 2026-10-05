@@ -10,6 +10,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.Response;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.logging.log4j.LogManager;
@@ -18,9 +19,11 @@ import org.folio.kafka.services.KafkaAdminClientService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.management.AuditManager;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.AuditKafkaTopic;
+import org.folio.util.pubsub.PubSubClientUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ModTenantService extends TenantAPI {
@@ -62,8 +65,12 @@ public class ModTenantService extends TenantAPI {
     Map<String, String> headers, Context context) {
 
     log.debug("loadData:: Starting loadData");
+    Vertx vertx = context.owner();
     log.info("loadData:: Started Loading Data");
-    return auditManager.executeDatabaseCleanup(tenantId).map(0);
+    return Future.fromCompletionStage(registerModuleToPubSub(headers, vertx))
+      .onFailure(t -> log.warn("loadData:: PubSub registration failed for tenant {}", tenantId, t))
+      .map(0)
+      .compose(integer -> auditManager.executeDatabaseCleanup(tenantId).map(integer));
   }
 
   Future<Void> updateKafkaTopics(TenantAttributes attributes, Vertx vertx, String tenantId) {
@@ -99,6 +106,13 @@ public class ModTenantService extends TenantAPI {
     return new KafkaAdminClientService(vertx).deleteKafkaTopics(AuditKafkaTopic.values(), tenantId)
       .onSuccess(v -> log.info("deleteKafkaTopics:: Kafka topics deleted successfully for tenant {}", tenantId))
       .onFailure(t -> log.warn("deleteKafkaTopics:: Failed to delete Kafka topics for tenant {}", tenantId, t));
+  }
+
+  private CompletableFuture<Void> registerModuleToPubSub(Map<String, String> headers, Vertx vertx) {
+    log.debug("registerModuleToPubSub:: Registering module to PubSub");
+    return CompletableFuture
+      .supplyAsync(() -> PubSubClientUtils.registerModule(new OkapiConnectionParams(headers, vertx)))
+      .thenAccept(registered -> log.info("registerModuleToPubSub:: Module registered successfully"));
   }
 
   private static boolean isPurgeRequested(TenantAttributes attributes) {

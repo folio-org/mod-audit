@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +25,9 @@ import org.folio.kafka.services.KafkaAdminClientService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.jaxrs.resource.Tenant.PostTenantResponse;
+import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.management.AuditManager;
+import org.folio.util.pubsub.PubSubClientUtils;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -221,16 +225,22 @@ class ModTenantServiceTest {
   }
 
   @Test
-  void loadDataRunsDatabaseCleanup() throws InterruptedException {
+  void loadDataRegistersToPubSubAndRunsDatabaseCleanup() throws InterruptedException {
     var attributes = new TenantAttributes(); // moduleTo == null: no topic creation
+    when(context.owner()).thenReturn(vertx);
     when(auditManager.executeDatabaseCleanup(TENANT_ID)).thenReturn(Future.succeededFuture());
 
     var latch = new CountDownLatch(1);
-    service.loadData(attributes, TENANT_ID, Map.of(), context)
-      .onComplete(ar -> latch.countDown());
+    try (var pubSubMock = mockStatic(PubSubClientUtils.class)) {
+      pubSubMock.when(() -> PubSubClientUtils.registerModule(any(OkapiConnectionParams.class)))
+        .thenReturn(CompletableFuture.completedFuture(true));
 
-    assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
-    verify(auditManager).executeDatabaseCleanup(TENANT_ID);
+      service.loadData(attributes, TENANT_ID, Map.of(), context)
+        .onComplete(ar -> latch.countDown());
+
+      assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
+      verify(auditManager).executeDatabaseCleanup(TENANT_ID);
+    }
   }
 
   private AsyncResult<Response> postTenant(ModTenantService tenantService, TenantAttributes attributes)

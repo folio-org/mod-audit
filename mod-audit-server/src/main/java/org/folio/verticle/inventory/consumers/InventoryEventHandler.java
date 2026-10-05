@@ -6,13 +6,16 @@ import static org.folio.util.inventory.InventoryUtils.isShadowCopyEvent;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
+import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.exception.DuplicateEventException;
+import org.folio.rest.util.OkapiConnectionParams;
 import org.folio.services.inventory.InventoryEventService;
 import org.folio.util.KafkaUtils;
 import org.folio.util.inventory.InventoryEvent;
@@ -34,15 +37,18 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
   );
 
   private final InventoryEventService inventoryEventService;
+  private final Vertx vertx;
 
-  public InventoryEventHandler(InventoryEventService inventoryEventService) {
+  public InventoryEventHandler(Vertx vertx, InventoryEventService inventoryEventService) {
+    this.vertx = vertx;
     this.inventoryEventService = inventoryEventService;
   }
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     var result = Promise.<String>promise();
-    var tenantId = KafkaUtils.getTenantId(kafkaConsumerRecord);
+    var kafkaHeaders = kafkaConsumerRecord.headers();
+    var okapiConnectionParams = new OkapiConnectionParams(KafkaHeaderUtils.kafkaHeadersToMap(kafkaHeaders), vertx);
     var event = constructInventoryEvent(kafkaConsumerRecord);
     if (UNKNOWN == event.getType()) {
       LOGGER.debug("handle:: Event type not supported [eventId: {}, entityId: {}]",
@@ -57,7 +63,7 @@ public class InventoryEventHandler implements AsyncRecordHandler<String, String>
     }
 
     LOGGER.info("handle:: Starting processing of Inventory event with id: {} for entity id: {}", event.getEventId(), event.getEntityId());
-    inventoryEventService.processEvent(event, tenantId)
+    inventoryEventService.processEvent(event, okapiConnectionParams.getTenantId())
       .onSuccess(ar -> {
         LOGGER.info("handle:: Inventory event with id: {} has been processed for entity id: {}", event.getEventId(), event.getEntityId());
         result.complete(event.getEventId());
