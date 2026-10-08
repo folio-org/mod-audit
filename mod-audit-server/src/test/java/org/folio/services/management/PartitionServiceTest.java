@@ -280,6 +280,95 @@ class PartitionServiceTest {
     verifyNoMoreInteractions(partitionDao);
   }
 
+  @Test
+  void testCreateNewSubPartitionsOnOctoberFirstUsesCurrentYearForCurrentQuarter() {
+    // Regression test for MODAUD-328: on Q4 rollover (next quarter wraps to Q1 of the following
+    // year), the current quarter's year must stay in the current calendar year, not be bumped
+    // along with the next quarter's year.
+    var now = LocalDateTime.of(2027, 10, 1, 0, 0);
+    var currentQuarter = YearQuarter.Q4;
+    var nextQuarter = YearQuarter.Q1;
+
+    when(configurationService.getSetting(Setting.INVENTORY_RECORDS_ENABLED, TENANT_ID))
+      .thenReturn(Future.succeededFuture(enabledSetting(true)));
+    when(configurationService.getSetting(Setting.AUTHORITY_RECORDS_ENABLED, TENANT_ID))
+      .thenReturn(Future.succeededFuture(enabledSetting(true)));
+
+    var instanceTableName = inventoryEventDaoList.getFirst().tableName();
+    var marcBibTableName = marcAuditDao.tableName(SourceRecordType.MARC_BIB);
+    var marcAuthorityTableName = marcAuditDao.tableName(SourceRecordType.MARC_AUTHORITY);
+
+    when(partitionDao.createSubPartitions(eq(TENANT_ID), any()))
+      .thenReturn(Future.succeededFuture());
+
+    var result = partitionService.createNewSubPartitions(TENANT_ID, now, List.of());
+    result.onComplete(ar -> assertTrue(ar.succeeded()));
+
+    // Current quarter (Q4) must stay in 2027, not be bumped to 2028.
+    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
+      new DatabaseSubPartition(instanceTableName, 0, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 1, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 2, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 3, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 4, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 5, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 6, 2027, currentQuarter),
+      new DatabaseSubPartition(instanceTableName, 7, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 0, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 1, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 2, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 3, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 4, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 5, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 6, 2027, currentQuarter),
+      new DatabaseSubPartition(marcBibTableName, 7, 2027, currentQuarter)
+    ));
+
+    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
+      new DatabaseSubPartition(marcAuthorityTableName, 0, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 1, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 2, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 3, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 4, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 5, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 6, 2027, currentQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 7, 2027, currentQuarter)
+    ));
+
+    // Next quarter (Q1) correctly rolls over to 2028.
+    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
+      new DatabaseSubPartition(instanceTableName, 0, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 1, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 2, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 3, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 4, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 5, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 6, 2028, nextQuarter),
+      new DatabaseSubPartition(instanceTableName, 7, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 0, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 1, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 2, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 3, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 4, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 5, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 6, 2028, nextQuarter),
+      new DatabaseSubPartition(marcBibTableName, 7, 2028, nextQuarter)
+    ));
+
+    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
+      new DatabaseSubPartition(marcAuthorityTableName, 0, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 1, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 2, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 3, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 4, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 5, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 6, 2028, nextQuarter),
+      new DatabaseSubPartition(marcAuthorityTableName, 7, 2028, nextQuarter)
+    ));
+
+    verifyNoMoreInteractions(partitionDao);
+  }
+
   private org.folio.rest.jaxrs.model.Setting enabledSetting(boolean enabled) {
     return new org.folio.rest.jaxrs.model.Setting()
       .withKey(SettingKey.ENABLED.getValue())

@@ -48,7 +48,7 @@ public class PartitionService {
       });
   }
 
-  private Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> existingSubPartitions) {
+  Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> existingSubPartitions) {
     var currentQuarter = YearQuarter.current(now);
     var nextQuarter = YearQuarter.next(now);
     var currentYear = now.getYear();
