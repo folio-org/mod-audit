@@ -48,10 +48,11 @@ public class PartitionService {
       });
   }
 
-  private Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> existingSubPartitions) {
+  Future<Void> createNewSubPartitions(String tenantId, LocalDateTime now, List<DatabaseSubPartition> existingSubPartitions) {
     var currentQuarter = YearQuarter.current(now);
     var nextQuarter = YearQuarter.next(now);
-    var year = currentQuarter.getValue() < nextQuarter.getValue() ? now.getYear() : now.getYear() + 1;
+    var currentYear = now.getYear();
+    var nextYear = currentQuarter.getValue() < nextQuarter.getValue() ? currentYear : currentYear + 1;
 
     var inventoryTableNames = inventoryTableNames();
     var authorityTableNames = authorityTableNames();
@@ -60,10 +61,10 @@ public class PartitionService {
     }
 
     return Future.all(
-      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, currentQuarter, inventoryTableNames, existingSubPartitions),
-      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, currentQuarter, authorityTableNames, existingSubPartitions),
-      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, year, nextQuarter, inventoryTableNames, existingSubPartitions),
-      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, year, nextQuarter, authorityTableNames, existingSubPartitions)
+      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, currentYear, currentQuarter, inventoryTableNames, existingSubPartitions),
+      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, currentYear, currentQuarter, authorityTableNames, existingSubPartitions),
+      createSubPartitionsForSetting(tenantId, Setting.INVENTORY_RECORDS_ENABLED, nextYear, nextQuarter, inventoryTableNames, existingSubPartitions),
+      createSubPartitionsForSetting(tenantId, Setting.AUTHORITY_RECORDS_ENABLED, nextYear, nextQuarter, authorityTableNames, existingSubPartitions)
     ).mapEmpty();
   }
 
