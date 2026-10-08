@@ -1,6 +1,7 @@
 package org.folio.services.management;
 
 import static org.folio.utils.EntityUtils.TENANT_ID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import io.vertx.core.Future;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.folio.CopilotGenerated;
 import org.folio.dao.inventory.InventoryEventDao;
 import org.folio.dao.inventory.impl.InstanceEventDao;
@@ -25,6 +27,10 @@ import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -280,93 +286,62 @@ class PartitionServiceTest {
     verifyNoMoreInteractions(partitionDao);
   }
 
-  @Test
-  void testCreateNewSubPartitionsOnOctoberFirstUsesCurrentYearForCurrentQuarter() {
+  @ParameterizedTest(name = "now={0} -> currentQuarterYear={1}, nextQuarterYear={2}")
+  @MethodSource("quarterRolloverDates")
+  void testCreateNewSubPartitionsUsesCorrectYearPerQuarter(LocalDateTime now, int expectedCurrentYear, int expectedNextYear) {
     // Regression test for MODAUD-328: on Q4 rollover (next quarter wraps to Q1 of the following
     // year), the current quarter's year must stay in the current calendar year, not be bumped
-    // along with the next quarter's year.
-    var now = LocalDateTime.of(2027, 10, 1, 0, 0);
-    var currentQuarter = YearQuarter.Q4;
-    var nextQuarter = YearQuarter.Q1;
+    // along with the next quarter's year. Also covers the non-rollover quarters to make sure
+    // the fix didn't break the common case.
+    var currentQuarter = YearQuarter.current(now);
+    var nextQuarter = YearQuarter.next(now);
 
     when(configurationService.getSetting(Setting.INVENTORY_RECORDS_ENABLED, TENANT_ID))
       .thenReturn(Future.succeededFuture(enabledSetting(true)));
     when(configurationService.getSetting(Setting.AUTHORITY_RECORDS_ENABLED, TENANT_ID))
       .thenReturn(Future.succeededFuture(enabledSetting(true)));
-
-    var instanceTableName = inventoryEventDaoList.getFirst().tableName();
-    var marcBibTableName = marcAuditDao.tableName(SourceRecordType.MARC_BIB);
-    var marcAuthorityTableName = marcAuditDao.tableName(SourceRecordType.MARC_AUTHORITY);
-
     when(partitionDao.createSubPartitions(eq(TENANT_ID), any()))
       .thenReturn(Future.succeededFuture());
 
     var result = partitionService.createNewSubPartitions(TENANT_ID, now, List.of());
     result.onComplete(ar -> assertTrue(ar.succeeded()));
 
-    // Current quarter (Q4) must stay in 2027, not be bumped to 2028.
-    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
-      new DatabaseSubPartition(instanceTableName, 0, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 1, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 2, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 3, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 4, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 5, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 6, 2027, currentQuarter),
-      new DatabaseSubPartition(instanceTableName, 7, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 0, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 1, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 2, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 3, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 4, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 5, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 6, 2027, currentQuarter),
-      new DatabaseSubPartition(marcBibTableName, 7, 2027, currentQuarter)
-    ));
-
-    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
-      new DatabaseSubPartition(marcAuthorityTableName, 0, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 1, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 2, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 3, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 4, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 5, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 6, 2027, currentQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 7, 2027, currentQuarter)
-    ));
-
-    // Next quarter (Q1) correctly rolls over to 2028.
-    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
-      new DatabaseSubPartition(instanceTableName, 0, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 1, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 2, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 3, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 4, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 5, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 6, 2028, nextQuarter),
-      new DatabaseSubPartition(instanceTableName, 7, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 0, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 1, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 2, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 3, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 4, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 5, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 6, 2028, nextQuarter),
-      new DatabaseSubPartition(marcBibTableName, 7, 2028, nextQuarter)
-    ));
-
-    verify(partitionDao, times(1)).createSubPartitions(TENANT_ID, List.of(
-      new DatabaseSubPartition(marcAuthorityTableName, 0, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 1, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 2, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 3, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 4, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 5, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 6, 2028, nextQuarter),
-      new DatabaseSubPartition(marcAuthorityTableName, 7, 2028, nextQuarter)
-    ));
-
+    var subPartitionsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(partitionDao, times(4)).createSubPartitions(eq(TENANT_ID), subPartitionsCaptor.capture());
     verifyNoMoreInteractions(partitionDao);
+
+    @SuppressWarnings("unchecked")
+    List<DatabaseSubPartition> allSubPartitions = subPartitionsCaptor.getAllValues().stream()
+      .flatMap(List::stream)
+      .map(DatabaseSubPartition.class::cast)
+      .toList();
+
+    var currentQuarterYears = allSubPartitions.stream()
+      .filter(subPartition -> subPartition.getQuarter() == currentQuarter)
+      .map(DatabaseSubPartition::getYear)
+      .distinct()
+      .toList();
+    var nextQuarterYears = allSubPartitions.stream()
+      .filter(subPartition -> subPartition.getQuarter() == nextQuarter)
+      .map(DatabaseSubPartition::getYear)
+      .distinct()
+      .toList();
+
+    assertEquals(List.of(expectedCurrentYear), currentQuarterYears);
+    assertEquals(List.of(expectedNextYear), nextQuarterYears);
+  }
+
+  static Stream<Arguments> quarterRolloverDates() {
+    return Stream.of(
+      // Q4 -> Q1 rollover: current quarter's year must NOT be bumped along with the next quarter's.
+      Arguments.of(LocalDateTime.of(2027, 10, 1, 0, 0), 2027, 2028),
+      Arguments.of(LocalDateTime.of(2027, 11, 15, 12, 0), 2027, 2028),
+      Arguments.of(LocalDateTime.of(2027, 12, 31, 23, 59), 2027, 2028),
+      // Non-rollover quarters: current and next quarter share the same year.
+      Arguments.of(LocalDateTime.of(2027, 1, 1, 0, 0), 2027, 2027),
+      Arguments.of(LocalDateTime.of(2027, 4, 15, 0, 0), 2027, 2027),
+      Arguments.of(LocalDateTime.of(2027, 7, 20, 0, 0), 2027, 2027)
+    );
   }
 
   private org.folio.rest.jaxrs.model.Setting enabledSetting(boolean enabled) {
