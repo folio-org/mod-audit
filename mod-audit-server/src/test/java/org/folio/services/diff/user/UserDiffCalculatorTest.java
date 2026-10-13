@@ -13,6 +13,7 @@ import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.CustomFields;
 import org.folio.rest.external.Personal__1;
 import org.folio.rest.external.User;
+import org.folio.rest.external.User.LoanAnonymizationPreference;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,6 +123,19 @@ class UserDiffCalculatorTest {
       .hasSize(1)
       .extracting(CollectionChangeDto::getCollectionName)
       .containsExactly("preferredContactTypeIds");
+  }
+
+  @Test
+  void shouldDetectLoanAnonymizationPreferenceChange() {
+    var oldUser = getMap(new User().withId("1").withLoanAnonymizationPreference(LoanAnonymizationPreference.NEVER));
+    var newUser = getMap(new User().withId("1")
+      .withLoanAnonymizationPreference(LoanAnonymizationPreference.LIBRARY_POLICY));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getFieldChanges())
+      .containsExactly(FieldChangeDto.modified("loanAnonymizationPreference", "loanAnonymizationPreference",
+        LoanAnonymizationPreference.NEVER, LoanAnonymizationPreference.LIBRARY_POLICY));
   }
 
   @Test
