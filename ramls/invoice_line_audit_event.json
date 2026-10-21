@@ -43,7 +43,12 @@
       "description": "Snapshot of the invoice line prior to the edit. Populated only for Edit actions.",
       "type": "object",
       "javaType": "org.folio.rest.jaxrs.model.InvoiceLine"
+    },
+    "invoiceSnapshot": {
+      "description": "Snapshot of the parent invoice at the time of the invoice line change",
+      "type": "object",
+      "javaType": "org.folio.rest.jaxrs.model.Invoice"
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

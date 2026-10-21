@@ -43,7 +43,12 @@
       "description": "Full snapshot of the order line before the EDIT action",
       "type": "object",
       "javaType": "java.lang.Object"
+    },
+    "orderSnapshot": {
+      "description": "Snapshot of the parent order at the time of the order line change",
+      "type": "object",
+      "javaType": "java.lang.Object"
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
