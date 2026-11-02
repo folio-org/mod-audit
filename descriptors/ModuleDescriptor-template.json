@@ -617,7 +617,7 @@
       },
       {
         "name": "REPLICATION_FACTOR",
-        "value": "1"
+        "value": "2"
       }
     ]
   }

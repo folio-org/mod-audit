@@ -19,7 +19,7 @@ public class ApplicationConfig {
   private String kafkaPort;
   @Value("${OKAPI_URL:http://okapi:9130}")
   private String okapiUrl;
-  @Value("${REPLICATION_FACTOR:1}")
+  @Value("${REPLICATION_FACTOR:2}")
   private int replicationFactor;
   @Value("${MAX_REQUEST_SIZE:4000000}")
   private int maxRequestSize;
