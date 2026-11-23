@@ -1,3 +1,10 @@
+## 3.0.2 2026-11-23
+
+### Stories
+* Improve performance of Order Line Log DB script ([MODAUD-334](https://folio-org.atlassian.net/browse/MODAUD-334))
+
+---
+
 ## 3.0.1 2026-04-22
 
 ### Tech Dept
