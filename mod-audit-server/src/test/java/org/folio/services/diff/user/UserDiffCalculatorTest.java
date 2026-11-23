@@ -1,6 +1,7 @@
 package org.folio.services.diff.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -12,6 +13,7 @@ import org.folio.domain.diff.FieldChangeDto;
 import org.folio.rest.external.CustomFields;
 import org.folio.rest.external.Personal__1;
 import org.folio.rest.external.User;
+import org.folio.rest.external.User.LoanAnonymizationPreference;
 import org.folio.utils.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,6 +93,49 @@ class UserDiffCalculatorTest {
       .hasSize(1)
       .extracting(CollectionChangeDto::getFullPath)
       .containsExactly("preferredEmailCommunication");
+  }
+
+  @Test
+  void shouldDetectPreferredContactTypeIdsChange() {
+    var oldUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002"))));
+    var newUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002", "003"))));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getFullPath, CollectionChangeDto::getCollectionName)
+      .containsExactly(tuple("personal.preferredContactTypeIds", "preferredContactTypeIds"));
+  }
+
+  @Test
+  void shouldDetectAddedPreferredContactTypeIds() {
+    var oldUser = getMap(new User().withId("1").withPersonal(new Personal__1().withLastName("Doe")));
+    var newUser = getMap(new User().withId("1")
+      .withPersonal(new Personal__1().withLastName("Doe").withPreferredContactTypeIds(List.of("002"))));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff).isNotNull();
+    assertThat(diff.getCollectionChanges())
+      .hasSize(1)
+      .extracting(CollectionChangeDto::getCollectionName)
+      .containsExactly("preferredContactTypeIds");
+  }
+
+  @Test
+  void shouldDetectLoanAnonymizationPreferenceChange() {
+    var oldUser = getMap(new User().withId("1").withLoanAnonymizationPreference(LoanAnonymizationPreference.NEVER));
+    var newUser = getMap(new User().withId("1")
+      .withLoanAnonymizationPreference(LoanAnonymizationPreference.LIBRARY_POLICY));
+
+    var diff = userDiffCalculator.calculateDiff(oldUser, newUser);
+
+    assertThat(diff.getFieldChanges())
+      .containsExactly(FieldChangeDto.modified("loanAnonymizationPreference", "loanAnonymizationPreference",
+        LoanAnonymizationPreference.NEVER, LoanAnonymizationPreference.LIBRARY_POLICY));
   }
 
   @Test

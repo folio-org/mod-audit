@@ -11,7 +11,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.dao.acquisition.impl.OrderEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.acquisition.OrderAuditEventsService;
 import org.folio.services.acquisition.impl.OrderAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
@@ -40,9 +40,6 @@ public class OrderEventsHandlerMockTest {
   private static final String ID = "0f2e22fc-fef3-4f88-a930-56bdca5bab46";
 
   @Spy
-  private Vertx vertx = Vertx.vertx();
-
-  @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @Mock
@@ -57,7 +54,7 @@ public class OrderEventsHandlerMockTest {
     MockitoAnnotations.openMocks(this);
     orderEventDao = new OrderEventsDaoImpl(postgresClientFactory);
     orderAuditEventServiceImpl = new OrderAuditEventsServiceImpl(orderEventDao);
-    orderEventsHandler =new OrderEventsHandler(vertx, orderAuditEventServiceImpl);
+    orderEventsHandler = new OrderEventsHandler(orderAuditEventServiceImpl);
 
   }
 
@@ -89,7 +86,7 @@ public class OrderEventsHandlerMockTest {
 
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, OrderAuditEvent event) {
     ConsumerRecord<java.lang.String, java.lang.String> consumerRecord = new ConsumerRecord("folio", 0, 0, topic, Json.encode(event));
-    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, (TOKEN).getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;
