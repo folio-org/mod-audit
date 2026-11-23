@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import static org.folio.TestSuite.isInitialized;
-import static org.folio.TestSuite.port;
 import static org.folio.utils.TenantApiTestUtil.deleteTenantAndPurgeTables;
 import static org.folio.utils.TenantApiTestUtil.prepareTenant;
 
@@ -19,14 +18,25 @@ import io.restassured.http.Headers;
 
 public class ApiTestBase {
   public static final Header TENANT = new Header("X-Okapi-Tenant", "modaudittest");
-  public static final Header OKAPI_URL = new Header("X-Okapi-Url", "http://localhost:" + port);
   protected static final Header PERMS = new Header("X-Okapi-Permissions", "audit.all");
   protected static final Header CONTENT_TYPE = new Header("Content-Type", "application/json");
-  public static final Headers HEADERS = new Headers(TENANT, PERMS, CONTENT_TYPE, OKAPI_URL);
 
   public static final String CIRCULATION_LOGS_ENDPOINT = "/audit-data/circulation/logs";
 
   private static TenantJob tenantJob;
+
+  /**
+   * Built lazily (not a static final constant) because {@link TestSuite#port} is a fresh, dynamically
+   * allocated port per {@code @Nested} test class run; a static final field would capture a stale port
+   * from whichever class triggered this class's static initialization first.
+   */
+  public static Header okapiUrl() {
+    return new Header("X-Okapi-Url", "http://localhost:" + TestSuite.port);
+  }
+
+  public static Headers headers() {
+    return new Headers(TENANT, PERMS, CONTENT_TYPE, okapiUrl());
+  }
 
   @BeforeAll
   public static void globalSetup() throws InterruptedException, ExecutionException, TimeoutException {

@@ -11,7 +11,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.dao.acquisition.impl.OrderLineEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.acquisition.impl.OrderLineAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
 import org.folio.verticle.acquisition.consumers.OrderLineEventsHandler;
@@ -36,10 +36,6 @@ public class OrderLineEventsHandlerMockTest {
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
   @Spy
-  private Vertx vertx = Vertx.vertx();
-
-
-  @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @InjectMocks
@@ -49,7 +45,7 @@ public class OrderLineEventsHandlerMockTest {
   OrderLineAuditEventsServiceImpl orderLineAuditEventServiceImpl = new OrderLineAuditEventsServiceImpl(orderLineEventsDao);
 
   @InjectMocks
-  private OrderLineEventsHandler orderLineEventsHandler = new OrderLineEventsHandler(vertx, orderLineAuditEventServiceImpl);
+  private OrderLineEventsHandler orderLineEventsHandler = new OrderLineEventsHandler(orderLineAuditEventServiceImpl);
 
   @Test
   void shouldProcessEvent() {
@@ -81,7 +77,7 @@ public class OrderLineEventsHandlerMockTest {
 
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, OrderLineAuditEvent event) {
     ConsumerRecord<String, String> consumerRecord = new ConsumerRecord("folio", 0, 0, topic, Json.encode(event));
-    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, (TOKEN).getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;

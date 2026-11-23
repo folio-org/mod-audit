@@ -10,7 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.exception.DuplicateEventException;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.marc.MarcAuditService;
 import org.folio.util.marc.SourceRecordDomainEvent;
 import org.folio.util.marc.SourceRecordType;
@@ -133,7 +133,7 @@ public class MarcRecordEventsHandlerMockTest {
     }
 
     var consumerRecord = new ConsumerRecord<>("folio", 0, 0, topic, eventJson.encode());
-    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, TOKEN.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(RECORD_TYPE_HEADER, event.getRecordType().name().getBytes(StandardCharsets.UTF_8)));

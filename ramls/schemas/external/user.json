@@ -137,8 +137,15 @@
           }
         },
         "preferredContactTypeId": {
-          "description": "Id of user's preferred contact type",
+          "description": "(Deprecated) ID of user's preferred contact type like Email, Mail, or Text Message  (see ui-users contactTypes.js)",
           "type": "string"
+        },
+        "preferredContactTypeIds": {
+          "description": "IDs of user's preferred contact types like Email, Mail, or Text Message (see ui-users contactTypes.js)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "pronouns": {
           "description": "The user's pronouns",
@@ -175,6 +182,11 @@
       },
       "maxItems": 3,
       "uniqueItems": true
+    },
+    "loanAnonymizationPreference": {
+      "description": "Preference for anonymizing the user's closed loans; a missing value means libraryPolicy",
+      "type": "string",
+      "enum": ["libraryPolicy", "asEarlyAsPossible", "never"]
     },
     "createdDate": {
       "description": "Deprecated",

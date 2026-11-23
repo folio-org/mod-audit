@@ -16,45 +16,61 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.TestSuite;
 import org.folio.rest.jaxrs.model.LogRecord;
 import org.folio.rest.jaxrs.model.LogRecord.Action;
 import org.folio.rest.jaxrs.model.LogRecordCollection;
+import org.folio.utils.KafkaTestProducerUtil;
+import org.folio.utils.TenantApiTestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class CirculationLogsImplApiTest extends ApiTestBase {
 
+  // 3 of the 23 SAMPLES payloads (loan_wrong_action, loan_empty_action, anonymize_loan_closed) carry an
+  // "action" value that LogRecord.Action doesn't recognize; LogRecordBuilder rejects them and no LogRecord
+  // is ever persisted for them, so the 23 seeded payloads only ever yield 28 records.
+  private static final int SAMPLE_LOG_RECORDS_TOTAL_AFTER_SEED = 28;
+  // getCirculationAuditLogRecordsNoFilter() below expects one additional record: the anonymize test method
+  // publishes LOAN_ANONYMIZE_PAYLOAD_JSON and (per JUnit's deterministic default method order) runs before
+  // getCirculationAuditLogRecordsNoFilter, bringing the total seen by that assertion up to 29.
+  private static final int SAMPLE_LOG_RECORDS_TOTAL = 29;
+
   private final Logger logger = LogManager.getLogger();
 
   @BeforeAll
   public static void prepareSampleData() {
+    var payloads = SAMPLES.stream().map(TenantApiTestUtil::getFile).toList();
+    KafkaTestProducerUtil.publishLogRecordEvents(TestSuite.getVertx(), TENANT.getValue(), payloads);
 
-    SAMPLES.forEach(sample -> given().headers(HEADERS)
-      .body(getFile(sample))
-      .post("/audit/handlers/log-record")
-      .then()
-      .log().all()
-      .statusCode(204));
+    awaitTotalRecords("", SAMPLE_LOG_RECORDS_TOTAL_AFTER_SEED);
+  }
+
+  private static void awaitTotalRecords(String query, int expectedTotalRecords) {
+    await().atMost(Duration.ofSeconds(30))
+      .untilAsserted(() -> given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + query)
+        .then().statusCode(200)
+        .assertThat().body("totalRecords", equalTo(expectedTotalRecords)));
   }
 
   @Test
   void getCirculationAuditLogRecordsNoFilter() {
     logger.info("Get circulation audit log records: no filter");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT)
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT)
       .then().log().all().statusCode(200)
-      .assertThat().body("totalRecords", equalTo(29));
+      .assertThat().body("totalRecords", equalTo(SAMPLE_LOG_RECORDS_TOTAL));
   }
 
   @Test
   void getCirculationAuditLogRecordsFilterByAction() {
     logger.info("Get circulation audit log records: filter by action");
-    LogRecordCollection records = given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=action=Created")
+    LogRecordCollection records = given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + "?query=action=Created")
       .then().log().all().statusCode(200).extract().body().as(LogRecordCollection.class);
 
     assertThat(records.getTotalRecords(), equalTo(3));
@@ -75,7 +91,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   @Test
   void getCirculationAuditLogRecordsFilterByUserBarcodeAndItemBarcode() {
     logger.info("Get circulation audit log records: filter by userBarcode and itemBarcode");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=40187925817754 AND items=326547658598)")
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + "?query=(userBarcode=40187925817754 AND items=326547658598)")
       .then().log().all().statusCode(200)
       .assertThat()
       .body("logRecords[0].object", anyOf(equalTo("Loan"), equalTo("Request")))
@@ -88,16 +104,12 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   void anonymizeLoanShouldRemoveUserDataFromRelatedRecords() {
     logger.info("Anonymize loan: user data from related records should be removed");
 
-    given().headers(HEADERS)
-      .body(getFile(LOAN_ANONYMIZE_PAYLOAD_JSON))
-      .post("/audit/handlers/log-record")
-      .then()
-      .log().all()
-      .statusCode(204);
+    KafkaTestProducerUtil.publishLogRecordEvent(TestSuite.getVertx(), TENANT.getValue(), getFile(LOAN_ANONYMIZE_PAYLOAD_JSON));
 
-    await().pollDelay(1, TimeUnit.SECONDS).until(() -> true);
+    var query = "?query=(items=845687423)";
+    awaitTotalRecords(query, 6);
 
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=845687423)")
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + query)
       .then().log().all().statusCode(200)
       .assertThat()
       .body("totalRecords", equalTo(6))
@@ -119,7 +131,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   void getFeeFineRelatedRecordOfVirtualItem() {
     // For virtual item, holdingsId and instanceId needs to be present, then only FE validation will work.
     // This record is already posted in beforeAll method so directly assert it using get endpoint with virtual item ID.
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=100d10bf-2f06-4aa0-be15-0b95b2d9f9e4)")
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + "?query=(items=100d10bf-2f06-4aa0-be15-0b95b2d9f9e4)")
       .then().log().all().statusCode(200)
       .assertThat()
       .body("totalRecords", equalTo(1))
@@ -132,7 +144,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   @Test
   void getCirculationAuditLogRecordsMalformedQuery() {
     logger.info("get circulation audit log records: malformed query");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=userbarcod=1000024158")
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + "?query=userbarcod=1000024158")
       .then().log().all().statusCode(200)
       .and().body("totalRecords", equalTo(0));
   }
@@ -140,7 +152,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   @Test
   void getCirculationAuditLogRecordsInvalidQuery() {
     logger.info("get circulation audit log records: invalid query");
-    given().headers(HEADERS).get(CIRCULATION_LOGS_ENDPOINT + "?query=abcd")
+    given().headers(headers()).get(CIRCULATION_LOGS_ENDPOINT + "?query=abcd")
       .then().log().all().statusCode(400);
   }
 
@@ -157,7 +169,7 @@ public class CirculationLogsImplApiTest extends ApiTestBase {
   private void verifyNumberOfLogRecords(String query, int expectedNumberOfRecords) {
     String url = String.format("%s?query=%s", CIRCULATION_LOGS_ENDPOINT, query);
 
-    given().headers(HEADERS)
+    given().headers(headers())
       .get(url)
       .then()
       .log().all()

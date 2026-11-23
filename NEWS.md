@@ -1,10 +1,15 @@
 ## 3.1.0 In progress
 
+### Breaking changes
+* Implement Kafka LOG_RECORD Event Processing, remove PubSub infrastructure ([MODAUD-163](https://folio-org.atlassian.net/browse/MODAUD-163))
+
 ### Features
 * Skip storing user audit events that contain only internal metadata changes ([MODAUD-310](https://folio-org.atlassian.net/browse/MODAUD-310))
 
 ### Bug fixes
 * Track `personal.pronouns`, `personal.profilePictureLink`, and top-level `preferredEmailCommunication` in user version history ([MODAUD-308](https://folio-org.atlassian.net/browse/MODAUD-308))
+* Track `personal.preferredContactTypeIds` in user version history ([MODAUD-326](https://folio-org.atlassian.net/browse/MODAUD-326))
+* Track `loanAnonymizationPreference` in user version history ([MODAUD-329](https://folio-org.atlassian.net/browse/MODAUD-329))
 
 ### Tech Dept
 * Upgrade to Vert.x v5 ([MODAUD-305](https://folio-org.atlassian.net/browse/MODAUD-305))

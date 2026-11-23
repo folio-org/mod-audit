@@ -11,7 +11,7 @@ import org.folio.CopilotGenerated;
 import org.folio.dao.acquisition.impl.OrganizationEventsDaoImpl;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrganizationAuditEvent;
-import org.folio.rest.util.OkapiConnectionParams;
+import org.folio.rest.RestVerticle;
 import org.folio.services.acquisition.OrganizationAuditEventsService;
 import org.folio.services.acquisition.impl.OrganizationAuditEventsServiceImpl;
 import org.folio.util.PostgresClientFactory;
@@ -45,9 +45,6 @@ public class OrganizationEventsHandlerMockTest {
   public static final String OKAPI_URL_HEADER = "x-okapi-url";
 
   @Spy
-  private Vertx vertx = Vertx.vertx();
-
-  @Spy
   private PostgresClientFactory postgresClientFactory = new PostgresClientFactory(Vertx.vertx());
 
   @Mock
@@ -61,7 +58,7 @@ public class OrganizationEventsHandlerMockTest {
   public void setUp() {
     organizationEventDao = new OrganizationEventsDaoImpl(postgresClientFactory);
     organizationAuditEventServiceImpl = new OrganizationAuditEventsServiceImpl(organizationEventDao);
-    organizationEventsHandler = new OrganizationEventsHandler(vertx, organizationAuditEventServiceImpl);
+    organizationEventsHandler = new OrganizationEventsHandler(organizationAuditEventServiceImpl);
   }
 
   @Test
@@ -90,7 +87,7 @@ public class OrganizationEventsHandlerMockTest {
 
   protected ConsumerRecord<String, String> buildConsumerRecord(String topic, OrganizationAuditEvent event) {
     ConsumerRecord<String, String> consumerRecord = new ConsumerRecord<>("folio", 0, 0, topic, Json.encode(event));
-    consumerRecord.headers().add(new RecordHeader(OkapiConnectionParams.OKAPI_TENANT_HEADER, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
+    consumerRecord.headers().add(new RecordHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT_ID.getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_URL_HEADER, ("http://localhost:" + 8080).getBytes(StandardCharsets.UTF_8)));
     consumerRecord.headers().add(new RecordHeader(OKAPI_TOKEN_HEADER, (TOKEN).getBytes(StandardCharsets.UTF_8)));
     return consumerRecord;
