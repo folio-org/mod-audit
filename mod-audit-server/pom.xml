@@ -29,6 +29,7 @@
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     <assertj.version>3.27.7</assertj.version>
     <javers.version>7.8.0</javers.version>
+    <testcontainers-kafka.version>2.0.5</testcontainers-kafka.version>
   </properties>
 
   <dependencies>
@@ -64,8 +65,8 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>kafka</artifactId>
-      <version>1.20.5</version>
+      <artifactId>testcontainers-kafka</artifactId>
+      <version>${testcontainers-kafka.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
