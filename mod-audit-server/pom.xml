@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>mod-audit-server</artifactId>
-  <version>3.0.2-SNAPSHOT</version>
+  <version>3.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <artifactId>mod-audit</artifactId>
     <groupId>org.folio</groupId>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.3-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -29,6 +29,7 @@
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     <assertj.version>3.27.7</assertj.version>
     <javers.version>7.8.0</javers.version>
+    <testcontainers-kafka.version>2.0.5</testcontainers-kafka.version>
   </properties>
 
   <dependencies>
@@ -64,8 +65,8 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>kafka</artifactId>
-      <version>1.20.5</version>
+      <artifactId>testcontainers-kafka</artifactId>
+      <version>${testcontainers-kafka.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
